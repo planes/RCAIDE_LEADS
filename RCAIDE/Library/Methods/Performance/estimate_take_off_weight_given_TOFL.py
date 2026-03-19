@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Library.Methods.Performance.estimate_take_off_field_length import estimate_take_off_field_length 
-from RCAIDE.Library.Mission.Common.Pre_Process  import geometry_preprocess_routine 
+from RCAIDE.Library.Mission.Common.Pre_Process.geometry  import planform_preprocess_routine 
 
 # package imports
 import numpy as np
@@ -71,7 +71,7 @@ def estimate_take_off_weight_given_TOFL(analyses,target_tofl = None,altitude = 0
     # ============================================== 
     # Preprocess Geometry 
     # ============================================== 
-    geometry_preprocess_routine(analyses)
+    planform_preprocess_routine(analyses)
     vehicle = deepcopy(analyses.vehicle)
          
     # unpack

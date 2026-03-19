@@ -10,7 +10,7 @@
 # RCAIDE Imports
 import RCAIDE
 from RCAIDE.Framework.Core import Data, Units  
-from RCAIDE.Library.Mission.Common.Pre_Process  import geometry_preprocess_routine 
+from RCAIDE.Library.Mission.Common.Pre_Process.geometry  import planform_preprocess_routine 
 
 # package imports
 import numpy as np
@@ -106,7 +106,7 @@ def generate_V_n_diagram(analyses= None,
     # ============================================== 
     # Preprocess Geometry 
     # ============================================== 
-    geometry_preprocess_routine(analyses)   
+    planform_preprocess_routine(analyses)   
     vehicle =  deepcopy(analyses.vehicle) 
     weight =  vehicle.mass_properties.max_takeoff
  

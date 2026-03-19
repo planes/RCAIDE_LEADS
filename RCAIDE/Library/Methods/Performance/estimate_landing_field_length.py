@@ -12,7 +12,7 @@
 import  RCAIDE
 from   RCAIDE.Framework.Core import Data, Units
 from   RCAIDE.Library.Methods.Aerodynamics.Common.Lift.compute_max_lift_coeff import compute_max_lift_coeff
-from RCAIDE.Library.Mission.Common.Pre_Process  import geometry_preprocess_routine 
+from RCAIDE.Library.Mission.Common.Pre_Process.geometry  import planform_preprocess_routine 
 
 import numpy as np
 from copy import deepcopy
@@ -88,7 +88,7 @@ def estimate_landing_field_length(analyses       = None,
     # ============================================== 
     # Preprocess Geometry 
     # ============================================== 
-    geometry_preprocess_routine(analyses)
+    planform_preprocess_routine(analyses)
     vehicle = deepcopy(analyses.vehicle)
     
     # ==============================================

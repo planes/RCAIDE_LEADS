@@ -96,8 +96,8 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
     W_CARGO = 0
     m_c  = []
     for cargo_bay in vehicle_0.cargo_bays:  
-        W_CARGO += cargo_bay.mass_properties.mass
-        m_c.append(cargo_bay.mass_properties.mass) 
+        W_CARGO += cargo_bay.cargo.mass_properties.mass
+        m_c.append(cargo_bay.cargo.mass_properties.mass) 
     cargo_bay_ratio = np.array(m_c) / sum(np.array(m_c)) 
     W_CARGO += PLD-W_PAX
      
@@ -130,23 +130,23 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
     # create empty data structures
     RES                                             =  Data()
     RES.loading_results                             =  Data()
-    RES.trim_results                                =  Data()
-    RES.discretization                              = discretization
-    RES.loading_results.mass                        = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.CG_location                 = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.LEMAC_location              = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.CG_percent_of_LEMAC_location      = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_cargo                               = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_pax                                 = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_cargo                               = np.zeros((2,discretization,discretization,discretization))
-    RES.trim_results.neutral_point                  = np.zeros((discretization,discretization))
-    RES.trim_results.static_margin                  = np.zeros((discretization,discretization)) 
-    RES.trim_results.mass                           = np.zeros((discretization,discretization)) 
-    RES.trim_results.LEMAC_location                 = np.zeros((discretization,discretization)) 
-    RES.trim_results.CG_percent_of_LEMAC_location         = np.zeros((discretization,discretization)) 
-    RES.MTOW                                        = MTOW     
-    RES.OEW                                         = OEW
-    RES.MLW                                         = MLW    
+    RES.trim_results                                    =  Data()
+    RES.discretization                                  = discretization
+    RES.loading_results.mass                            = np.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.CG_location                     = np.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.LEMAC_location                  = np.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.CG_percent_of_LEMAC_location    = np.zeros((2,discretization,discretization,discretization))
+    RES.percent_cargo                                   = np.zeros((2,discretization,discretization,discretization))
+    RES.percent_pax                                     = np.zeros((2,discretization,discretization,discretization))
+    RES.percent_cargo                                   = np.zeros((2,discretization,discretization,discretization))
+    RES.trim_results.neutral_point                      = np.zeros((discretization,discretization))
+    RES.trim_results.static_margin                      = np.zeros((discretization,discretization)) 
+    RES.trim_results.mass                               = np.zeros((discretization,discretization)) 
+    RES.trim_results.LEMAC_location                     = np.zeros((discretization,discretization)) 
+    RES.trim_results.CG_percent_of_LEMAC_location       = np.zeros((discretization,discretization)) 
+    RES.MTOW                                            = MTOW     
+    RES.OEW                                             = OEW
+    RES.MLW                                             = MLW    
 
     #============================================================================================  
     # Load Diagram Data
@@ -174,7 +174,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
                                 fuel_tank.fuel.mass_properties.mass = 0
                                     
                     for cargo_bay in vehicle.cargo_bays:  
-                        cargo_bay.mass_properties.mass   =  0
+                        cargo_bay.cargo.mass_properties.mass   =  0
                         
                     for fuselage in  vehicle.fuselages: 
                         for cabin in fuselage.cabins:
@@ -212,7 +212,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
                     # Update Cargo
                     #------------------------------------------------------------------------
                     for cargo_bay_i ,  cargo_bay in enumerate(vehicle.cargo_bays): 
-                        cargo_bay.mass_properties.mass   = percent_cargo[c_i] * W_CARGO *  cargo_bay_ratio[cargo_bay_i]
+                        cargo_bay.cargo.mass_properties.mass   = percent_cargo[c_i] * W_CARGO *  cargo_bay_ratio[cargo_bay_i]
 
                     vehicle.mass_properties.cargo    =  percent_cargo[c_i] * W_CARGO
                     vehicle.mass_properties.payload  = (W_PAX_per_pax) *vehicle.number_of_passengers +  vehicle.mass_properties.cargo         
@@ -258,7 +258,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
                         fuel_tank.fuel.mass_properties.mass = 0
                             
             for cargo_bay in vehicle.cargo_bays:  
-                cargo_bay.mass_properties.mass   =  0
+                cargo_bay.cargo.mass_properties.mass   =  0
                 
             for fuselage in  vehicle.fuselages: 
                 for cabin in fuselage.cabins:
@@ -290,7 +290,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
             # Update Cargo
             #------------------------------------------------------------------------
             for cargo_bay in vehicle.cargo_bays: 
-                cargo_bay.mass_properties.mass   = percent_cargo[w_i]  * W_CARGO *  cargo_bay_ratio[cargo_bay_i]
+                cargo_bay.cargo.mass_properties.mass   = percent_cargo[w_i]  * W_CARGO *  cargo_bay_ratio[cargo_bay_i]
                 
 
             vehicle.mass_properties.cargo    =  percent_cargo[w_i] * W_CARGO

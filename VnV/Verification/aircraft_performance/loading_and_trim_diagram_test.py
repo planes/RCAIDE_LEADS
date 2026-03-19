@@ -70,7 +70,7 @@ def tube_and_wing_load_trim_test():
                             [-47.07353741,  40.35384535, 127.78122812]])
     plot_load_diagram(load_data,save_filename  = "TW_Aircraft_Loading_Trim_Dragram") 
 
-    LEMAC_error = np.max(abs((load_data.aerodynamic_LEMAC_location - LEMAC_truth)/LEMAC_truth))
+    LEMAC_error = np.max(abs((load_data.trim_results.LEMAC_location - LEMAC_truth)/LEMAC_truth))
     print(f"LEMAC error: {LEMAC_error}")
     assert LEMAC_error < 1e-4, f"LEMAC error too large: {LEMAC_error}"
         
@@ -102,7 +102,7 @@ def blended_wing_body_load_trim_test():
                             [15.30488839, 31.62418592, 47.94348346]])
     plot_load_diagram(load_data,save_filename  = "BWB_Aircraft_Loading_Trim_Dragram") 
 
-    LEMAC_error = np.max(abs((load_data.aerodynamic_LEMAC_location - LEMAC_truth)/LEMAC_truth))
+    LEMAC_error = np.max(abs((load_data.trim_results.LEMAC_location- LEMAC_truth)/LEMAC_truth))
     print(f"LEMAC error: {LEMAC_error}")
     assert LEMAC_error < 1e-4, f"LEMAC error too large: {LEMAC_error}"
         
