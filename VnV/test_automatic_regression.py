@@ -11,7 +11,7 @@ sys.path.append(os.path.join(sys.path[0], 'Vehicles'))
 sys.path.append(os.path.join(sys.path[0], 'Vehicles', 'Rotors'))
 
 import RNUMPY as rp
-rp.use_torch = True
+# rp.use_torch = True
 
 
 modules = [ 

@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
 # Python Imports 
 import RNUMPY as rp
 from scipy.interpolate import interp1d 
-import trimesh
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh
 from copy import deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -73,10 +73,10 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
             solid_segment =  compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift) 
             segment_meshes.append(solid_segment)
         
-        combinde_mesh = trimesh.util.concatenate(segment_meshes)
+        combinde_mesh = Mesh.concatenate(segment_meshes)
     
         # Reflect across the YZ plane (mirror X)
-        Ry = rp.diag([1, -1, 1])    
+        Ry = rp.diag(rp.array([1.0, -1.0, 1.0])) 
     
         # Compute centroid
         centroid = combinde_mesh.centroid 
@@ -86,13 +86,14 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
             combined_mesh_sym = deepcopy(combinde_mesh)
         
             # 2. apply the mirror transform
-            combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
+            Ry_cast = rp.array(Ry, dtype=combined_mesh_sym.vertices.dtype)
+            combined_mesh_sym.vertices = (Ry_cast @ combined_mesh_sym.vertices.T).T
         
             # 3. fix face orientation (reverse winding)
             combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
         
             # 4. concatenate original + mirrored
-            combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
+            combined_mesh_full         = Mesh.concatenate([combinde_mesh, combined_mesh_sym])
         else:
             combined_mesh_full = combinde_mesh
     
@@ -137,10 +138,10 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
         solid_segment =  compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift) 
         segment_meshes.append(solid_segment)
     
-        combinde_mesh = trimesh.util.concatenate(segment_meshes)
+        combinde_mesh = Mesh.concatenate(segment_meshes)
     
         # Reflect across the YZ plane (mirror X)
-        Ry = rp.diag([1, -1, 1])    
+        Ry = rp.diag(rp.array([1.0, -1.0, 1.0]))    
     
         # Compute centroid
         centroid = combinde_mesh.centroid 
@@ -150,13 +151,14 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
             combined_mesh_sym = deepcopy(combinde_mesh)
         
             # 2. apply the mirror transform
-            combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
+            Ry_cast = rp.array(Ry, dtype=combined_mesh_sym.vertices.dtype)
+            combined_mesh_sym.vertices = (Ry_cast @ combined_mesh_sym.vertices.T).T
         
             # 3. fix face orientation (reverse winding)
             combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
         
             # 4. concatenate original + mirrored
-            combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
+            combined_mesh_full         = Mesh.concatenate([combinde_mesh, combined_mesh_sym])
   
         else:
             combined_mesh_full = combinde_mesh

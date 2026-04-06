@@ -18,7 +18,7 @@ from   RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan.design_turbofan imp
 from   RCAIDE.Framework.Mission.Common import Conditions
 
 # Python imports 
-import numpy  as np                   
+import RNUMPY as rp                  
 import pandas as pd
 
 # ----------------------------------------------------------------------

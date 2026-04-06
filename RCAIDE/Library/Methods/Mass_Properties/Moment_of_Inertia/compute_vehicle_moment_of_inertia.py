@@ -12,7 +12,7 @@ import RNUMPY as rp
 # ------------------------------------------------------------------        
 #  Component moments of inertia (MOI) tensors
 # ------------------------------------------------------------------  
-def compute_vehicle_moment_of_inertia(vehicle, moment_of_inertia_df,overwrite_moment_of_intertia=True, segment = None,verbose=True): 
+def compute_vehicle_moment_of_inertia(vehicle, moment_of_inertia_df,overwrite_moment_of_inertia=True, segment = None,verbose=True): 
     ''' sums the moments of inertia of each component in the aircraft. Components summed: fuselages,
     wings (main, horizontal, tail + others), turbofan engines, batteries, motors, batteries, fuel tanks
 
@@ -47,13 +47,13 @@ def compute_vehicle_moment_of_inertia(vehicle, moment_of_inertia_df,overwrite_mo
         print(total_MOI) 
     moment_of_inertia_df.loc[len(moment_of_inertia_df)] = [
     "Aircraft Total",
-    round(vehicle.mass_properties.operating_empty, 2),
-    round(total_MOI[0][0], 2),
-    round(total_MOI[1][1], 2),
-    round(total_MOI[2][2], 2),
-    round(total_MOI[0][1], 2),
-    round(total_MOI[0][2], 2),
-    round(total_MOI[1][2], 2),
+    round(float(vehicle.mass_properties.operating_empty), 2),
+    round(float(total_MOI[0][0]), 2),
+    round(float(total_MOI[1][1]), 2),
+    round(float(total_MOI[2][2]), 2),
+    round(float(total_MOI[0][1]), 2),
+    round(float(total_MOI[0][2]), 2),
+    round(float(total_MOI[1][2]), 2),
 ]
  
     # if simulations is part of a mission, store MOI in results vector 

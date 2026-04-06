@@ -8,10 +8,8 @@
 import RCAIDE
 
 # package imports 
-import numpy as np  
-from   copy import deepcopy
-from shapely import Polygon, box 
-import trimesh
+import RNUMPY as rp
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_convex_hull, clip_polygon_x, get_polygon_area, get_polygon_centroid
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Blended Wing Body Center of Gravity
@@ -47,7 +45,7 @@ def compute_bwb_center_of_gravity(bwb_wing, vehicle):
     # compute aft cabin moment of inertia 
     compute_aft_center_body_center_of_gravity(bwb_wing,center_body_segs)
 
-    # compute wing moment of intertia 
+    # compute wing moment of inertia 
     compute_bwb_wing_center_of_gravity(bwb_wing,wing_segs) 
 
     return bwb_wing.mass_properties.center_of_gravity 
@@ -70,26 +68,18 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
         y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
 
-        points_out = list(zip(x_out, y_out))
-        poly_out = Polygon(points_out)
-
-        points_in = list(zip(x_in, y_in))
-        poly_in = Polygon(points_in) 
-
-        # Compute segment span length
-        L = (outer_segment.percent_span_location - inner_segment.percent_span_location) * bwb_wing.spans.projected/2
         # STEP 1: Build 3D point clouds for both sections
-        x1, y1 = poly_in.exterior.xy
-        x2, y2 = poly_out.exterior.xy
+        x1, y1 = x_in, y_in
+        x2, y2 = x_out, y_out
 
         pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
-        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.ones(len(x2)-1) * L)) # z = L
 
         # STEP 2: Combine all points
         all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
-        solid_segment = trimesh.convex.convex_hull(all_pts)
+        solid_segment = get_convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
@@ -97,26 +87,32 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        # Rotate 90 degrees around X axis to match RCAIDE convention
+        R = rp.eye(4)
+        R[1, 1] = 0.0
+        R[1, 2] = -1.0
+        R[2, 1] = 1.0
+        R[2, 2] = 0.0
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
-    combinde_mesh = trimesh.util.concatenate(segment_meshes)
+    combinde_mesh = Mesh.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = rp.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag(rp.array([1.0, -1.0, 1.0]))   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
 
     # 2. apply the mirror transform
-    combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
+    Ry_cast = rp.array(Ry, dtype=combined_mesh_sym.vertices.dtype)
+    combined_mesh_sym.vertices = (Ry_cast @ combined_mesh_sym.vertices.T).T
 
     # 3. fix face orientation (reverse winding)
     combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
 
     # 4. concatenate original + mirrored
-    combined_mesh_full = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
+    combined_mesh_full = Mesh.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I        = combined_mesh_full.moment_inertia
     centroid = rp.array(combined_mesh_full.centroid)
@@ -144,29 +140,23 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
         x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
         y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
-        cabin_seperation = box(cabin_length, -1e9, 1e9, 1e9)
-        points_out = list(zip(x_out, y_out))
-        poly_out = Polygon(points_out)
-        poly_out = poly_out.intersection(cabin_seperation)
-
-        points_in = list(zip(x_in, y_in))
-        poly_in = Polygon(points_in)
-        poly_in = poly_in.intersection(cabin_seperation) 
+        x_out, y_out = clip_polygon_x(x_out, y_out, x_min=cabin_length)
+        x_in, y_in   = clip_polygon_x(x_in, y_in, x_min=cabin_length)
 
         # Compute segment span length
         L = (outer_segment.percent_span_location - inner_segment.percent_span_location) * bwb_wing.spans.projected/2
         # STEP 1: Build 3D point clouds for both sections
-        x1, y1 = poly_in.exterior.xy
-        x2, y2 = poly_out.exterior.xy
+        x1, y1 = x_in, y_in
+        x2, y2 = x_out, y_out
 
         pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
-        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.ones(len(x2)-1) * L)) # z = L
 
         # STEP 2: Combine all points
         all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
-        solid_segment = trimesh.convex.convex_hull(all_pts)
+        solid_segment = get_convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
@@ -174,26 +164,32 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        # Rotate 90 degrees around X axis to match RCAIDE convention
+        R = rp.eye(4)
+        R[1, 1] = 0.0
+        R[1, 2] = -1.0
+        R[2, 1] = 1.0
+        R[2, 2] = 0.0
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
-    combinde_mesh = trimesh.util.concatenate(segment_meshes)
+    combinde_mesh = Mesh.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = rp.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag(rp.array([1.0, -1.0, 1.0]))   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
 
     # 2. apply the mirror transform
-    combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
+    Ry_cast = rp.array(Ry, dtype=combined_mesh_sym.vertices.dtype)
+    combined_mesh_sym.vertices = (Ry_cast @ combined_mesh_sym.vertices.T).T
 
     # 3. fix face orientation (reverse winding)
     combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
 
     # 4. concatenate original + mirrored
-    combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
+    combined_mesh_full         = Mesh.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I                          = combined_mesh_full.moment_inertia
     centroid                   = rp.array(combined_mesh_full.centroid)
@@ -222,32 +218,26 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
         x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
         y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
-        cabin_seperation = box(-1e9, -1e9, cabin_length, 1e9)
-        points_out = list(zip(x_out, y_out))
-        poly_out = Polygon(points_out)
-        poly_out = poly_out.intersection(cabin_seperation)
-
-        points_in = list(zip(x_in, y_in))
-        poly_in = Polygon(points_in)
-        poly_in = poly_in.intersection(cabin_seperation)
+        x_out, y_out = clip_polygon_x(x_out, y_out, x_max=cabin_length)
+        x_in, y_in   = clip_polygon_x(x_in, y_in, x_max=cabin_length)
         
-        A_1 = poly_in.area
-        A_2 = poly_out.area
+        A_1 = get_polygon_area(x_in, y_in)
+        A_2 = get_polygon_area(x_out, y_out)
 
         # Compute segment span length
         L = (outer_segment.percent_span_location - inner_segment.percent_span_location) * bwb_wing.spans.projected/2
         # STEP 1: Build 3D point clouds for both sections
-        x1, y1 = poly_in.exterior.xy
-        x2, y2 = poly_out.exterior.xy
+        x1, y1 = x_in, y_in
+        x2, y2 = x_out, y_out
 
         pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
-        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.ones(len(x2)-1) * L)) # z = L
 
         # STEP 2: Combine all points
         all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
-        solid_segment = trimesh.convex.convex_hull(all_pts)
+        solid_segment = get_convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
@@ -255,26 +245,32 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        # Rotate 90 degrees around X axis to match RCAIDE convention
+        R = rp.eye(4)
+        R[1, 1] = 0.0
+        R[1, 2] = -1.0
+        R[2, 1] = 1.0
+        R[2, 2] = 0.0
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
-    combinde_mesh = trimesh.util.concatenate(segment_meshes)
+    combinde_mesh = Mesh.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = rp.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag(rp.array([1.0, -1.0, 1.0]))   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
 
     # 2. apply the mirror transform
-    combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
+    Ry_cast = rp.array(Ry, dtype=combined_mesh_sym.vertices.dtype)
+    combined_mesh_sym.vertices = (Ry_cast @ combined_mesh_sym.vertices.T).T
 
     # 3. fix face orientation (reverse winding)
     combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
 
     # 4. concatenate original + mirrored
-    combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
+    combined_mesh_full         = Mesh.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I                          = combined_mesh_full.moment_inertia
     centroid                   = rp.array(combined_mesh_full.centroid)

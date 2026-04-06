@@ -12,9 +12,8 @@
 import  RCAIDE 
 from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  compute_naca_4series 
 from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
-
-# Python Imports 
 import RNUMPY as rp
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_convex_hull, extrude_polygon
 from RNUMPY.scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -181,10 +180,10 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
             fuselage_points[start_idx:end_idx,2] = fus_zpts + segment.percent_z_location*fuselage.lengths.total + fuselage.origin[0][2]
    
         # Convex hull → watertight volume mesh
-        solid_segment = trimesh.convex.convex_hull(fuselage_points) 
+        solid_segment = get_convex_hull(fuselage_points) 
     
         # Rotate to match the RCAIDE aircraft axes convention
-        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        R = Mesh.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
         solid_segment.apply_transform(R)
     
         # Calculate MOI of the fuel within the fuel tank 
@@ -914,12 +913,12 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
    
     # Build a 3D tank mesh by extruding the 2D section over length_external.
     # Extrusion is centered about y = 0 (symmetric about origin in spanwise axis).
-    tank_mesh = trimesh.creation.extrude_polygon(
+    tank_mesh = extrude_polygon(
         polygon=polygon_for_calc,
         height=float(fuel_tank.length_external),
     )
-    R = trimesh.transformations.rotation_matrix(-rp.pi / 2.0, [1.0, 0.0, 0.0])
-    T = trimesh.transformations.translation_matrix(
+    R = Mesh.rotation_matrix(-rp.pi / 2.0, [1.0, 0.0, 0.0])
+    T = Mesh.translation_matrix(
         [0.0, -0.5 * float(fuel_tank.length_external), 0.0]
     )
   

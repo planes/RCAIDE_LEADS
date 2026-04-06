@@ -72,7 +72,7 @@ def compute_wing_moment_of_inertia(wing, center_of_gravity = [[0, 0, 0]]):
                     A               = inner_segment.sweeps.quarter_chord                            # sweep angle (located at quarter chord)
                     dihedral        = inner_segment.dihedral_outboard                               # Wing dihedral           
                     m_wing          = wing.mass_properties.mass * (inner_segment.volume_properties.gross_volume / wing.volume_properties.gross_volume )  
-                    I_section , _   = compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
+                    I_section , _   = compute_wing_section_moment_of_inertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
                     I_local        += I_section 
                      
             else:    
@@ -84,7 +84,7 @@ def compute_wing_moment_of_inertia(wing, center_of_gravity = [[0, 0, 0]]):
                 A               = inner_segment.sweeps.quarter_chord                            # sweep angle (located at quarter chord)
                 dihedral        = inner_segment.dihedral_outboard                               # Wing dihedral
                 m_wing          = wing.mass_properties.mass * (inner_segment.volume_properties.gross_volume / wing.volume_properties.gross_volume )   
-                I_section,_     = compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
+                I_section,_     = compute_wing_section_moment_of_inertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
                 I_local         += I_section 
         
     else: 
@@ -95,7 +95,7 @@ def compute_wing_moment_of_inertia(wing, center_of_gravity = [[0, 0, 0]]):
         b           = span/(1+xz_symm)           # half-span of the wing
         A           = wing.sweeps.quarter_chord # sweep angle (located at quarter chord)
         dihedral    = wing.dihedral # Wing dihedral
-        I_local,_  = compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
+        I_local,_  = compute_wing_section_moment_of_inertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity)
         
     
     # Store moment of inertia tensor on component 
@@ -104,7 +104,7 @@ def compute_wing_moment_of_inertia(wing, center_of_gravity = [[0, 0, 0]]):
     return I_local,  mass
     
     
-def compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity):
+def compute_wing_section_moment_of_inertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz_symm,vertical,center_of_gravity):
     # ----------------------------------------------------------------------------------------------------------------------
     # Constants. These values and equations are defined in Moulton and Hunsaker [1]
     # ----------------------------------------------------------------------------------------------------------------------

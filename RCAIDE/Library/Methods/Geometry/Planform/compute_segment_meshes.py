@@ -8,8 +8,7 @@
 
 # package imports 
 import RNUMPY as rp
-from shapely import Polygon
-import trimesh
+from RCAIDE.Library.Methods.Geometry.Mesh import get_convex_hull
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -17,24 +16,15 @@ import trimesh
 # ---------------------------------------------------------------------------------------------------------------------- 
 def compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift):
 
-    points_out = list(zip(x_out, y_out))
-    poly_out = Polygon(points_out)
-
-    points_in = list(zip(x_in, y_in))
-    poly_in = Polygon(points_in) 
-    
     # STEP 1: Build 3D point clouds for both sections
-    x1, y1 = poly_in.exterior.xy
-    x2, y2 = poly_out.exterior.xy
-
-    pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
-    pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
+    pts1 = rp.column_stack((x_in, y_in, rp.zeros(len(x_in))))   # z = 0
+    pts2 = rp.column_stack((x_out, y_out, rp.ones(len(x_out)) * L)) # z = L
 
     # STEP 2: Combine all points
     all_pts = rp.vstack([pts1, pts2])
 
     # STEP 3: Convex hull → watertight volume mesh
-    solid_segment = trimesh.convex.convex_hull(all_pts)
+    solid_segment = get_convex_hull(all_pts)
 
     # Apply spanwise translation AFTER orientation fix
     T = rp.eye(4)
@@ -42,7 +32,15 @@ def compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift):
     T[1, 3] = 0.0
     T[2, 3] = spanwise_shift
     solid_segment.apply_transform(T)
-    R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
+    
+    # Rotate 90 degrees around X axis to match RCAIDE convention
+    R = rp.eye(4)
+    cos_a = 0.0 # cos(90)
+    sin_a = 1.0 # sin(90)
+    R[1, 1] = cos_a
+    R[1, 2] = -sin_a
+    R[2, 1] = sin_a
+    R[2, 2] = cos_a
     solid_segment.apply_transform(R)
     
     return solid_segment

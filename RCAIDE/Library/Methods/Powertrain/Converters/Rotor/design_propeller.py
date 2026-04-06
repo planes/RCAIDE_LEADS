@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil    import compute_airfoil_propertie
 # package imports 
 import RNUMPY as rp
 import RNUMPY.scipy as sp 
-from scipy.optimize import root 
+from RNUMPY.scipy.optimize import root 
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Design Propeller

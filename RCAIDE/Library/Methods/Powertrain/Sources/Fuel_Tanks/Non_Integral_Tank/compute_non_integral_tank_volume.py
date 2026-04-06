@@ -14,9 +14,8 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  co
 #Python Imports 
 import RNUMPY as rp
 from RNUMPY.scipy.interpolate import interp1d
-from shapely.geometry import Polygon, Point
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_polygon_area, point_in_polygon, point_to_polygon_distance, intersect_convex_polygons
 from copy import  deepcopy
-import shapely
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Methods to compute volume of non integrak tanks
@@ -200,22 +199,20 @@ def compute_bwb_aft_tank_volume(fuel_tank, wing,fuel_tanks):
     tank_lengths   = rp.zeros(num_tank_sections-1)
     circle_origins = rp.zeros((num_tank_sections-1, 2))
     for seg_i in  range(1,num_tank_sections):
-        if seg_i == 1:
-            inner_polygon =  Polygon( polygon_points[seg_i-1] )
-        else:
-            inner_polygon = intersection_polygon
-        outer_polygon =  Polygon(  polygon_points[seg_i] )
+        x_in = rp.array([p[0] for p in polygon_points[seg_i-1]])
+        y_in = rp.array([p[1] for p in polygon_points[seg_i-1]])
+        if seg_i > 1:
+            x_in, y_in = x_inter, y_inter
+        
+        x_out = rp.array([p[0] for p in polygon_points[seg_i]])
+        y_out = rp.array([p[1] for p in polygon_points[seg_i]])
+
         # intersection polygon
-        intersection_polygon = inner_polygon.intersection(outer_polygon)
-        intersection_polygon.exterior.coords.xy
+        x_inter, y_inter = intersect_convex_polygons(x_in, y_in, x_out, y_out)
+        
         # maximum radius
-        poly             = Polygon(intersection_polygon)
-        inscribed_circle =  shapely.maximum_inscribed_circle(poly)
-        circle_center_x  =  inscribed_circle.coords[0][0]
-        circle_center_y  =  inscribed_circle.coords[0][1]
-        boundary_x       =  inscribed_circle.coords[1][0]
-        boundary_y       = inscribed_circle.coords[1][1]
-        tank_radius      =  rp.sqrt( (boundary_x - circle_center_x) ** 2 + (boundary_y - circle_center_y) ** 2 )
+        max_diameter, x_c, z_c = compute_largest_circle(x_inter, y_inter, None)
+        tank_radius = max_diameter / 2
         # store radius
         tank_radii[seg_i-1] = tank_radius
         # compute and store volume
@@ -224,8 +221,8 @@ def compute_bwb_aft_tank_volume(fuel_tank, wing,fuel_tanks):
         volume                  = 4/3 *rp.pi * (tank_radius ** 3) +   rp.pi * (tank_radius ** 2) *  height
         tank_volumes[seg_i-1]   =  volume
         tank_lengths[seg_i-1]   = height
-        circle_origins[seg_i-1][0] = circle_center_x
-        circle_origins[seg_i-1][1] = circle_center_y
+        circle_origins[seg_i-1][0] = x_c
+        circle_origins[seg_i-1][1] = z_c
     # ------------------------------------------------------------------------------------------------------
     # Get Maximum volume and corresponding properties
     # ------------------------------------------------------------------------------------------------------
@@ -714,80 +711,33 @@ def compute_non_dimensional_rib_coordinates(compoment,fuel_tank,front_rib_nondim
 
     return front_rib_nondim_y_upper,rear_rib_nondim_y_upper, front_rib_nondim_y_lower, rear_rib_nondim_y_lower 
 
-def compute_largest_circle(x_points, z_upper, z_lower):
+def compute_largest_circle(x_points, z_points, _unused=None):
     """
-    Computes the largest circle that can fit within a polygon defined by airfoil coordinates.
-
-    This function finds the optimal center point and radius for the largest possible circle
-    that fits within the polygon formed by the upper and lower airfoil surfaces. It uses
-    a grid search approach to find the best center location.
-
-    Parameters
-    ----------
-    x_points : array_like
-        X-coordinates of the airfoil points
-    z_upper : array_like
-        Z-coordinates of the upper airfoil surface
-    z_lower : array_like
-        Z-coordinates of the lower airfoil surface
-
-    Returns
-    -------
-    max_diameter : float
-        Diameter of the largest possible circle
-    x_center : float
-        X-coordinate of the circle center
-    z_center : float
-        Z-coordinate of the circle center
-
-    Notes
-    -----
-    The function creates a polygon from the airfoil coordinates and performs a grid search
-    within the polygon's bounding box to find the optimal circle center. The radius is
-    limited by the distance to the closest polygon edge.
-
-    **Major Assumptions**
-        * Airfoil coordinates form a valid polygon
-        * Grid resolution is sufficient for accurate results
-        * Polygon is simply connected
-
-    **Theory**
-
-    The largest circle is found by maximizing the radius r such that:
+    Computes the largest circle that can fit within a polygon defined by x and z coordinates.
+    """
+    x_points = rp.array(x_points)
+    z_points = rp.array(z_points)
     
-    .. math::
-        r = \\min_{i} d(p, e_i)
-
-    where p is the circle center and e_i are the polygon edges.
-
-    **Definitions**
-
-    'Inscribed Circle'
-        The largest circle that can fit completely within a given polygon
-    """
-
-    coords = list(zip(x_points, z_upper)) + list(zip(x_points[::-1], z_lower[::-1]))
-    poly   = Polygon(coords)
-
-    #scan a fine grid inside the polygon's bounding box to find the best center
-    minx, minz, maxx, maxz = poly.bounds
-    nx, nz = 200, 200  
+    # scan a fine grid inside the polygon's bounding box to find the best center
+    minx, maxx = rp.min(x_points), rp.max(x_points)
+    minz, maxz = rp.min(z_points), rp.max(z_points)
+    
+    nx, nz = 100, 100  # Reduced for performance
     xs = rp.linspace(minx, maxx, nx)
     zs = rp.linspace(minz, maxz, nz)
 
     best_r = 0.0
-    best_pt = None
+    best_pt = ( (minx+maxx)/2, (minz+maxz)/2 )
 
     for x in xs:
         for z in zs:
-            p = Point(x, z)
-            if not poly.contains(p):
+            if not point_in_polygon(x, z, x_points, z_points):
                 continue
             # the radius is limited by the closest polygon edge
-            r = p.distance(poly.exterior)
+            r = point_to_polygon_distance(x, z, x_points, z_points)
             if r > best_r:
                 best_r = r
                 best_pt = (x, z)
     max_diameter = 2 * best_r
     
-    return max_diameter , best_pt[0],best_pt[1]
+    return max_diameter , best_pt[0], best_pt[1]

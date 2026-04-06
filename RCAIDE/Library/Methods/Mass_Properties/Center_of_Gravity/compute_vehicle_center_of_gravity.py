@@ -79,7 +79,7 @@ def compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df, overwrite_ce
         print('Mission Center of Gravity        : ', CG)   
     centre_of_gravity_df.loc[len(centre_of_gravity_df)] = [
                 'Operating_Empty',
-                round(OEW_mass[0], 2),
+                round(float(OEW_mass[0]), 2),
                 OEW_CG[0][0],
                 OEW_CG[0][1],
                 OEW_CG[0][2],

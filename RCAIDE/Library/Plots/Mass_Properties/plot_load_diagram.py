@@ -10,7 +10,6 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Plots.Common import set_axes, plot_style
 import matplotlib.pyplot as plt
 from scipy.spatial import ConvexHull
-from shapely.geometry import Polygon
 import matplotlib.cm as cm
 from scipy.interpolate import griddata
 import matplotlib.tri as tri
@@ -124,29 +123,33 @@ def plot_load_diagram(results,
     points =  np.hstack((  100*np.atleast_2d(results.loading_results.CG_percent_of_LEMAC_location.flatten()).T,  np.atleast_2d(results.loading_results.mass.flatten()).T ))  
     hull = ConvexHull(points) 
     hull_points = points[hull.vertices] 
-    polygon = Polygon(hull_points)  
-    x_hull, y_hull = polygon.exterior.xy
+    # Close the loop for plotting
+    hull_points = np.vstack([hull_points, hull_points[0]])
+    x_hull, y_hull = hull_points[:, 0], hull_points[:, 1]
     
     # fuel vector diamond 
     points =  np.hstack((  100*np.atleast_2d(results.loading_results.CG_percent_of_LEMAC_location[:,0,0,:].flatten()).T,  np.atleast_2d(results.loading_results.mass[:,0,0,:].flatten()).T ))  
     hull = ConvexHull(points) 
     hull_points = points[hull.vertices] 
-    polygon = Polygon(hull_points)  
-    x_hull_f, y_hull_f = polygon.exterior.xy
+    # Close the loop for plotting
+    hull_points = np.vstack([hull_points, hull_points[0]])
+    x_hull_f, y_hull_f = hull_points[:, 0], hull_points[:, 1]
      
     # passenger vector diamond      
     points =  np.hstack((  100*np.atleast_2d(results.loading_results.CG_percent_of_LEMAC_location[:,:,0,0].flatten()).T,  np.atleast_2d(results.loading_results.mass[:,:,0,0].flatten()).T ))  
     hull = ConvexHull(points) 
     hull_points = points[hull.vertices] 
-    polygon = Polygon(hull_points)  
-    x_hull_p, y_hull_p = polygon.exterior.xy
+    # Close the loop for plotting
+    hull_points = np.vstack([hull_points, hull_points[0]])
+    x_hull_p, y_hull_p = hull_points[:, 0], hull_points[:, 1]
 
     # cargo vector diamond      
     points =  np.hstack((  100*np.atleast_2d(results.loading_results.CG_percent_of_LEMAC_location[:,0,:,0].flatten()).T,  np.atleast_2d(results.loading_results.mass[:,0,:,0].flatten()).T ))  
     hull = ConvexHull(points) 
     hull_points = points[hull.vertices] 
-    polygon = Polygon(hull_points)  
-    x_hull_c, y_hull_c = polygon.exterior.xy    
+    # Close the loop for plotting
+    hull_points = np.vstack([hull_points, hull_points[0]])
+    x_hull_c, y_hull_c = hull_points[:, 0], hull_points[:, 1]    
 
     # ------------------------------------------------------------------------    
     # PLot Bounds 

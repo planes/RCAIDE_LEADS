@@ -55,7 +55,8 @@ def update_total_moment_of_inertia(total_MOI,vehicle_CG,C,segment,verbose,moment
     # MOI due to parallel axis theorm
     component_CG    = rp.array(C.mass_properties.center_of_gravity) + rp.array(C.origin)   
     s               = rp.array(vehicle_CG) -  rp.array(component_CG)
-    I_parallel_axis = component_mass * (rp.array(rp.dot(s[0], s[0])) * rp.array(rp.identity(3)) - rp.outer(s,s))
+    s               = s.ravel()
+    I_parallel_axis = component_mass * (rp.array(rp.dot(s, s)) * rp.array(rp.identity(3)) - rp.outer(s,s))
     
     # total moment of inertia 
     I_global        = I_component + I_parallel_axis

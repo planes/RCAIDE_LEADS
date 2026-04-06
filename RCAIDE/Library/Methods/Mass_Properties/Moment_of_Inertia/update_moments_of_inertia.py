@@ -122,7 +122,7 @@ def update_fuel_tank_moment_of_inertia(fuel_tank,state):
     s       = rp.array(center_of_gravity) - conditions.weights.components.global_center_of_gravity[fuel_tag]
     term_1  = rp.repeat(rp.repeat(rp.vecdot(s, s)[:,None, None],3, axis=2), 3, axis=1)
     term_2  = rp.repeat(rp.array(rp.identity(3))[None,:,:],N, axis=0)
-    term_3  = rp.multiply.outer(s, s)[:, :, 0, :]
+    term_3  = s[:, :, None] * s[:, None, :]
     
     # parallel axis moment 
     I_fuel_par        = M_fuel[:,:, None] *  (term_1* term_2 - term_3 )     

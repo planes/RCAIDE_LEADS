@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry, com
 # python imports
 import numpy as np
 from scipy.interpolate import interp1d
-from shapely import Polygon
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_polygon_area, intersect_convex_polygons
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  generate_integral_wing_tank_points
@@ -522,31 +522,30 @@ def generate_aft_integral_wing_tank_points(wing, n_points, segment_list, fuel_ta
     intersection_polygons = []
 
     for seg_i in range(1, num_tank_sections):
-        if seg_i == 1:
-            inner_polygon = Polygon(polygon_points[seg_i - 1])
-        else:
-            inner_polygon = intersection_polygon
+        x_in = np.array([p[0] for p in polygon_points[seg_i - 1]])
+        y_in = np.array([p[1] for p in polygon_points[seg_i - 1]])
+        if seg_i > 1:
+            x_in, y_in = x_inter, y_inter
 
-        outer_polygon = Polygon(polygon_points[seg_i])
-        intersection_polygon = inner_polygon.intersection(outer_polygon)
+        x_out = np.array([p[0] for p in polygon_points[seg_i]])
+        y_out = np.array([p[1] for p in polygon_points[seg_i]])
 
-        if intersection_polygon.is_empty:
+        x_inter, y_inter = intersect_convex_polygons(x_in, y_in, x_out, y_out)
+
+        if len(x_inter) == 0:
             tank_volumes[seg_i - 1] = 0.0
             tank_lengths[seg_i - 1] = 0.0
             intersection_polygons.append(None)
             continue
 
-        if intersection_polygon.geom_type == 'MultiPolygon':
-            intersection_polygon = max(intersection_polygon.geoms, key=lambda g: g.area)
-
-        area = intersection_polygon.area
+        area = get_polygon_area(x_inter, y_inter)
         y_curr = segments[seg_names[seg_i]].percent_span_location * wing_span
         y_prev = segments[seg_names[seg_i - 1]].percent_span_location * wing_span
         span_length = y_curr - y_prev
 
         tank_volumes[seg_i - 1] = area * span_length
         tank_lengths[seg_i - 1] = span_length
-        intersection_polygons.append(intersection_polygon)
+        intersection_polygons.append((x_inter, y_inter))
 
     if np.all(tank_volumes <= 0.0):
         raise AttributeError("No valid intersection polygon found for aft tank geometry.")
@@ -556,23 +555,13 @@ def generate_aft_integral_wing_tank_points(wing, n_points, segment_list, fuel_ta
     if best_polygon is None:
         raise AttributeError("No valid intersection polygon found for aft tank geometry.")
 
-    polygon_for_plot = best_polygon
-    if polygon_for_plot.geom_type == 'MultiPolygon':
-        polygon_for_plot = max(polygon_for_plot.geoms, key=lambda g: g.area)
-
-    coords = list(polygon_for_plot.exterior.coords)
-    if np.allclose(coords[0], coords[-1]):
-        coords = coords[:-1]
-    if len(coords) != 4:
-        # Robust fallback for slightly over-resolved intersections.
-        rect = polygon_for_plot.minimum_rotated_rectangle
-        coords = list(rect.exterior.coords)[:-1]
-
-    coords_np = np.asarray(coords, dtype=float)
-    center = np.mean(coords_np, axis=0)
-    angles = np.arctan2(coords_np[:, 1] - center[1], coords_np[:, 0] - center[0])
-    coords_np = coords_np[np.argsort(angles)]
-    coords_np = np.vstack([coords_np, coords_np[0]])
+    x_inter, y_inter = best_polygon
+    coords_np = np.column_stack([x_inter, y_inter])
+    if np.allclose(coords_np[0], coords_np[-1]):
+        coords_np = coords_np[:-1]
+    # If we have more than 4 points, we just keep them as is for visualization
+    # coords_np is already the exterior points
+    coords_np = coords_np
 
     span_length = float(tank_lengths[max_idx])
     y0 = -0.5 * span_length

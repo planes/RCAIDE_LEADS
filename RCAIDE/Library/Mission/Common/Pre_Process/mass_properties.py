@@ -487,7 +487,7 @@ def mass_properties_preprocess_routine(segment, i = 0):
         else:
             verbose_flag = weights_analysis.print_weight_analysis_report
         _ ,moment_of_inertia_df = compute_vehicle_moment_of_inertia(analyses.vehicle,moment_of_inertia_df,
-                                            overwrite_moment_of_intertia = overwrite_MOI,
+                                            overwrite_moment_of_inertia = overwrite_MOI,
                                             segment=segment,
                                             verbose=verbose_flag) 
         if i==0 and weights_analysis.settings.write_mass_properties:
