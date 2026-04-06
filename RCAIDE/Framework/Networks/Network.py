@@ -16,7 +16,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Generator.compute_generator_pe
 from RCAIDE.Library.Components import Component
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Network
@@ -240,7 +240,7 @@ class Network(Component):
         
         # 3.2 Electric Sources 
         time               = state.conditions.frames.inertial.time[:,0] 
-        delta_t            = np.diff(time) 
+        delta_t            = rp.diff(time) 
         
         for bus in  busses:
             if bus.active: 

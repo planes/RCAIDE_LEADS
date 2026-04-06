@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 import RCAIDE
-import numpy as np 
+import RNUMPY as rp 
 from RCAIDE.Framework.Core   import orientation_product, orientation_transpose 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -117,7 +117,7 @@ def flight_dynamics(segment):
     if transition_seg_flag or ground_seg_flag: 
         v       = segment.state.conditions.frames.inertial.velocity_vector
         D       = segment.state.numerics.time.differentiate 
-        segment.state.conditions.frames.inertial.acceleration_vector = np.dot(D,v)
+        segment.state.conditions.frames.inertial.acceleration_vector = rp.dot(D,v)
 
     FT_i = segment.state.conditions.frames.inertial.total_force_vector
     a_i  = segment.state.conditions.frames.inertial.acceleration_vector  
@@ -127,7 +127,7 @@ def flight_dynamics(segment):
     if transition_seg_flag: 
         omega = segment.state.conditions.frames.inertial.angular_velocity_vector
         D     = segment.state.numerics.time.differentiate
-        ang_acc_i = np.dot(D,omega)
+        ang_acc_i = rp.dot(D,omega)
         segment.state.conditions.frames.inertial.angular_acceleration_vector = ang_acc_i 
         segment.state.conditions.frames.wind.angular_acceleration_vector     = orientation_product(T_inertia2wind,ang_acc_i )
  

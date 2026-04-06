@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
  
 # Python package imports   
-import numpy as np   
+import RNUMPY as rp   
 
 # ----------------------------------------------------------------------------------------------------------------------     
 #  Angle of Attack Effect
@@ -24,6 +24,6 @@ def angle_of_attack_effect(AoA,Mach_aircraft,theta_m):
     """
 
     # Angle of attack effect
-    ATK_m = 0.5*AoA*Mach_aircraft*((1.8*theta_m/np.pi)-0.6)**2
+    ATK_m = 0.5*AoA*Mach_aircraft*((1.8*theta_m/rp.pi)-0.6)**2
 
     return ATK_m

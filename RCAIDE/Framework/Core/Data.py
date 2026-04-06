@@ -12,8 +12,8 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
-from .Arrays import atleast_2d_col, array_type, matrix_type 
+import RNUMPY as rp
+from .Arrays import atleast_2d_col, array_type
 
 from copy import copy
 
@@ -274,6 +274,9 @@ class Data(dict):
                                                 
             # everything else
             else:
+                # if not isinstance(value,str):
+                    # value = float(value)
+
                 val = str(value) + '\n'
                 
             # this key-value, indented
@@ -536,7 +539,7 @@ class Data(dict):
         """ maps the data dict to a 1D vector or 2D column array
         
             Assumptions:
-                will only pack int, float, np.array and np.matrix (max rank 2)
+                will only pack int, float, rp.array and rp.matrix (max rank 2)
                 if using output = 'matrix', all data values must have 
                 same length (if 1D) or number of rows (if 2D), otherwise is skipped
     
@@ -566,8 +569,7 @@ class Data(dict):
         
         # valid types for output
         valid_types = ( int, float,
-                        array_type,
-                        matrix_type )
+                        array_type )
         
         # initialize array row size (for array output)
         size = [False]
@@ -607,13 +609,13 @@ class Data(dict):
         
         # pack into final array
         if M:
-            M = np.hstack(M)
+            M = rp.hstack(M)
         else:
             # empty result
             if vector:
-                M = np.array([])
+                M = rp.array([])
             else:
-                M = np.array([[]])
+                M = rp.array([[]])
         
         # done!
         return M
@@ -641,16 +643,15 @@ class Data(dict):
 
         
         # dont require dict to have numpy
-        import numpy as np
-        from .Arrays import atleast_2d_col, array_type, matrix_type
+        import RNUMPY as rp
+        from .Arrays import atleast_2d_col, array_type
         
         # check input type
         vector = M.ndim  == 1
         
         # valid types for output
         valid_types = ( int, float,
-                        array_type,
-                        matrix_type )
+                        array_type )
         
         # counter for unpacking
         _index = [0]
@@ -698,7 +699,7 @@ class Data(dict):
                 elif rank == 2:
                     n,m = v.shape
                     if vector:
-                        D[k][:,:] = np.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
+                        D[k][:,:] = rp.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
                         index += n*m 
                     else:#array
                         D[k][:,:] = M[:,index:(index+m)]

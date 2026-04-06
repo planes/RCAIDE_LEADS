@@ -9,7 +9,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units 
 from RCAIDE.Library.Methods.Geometry.Airfoil import  import_airfoil_geometry , compute_naca_4series
 from .purge_files import purge_files   
-import numpy as  np
+import RNUMPY as rp
  
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Write Geometry 
@@ -154,9 +154,9 @@ ROTOR
    
     geometry.write(header_1_text)
     
-    station_chords = np.linspace(0.4,0.3, number_of_stations) *tip_radius
-    station_twists = np.linspace(77, 30, number_of_stations)
-    station_radii  = np.linspace(hub_radius+clearance, tip_radius-clearance,number_of_stations )
+    station_chords = rp.linspace(0.4,0.3, number_of_stations) *tip_radius
+    station_twists = rp.linspace(77, 30, number_of_stations)
+    station_radii  = rp.linspace(hub_radius+clearance, tip_radius-clearance,number_of_stations )
     for i in range(number_of_stations): 
         station_radius = station_radii[i]
         station_chord  = station_chords[i] 

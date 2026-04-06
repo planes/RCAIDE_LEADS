@@ -10,7 +10,7 @@
 from RCAIDE                    import Framework
 from RCAIDE.Framework.Core     import Data, DataOrdered
 from RCAIDE.Library            import Components
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vehicle
@@ -308,7 +308,7 @@ class Vehicle_Mass_Properties(Components.Mass_Properties):
         self.fuel                        = 0
         self.max_zero_fuel               = None
         self.center_of_gravity           = [[0.0,0.0,0.0]]
-        self.zero_fuel_center_of_gravity = np.array([[0.0,0.0,0.0]])    
+        self.zero_fuel_center_of_gravity = rp.array([[0.0,0.0,0.0]])    
         
 class Vehicle_Mass_Container(Components.Component.Container,Vehicle_Mass_Properties):
         

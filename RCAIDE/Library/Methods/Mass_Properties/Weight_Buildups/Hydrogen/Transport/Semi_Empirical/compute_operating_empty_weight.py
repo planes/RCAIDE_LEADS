@@ -12,7 +12,7 @@ import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.Trans
 import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Hydrogen.Transport.Semi_Empirical as Hydrogen
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Operating Empty Weight 
@@ -201,8 +201,8 @@ def compute_operating_empty_weight(vehicle, settings=None):
         WTNFA  = W_energy_network.W_engine + W_energy_network.W_thrust_reverser + W_energy_network.W_starter \
                 + 0.25 * W_energy_network.W_engine_controls + 0.11 * W_systems.W_instruments + 0.13 * W_systems.W_electrical \
                 + 0.13 * W_systems.W_hyd_pnu + 0.25 * W_energy_network.W_fuel_system
-        WPOD += WTNFA / np.max([1, NENG]) + W_energy_network.W_nacelle/ np.max(
-            [1.0, NENG + 1. / 2 * (NENG - 2 * np.floor(NENG / 2.))])
+        WPOD += WTNFA / rp.max([1, NENG]) + W_energy_network.W_nacelle/ rp.max(
+            [1.0, NENG + 1. / 2 * (NENG - 2 * rp.floor(NENG / 2.))])
  
     output.empty.propulsion.total               = W_energy_network_cumulative
     output.empty.propulsion.battery             = W_energy_network.W_battery
@@ -230,13 +230,13 @@ def compute_operating_empty_weight(vehicle, settings=None):
 
             # Apply weight factor
             W_wing = W_wing 
-            if np.isnan(W_wing):
+            if rp.isnan(W_wing):
                 W_wing = 0.
             wing.mass_properties.mass = W_wing
             W_main_wing += W_wing
         if isinstance(wing, Wings.Horizontal_Tail):
             W_tail = FLOPS.compute_horizontal_tail_weight(vehicle, wing)
-            if type(W_tail) == np.ndarray:
+            if type(W_tail) == rp.ndarray:
                 W_tail = sum(W_tail)
             # Pack and sum
             wing.mass_properties.mass = W_tail

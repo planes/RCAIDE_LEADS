@@ -14,7 +14,7 @@ from .Generic_Battery_Module import  Generic_Battery_Module
 from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Lithium_Ion_LFP  import * 
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 import os
 from scipy.interpolate  import NearestNDInterpolator
 
@@ -120,10 +120,10 @@ class Lithium_Ion_LFP(Generic_Battery_Module):
         self.cell.diameter                    = 0.0185                                                    # [m]
         self.cell.height                      = 0.0653                                                    # [m]
         self.cell.mass                        = 0.03  * Units.kg                                          # [kg]
-        self.cell.surface_area                = (np.pi*self.cell.height*self.cell.diameter) \
-                                                + (0.5*np.pi*self.cell.diameter**2)                       # [m^2]
+        self.cell.surface_area                = (rp.pi*self.cell.height*self.cell.diameter) \
+                                                + (0.5*rp.pi*self.cell.diameter**2)                       # [m^2]
 
-        self.cell.volume                      = np.pi*(0.5*self.cell.diameter)**2*self.cell.height        # [m^3] 
+        self.cell.volume                      = rp.pi*(0.5*self.cell.diameter)**2*self.cell.height        # [m^3] 
         self.cell.density                     = self.cell.mass/self.cell.volume                           # [kg/m^3]
         self.cell.electrode_area              = 0.0342                                                    # [m^2]  # estimated 
                                                         
@@ -270,8 +270,8 @@ def create_discharge_performance_map(raw_data):
             temperatures.extend([initial_temp] * len(data['discharge']))
 
     # Convert lists to numpy arrays
-    points = np.array([c_rates, temperatures, discharge_capacities]).T
-    values = np.array(voltages)
+    points = rp.array([c_rates, temperatures, discharge_capacities]).T
+    values = rp.array(voltages)
 
     # Create the interpolant
     battery_data = NearestNDInterpolator(points, values) # Can be replaced by a Linear Interpolator for a better fit but computation time increases by 30 times. 

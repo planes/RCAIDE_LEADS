@@ -14,7 +14,7 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Rotor                          import design_electric_rotor
 
 # python imports 
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 import os
 
@@ -403,7 +403,7 @@ def vehicle_setup(rotor_type):
     nacelle.tag                    = 'nacelle_1'
     nacelle.length                 = 2
     nacelle.diameter               = 42 * Units.inches
-    nacelle.areas.wetted           = 0.01*(2*np.pi*0.01/2)
+    nacelle.areas.wetted           = 0.01*(2*rp.pi*0.01/2)
     nacelle.origin                 = [[2.5,2.5,1.0]]
     nacelle.flow_through           = False  
     

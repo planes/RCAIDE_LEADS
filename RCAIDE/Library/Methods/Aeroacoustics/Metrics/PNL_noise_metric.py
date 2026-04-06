@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  PNL_noise_metric
@@ -65,8 +65,8 @@ def PNL_noise_metric(SPL_1_3_spectrum):
     n_mic_x = len(SPL_1_3_spectrum[0,:,0,0])
     n_mic_y = len(SPL_1_3_spectrum[0,0,:,0])
     n_f     = len(SPL_1_3_spectrum[0,0,0,:])
-    SPL_noy = np.zeros((n_cpts,n_mic_x,n_mic_y,n_f))
-    PNL     = np.zeros((n_cpts,n_mic_x,n_mic_y ))
+    SPL_noy = rp.zeros((n_cpts,n_mic_x,n_mic_y,n_f))
+    PNL     = rp.zeros((n_cpts,n_mic_x,n_mic_y ))
     
     #-------------------------------------------
     # STEP 1 - Convert SPL to Perceived Noisiness
@@ -90,14 +90,14 @@ def PNL_noise_metric(SPL_1_3_spectrum):
                 #-------------------------------------------  
                 # STEP 2 - Combine perceived noiseness values  
                 #-------------------------------------------
-                max_noy = np.max(SPL_noy[j][n_x][n_y][:])            
-                Perceived_noisinees = 0.85*max_noy+0.15*np.sum(SPL_noy[j][n_x][n_y][:])
+                max_noy = rp.max(SPL_noy[j][n_x][n_y][:])            
+                Perceived_noisinees = 0.85*max_noy+0.15*rp.sum(SPL_noy[j][n_x][n_y][:])
                 
                 #-----------------------------------------------------------------
                 # STEP 3 - Convert Perceived Noiseness into Perceived Noise Level
                 #------------------------------------------------------------------    
                 if Perceived_noisinees==0:
                     Perceived_noisinees = 0.0625
-                PNL[j,n_x, n_y] = 40+(10/np.log10(2))*np.log10(Perceived_noisinees)
+                PNL[j,n_x, n_y] = 40+(10/rp.log10(2))*rp.log10(Perceived_noisinees)
      
     return PNL

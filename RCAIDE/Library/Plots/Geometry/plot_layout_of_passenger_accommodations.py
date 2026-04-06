@@ -10,7 +10,7 @@ from RCAIDE.Library.Methods.Geometry.LOPA.compute_layout_of_passenger_accommodat
 
 # python imports 
 import plotly.graph_objects as go
-import numpy as  np
+import numpy as np
 import os
 import sys
 # ----------------------------------------------------------------------------------------------------------------------

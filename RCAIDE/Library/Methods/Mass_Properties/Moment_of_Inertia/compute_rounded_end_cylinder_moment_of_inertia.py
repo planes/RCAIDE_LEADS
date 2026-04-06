@@ -9,13 +9,13 @@
 import RCAIDE
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Rounded-End Cylinder Moment of Inertia
 # ----------------------------------------------------------------------------------------------------------------------   
 def compute_rounded_end_cylinder_moment_of_inertia(component,outer_length,outer_radius,inner_length,inner_radius,
-                                                   center_of_gravity = np.array([[0,0,0]]), fuel_tank=False):  
+                                                   center_of_gravity = rp.array([[0,0,0]]), fuel_tank=False):  
     """
     Computes the moment of inertia tensor for a hollow rounded-end cylinder.
 
@@ -83,16 +83,16 @@ def compute_rounded_end_cylinder_moment_of_inertia(component,outer_length,outer_
     # ----------------------------------------------------------------------------------------------------------------------    
     # Setup
     # ----------------------------------------------------------------------------------------------------------------------           
-    I =  np.zeros((3, 3))
+    I =  rp.zeros((3, 3))
     
     # ----------------------------------------------------------------------------------------------------------------------    
     # Moment of inertia in local system 
     # ----------------------------------------------------------------------------------------------------------------------
     # volume of cylindrical part 
-    volume_cyl = (np.pi * (outer_radius ** 2 )* outer_length ) -  (np.pi * (inner_radius ** 2) * inner_length )
+    volume_cyl = (rp.pi * (outer_radius ** 2 )* outer_length ) -  (rp.pi * (inner_radius ** 2) * inner_length )
    
     # volume of sperical end caps 
-    volume_sph =   ( 4 / 3 * np.pi * outer_radius ** 3) -  ( 4 / 3 * np.pi * inner_radius ** 3)  
+    volume_sph =   ( 4 / 3 * rp.pi * outer_radius ** 3) -  ( 4 / 3 * rp.pi * inner_radius ** 3)  
    
     # total volume 
     volume     = volume_cyl + volume_sph

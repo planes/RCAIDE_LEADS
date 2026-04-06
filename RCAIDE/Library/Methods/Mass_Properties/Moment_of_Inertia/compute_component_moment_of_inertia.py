@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Mass_Properties/Moment_of_Intertia/sum_component_moments_of_inertia.py 
+# RCAIDE/Library/Methods/Mass_Properties/Moment_of_inertia/sum_component_moments_of_inertia.py 
 # 
 # Created:  Jul 2025, M. Clarke 
 
@@ -66,16 +66,16 @@ def update_total_moment_of_inertia(total_MOI,vehicle_CG,C,segment,verbose,moment
     if verbose:
         name_column_width = 20
         num_column_width  = 6
-        print(f"{C.tag.ljust(name_column_width)}",'\t \t', f"{str(round(I_global[0][0],2)).ljust(num_column_width)}", '\t', f"{str(round(I_global[1][1],2)).ljust(num_column_width)}", '\t'f"{str(round(I_global[2][2],2)).ljust(num_column_width)}", '\t'  )    
+        print(f"{C.tag.ljust(name_column_width)}",'\t \t', f"{str(round(float(I_global[0][0]),2)).ljust(num_column_width)}", '\t', f"{str(round(float(I_global[1][1]),2)).ljust(num_column_width)}", '\t'f"{str(round(float(I_global[2][2]),2)).ljust(num_column_width)}", '\t'  )    
     moment_of_inertia_df.loc[len(moment_of_inertia_df)] = [
     C.tag,
-    round(C.mass_properties.mass, 2),
-    round(I_global[0][0], 2),
-    round(I_global[1][1], 2),
-    round(I_global[2][2], 2),
-    round(I_global[0][1], 2),
-    round(I_global[0][2], 2),
-    round(I_global[1][2], 2),
+    round(float(C.mass_properties.mass), 2),
+    round(float(I_global[0][0]), 2),
+    round(float(I_global[1][1]), 2),
+    round(float(I_global[2][2]), 2),
+    round(float(I_global[0][1]), 2),
+    round(float(I_global[0][2]), 2),
+    round(float(I_global[1][2]), 2),
     ]
     if segment != None:
         ones_row  = segment.state.ones_row  

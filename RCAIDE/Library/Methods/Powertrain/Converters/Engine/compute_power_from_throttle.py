@@ -9,7 +9,7 @@
 import RCAIDE
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # compute_power_from_throttle
@@ -114,7 +114,7 @@ def compute_power_from_throttle(engine,conditions):
     torque = P/omega
     
     # Determine fuel flow rate and cap at 0
-    m_dot_fuel  = np.fmax(m_dot,np.zeros_like(altitude)) 
+    m_dot_fuel  = rp.fmax(m_dot,rp.zeros_like(altitude)) 
     
     # Store results 
     engine_conditions.power                           = P

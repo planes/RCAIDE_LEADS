@@ -5,7 +5,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 from RCAIDE.Framework.Core import Units 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Find Voltage Larminie
@@ -77,6 +77,6 @@ def compute_voltage(fuel_cell, current_density):
     n   = fuel_cell.n   
     
     i1 = current_density/(0.001/(Units.cm**2.)) # current density(mA cm^-2)
-    v  = Eoc-r*i1-A1*np.log(i1)-m*np.exp(n*i1)     #useful voltage vector
+    v  = Eoc-r*i1-A1*rp.log(i1)-m*rp.exp(n*i1)     #useful voltage vector
 
     return v

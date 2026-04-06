@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  Imports
 # ---------------------------------------------------------------------------------------------------------------------- 
-import numpy as np
+import RNUMPY as rp
 from RCAIDE.Framework.Core   import orientation_product, orientation_transpose 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -39,7 +39,7 @@ def angular_acceleration(segment):
     T_inertia2wind  = orientation_transpose(T_wind2inertial)    
     
     # accelerations
-    ang_acc_i = np.dot(D,omega)
+    ang_acc_i = rp.dot(D,omega)
     ang_acc_w = orientation_product(T_inertia2wind,ang_acc_i )
 
     # pack conditions

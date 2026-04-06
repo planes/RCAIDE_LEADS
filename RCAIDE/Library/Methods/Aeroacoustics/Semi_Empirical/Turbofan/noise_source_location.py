@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core  import  Data 
 
 # Python package imports   
-import numpy as np   
+import RNUMPY as rp   
 
 # ----------------------------------------------------------------------------------------------------------------------     
 #  Noise Source Location
@@ -91,99 +91,99 @@ def noise_source_location(B, Xo, zk, Diameter_primary, theta_p, Area_primary, Ar
     """
     
     # P rimary jet source location
-    XJ = np.zeros(24)
+    XJ = rp.zeros(24)
     
     for i in range(24):
         residual = Diameter_primary
-        XJ[i]    = (zk*Diameter_primary)*(4.+4.*np.arctan((18.*theta_p[i]/np.pi)-9.)+(Area_secondary/Area_primary))
-        B[i]     = (1./np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+        XJ[i]    = (zk*Diameter_primary)*(4.+4.*rp.arctan((18.*theta_p[i]/rp.pi)-9.)+(Area_secondary/Area_primary))
+        B[i]     = (1./rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
         
         if (B[i]>=0.):
-            theta_p[i]=np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_p[i]=rp.arcsin(((B[i])**2.+1.)**(-0.5))
         else:
-            theta_p[i]=np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_p[i]=rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
 
-        XJ[i] = (zk*Diameter_primary)*(4.+4.*np.arctan((18.*theta_p[i]/np.pi)-9.)+(Area_secondary/Area_primary))
+        XJ[i] = (zk*Diameter_primary)*(4.+4.*rp.arctan((18.*theta_p[i]/rp.pi)-9.)+(Area_secondary/Area_primary))
         
         while residual>(Diameter_primary/200.):
             XJ_old = XJ[i]
             theta1 = theta_p[i]
-            B[i]   = (1./np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+            B[i]   = (1./rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
             
             if B[i]>=0.:
-                theta_p[i] = np.arcsin(((B[i])**2.+1.)**(-0.5))
+                theta_p[i] = rp.arcsin(((B[i])**2.+1.)**(-0.5))
             else:
-                theta_p[i] = np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+                theta_p[i] = rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
 
             theta2     = theta_p[i]
             theta_p[i] = (theta1+theta2)/2.
-            XJ[i]      = (zk*Diameter_primary)*(4.+4.*np.arctan((18.*theta_p[i]/np.pi)-9.)+(Area_secondary/Area_primary))
-            residual   = np.abs(XJ_old-XJ[i])
+            XJ[i]      = (zk*Diameter_primary)*(4.+4.*rp.arctan((18.*theta_p[i]/rp.pi)-9.)+(Area_secondary/Area_primary))
+            residual   = rp.abs(XJ_old-XJ[i])
 
         # Secondary jet source location
         residual = Diameter_secondary
         XJ_old   = 0.0
-        XJ[i]    = (zk*Diameter_secondary)*(2.+1.6*np.arctan((4.5*theta_s[i]/np.pi)-2.25))*(1.+0.5/np.sqrt(Str_s[i])) \
-            *  np.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
+        XJ[i]    = (zk*Diameter_secondary)*(2.+1.6*rp.arctan((4.5*theta_s[i]/rp.pi)-2.25))*(1.+0.5/rp.sqrt(Str_s[i])) \
+            *  rp.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
         
-        B[i]     = (1./np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+        B[i]     = (1./rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
         
         if B[i]>=0.:
-            theta_s[i] = np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_s[i] = rp.arcsin(((B[i])**2.+1.)**(-0.5))
         else:
-            theta_s[i] = np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_s[i] = rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
             
-        XJ[i] = (zk*Diameter_mixed)*(2.+1.6*np.arctan((4.5*theta_s[i]/np.pi)-2.25))*(1.+0.5/np.sqrt(Str_s[i]))* \
-            np.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
+        XJ[i] = (zk*Diameter_mixed)*(2.+1.6*rp.arctan((4.5*theta_s[i]/rp.pi)-2.25))*(1.+0.5/rp.sqrt(Str_s[i]))* \
+            rp.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
         
         while residual>(Diameter_mixed/200.):
             XJ_old = XJ[i]
             theta1 = theta_s[i]
-            B[i]   = (1/np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+            B[i]   = (1/rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
             
             if B[i]>=0.:
-                theta_s[i] = np.arcsin((B[i]**2.+1.)**(-0.5))
+                theta_s[i] = rp.arcsin((B[i]**2.+1.)**(-0.5))
             else:
-                theta_s[i] = np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+                theta_s[i] = rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
 
             theta2     = theta_s[i]
             theta_s[i] = (theta1+theta2)/2.
-            XJ[i]      = (zk*Diameter_mixed)*(2.+1.6*np.arctan((4.5*theta_s[i]/np.pi)-2.25))*(1.+0.5/np.sqrt(Str_s[i]))* \
-                np.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
+            XJ[i]      = (zk*Diameter_mixed)*(2.+1.6*rp.arctan((4.5*theta_s[i]/rp.pi)-2.25))*(1.+0.5/rp.sqrt(Str_s[i]))* \
+                rp.sqrt(1.+(0.7*Velocity_secondary/sound_ambient))*(Velocity_secondary/(Velocity_secondary-Velocity_aircraft))
             
-            residual = np.abs(XJ_old-XJ[i])
+            residual = rp.abs(XJ_old-XJ[i])
 
         #Mixed jet source location
         residual = Diameter_mixed
         XJ_old   = 0.
-        XJ[i] = (zk*Diameter_mixed)*(3.+np.exp(-Str_m[i])+(2.+1.1*np.arctan((18.*theta_m[i]/np.pi)-13.))+ \
-            (1.+0.5/np.sqrt(Str_m[i])))*np.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) * \
+        XJ[i] = (zk*Diameter_mixed)*(3.+rp.exp(-Str_m[i])+(2.+1.1*rp.arctan((18.*theta_m[i]/rp.pi)-13.))+ \
+            (1.+0.5/rp.sqrt(Str_m[i])))*rp.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) * \
             (Velocity_mixed/(Velocity_mixed-Velocity_aircraft))
         
-        B[i] = (1./np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+        B[i] = (1./rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
         if B[i]>=0.:
-            theta_m[i] = np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_m[i] = rp.arcsin(((B[i])**2.+1.)**(-0.5))
         else:
-            theta_m[i] = np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+            theta_m[i] = rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
 
-        XJ[i]=(zk*Diameter_mixed)*(3.+np.exp(-Str_m[i])+(2.+1.1*np.arctan((18.*theta_m[i]/np.pi)-13.))+\
-            (1.+0.5/np.sqrt(Str_m[i])))*np.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) \
+        XJ[i]=(zk*Diameter_mixed)*(3.+rp.exp(-Str_m[i])+(2.+1.1*rp.arctan((18.*theta_m[i]/rp.pi)-13.))+\
+            (1.+0.5/rp.sqrt(Str_m[i])))*rp.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) \
             *(Velocity_mixed/(Velocity_mixed-Velocity_aircraft))
         
         while residual>(Diameter_mixed/200.):
             XJ_old = XJ[i]
             theta1 = theta_m[i]
-            B[i]   = (1./np.sin(theta))*(((Xo+XJ[i])/distance_microphone)+np.cos(theta))
+            B[i]   = (1./rp.sin(theta))*(((Xo+XJ[i])/distance_microphone)+rp.cos(theta))
             
             if B[i]>=0.:
-                theta_m[i] = np.arcsin(((B[i])**2.+1.)**(-0.5))
+                theta_m[i] = rp.arcsin(((B[i])**2.+1.)**(-0.5))
             else:
-                theta_m[i] = np.pi-np.arcsin(((B[i])**2.+1.)**(-0.5))
+                theta_m[i] = rp.pi-rp.arcsin(((B[i])**2.+1.)**(-0.5))
                 
             theta2     = theta_m[i]
             theta_m[i] = (theta1+theta2)/2.
-            XJ[i]      = (zk*Diameter_mixed)*(3.+np.exp(-Str_m[i])+(2.+1.1*np.arctan((18.*theta_m[i]/np.pi)-13.))+\
-                (1.+0.5/np.sqrt(Str_m[i])))*np.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) \
+            XJ[i]      = (zk*Diameter_mixed)*(3.+rp.exp(-Str_m[i])+(2.+1.1*rp.arctan((18.*theta_m[i]/rp.pi)-13.))+\
+                (1.+0.5/rp.sqrt(Str_m[i])))*rp.sqrt(0.5+0.5*Velocity_mixed/sound_ambient) \
                 *(Velocity_mixed/(Velocity_mixed-Velocity_aircraft))
             
             residual   = abs(XJ_old-XJ[i])

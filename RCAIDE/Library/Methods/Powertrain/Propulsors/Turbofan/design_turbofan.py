@@ -20,7 +20,7 @@ from RCAIDE.Library.Methods.Powertrain                               import setu
 
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Design Turbofan
@@ -153,18 +153,18 @@ def design_turbofan(turbofan):
         conditions = RCAIDE.Framework.Mission.Common.Results()
     
         # freestream conditions    
-        conditions.freestream.altitude                    = np.atleast_1d(turbofan.design_altitude)
-        conditions.freestream.mach_number                 = np.atleast_1d(turbofan.design_mach_number)
-        conditions.freestream.pressure                    = np.atleast_1d(p)
-        conditions.freestream.temperature                 = np.atleast_1d(T)
-        conditions.freestream.density                     = np.atleast_1d(rho)
-        conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
-        conditions.freestream.gravity                     = np.atleast_1d(planet.compute_gravity(turbofan.design_altitude))
-        conditions.freestream.isentropic_expansion_factor = np.atleast_1d(turbofan.working_fluid.compute_gamma(T,p))
-        conditions.freestream.Cp                          = np.atleast_1d(turbofan.working_fluid.compute_cp(T,p))
-        conditions.freestream.R                           = np.atleast_1d(turbofan.working_fluid.gas_specific_constant)
-        conditions.freestream.speed_of_sound              = np.atleast_1d(a)
-        conditions.freestream.velocity                    = np.atleast_1d(U) 
+        conditions.freestream.altitude                    = rp.atleast_1d(turbofan.design_altitude)
+        conditions.freestream.mach_number                 = rp.atleast_1d(turbofan.design_mach_number)
+        conditions.freestream.pressure                    = rp.atleast_1d(p)
+        conditions.freestream.temperature                 = rp.atleast_1d(T)
+        conditions.freestream.density                     = rp.atleast_1d(rho)
+        conditions.freestream.dynamic_viscosity           = rp.atleast_1d(mu)
+        conditions.freestream.gravity                     = rp.atleast_1d(planet.compute_gravity(turbofan.design_altitude))
+        conditions.freestream.isentropic_expansion_factor = rp.atleast_1d(turbofan.working_fluid.compute_gamma(T,p))
+        conditions.freestream.Cp                          = rp.atleast_1d(turbofan.working_fluid.compute_cp(T,p))
+        conditions.freestream.R                           = rp.atleast_1d(turbofan.working_fluid.gas_specific_constant)
+        conditions.freestream.speed_of_sound              = rp.atleast_1d(a)
+        conditions.freestream.velocity                    = rp.atleast_1d(U) 
      
     segment                  = RCAIDE.Framework.Mission.Segments.Segment()  
     segment.state.conditions = conditions 
@@ -330,8 +330,8 @@ def design_turbofan(turbofan):
     
     # Step 23: Static Sea Level Thrust  
     atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
-    V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state       = setup_operating_conditions(turbofan,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    V                     = atmo_data_sea_level.speed_of_sound[0]*0.01 
+    operating_state       = setup_operating_conditions(turbofan,velocity_range=V, altitude = 0, angle_of_attack=0, temperature_deviation=0)  
     operating_state.conditions.energy.propulsors[turbofan.tag].throttle[:,0] = 1.0  
     sls_T,_,sls_P,_,_,_                          = turbofan.compute_performance(operating_state) 
     turbofan.sealevel_static_thrust              = sls_T[0][0]

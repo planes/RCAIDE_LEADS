@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core                                            import Uni
 from .Generic_Battery_Module                                          import Generic_Battery_Module   
 from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Lithium_Ion_NMC  import *
 # package imports 
-import numpy as np
+import RNUMPY as rp
 import os 
 from scipy.interpolate  import RegularGridInterpolator 
 
@@ -146,8 +146,8 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
         self.cell.diameter                    = 0.0185                                                                            # [m]
         self.cell.height                      = 0.0653                                                                            # [m]
         self.cell.mass                        = 0.048 * Units.kg                                                                  # [kg]
-        self.cell.surface_area                = (np.pi*self.cell.height*self.cell.diameter) + (0.5*np.pi*self.cell.diameter**2)  # [m^2]
-        self.cell.volume                      = np.pi*(0.5*self.cell.diameter)**2*self.cell.height 
+        self.cell.surface_area                = (rp.pi*self.cell.height*self.cell.diameter) + (0.5*rp.pi*self.cell.diameter**2)  # [m^2]
+        self.cell.volume                      = rp.pi*(0.5*self.cell.diameter)**2*self.cell.height 
         self.cell.density                     = self.cell.mass/self.cell.volume                                                  # [kg/m^3]  
         self.cell.electrode_area              = 0.0342                                                                           # [m^2] 
                                                                                                                            
@@ -297,8 +297,8 @@ def create_discharge_performance_map(raw_data):
     """   
     # Process raw data   
     processed_data = Data() 
-    processed_data.Voltage        = np.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs voltage      
-    processed_data.Temperature    = np.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs temperature 
+    processed_data.Voltage        = rp.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs voltage      
+    processed_data.Temperature    = rp.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs temperature 
 
     # Reshape  Data          
     raw_data.Voltage 
@@ -306,9 +306,9 @@ def create_discharge_performance_map(raw_data):
         for j , Deg in enumerate(Amps):
             min_x    = 0 
             max_x    = max(Deg[:,0])
-            x        = np.linspace(min_x,max_x,15)
-            y        = np.interp(x,Deg[:,0],Deg[:,1])
-            vec      = np.zeros((15,2))
+            x        = rp.linspace(min_x,max_x,15)
+            y        = rp.interp(x,Deg[:,0],Deg[:,1])
+            vec      = rp.zeros((15,2))
             vec[:,0] = x/max_x
             vec[:,1] = y
             processed_data.Voltage[i,j,:,:]= vec   
@@ -317,18 +317,18 @@ def create_discharge_performance_map(raw_data):
         for j , Deg in enumerate(Amps):
             min_x    = 0   
             max_x    = max(Deg[:,0])
-            x        = np.linspace(min_x,max_x,15)
-            y        = np.interp(x,Deg[:,0],Deg[:,1])
-            vec      = np.zeros((15,2))
+            x        = rp.linspace(min_x,max_x,15)
+            y        = rp.interp(x,Deg[:,0],Deg[:,1])
+            vec      = rp.zeros((15,2))
             vec[:,0] = x/max_x
             vec[:,1] = y
             processed_data.Temperature[i,j,:,:]= vec  
     
     # Create performance maps  
     battery_data             = Data() 
-    amps                    = np.linspace(0, 8, 5)
-    temp                    = np.linspace(0, 50, 6) +  272.65  # Convert to Kelvin
-    SOC                     = np.linspace(0, 1, 15)
+    amps                    = rp.linspace(0, 8, 5)
+    temp                    = rp.linspace(0, 50, 6) +  272.65  # Convert to Kelvin
+    SOC                     = rp.linspace(0, 1, 15)
     battery_data.Voltage     = RegularGridInterpolator((amps, temp, SOC), processed_data.Voltage,bounds_error=False,fill_value=None)
     battery_data.Temperature = RegularGridInterpolator((amps, temp, SOC), processed_data.Temperature,bounds_error=False,fill_value=None) 
      

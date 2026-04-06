@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core  import Units,  angles_to_dcms, orientation_product, orientation_transpose
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Update Orientations
@@ -71,7 +71,7 @@ def orientations(segment):
     V_stability = V_body * 1.
 
     # calculate angle of attack
-    alpha = np.arctan2(V_stability[:,2],V_stability[:,0])[:,None] 
+    alpha = rp.arctan2(V_stability[:,2],V_stability[:,0])[:,None] 
 
     # pack aerodynamics angles
     conditions.aerodynamics.angles.alpha[:,0] = alpha[:,0]
@@ -105,17 +105,17 @@ def orientations(segment):
     # ------------------------------------------------------------------
     # Rotation rates 
     # ------------------------------------------------------------------ 
-    stability_frame_rotations       =  np.concatenate((np.concatenate((roll_rate, pitch_rate), axis=1), yaw_rate), axis=1)
+    stability_frame_rotations       =  rp.concatenate((rp.concatenate((roll_rate, pitch_rate), axis=1), yaw_rate), axis=1)
     phi                             = body_inertial_rotations[:, 0]
     theta                           = body_inertial_rotations[:, 1]
-    reverse_transformation          = np.zeros_like(T_body2inertial)
+    reverse_transformation          = rp.zeros_like(T_body2inertial)
     reverse_transformation[:, 0, 0] =  1 
-    reverse_transformation[:, 0, 1] =  np.sin(phi)*np.tan(theta)
-    reverse_transformation[:, 0, 2] =  np.cos(phi)*np.tan(theta)
-    reverse_transformation[:, 1, 1] =  np.cos(phi)
-    reverse_transformation[:, 1, 2] =  -np.sin(phi) 
-    reverse_transformation[:, 2, 1] =  np.sin(phi) /np.cos(theta)
-    reverse_transformation[:, 2, 2] =  np.cos(phi) /np.cos(theta) 
+    reverse_transformation[:, 0, 1] =  rp.sin(phi)*rp.tan(theta)
+    reverse_transformation[:, 0, 2] =  rp.cos(phi)*rp.tan(theta)
+    reverse_transformation[:, 1, 1] =  rp.cos(phi)
+    reverse_transformation[:, 1, 2] =  -rp.sin(phi) 
+    reverse_transformation[:, 2, 1] =  rp.sin(phi) /rp.cos(theta)
+    reverse_transformation[:, 2, 2] =  rp.cos(phi) /rp.cos(theta) 
     inertial_rotations              =  orientation_product(reverse_transformation,stability_frame_rotations)
     segment.state.conditions.frames.inertial.angular_velocity_vector = inertial_rotations 
     

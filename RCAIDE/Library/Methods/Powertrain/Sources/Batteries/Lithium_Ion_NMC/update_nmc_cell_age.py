@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np  
+import RNUMPY as rp  
  
 # ----------------------------------------------------------------------------------------------------------------------
 # update_nmc_cell_age
@@ -84,21 +84,21 @@ def update_nmc_cell_age(battery, segment, battery_conditions, increment_battery_
     V_ul       = battery_conditions.voltage_under_load/n_series
     t          = battery_conditions.cell.cycle_in_day         
     Q_prior    = battery_conditions.cell.charge_throughput[-1,0] 
-    Temp       = np.mean(battery_conditions.cell.temperature) 
+    Temp       = rp.mean(battery_conditions.cell.temperature) 
     
     # aging model  
     delta_DOD = abs(SOC[0][0] - SOC[-1][0])
-    rms_V_ul  = np.sqrt(np.mean(V_ul**2)) 
-    alpha_cap = (7.542*np.mean(V_ul) - 23.75) * 1E6 * np.exp(-6976/(Temp))  
-    alpha_res = (5.270*np.mean(V_ul) - 16.32) * 1E5 * np.exp(-5986/(Temp))  
+    rms_V_ul  = rp.sqrt(rp.mean(V_ul**2)) 
+    alpha_cap = (7.542*rp.mean(V_ul) - 23.75) * 1E6 * rp.exp(-6976/(Temp))  
+    alpha_res = (5.270*rp.mean(V_ul) - 16.32) * 1E5 * rp.exp(-5986/(Temp))  
     beta_cap  = 7.348E-3 * (rms_V_ul - 3.667)**2 +  7.60E-4 + 4.081E-3*delta_DOD
     beta_res  = 2.153E-4 * (rms_V_ul - 3.725)**2 - 1.521E-5 + 2.798E-4*delta_DOD
     
-    E_fade_factor   = 1 - alpha_cap*(t**0.75) - beta_cap*np.sqrt(Q_prior)   
+    E_fade_factor   = 1 - alpha_cap*(t**0.75) - beta_cap*rp.sqrt(Q_prior)   
     R_growth_factor = 1 + alpha_res*(t**0.75) + beta_res*Q_prior  
     
-    battery_conditions.cell.capacity_fade_factor     = np.minimum(E_fade_factor,battery_conditions.cell.capacity_fade_factor)
-    battery_conditions.cell.resistance_growth_factor = np.maximum(R_growth_factor,battery_conditions.cell.resistance_growth_factor)
+    battery_conditions.cell.capacity_fade_factor     = rp.minimum(E_fade_factor,battery_conditions.cell.capacity_fade_factor)
+    battery_conditions.cell.resistance_growth_factor = rp.maximum(R_growth_factor,battery_conditions.cell.resistance_growth_factor)
     
     if increment_battery_age_by_one_day:
         battery_conditions.cell.cycle_in_day += 1 # update battery age by one day 

@@ -10,6 +10,7 @@
  
 from RCAIDE.Framework.Core import Units  
 import matplotlib.pyplot as plt    
+import numpy as np
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  PLOTS
@@ -90,7 +91,7 @@ def plot_airfoil_surface_forces(ap,
 
     for i in range(n_cpts):     
         for j in range(nAoA): 
-            label =  '_AoA_' + str(round(ap.AoA[i][j]/Units.degrees,2)) + '_deg_Re_' + str(round(ap.Re[i][j]/1000000,2)) + 'E6'
+            label =  '_AoA_' + str(((ap.AoA[i][j]/Units.degrees))) + '_deg_Re_' + str(ap.Re[i][j]/1000000) + 'E6'
             fig   = plt.figure('Airfoil_Pressure_Normals' + label )
             axis = fig.add_subplot(1,1,1) 
             axis.plot(ap.x[0,0,:], ap.y[0,0,:],'k-')   
@@ -98,10 +99,10 @@ def plot_airfoil_surface_forces(ap,
                 dx_val = ap.normals[i,j,k,0]*abs(ap.cp[i,j,k])*0.1
                 dy_val = ap.normals[i,j,k,1]*abs(ap.cp[i,j,k])*0.1
                 if ap.cp[i,j,k] < 0:
-                    plt.arrow(x= ap.x[i,j,k], y=ap.y[i,j,k] , dx= dx_val , dy = dy_val , 
+                    plt.arrow(x= np.array(ap.x[i,j,k]), y=np.array(ap.y[i,j,k]) , dx= np.array(dx_val) , dy = np.array(dy_val) , 
                               fc=arrow_color, ec=arrow_color,head_width=0.005, head_length=0.01 )   
                 else:
-                    plt.arrow(x= ap.x[i,j,k]+dx_val , y= ap.y[i,j,k]+dy_val , dx= -dx_val , dy = -dy_val , 
+                    plt.arrow(x= np.array(ap.x[i,j,k]+dx_val) , y= np.array(ap.y[i,j,k]+dy_val) , dx= np.array(-dx_val) , dy = np.array(-dy_val) , 
                               fc=arrow_color, ec=arrow_color,head_width=0.005, head_length=0.01 )   
     
     

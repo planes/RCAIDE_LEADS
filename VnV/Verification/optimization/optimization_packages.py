@@ -10,7 +10,7 @@ from   RCAIDE.Framework.Core         import Units, Data
 import RCAIDE.Framework.Optimization.Packages.scipy as scipy_setup 
 from   RCAIDE.Framework.Optimization.Common         import Nexus
 
-import numpy as np
+import RNUMPY as rp
 import vehicle_opt_pack
 import procedure_opt_pack
 
@@ -18,14 +18,14 @@ import os , sys
 
 def main():
     
-    seed = np.random.seed(1)  
+    seed = rp.random.seed(1)  
 
     # ------------------------------------------------------------------
     #   SLSQP
     # ------------------------------------------------------------------    
     solver_name = 'SLSQP'
     problem     = setup(solver_name)
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x1' , '=',   0., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
@@ -45,9 +45,9 @@ def main():
     x2 = outputs[0][1] 
 
     #   Check Results 
-    assert( np.isclose(obj,  1, atol=1e-6) )
-    assert( np.isclose(x1 ,  0, atol=1e-2) )
-    assert( np.isclose(x2 ,  1, atol=1e-2))
+    assert( rp.isclose(obj,  1, atol=1e-6) )
+    assert( rp.isclose(x1 ,  0, atol=1e-2) )
+    assert( rp.isclose(x2 ,  1, atol=1e-2))
     
     # ------------------------------------------------------------------
     #   Differential Evolution 
@@ -55,7 +55,7 @@ def main():
     print('\n\n Checking differential evolution algorithm')
     solver_name = 'differential_evolution' 
     problem     = setup(solver_name)
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x1' , '=',   0., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
@@ -72,9 +72,9 @@ def main():
     x2 = outputs.x[1] 
 
     #   Check Results 
-    assert( np.isclose(obj,  1, atol=1e-5) )
-    assert( np.isclose(x1 ,  0, atol=1e-4) )
-    assert( np.isclose(x2 ,  1, atol=1e-4) )     
+    assert( rp.isclose(obj,  1, atol=1e-5) )
+    assert( rp.isclose(x1 ,  0, atol=1e-4) )
+    assert( rp.isclose(x2 ,  1, atol=1e-4) )     
 
 
     # ------------------------------------------------------------------
@@ -82,7 +82,7 @@ def main():
     # ------------------------------------------------------------------     
     solver_name = 'particle_swarm_optimization'
     problem     = setup(solver_name)        
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
         [ 'x2' , '<',   2., 1., 1*Units.less],
@@ -99,9 +99,9 @@ def main():
     x2  = outputs[0][1]
 
     #   Check Results 
-    assert( np.isclose(obj,  1, atol=1e-2) )
-    assert( np.isclose(x1 ,  0, atol=1e-1) )
-    assert( np.isclose(x2 ,  1, atol=1e-1) )     
+    assert( rp.isclose(obj,  1, atol=1e-2) )
+    assert( rp.isclose(x1 ,  0, atol=1e-1) )
+    assert( rp.isclose(x2 ,  1, atol=1e-1) )     
 
 
     return
@@ -120,7 +120,7 @@ def setup(solver_name):
     # Inputs
     # -------------------------------------------------------------------
 
-    problem.inputs = np.array([
+    problem.inputs = rp.array([
         #   [ tag   , initial,(   lb   ,   ub   )     , scaling , units ]
     [ 'x1'  ,  1.  ,    -2.   ,   2.     ,   1.   , 1*Units.less],
         [ 'x2'  ,  1.  ,    -2.   ,   2.     ,   1.   , 1*Units.less],
@@ -132,7 +132,7 @@ def setup(solver_name):
 
     # throw an error if the user isn't specific about wildcards
     # [ tag, scaling, units ]
-    problem.objective = np.array([
+    problem.objective = rp.array([
         ['y',1.,1*Units.less]
         ],dtype=object)
 
@@ -141,7 +141,7 @@ def setup(solver_name):
     # -------------------------------------------------------------------
 
     # [ tag, sense, edge, scaling, units ]
-    problem.constraints = np.array([
+    problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>', -50., 1., 1*Units.less],
     ])

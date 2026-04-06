@@ -12,9 +12,8 @@ from RCAIDE.Library.Components          import Component
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.compute_cylinder_moment_of_inertia  import compute_cylinder_moment_of_inertia 
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.compute_cylinder_center_of_gravity  import compute_cylinder_center_of_gravity
 
-# python imports 
-import scipy as sp
-import numpy as np
+import RNUMPY.scipy as sp
+import RNUMPY as rp
  
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Nacelle
@@ -175,18 +174,18 @@ class Nacelle(Component):
         3. Nacelle vehicle to nacelle velocity frame
         """
         # Go from body to vehicle frame
-        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0,rp.pi,0]).as_matrix()
         
         # Go from vehicle frame to nacelle vehicle frame
-        rots = np.array(self.orientation_euler_angles) * 1. 
+        rots = rp.array(self.orientation_euler_angles) * 1. 
         vehicle_2_nac_vec = sp.spatial.transform.Rotation.from_rotvec(rots).as_matrix()        
         
         # Go from nacelle vehicle frame to nacelle velocity frame
         nac_vec_2_nac_vel = self.vec_to_vel()
         
         # Combine transformations
-        rot1 = np.matmul(body_2_vehicle,vehicle_2_nac_vec)
-        rot_mat = np.matmul(rot1,nac_vec_2_nac_vel) 
+        rot1 = rp.matmul(body_2_vehicle,vehicle_2_nac_vec)
+        rot_mat = rp.matmul(rot1,nac_vec_2_nac_vel) 
         return rot_mat    
     
     def vec_to_vel(self):
@@ -198,7 +197,7 @@ class Nacelle(Component):
         ndarray
             3x3 rotation matrix
         """
-        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,rp.pi,0]).as_matrix()
         return rot_mat
     
     def compute_moments_of_inertia(self,vehicle,center_of_gravity=[[0, 0, 0]]): 

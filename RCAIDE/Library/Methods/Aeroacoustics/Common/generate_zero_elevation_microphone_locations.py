@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
 # package imports  
-import numpy as np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  generate_zero_elevation_microphone_locations
@@ -40,14 +40,14 @@ def generate_zero_elevation_microphone_locations(settings):
     N_x                   = settings.microphone_x_resolution 
     N_y                   = settings.microphone_y_resolution
     num_gm                = N_x*N_y
-    gm_mic_locations      = np.zeros((num_gm,3))     
+    gm_mic_locations      = rp.zeros((num_gm,3))     
     min_x                 = settings.microphone_min_x         
     max_x                 = settings.microphone_max_x         
     min_y                 = settings.microphone_min_y         
     max_y                 = settings.microphone_max_y   
-    x_coords_0            = np.repeat(np.linspace(min_x,max_x,N_x)[:,np.newaxis],N_y, axis = 1)
-    y_coords_0            = np.repeat(np.linspace(min_y,max_y,N_y)[:,np.newaxis],N_x, axis = 1).T
-    z_coords_0            = np.zeros_like(x_coords_0) 
+    x_coords_0            = rp.repeat(rp.linspace(min_x,max_x,N_x)[:,rp.newaxis],N_y, axis = 1)
+    y_coords_0            = rp.repeat(rp.linspace(min_y,max_y,N_y)[:,rp.newaxis],N_x, axis = 1).T
+    z_coords_0            = rp.zeros_like(x_coords_0) 
     gm_mic_locations[:,0] = x_coords_0.reshape(num_gm)
     gm_mic_locations[:,1] = y_coords_0.reshape(num_gm)
     gm_mic_locations[:,2] = z_coords_0.reshape(num_gm) 

@@ -9,7 +9,7 @@
 from RCAIDE.Framework.Core import Data
 
 # python
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  cooling_drag
@@ -131,7 +131,7 @@ def cooling_drag(state,settings,geometry):
     reference_area             = geometry.reference_area
     
     # Create an empty array for cooling drag coefficient
-    cd_cooling  = np.zeros_like(density)
+    cd_cooling  = rp.zeros_like(density)
     
     for network in geometry.networks:
         for coolant_line in  network.coolant_lines:

@@ -9,7 +9,7 @@ import RCAIDE
 from   RCAIDE.Framework.Core import Data
  
 # package imports
-import  numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  evaluate_correlation_emissions_indices
@@ -191,12 +191,12 @@ def evaluate_correlation_emissions_indices(segment,settings,vehicle):
                     mdot_fuel = propulsor_conditions.fuel_mass_flow_rate
                      
                     # Integrate them over the entire segment
-                    NOx_total  += np.dot(I,mdot_fuel*EI_NOx)
-                    CO2_total  += np.dot(I,mdot_fuel*EI_CO2)
-                    CO_total   += np.dot(I,mdot_fuel*EI_CO)
-                    SO2_total  += np.dot(I,mdot_fuel*EI_SO2)
-                    H2O_total  += np.dot(I,mdot_fuel*EI_H2O)
-                    Soot_total += np.dot(I,mdot_fuel*EI_Soot)
+                    NOx_total  += rp.dot(I,mdot_fuel*EI_NOx)
+                    CO2_total  += rp.dot(I,mdot_fuel*EI_CO2)
+                    CO_total   += rp.dot(I,mdot_fuel*EI_CO)
+                    SO2_total  += rp.dot(I,mdot_fuel*EI_SO2)
+                    H2O_total  += rp.dot(I,mdot_fuel*EI_H2O)
+                    Soot_total += rp.dot(I,mdot_fuel*EI_Soot)
                                      
          
     flight_range    =  state.conditions.frames.inertial.aircraft_range 

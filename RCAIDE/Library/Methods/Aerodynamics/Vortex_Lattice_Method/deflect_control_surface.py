@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import Data
 from RCAIDE.Library.Components.Wings.All_Moving_Surface import All_Moving_Surface
 from .generate_VD_helpers import postprocess_VD
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Deflect Control Surface
@@ -31,7 +31,7 @@ def deflect_control_surfaces(VD,geometry,settings):
     Inputs: 
     VD - vehicle vortex distribution              [Unitless] 
     geometry.wings                                [Unitless]  
-    settings.floating_point_precision             [np.dtype]
+    settings.floating_point_precision             [rp.dtype]
 
     Outputs:      
     VD - vehicle vortex distribution              [Unitless] 
@@ -90,7 +90,7 @@ def deflect_control_surface(VD,wing):
 
 
     # Symmetry loop
-    signs         = np.array([1, -1], dtype=int) # acts as a multiplier for symmetry. -1 is only ever used for symmetric wings
+    signs         = rp.array([1, -1], dtype=int) # acts as a multiplier for symmetry. -1 is only ever used for symmetric wings
     symmetry_mask = [True,sym_para]
     for sym_sign in signs[symmetry_mask]:    
         
@@ -128,9 +128,9 @@ def deflect_control_surface(VD,wing):
         zeta_prime_ch  = VD.ZCH[condition]
         zeta_prime     = VD.ZC [condition]
         
-        X_as = np.zeros_like(VD.X[condition_full][:-(n_cw+1)])
-        Y_as = np.zeros_like(VD.Y[condition_full][:-(n_cw+1)])
-        Z_as = np.zeros_like(VD.Z[condition_full][:-(n_cw+1)])
+        X_as = rp.zeros_like(VD.X[condition_full][:-(n_cw+1)])
+        Y_as = rp.zeros_like(VD.Y[condition_full][:-(n_cw+1)])
+        Z_as = rp.zeros_like(VD.Z[condition_full][:-(n_cw+1)])
         
         
         for idx_y in range(n_sw):
@@ -207,9 +207,9 @@ def deflect_control_surface(VD,wing):
             zeta_prime_ch[start:stop]  = raw_VD.zeta_prime_ch
             zeta_prime   [start:stop]  = raw_VD.zeta_prime   
             
-            X_as[start_full:stop_full] = np.append(raw_VD.xi_prime_a1  , raw_VD.xi_prime_a2  [-1])
-            Y_as[start_full:stop_full] = np.append(raw_VD.y_prime_a1   , raw_VD.y_prime_a2   [-1])
-            Z_as[start_full:stop_full] = np.append(raw_VD.zeta_prime_a1, raw_VD.zeta_prime_a2[-1])
+            X_as[start_full:stop_full] = rp.append(raw_VD.xi_prime_a1  , raw_VD.xi_prime_a2  [-1])
+            Y_as[start_full:stop_full] = rp.append(raw_VD.y_prime_a1   , raw_VD.y_prime_a2   [-1])
+            Z_as[start_full:stop_full] = rp.append(raw_VD.zeta_prime_a1, raw_VD.zeta_prime_a2[-1])
         
         # pack surface VD values into vehicle VD    
         VD.XA1[condition]    = xi_prime_a1    
@@ -243,13 +243,13 @@ def deflect_control_surface(VD,wing):
         VD.ZCH[condition]    = zeta_prime_ch  
         VD.ZC [condition]    = zeta_prime    
         
-        X_last_bs = np.append(raw_VD.xi_prime_b1  , raw_VD.xi_prime_b2  [-1])
-        Y_last_bs = np.append(raw_VD.y_prime_b1   , raw_VD.y_prime_b2   [-1])
-        Z_last_bs = np.append(raw_VD.zeta_prime_b1, raw_VD.zeta_prime_b2[-1])
+        X_last_bs = rp.append(raw_VD.xi_prime_b1  , raw_VD.xi_prime_b2  [-1])
+        Y_last_bs = rp.append(raw_VD.y_prime_b1   , raw_VD.y_prime_b2   [-1])
+        Z_last_bs = rp.append(raw_VD.zeta_prime_b1, raw_VD.zeta_prime_b2[-1])
         
-        VD.X[condition_full] = np.append(X_as, X_last_bs)
-        VD.Y[condition_full] = np.append(Y_as, Y_last_bs)
-        VD.Z[condition_full] = np.append(Z_as, Z_last_bs)
+        VD.X[condition_full] = rp.append(X_as, X_last_bs)
+        VD.Y[condition_full] = rp.append(Y_as, Y_last_bs)
+        VD.Z[condition_full] = rp.append(Z_as, Z_last_bs)
         
         
     wing.deflection_last = wing.deflection*1.
@@ -351,13 +351,13 @@ def deflect_control_surface_strip(wing, raw_VD, is_first_strip, sym_sign):
     #found here will not change for the rest of this control surface/all-moving surface. See docstring for reasoning.
     if is_first_strip:
         # get rotation points by iterpolating between strip corners --> le/te, ib/ob = leading/trailing edge, in/outboard
-        ib_le_strip_corner = np.array([xi_prime_a1[0 ], y_prime_a1[0 ], zeta_prime_a1[0 ]]) 
-        ib_te_strip_corner = np.array([xi_prime_a2[-1], y_prime_a2[-1], zeta_prime_a2[-1]])                    
+        ib_le_strip_corner = rp.array([xi_prime_a1[0 ], y_prime_a1[0 ], zeta_prime_a1[0 ]]) 
+        ib_te_strip_corner = rp.array([xi_prime_a2[-1], y_prime_a2[-1], zeta_prime_a2[-1]])                    
         
-        interp_fractions   = np.array([0.,    2.,    4.   ]) + wing.hinge_fraction
-        interp_domains     = np.array([0.,1., 2.,3., 4.,5.])
-        interp_ranges_ib   = np.array([ib_le_strip_corner, ib_te_strip_corner]).T.flatten()
-        ib_hinge_point     = np.interp(interp_fractions, interp_domains, interp_ranges_ib)
+        interp_fractions   = rp.array([0.,    2.,    4.   ]) + wing.hinge_fraction
+        interp_domains     = rp.array([0.,1., 2.,3., 4.,5.])
+        interp_ranges_ib   = rp.array([ib_le_strip_corner, ib_te_strip_corner]).T.flatten()
+        ib_hinge_point     = rp.interp(interp_fractions, interp_domains, interp_ranges_ib)
         
         #Find the hinge_vector if this is a control surface or the user has not already defined and chosen to use a specific one                    
         if wing.is_a_control_surface:
@@ -365,20 +365,20 @@ def deflect_control_surface_strip(wing, raw_VD, is_first_strip, sym_sign):
         else: #wing is an all-moving surface
             hinge_vector                 = wing.hinge_vector
             hinge_vector_is_pre_defined  = (not wing.use_constant_hinge_fraction) and \
-                                            not (hinge_vector==np.array([0.,0.,0.])).all()
+                                            not (hinge_vector==rp.array([0.,0.,0.])).all()
             need_to_compute_hinge_vector = not hinge_vector_is_pre_defined  
             
         if need_to_compute_hinge_vector:
-            ob_le_strip_corner = np.array([xi_prime_b1[0 ], y_prime_b1[0 ], zeta_prime_b1[0 ]])                
-            ob_te_strip_corner = np.array([xi_prime_b2[-1], y_prime_b2[-1], zeta_prime_b2[-1]])                         
-            interp_ranges_ob   = np.array([ob_le_strip_corner, ob_te_strip_corner]).T.flatten()
-            ob_hinge_point     = np.interp(interp_fractions, interp_domains, interp_ranges_ob)
+            ob_le_strip_corner = rp.array([xi_prime_b1[0 ], y_prime_b1[0 ], zeta_prime_b1[0 ]])                
+            ob_te_strip_corner = rp.array([xi_prime_b2[-1], y_prime_b2[-1], zeta_prime_b2[-1]])                         
+            interp_ranges_ob   = rp.array([ob_le_strip_corner, ob_te_strip_corner]).T.flatten()
+            ob_hinge_point     = rp.interp(interp_fractions, interp_domains, interp_ranges_ob)
         
             use_root_chord_in_plane_normal = wing_is_all_moving and not wing.use_constant_hinge_fraction
             if use_root_chord_in_plane_normal: ob_hinge_point[0] = ib_hinge_point[0]
         
             hinge_vector       = ob_hinge_point - ib_hinge_point
-            hinge_vector       = hinge_vector / np.linalg.norm(hinge_vector)   
+            hinge_vector       = hinge_vector / rp.linalg.norm(hinge_vector)   
         elif wing.vertical: #For a vertical all-moving surface, flip y and z of hinge vector before flipping again later
             hinge_vector[1], hinge_vector[2] = hinge_vector[2], hinge_vector[1] 
             
@@ -390,7 +390,7 @@ def deflect_control_surface_strip(wing, raw_VD, is_first_strip, sym_sign):
     # get deflection angle
     ddeflection      = wing.deflection      - wing.deflection_last               # This is a delta deflection
     slat_multiplier  = (1 - wing.is_slat)   - wing.is_slat                       # Flip signs if it's a slat
-    sym_multiplier   = (1 - (sym_sign==-1)) - wing.sign_duplicate*(sym_sign==-1) # If it's the symmetric side
+    sym_multiplier   = (1 - int(sym_sign==-1)) - wing.sign_duplicate*int(sym_sign==-1) # If it's the symmetric side
     ver_multiplier   = (1 - vertical_wing)-1*vertical_wing                       # Vertical multiplier
 
     delta_deflection = slat_multiplier*sym_multiplier*ver_multiplier*ddeflection
@@ -489,8 +489,8 @@ def make_hinge_quaternion(point_on_line, direction_unit_vector, rotation_angle):
     a,  b,  c  = point_on_line
     u,  v,  w  = direction_unit_vector
     
-    cos         = np.cos(rotation_angle)
-    sin         = np.sin(rotation_angle)
+    cos         = rp.cos(rotation_angle)
+    sin         = rp.sin(rotation_angle)
     
     q11 = u**2 + (v**2 + w**2)*cos
     q12 = u*v*(1-cos) - w*sin
@@ -507,7 +507,7 @@ def make_hinge_quaternion(point_on_line, direction_unit_vector, rotation_angle):
     q33 = w**2 + (u**2 + v**2)*cos
     q34 = (c*(u**2 + v**2) - w*(a*u + b*v))*(1-cos)  +  (a*v - b*u)*sin    
     
-    quat = np.array([[q11, q12, q13, q14],
+    quat = rp.array([[q11, q12, q13, q14],
                      [q21, q22, q23, q24],
                      [q31, q32, q33, q34],
                      [0. , 0. , 0. , 1. ]])
@@ -539,8 +539,8 @@ def rotate_points_with_quaternion(quat, points):
     Properties Used:
     N/A
     """     
-    vectors = np.array([points[0],points[1],points[2],np.ones(len(points[0]))]).T
-    x_primes, y_primes, z_primes = np.sum(quat[0]*vectors, axis=1), np.sum(quat[1]*vectors, axis=1), np.sum(quat[2]*vectors, axis=1)
+    vectors = rp.array([points[0],points[1],points[2],rp.ones(len(points[0]))]).T
+    x_primes, y_primes, z_primes = rp.sum(quat[0]*vectors, axis=1), rp.sum(quat[1]*vectors, axis=1), rp.sum(quat[2]*vectors, axis=1)
     return x_primes, y_primes, z_primes
     
     

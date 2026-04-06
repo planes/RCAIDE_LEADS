@@ -13,8 +13,8 @@ from RCAIDE.Framework.Core    import Units ,  Data
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.compute_distributor_center_of_gravity import compute_distributor_center_of_gravity
 
 # python imports 
-import  numpy as  np
-from copy import deepcopy
+import RNUMPY as rp
+
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Propulsion Systems Weight 
@@ -171,7 +171,7 @@ def compute_nacelle_weight(ref_propulsor,ref_nacelle,NENG):
         Properties Used:
             N/A
     """ 
-    TNAC   = NENG + 0.5 * (NENG - 2 * np.floor(NENG / 2.))
+    TNAC   = NENG + 0.5 * (NENG - 2 * rp.floor(NENG / 2.))
     DNAC   = ref_nacelle.diameter / Units.ft
     XNAC   = ref_nacelle.length / Units.ft
     FTHRST = ref_propulsor.sealevel_static_thrust * 1 / Units.lbf
@@ -198,7 +198,7 @@ def compute_thrust_reverser_weight(ref_propulsor,NENG):
         Properties Used:
             N/A
     """ 
-    TNAC = NENG + 1. / 2 * (NENG - 2 * np.floor(NENG / 2.))
+    TNAC = NENG + 1. / 2 * (NENG - 2 * rp.floor(NENG / 2.))
     THRUST = ref_propulsor.sealevel_static_thrust * 1 / Units.lbf
     WTHR = 0.034 * THRUST * TNAC
     return WTHR * Units.lbs

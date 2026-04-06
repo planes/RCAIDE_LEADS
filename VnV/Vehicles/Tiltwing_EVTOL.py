@@ -15,7 +15,7 @@ from RCAIDE.load    import load as load_propulsor
 from RCAIDE.save    import save as save_propulsor
  
 import os
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy 
 
 def vehicle_setup(new_regression=True): 
@@ -295,10 +295,10 @@ def vehicle_setup(new_regression=True):
     prop_rotor.number_of_blades                   = 3
     prop_rotor.hover.design_altitude              = 40 * Units.feet   
     prop_rotor.hover.design_thrust                = Hover_Load/8 
-    prop_rotor.hover.design_freestream_velocity   = np.sqrt(prop_rotor.hover.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))  
+    prop_rotor.hover.design_freestream_velocity   = rp.sqrt(prop_rotor.hover.design_thrust/(2*1.2*rp.pi*(prop_rotor.tip_radius**2)))  
     prop_rotor.oei.design_altitude                = 40 * Units.feet  
     prop_rotor.oei.design_thrust                  = Hover_Load/7  
-    prop_rotor.oei.design_freestream_velocity     = np.sqrt(prop_rotor.oei.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))   
+    prop_rotor.oei.design_freestream_velocity     = rp.sqrt(prop_rotor.oei.design_thrust/(2*1.2*rp.pi*(prop_rotor.tip_radius**2)))   
     prop_rotor.cruise.design_altitude             = 1500 * Units.feet
     prop_rotor.cruise.design_thrust               = 500#200    
     prop_rotor.cruise.design_freestream_velocity  = 150.* Units['mph']  #130.* Units['mph']  

@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 import sys, os
-import numpy as np
+import RNUMPY as rp
 import time
 
 import RCAIDE
@@ -44,11 +44,11 @@ def main():
     # #####################################################################################################
         
     truth_values = {
-        "range": np.array([0., 10548232.68, 17639207.32, 18364357.92]),
-        "payload": np.array([44000.        , 44000.        ,  10373.47,     0.        ]),
-        "oew_plus_payload": np.array([ 160233.53, 160233.53, 126607.        , 116233.53]),
-        "fuel": np.array([     0.        ,  67696.47, 101323.        , 101323.        ]),
-        "takeoff_weight": np.array([     0.        , 227930.        , 227930.        , 217556.53]),
+        "range": rp.array([0., 10548232.68, 17639207.32, 18364357.92]),
+        "payload": rp.array([44000.        , 44000.        ,  10373.47,     0.        ]),
+        "oew_plus_payload": rp.array([ 160233.53, 160233.53, 126607.        , 116233.53]),
+        "fuel": rp.array([     0.        ,  67696.47, 101323.        , 101323.        ]),
+        "takeoff_weight": rp.array([     0.        , 227930.        , 227930.        , 217556.53]),
     }
     # ########################################### WARNING #################################################
     ###### DO NOT CHANGE THESE VALUES WITHOUT CONSULTING THE AIRPORT PLANNING MANUAL FIRST ################
@@ -59,13 +59,13 @@ def main():
             
     # Tolerance checks
     for key in truth_values:
-        denom = np.atleast_1d(truth_values[key])
-        numer = np.abs(np.atleast_1d(payload_range_results[key]) - denom)
+        denom = rp.atleast_1d(truth_values[key])
+        numer = rp.abs(rp.atleast_1d(payload_range_results[key]) - denom)
 
         # Avoid division by zero
-        with np.errstate(divide='ignore', invalid='ignore'):
-            rel_error = np.where(denom != 0, numer / denom, 0.0)
-            error = np.max(rel_error)
+        with rp.errstate(divide='ignore', invalid='ignore'):
+            rel_error = rp.where(denom != 0, numer / denom, 0.0)
+            error = rp.max(rel_error)
 
         assert error < 2e-2, f"{key} error too large: {error}"
     tf                   = time.time()

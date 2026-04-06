@@ -12,7 +12,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Data, Units  
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt
 
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -160,12 +160,12 @@ def generate_V_n_diagram(vehicle,analyses,altitude = 0,delta_ISA = 0):
     wing_loading      = weight / reference_area
     Vc                = Vc / Units['ft/s']
     
-    load_factors_pos    = np.zeros(shape=(5));
-    load_factors_neg    = np.zeros(shape=(5));
+    load_factors_pos    = rp.zeros(shape=(5));
+    load_factors_neg    = rp.zeros(shape=(5));
     load_factors_pos[1] =  1;
     load_factors_neg[1] = -1;
-    airspeeds_pos       = np.zeros(shape=(5));
-    airspeeds_neg       = np.zeros(shape=(5))
+    airspeeds_pos       = rp.zeros(shape=(5));
+    airspeeds_neg       = rp.zeros(shape=(5))
         
     # --------------------------------------------------
     # Establish limit maneuver load factors n+ and n- 
@@ -298,7 +298,7 @@ def generate_V_n_diagram(vehicle,analyses,altitude = 0,delta_ISA = 0):
             
         # Minimum Cruise speed Vc_min
         coefs = [1, -Uref_cruise * (2.64 + (Kg * CLa * airspeeds_pos[1]**2)/(498 * wing_loading)), 1.72424 * Uref_cruise**2 - airspeeds_pos[1]**2]
-        Vc1   = max(np.roots(coefs))
+        Vc1   = max(rp.roots(coefs))
         
     elif FAR_part_number == '23':           
         if altitude < 20000:
@@ -397,8 +397,8 @@ def generate_V_n_diagram(vehicle,analyses,altitude = 0,delta_ISA = 0):
     # Finalize the load factors for acrobatic and utility aircraft
     #----------------------------------------------------------------
     if category_tag == 'acrobatic' or category_tag == 'utility':
-        V_n_data.airspeeds.negative    = np.append(V_n_data.airspeeds.negative, Vd)
-        V_n_data.load_factors.negative = np.append(V_n_data.load_factors.negative, 0)
+        V_n_data.airspeeds.negative    = rp.append(V_n_data.airspeeds.negative, Vd)
+        V_n_data.load_factors.negative = rp.append(V_n_data.load_factors.negative, 0)
 
     # ----------------------------------------------
     # Post-processing the V-n diagram
@@ -665,14 +665,14 @@ def stall_line(V_n_data, upper_bound, lower_bound, Num_of_points, sign_flag):
     delta = (airspeeds[upper_bound] - airspeeds[lower_bound]) / (Num_of_points + 1)     # Step size
     for i in range(Num_of_points):       
         coef      = lower_bound + i + 1
-        airspeeds = np.concatenate((airspeeds[:coef], [airspeeds[lower_bound] + (i + 1) * delta], airspeeds[coef:]))
+        airspeeds = rp.concatenate((airspeeds[:coef], [airspeeds[lower_bound] + (i + 1) * delta], airspeeds[coef:]))
         Vtas      = airspeeds[coef] / density_ratio * Units.knots / Units['ft/s']      
         if load_factors[1] > 0:
             nl = 0.5 * rho * Vtas**2 * reference_area * lift_coefficient / weight
         else:
             nl = -0.5 * rho * Vtas**2 * reference_area * abs(lift_coefficient) / weight
             
-        load_factors = np.concatenate((load_factors[:coef], [nl], load_factors[coef:]))
+        load_factors = rp.concatenate((load_factors[:coef], [nl], load_factors[coef:]))
 
     # Pack
     if sign_flag == 1:
@@ -762,7 +762,7 @@ def gust_loads(category_tag, V_n_data, Kg, CLa, Num_of_points, FAR_part_number, 
         Uref_dive        = -V_n_data.gust_data.airspeeds.dive_gust
         
 
-    gust_load_factors    = np.zeros(shape=(4));    
+    gust_load_factors    = rp.zeros(shape=(4));    
     gust_load_factors[0] = 1;
     
     # Cruise speed Gust loads at Va and Vc
@@ -773,11 +773,11 @@ def gust_loads(category_tag, V_n_data, Kg, CLa, Num_of_points, FAR_part_number, 
     if abs(gust_load_factors[1]) > abs(limit_load):
         sea_level_rho      = density / density_ratio**2
         coefs              = [709.486 * sea_level_rho * lift_coefficient, -Kg * Uref_rough * CLa, -498 * wing_loading]
-        V_inters           = max(np.roots(coefs))
+        V_inters           = max(rp.roots(coefs))
         load_factor_inters = 1 + Kg * CLa * V_inters * Uref_rough / (498 * wing_loading)
 
-        airspeeds    = np.concatenate((airspeeds[:(Num_of_points + 3)], [V_inters], airspeeds[(Num_of_points + 3):]))
-        load_factors = np.concatenate((load_factors[:(Num_of_points + 3)], [load_factor_inters], load_factors[(Num_of_points + 3):]))
+        airspeeds    = rp.concatenate((airspeeds[:(Num_of_points + 3)], [V_inters], airspeeds[(Num_of_points + 3):]))
+        load_factors = rp.concatenate((load_factors[:(Num_of_points + 3)], [load_factor_inters], load_factors[(Num_of_points + 3):]))
 
         # Pack
         if sign_flag == 1:
@@ -815,21 +815,21 @@ def gust_loads(category_tag, V_n_data, Kg, CLa, Num_of_points, FAR_part_number, 
         
         # insert the cruise speed Vc in the positive load factor line
         if load_factors[1] > 0:
-            airspeeds    = np.concatenate((airspeeds[:(Num_of_points + 3)], [Vc], airspeeds[(Num_of_points + 3):]))
-            load_factors = np.concatenate((load_factors[:(Num_of_points + 3)], [gust_load_factors[2]], \
+            airspeeds    = rp.concatenate((airspeeds[:(Num_of_points + 3)], [Vc], airspeeds[(Num_of_points + 3):]))
+            load_factors = rp.concatenate((load_factors[:(Num_of_points + 3)], [gust_load_factors[2]], \
                                            load_factors[(Num_of_points + 3):]))
 
     # Intersection between cruise gust load and maximum load at Vc
     elif abs(gust_load_factors[2]) > abs(limit_load):
         V_inters      = 498 * (load_factors[Num_of_points + 2] - 1) * wing_loading / (Kg * Uref_cruise * CLa)
-        airspeeds     = np.concatenate((airspeeds[:(Num_of_points + 3)], [V_inters], airspeeds[(Num_of_points + 3):]))
-        load_factors  = np.concatenate((load_factors[:(Num_of_points + 3)], [limit_load], \
+        airspeeds     = rp.concatenate((airspeeds[:(Num_of_points + 3)], [V_inters], airspeeds[(Num_of_points + 3):]))
+        load_factors  = rp.concatenate((load_factors[:(Num_of_points + 3)], [limit_load], \
                                        load_factors[(Num_of_points + 3):]))
         Num_of_points = Num_of_points + 1
 
         if load_factors[1] > 0:
-            airspeeds    = np.concatenate((airspeeds[:(Num_of_points + 3)], [Vc], airspeeds[(Num_of_points + 3):]))
-            load_factors = np.concatenate((load_factors[:(Num_of_points + 3)], [gust_load_factors[2]], \
+            airspeeds    = rp.concatenate((airspeeds[:(Num_of_points + 3)], [Vc], airspeeds[(Num_of_points + 3):]))
+            load_factors = rp.concatenate((load_factors[:(Num_of_points + 3)], [gust_load_factors[2]], \
                                            load_factors[(Num_of_points + 3):]))
         else:
             load_factors[len(airspeeds)-2] = gust_load_factors[2]
@@ -850,9 +850,9 @@ def gust_loads(category_tag, V_n_data, Kg, CLa, Num_of_points, FAR_part_number, 
     # Resolve the lower half of the dive section
     else:
         if gust_load_factors[3] < load_factors[len(load_factors) - 1]:
-            airspeeds    = np.concatenate((airspeeds[:(len(load_factors) - 1)], [airspeeds[(len(load_factors) - 1)]], \
+            airspeeds    = rp.concatenate((airspeeds[:(len(load_factors) - 1)], [airspeeds[(len(load_factors) - 1)]], \
                                            airspeeds[(len(load_factors) - 1):]))
-            load_factors = np.concatenate((load_factors[:(len(load_factors) - 1)], [gust_load_factors[3]], \
+            load_factors = rp.concatenate((load_factors[:(len(load_factors) - 1)], [gust_load_factors[3]], \
                                            load_factors[(len(load_factors) - 1):]))
             
             if abs(gust_load_factors[2]) > abs(limit_load):
@@ -866,14 +866,14 @@ def gust_loads(category_tag, V_n_data, Kg, CLa, Num_of_points, FAR_part_number, 
             V_n_data.limit_loads.dive.negative = load_factors[len(load_factors) - 1]
 
     # gusts load extension for gust lines at Vd
-    gust_load_factors = np.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_cruise/(498 * wing_loading))
-    gust_load_factors = np.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_dive/(498 * wing_loading))
+    gust_load_factors = rp.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_cruise/(498 * wing_loading))
+    gust_load_factors = rp.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_dive/(498 * wing_loading))
 
     # guts load extension for gust lines at Vb and Vc for a rough gust
     if category_tag == 'commuter':
-        gust_load_factors = np.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_rough/(498 * wing_loading))
+        gust_load_factors = rp.append(gust_load_factors, 1 + Kg * CLa * (1.05 * Vd) * Uref_rough/(498 * wing_loading))
     else:
-        gust_load_factors = np.append(gust_load_factors, 0)
+        gust_load_factors = rp.append(gust_load_factors, 0)
       
     # Pack
     if sign_flag == 1:
@@ -933,8 +933,8 @@ def gust_dive_speed_intersection(category_tag, load_factors, gust_load_factors, 
             load     = min(load_factors) * (V_inters - Vd) / (Vc - Vd)
 
 
-    airspeeds    = np.concatenate((airspeeds[:(element_num)], [V_inters], airspeeds[(element_num):]))
-    load_factors = np.concatenate((load_factors[:(element_num)], [load], \
+    airspeeds    = rp.concatenate((airspeeds[:(element_num)], [V_inters], airspeeds[(element_num):]))
+    load_factors = rp.concatenate((load_factors[:(element_num)], [load], \
                                         load_factors[(element_num):]))    
 
     return airspeeds, load_factors

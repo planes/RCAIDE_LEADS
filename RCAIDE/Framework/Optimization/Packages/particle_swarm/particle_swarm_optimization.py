@@ -7,8 +7,7 @@
 # ----------------------------------------------------------------------
 
 # RCAIDE imports
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
   
 def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(), kwargs={}, 
         swarmsize=100, omega=0.5, phip=0.5, phig=0.5, maxiter=100, 
@@ -81,11 +80,11 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
     
     assert len(lb)==len(ub), 'Lower- and upper-bounds must be the same length'
     assert hasattr(func, '__call__'), 'Invalid function handle'
-    lb = np.array(lb)
-    ub = np.array(ub)
-    assert np.all(ub>lb), 'All upper-bound values must be greater than lower-bound values'
+    lb = rp.array(lb)
+    ub = rp.array(ub)
+    assert rp.all(ub>lb), 'All upper-bound values must be greater than lower-bound values'
    
-    vhigh = np.abs(ub - lb)
+    vhigh = rp.abs(ub - lb)
     vlow = -vhigh
     
     # Check for constraint function(s) #########################################
@@ -94,27 +93,27 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
         if not len(ieqcons):
             if debug:
                 print('No constraints given.')
-            cons = lambda x: np.array([0])
+            cons = lambda x: rp.array([0])
         else:
             if debug:
                 print('Converting ieqcons to a single constraint function')
-            cons = lambda x: np.array([y(x, *args, **kwargs) for y in ieqcons])
+            cons = lambda x: rp.array([y(x, *args, **kwargs) for y in ieqcons])
     else:
         if debug:
             print('Single constraint function given in f_ieqcons')
-        cons = lambda x: np.array(f_ieqcons(x, *args, **kwargs))
+        cons = lambda x: rp.array(f_ieqcons(x, *args, **kwargs))
         
     def is_feasible(x):
-        check = np.all(cons(x)>=0)
+        check = rp.all(cons(x)>=0)
         return check
         
     # Initialize the particle swarm ############################################
     S = swarmsize
     D = len(lb)  # the number of dimensions each particle has
-    x = np.random.rand(S, D)  # particle positions
-    v = np.zeros_like(x)  # particle velocities
-    p = np.zeros_like(x)  # best particle positions
-    fp = np.zeros(S)  # best particle function values
+    x = rp.random.rand(S, D)  # particle positions
+    v = rp.zeros_like(x)  # particle velocities
+    p = rp.zeros_like(x)  # best particle positions
+    fp = rp.zeros(S)  # best particle function values
     g = []  # best swarm position
     fg = 1e100  # artificial best swarm position starting value
     
@@ -140,17 +139,17 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
             g = p[i, :].copy()
        
         # Initialize the particle's velocity
-        v[i, :] = vlow + np.random.rand(D)*(vhigh - vlow)
+        v[i, :] = vlow + rp.random.rand(D)*(vhigh - vlow)
        
     # Iterate until termination criterion met ##################################
     it = 1
     while it<=maxiter:
-        rp = np.random.uniform(size=(S, D))
-        rg = np.random.uniform(size=(S, D))
+        rpv = rp.random.uniform(size=(S, D))
+        rg = rp.random.uniform(size=(S, D))
         for i in range(S):
 
             # Update the particle's velocity
-            v[i, :] = omega*v[i, :] + phip*rp[i, :]*(p[i, :] - x[i, :]) + \
+            v[i, :] = omega*v[i, :] + phip*rpv[i, :]*(p[i, :] - x[i, :]) + \
                       phig*rg[i, :]*(g - x[i, :])
                       
             # Update the particle's position, correcting lower and upper bound 
@@ -174,8 +173,8 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
                         print('New best for swarm at iteration {:}: {:} {:}'.format(it, x[i, :], fx))
 
                     tmp = x[i, :].copy()
-                    stepsize = np.sqrt(np.sum((g-tmp)**2))
-                    if np.abs(fg - fx)<=minfunc:
+                    stepsize = rp.sqrt(rp.sum((g-tmp)**2))
+                    if rp.abs(fg - fx)<=minfunc:
                         print('Stopping search: Swarm best objective change less than {:}'.format(minfunc))
                         return tmp, fx
                     elif stepsize<=minstep:

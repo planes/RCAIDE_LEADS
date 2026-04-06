@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Package imports 
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -98,7 +98,7 @@ def initialize_conditions(segment):
     # check for initial velocity
     if air_speed is None: 
         if not segment.state.initials: raise AttributeError('airspeed not set')
-        air_speed = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        air_speed = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
         
     # check for initial altitude
     if alt is None:
@@ -116,8 +116,8 @@ def initialize_conditions(segment):
         arc_sector = 0.0 # aircraft does not turn    
 
     # dimensionalize time
-    v_body_x    = np.cos(beta)*air_speed # x-velocity in the body frame. 
-    v_body_y    = np.sin(beta)*air_speed # y-velocity in the body frame
+    v_body_x    = rp.cos(beta)*air_speed # x-velocity in the body frame. 
+    v_body_y    = rp.sin(beta)*air_speed # y-velocity in the body frame
     t_initial   = conditions.frames.inertial.time[0,0]
     omega       = v_body_x / radius
     t_final     = abs(arc_sector) / omega + t_initial  # Time to complete the turn
@@ -126,8 +126,8 @@ def initialize_conditions(segment):
     
     true_course_control_points = start_true_course + t_nondim * arc_sector
     
-    v_inertial_x = air_speed * np.cos(true_course_control_points)
-    v_inertial_y = air_speed * np.sin(true_course_control_points)
+    v_inertial_x = air_speed * rp.cos(true_course_control_points)
+    v_inertial_y = air_speed * rp.sin(true_course_control_points)
     
     # pack
     segment.state.conditions.freestream.altitude[:,0]                 = alt

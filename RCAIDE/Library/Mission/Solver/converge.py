@@ -14,7 +14,8 @@ from RCAIDE.Framework.Analyses.Process            import Process
 
 import scipy 
 import scipy.optimize
-import numpy as np 
+import RNUMPY as rp 
+import numpy as np
 import sys 
 import os 
 
@@ -125,7 +126,7 @@ def iterate_root_finder(unknowns, segment):
     Properties Used:
     N/A
     """       
-    if isinstance(unknowns,np.ndarray):
+    if isinstance(unknowns,rp.ndarray):
         segment.state.unknowns.unpack_array(unknowns)
     else:
         segment.state.unknowns = unknowns
@@ -196,51 +197,56 @@ def add_mission_variables(segment):
     full_lower_bound_vals = Data()
     for unkn in unknown_keys: 
         full_unkn_vals[unkn]  = segment.state.unknowns[unkn]
-        full_lower_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
-        full_upper_bound_vals[unkn] = np.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
+        full_lower_bound_vals[unkn] = rp.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
+        full_upper_bound_vals[unkn] = rp.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
 
-    # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
+    # Step 2.2: Construct nexus format  : [Variable_###, initial, -rp.inf, rp.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
-    input_len_strings = np.tile('Variable_', len_inputs)
-    input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
-    input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
+    input_len_strings = rp.tile('Variable_', len_inputs)
+    input_numbers     = rp.linspace(1,len_inputs,len_inputs,dtype=rp.int16)
+    input_names       = np.core.defchararray.add(input_len_strings,rp.array(input_numbers+input_count).astype(str))
     lower_bounds      = full_lower_bound_vals.pack_array()
     upper_bounds      = full_upper_bound_vals.pack_array()     
-    units             = np.broadcast_to(Units.less,(len_inputs,))
-    new_inputs        = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None,None])),len_inputs), (-1, 6))
-    
+    units             = rp.broadcast_to(Units.less,(len_inputs,))
     # scaling factor for optimizer 
-    factor = np.ceil(np.log10(abs(initial_values)))
-    factor[np.isinf(factor)] = 0
+    factor = rp.ceil(rp.log10(abs(initial_values)))
+    factor[rp.isinf(factor)] = 0
     scale  = 10 ** (factor)
     
     # Step 2.4 Add in the inputs 
-    new_inputs[:,0]     = input_names   
-    new_inputs[:,1]     = initial_values 
-    new_inputs[:,2]     = lower_bounds   
-    new_inputs[:,3]     = upper_bounds  
-    new_inputs[:,4]     = scale
-    new_inputs[:,5]     = units 
-    optimization_problem.inputs = np.array(new_inputs,dtype=object)
+    optimization_problem.inputs = Data()
+    optimization_problem.inputs.name = input_names
+    
+    new_inputs_value = rp.zeros((len_inputs, 5))
+    new_inputs_value[:,0] = rp.ravel(initial_values)
+    new_inputs_value[:,1] = rp.ravel(lower_bounds)
+    new_inputs_value[:,2] = rp.ravel(upper_bounds)
+    new_inputs_value[:,3] = rp.ravel(scale)
+    new_inputs_value[:,4] = rp.ravel(units)
+    optimization_problem.inputs.value = rp.array(new_inputs_value, dtype=rp.float32)
     
     # Step 3: Constraints 
     # Step 3.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
-    new_con = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None])),len_residuals), (-1, 5))  
     con_count       = 0
-    con_len_strings = np.tile('Residual_', len_residuals)
-    con_numbers     = np.linspace(1,len_residuals,len_residuals,dtype=np.int16)
-    con_names       = np.core.defchararray.add(con_len_strings,np.array(con_numbers+con_count).astype(str))
-    equals          = np.broadcast_to('=',(len_residuals,))
-    zeros           = np.zeros(len_residuals)
-    ones            = np.ones(len_residuals)
+    con_len_strings = rp.tile('Residual_', len_residuals)
+    con_numbers     = rp.linspace(1,len_residuals,len_residuals,dtype=rp.int16)
+    con_names       = np.core.defchararray.add(con_len_strings,rp.array(con_numbers+con_count).astype(str))
+    equals          = rp.broadcast_to('=',(len_residuals,))
+    zeros           = rp.zeros(len_residuals)
+    ones            = rp.ones(len_residuals)
     
     # Step 3.2 Add in the new constraints
-    new_con[:,0]    = con_names
-    new_con[:,1]    = equals
-    new_con[:,2]    = zeros  
-    new_con[:,3]    = ones
-    new_con[:,4]    = 1*Units.less
-    optimization_problem.constraints =  np.array(new_con,dtype=object)            
+    optimization_problem.constraints = Data()
+    new_con_name_signs = rp.empty((len_residuals, 2), dtype=object)
+    new_con_name_signs[:,0] = con_names
+    new_con_name_signs[:,1] = equals
+    optimization_problem.constraints.name_signs = new_con_name_signs
+    
+    new_con_value = rp.zeros((len_residuals, 3))
+    new_con_value[:,0] = zeros
+    new_con_value[:,1] = ones
+    new_con_value[:,2] = 1*Units.less
+    optimization_problem.constraints.value = rp.array(new_con_value, dtype=rp.float32)            
     
     # Step 4. Aliases 
     # Step 4.1: Setup the aliases for the inputs
@@ -248,41 +254,41 @@ def add_mission_variables(segment):
     input_string = []
 
     if ground_seg_flag:       
-        output_numbers = np.linspace(0,n_points-2,n_points-1,dtype=np.int16)
-        basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
-        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str)))
-        input_string        = np.array(input_string[0])
-        input_string        = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1))
-        input_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        output_numbers = rp.linspace(0,n_points-2,n_points-1,dtype=rp.int16)
+        basic_string_con[unknown_keys[1]] = rp.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
+        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],rp.array(output_numbers).astype(str)))
+        input_string        = rp.array(input_string[0])
+        input_string        = np.core.defchararray.add(input_string, rp.tile(']',len_inputs-1))
+        input_aliases       = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
         input_aliases[0,1]  = 'segment.state.unknowns.'+unknown_keys[0] 
         input_aliases[1:,1] = input_string 
         
     elif single_pt_seg:  
         for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
-        input_string       = np.ravel(input_string)
-        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+            basic_string_con[unkn] = rp.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],rp.array([0]).astype(str)))
+        input_string       = rp.ravel(input_string)
+        input_string       = np.core.defchararray.add(input_string, rp.tile(']',len_inputs))
+        input_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string    
     else:  
-        output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
+        output_numbers = rp.linspace(0,n_points-1,n_points,dtype=rp.int16) 
         for unkn in unknown_keys:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
-        input_string       = np.ravel(input_string)
-        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+            basic_string_con[unkn] = rp.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],rp.array(output_numbers).astype(str)))
+        input_string       = rp.ravel(input_string)
+        input_string       = np.core.defchararray.add(input_string, rp.tile(']',len_inputs))
+        input_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string
     
     # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_residuals)
-    residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
-    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
-    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
+    basic_string_res      = rp.tile('segment.state.residuals.pack_array()[', len_residuals)
+    residual_string       = np.core.defchararray.add(basic_string_res,rp.array(con_numbers-1).astype(str))
+    residual_string       = np.core.defchararray.add(residual_string, rp.tile(']',len_residuals))
+    residual_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_residuals), (-1, 2)) 
     residual_aliases[:,0] = con_names
     residual_aliases[:,1] = residual_string
         
@@ -296,13 +302,19 @@ def add_mission_variables(segment):
     # Step 5: Objective function
     if segment.state.numerics.solver.objective == None:     
         aliases.append([ 'nothing'                   , 'postprocess.nothing']) 
-        optimization_problem.objective = np.array([ [  'nothing'  ,  1   ,    1*Units.less]  ],dtype=object)            
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = rp.array([['nothing']], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
-        optimization_problem.objective = np.array([ [  'energy_consumed'  ,  1   ,    1*Units.less]  ],dtype=object)            
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = rp.array(['energy_consumed'], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
-        optimization_problem.objective = np.array([ [  'maximum_power'  ,  1   ,    1*Units.less]  ],dtype=object)   
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = rp.array(['maximum_power'], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     else:
         raise Exception('undefined objective function')
     
@@ -341,7 +353,7 @@ def iterate_optimizer(nexus):
     segment = nexus.segment
      
     unknowns = segment.state.unknowns.pack_array()
-    if isinstance(unknowns,np.ndarray):
+    if isinstance(unknowns,rp.ndarray):
         segment.state.unknowns.unpack_array(unknowns)
     else:
         segment.state.unknowns = unknowns
@@ -360,7 +372,7 @@ def segment_post_process(nexus):
     I          = nexus.segment.state.numerics.time.integrate
     
     # compute max power of segment 
-    max_power  = np.max(nexus.segment.state.conditions.energy.power)
+    max_power  = rp.max(nexus.segment.state.conditions.energy.power)
     
     # compute total energy consumed 
     if (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
@@ -369,7 +381,7 @@ def segment_post_process(nexus):
                     (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle): 
         energy_consumed =  0
     else:
-        energy_consumed = np.dot(I,power)[-1][0]
+        energy_consumed = rp.dot(I,power)[-1][0]
     
     postprocess                 = nexus.postprocess
     postprocess.maximum_power   = max_power

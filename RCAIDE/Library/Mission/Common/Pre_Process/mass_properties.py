@@ -328,9 +328,9 @@ def mass_properties_preprocess_routine(segment, i = 0):
                     print("-" * 40)
                     for item, value in data.items():
                         if item != 'total':
-                            print(f"{item.replace('_', ' ').title():<25}{value:>15.2f}")
+                            print(f"{item.replace('_', ' ').title():<25}{float(value):>15.2f}")
                     print("-" * 40)
-                    print(f"{'Total':<25}{data.get('total', 0):>15.2f}\n")
+                    print(f"{'Total':<25}{float(data.get('total', 0)):>15.2f}\n")
 
                 print("\n=== WEIGHT BREAKDOWN REPORT ===\n")
 
@@ -352,11 +352,11 @@ def mass_properties_preprocess_routine(segment, i = 0):
                 print("Overall Summary:")
                 print(f"{'Metric':<25}{'Weight (kg)':>15}")
                 print("-" * 40)
-                print(f"{'Operating Empty Weight':<25}{analyses.vehicle.mass_properties.operating_empty:>15.2f}")
+                print(f"{'Operating Empty Weight':<25}{float(analyses.vehicle.mass_properties.operating_empty):>15.2f}")
                 print(f"{'Payload Weight':<25}{analyses.vehicle.mass_properties.payload:>15.2f}")
-                print(f"{'Fuel Weight':<25}{analyses.vehicle.mass_properties.fuel:>15.2f}")
-                print(f"{'Takeoff Weight':<25}{analyses.vehicle.mass_properties.takeoff:>15.2f}")
-                print(f"{'Zero Fuel Weight':<25}{analyses.vehicle.mass_properties.weight_breakdown.get('zero_fuel_weight', 0):>15.2f}")
+                print(f"{'Fuel Weight':<25}{float(analyses.vehicle.mass_properties.fuel):>15.2f}")
+                print(f"{'Takeoff Weight':<25}{float(analyses.vehicle.mass_properties.takeoff):>15.2f}")
+                print(f"{'Zero Fuel Weight':<25}{float(analyses.vehicle.mass_properties.weight_breakdown.get('zero_fuel_weight', 0)):>15.2f}")
                 print(f"{'Max Takeoff Weight':<25}{analyses.vehicle.mass_properties.max_takeoff:>15.2f}")
                 print("\n===============================\n") 
             

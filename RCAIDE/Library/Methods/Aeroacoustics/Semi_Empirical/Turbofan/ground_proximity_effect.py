@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
  
 # Python package imports   
-import numpy as np   
+import RNUMPY as rp   
 
 # ----------------------------------------------------------------------------------------------------------------------     
 #  Ground Proximity Effect
@@ -52,8 +52,8 @@ def ground_proximity_effect(Velocity_mixed, sound_ambient, theta_m, engine_heigh
     [2] de Almeida, Odenir. "Semi-empirical methods for coaxial jet noise prediction." (2008). (adapted)
     """ 
     # Ground proximity is applied only for the mixed jet component
-    GPROX_m = (5*Velocity_mixed/sound_ambient)*np.exp(-(9*(theta_m/np.pi)-6.75)**2- \
-        ((engine_height/Diameter_mixed)-2.5)**2)*(1+(np.sin((np.pi*engine_height*frequency/sound_ambient)-np.pi/2))**2)/ \
-        (2+np.abs((engine_height*frequency/sound_ambient)-1))
+    GPROX_m = (5*Velocity_mixed/sound_ambient)*rp.exp(-(9*(theta_m/rp.pi)-6.75)**2- \
+        ((engine_height/Diameter_mixed)-2.5)**2)*(1+(rp.sin((rp.pi*engine_height*frequency/sound_ambient)-rp.pi/2))**2)/ \
+        (2+rp.abs((engine_height*frequency/sound_ambient)-1))
 
     return GPROX_m

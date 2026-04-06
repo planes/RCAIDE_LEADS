@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Update Acceleration
@@ -37,7 +37,7 @@ def kinematics(segment):
     D = segment.state.numerics.time.differentiate
     
     # accelerations
-    acc = np.dot(D,v)
+    acc = rp.dot(D,v)
     
     # pack conditions
     segment.state.conditions.frames.inertial.acceleration_vector[:,:] = acc[:,:]   

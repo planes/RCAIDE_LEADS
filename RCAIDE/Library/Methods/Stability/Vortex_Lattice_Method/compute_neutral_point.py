@@ -10,7 +10,7 @@ from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method.VLM   import VLM
 from copy import deepcopy 
 
 # package imports
-import numpy  as np
+import RNUMPY as rp
 from scipy.optimize import minimize 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -71,12 +71,12 @@ def compute_neutral_point(stability, vehicle):
     len_Mach       = len(Mach)        
     len_AoA        = len(AoA)
      
-    AoAs                                            = np.atleast_2d(np.tile(AoA,len_Mach).T.flatten()).T 
-    Machs                                           = np.atleast_2d(np.repeat(Mach,len_AoA)).T      
+    AoAs                                            = rp.atleast_2d(rp.tile(AoA,len_Mach).T.flatten()).T 
+    Machs                                           = rp.atleast_2d(rp.repeat(Mach,len_AoA)).T      
     conditions                                      = RCAIDE.Framework.Mission.Common.Results() 
     conditions.freestream.mach_number               = Machs
-    conditions.freestream.velocity                  = np.ones_like(Machs) * 1e-6
-    conditions.aerodynamics.angles.alpha            = np.ones_like(Machs)*AoAs  
+    conditions.freestream.velocity                  = rp.ones_like(Machs) * 1e-6
+    conditions.aerodynamics.angles.alpha            = rp.ones_like(Machs)*AoAs  
     
     # --------------------------------------------------------------------------------------------------------------
     # Neutral Point 
@@ -139,7 +139,7 @@ def neutral_point_objective(cg_location,conditions,settings,clean_wing_vehicle_n
     
     AoA       = conditions.aerodynamics.angles.alpha
     CM_res    = VLM_results.CM
-    CM        = np.reshape(CM_res,(len_Mach,len_AoA)).T 
+    CM        = rp.reshape(CM_res,(len_Mach,len_AoA)).T 
     
     # compute dCM_dalpha 
     dCM_dalpha = ( CM[2, 0] - CM[1, 0]) /( AoA[2] - AoA[1])

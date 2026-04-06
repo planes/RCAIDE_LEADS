@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------
 #  Imports
 # ---------------------------------------------------------------------- 
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------
 #  Methods
@@ -152,16 +152,16 @@ def cross_flow_hex_rating_model(HEX,state,bus,coolant_line, delta_t,t_idx):
         h_h = j_h * G_h * c_p_h / (Pr_h**(2/3))
         h_c = j_c * G_c * c_p_c / (Pr_c**(2/3))
     
-        m_f_h = (np.sqrt((2*h_h)/(fin_conductivity*delta_h)))*np.sqrt(1+(delta_h/l_s_h))
-        m_f_c = (np.sqrt((2*h_c)/(fin_conductivity*delta_c)))*np.sqrt(1+(delta_c/l_s_c))
+        m_f_h = (rp.sqrt((2*h_h)/(fin_conductivity*delta_h)))*rp.sqrt(1+(delta_h/l_s_h))
+        m_f_c = (rp.sqrt((2*h_c)/(fin_conductivity*delta_c)))*rp.sqrt(1+(delta_c/l_s_c))
     
     
         l_f_h = b_h / 2 - delta_h
         l_f_c = b_c / 2 - delta_c
     
         # Fin Efficiency
-        eta_f_h = np.tanh(m_f_h * l_f_h) / (m_f_h * l_f_h)
-        eta_f_c = np.tanh(m_f_c * l_f_c) / (m_f_c * l_f_c)
+        eta_f_h = rp.tanh(m_f_h * l_f_h) / (m_f_h * l_f_h)
+        eta_f_c = rp.tanh(m_f_c * l_f_c) / (m_f_c * l_f_c)
     
         # Overall Efficiency 
         eta_o_h = 1 - (1 - eta_f_h) * Af_A_h
@@ -185,7 +185,7 @@ def cross_flow_hex_rating_model(HEX,state,bus,coolant_line, delta_t,t_idx):
         NTU            = UA/C_min
     
         # Updated effectiveness and we neglect longitudnal conduction for now 
-        eff_hex_updated= (1 - np.exp(((NTU**0.22)/C_r)*(np.exp(-C_r*(NTU**(0.78))) - 1 ))) 
+        eff_hex_updated= (1 - rp.exp(((NTU**0.22)/C_r)*(rp.exp(-C_r*(NTU**(0.78))) - 1 ))) 
     
         # Heat trannsfer rate
         q             = eff_hex*(T_i_h-T_i_c)*C_min
@@ -243,20 +243,20 @@ def cross_flow_hex_rating_model(HEX,state,bus,coolant_line, delta_t,t_idx):
         T_w = (T_m_h + (R_h / R_c) * T_m_c) / (1 + R_h / R_c)
     
         # Considering temperature at wall effecting f value of 0.81 changes
-        f_h_wall = f_h * np.power(((T_w + 273) / (273 + T_m_h)), 0.81)
-        f_c_wall = f_c * np.power(((T_w + 273) / (273 + T_m_c)), 1)
+        f_h_wall = f_h * rp.power(((T_w + 273) / (273 + T_m_h)), 0.81)
+        f_c_wall = f_c * rp.power(((T_w + 273) / (273 + T_m_c)), 1)
     
         # Calculate Pressure Drop
     
-        delta_p_c.append(np.power(G_c, 2) / (2 * rho_c_i) * ((1 - np.power(sigma_c, 2) + k_c_c)
+        delta_p_c.append(rp.power(G_c, 2) / (2 * rho_c_i) * ((1 - rp.power(sigma_c, 2) + k_c_c)
                                                            + 2 * (rho_c_i / rho_c_o - 1) + f_c_wall * 4 * L_c / d_h_c *
                                                                    rho_c_i / rho_c_m
-                                                                 - (1 - np.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o))
+                                                                 - (1 - rp.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o))
     
-        delta_p_h.append(np.power(G_h, 2) / (2 * rho_h_i) * ((1 - np.power(sigma_h, 2) + k_c_h)
+        delta_p_h.append(rp.power(G_h, 2) / (2 * rho_h_i) * ((1 - rp.power(sigma_h, 2) + k_c_h)
                                                            + 2 * (rho_h_i / rho_h_o - 1) + f_h_wall * 4 * L_h / d_h_h *
                                                                    rho_h_i / rho_h_m
-                                                                    - (1 - np.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o))   
+                                                                    - (1 - rp.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o))   
     
         if iteraion_counter_1 >=1:
             residual_pressure    = [abs(delta_p_c[iteraion_counter_1]-delta_p_c[iteraion_counter_1-1]),abs(delta_p_h[iteraion_counter_1]-delta_p_h[iteraion_counter_1-1])]

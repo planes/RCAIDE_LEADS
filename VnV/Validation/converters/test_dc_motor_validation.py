@@ -10,7 +10,7 @@ import RCAIDE
 from   RCAIDE.Library.Methods.Powertrain                  import setup_operating_conditions 
 from   RCAIDE.Library.Methods.Powertrain.Converters       import Motor
 import matplotlib.pyplot as plt
-import numpy as np
+import RNUMPY as rp
 
 #----------------------------------------------------------------------
 #   Reference Values
@@ -25,7 +25,7 @@ def main():
 
     plot_flag = False
 
-    motor_current       = np.linspace(0, 48, 20) # [A]
+    motor_current       = rp.linspace(0, 48, 20) # [A]
     motor_rpm_vector    = []                     # [rpm]
     motor_torque_vector = []                     # [kgfcm]
 
@@ -55,7 +55,7 @@ def main():
         Motor.compute_motor_performance(motor,operating_state.conditions)       
     
         # Extract results
-        motor_rpm_vector.append(motor_conditions.outputs.omega[0][0]*(60/(2*np.pi)))    # [rpm]
+        motor_rpm_vector.append(motor_conditions.outputs.omega[0][0]*(60/(2*rp.pi)))    # [rpm]
         motor_torque_vector.append(motor_conditions.outputs.torque[0][0]*10.1971621298) # [kgfcm]
         
     # Literature values
@@ -67,7 +67,7 @@ def main():
     # Plot results
     plot_power_and_torque(x_current, y_current, x_rpm, y_rpm, motor_torque_vector, motor_current, motor_rpm_vector)
 
-    error = np.abs((motor_current[-1] - y_current[-1]) / y_current[-1]) * 100
+    error = rp.abs((motor_current[-1] - y_current[-1]) / y_current[-1]) * 100
     print("\nError in Current [%]:", error)
     assert error < 10
 

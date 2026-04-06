@@ -13,7 +13,8 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry, com
 from RCAIDE.Library.Plots import *
 
 import os
-import numpy as np
+
+import RNUMPY as rp
 import matplotlib.pyplot as plt
 
 # ----------------------------------------------------------------------
@@ -57,18 +58,18 @@ def main():
     airfoil_tc_actual = [0.12031526401402462, 0.11177619218206997, 0.11177619218206997] 
 
     # Check t/c calculation against previously calculated values  
-    assert(np.abs(airfoil_tc_actual[0]-airfoil_geometry_2.thickness_to_chord) < 1E-8 ) 
-    assert(np.abs(airfoil_tc_actual[1]-airfoil_geometry_3.thickness_to_chord) < 1E-8 ) 
-    assert(np.abs(airfoil_tc_actual[2]-airfoil_geometry_4.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[0]-airfoil_geometry_2.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[1]-airfoil_geometry_3.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[2]-airfoil_geometry_4.thickness_to_chord) < 1E-8 ) 
 
     # Check that camber line comes back the same for the Lednicer and Selig formats 
     for j in range(0, len(airfoil_geometry_3.camber_coordinates)):
-        assert( np.abs(airfoil_geometry_3.camber_coordinates[j] - airfoil_geometry_4.camber_coordinates[j]) < 1E-8 )
+        assert( rp.abs(airfoil_geometry_3.camber_coordinates[j] - airfoil_geometry_4.camber_coordinates[j]) < 1E-8 )
 
     # Multiple meshes use too much memory on AppVeyor 
     A_MASK_1 = convert_airfoil_to_meshgrid(airfoil_geometry_1) 
 
-    assert (len(np.where(A_MASK_1)[0]) == 32313) 
+    assert (len(rp.where(A_MASK_1)[0]) == 32313) 
 
     plot_airfoil(airfoil_geometry_with_selig[1])
 

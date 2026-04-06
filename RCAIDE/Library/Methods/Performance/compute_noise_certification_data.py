@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core import   Data
 from RCAIDE.Library.Methods.Aeroacoustics.Common import post_process_noise_data
  
 # Pacakge imports 
-import numpy as np 
+import RNUMPY as rp 
  
 # ----------------------------------------------------------------------
 #  Compute Aircraft Noise Certification Data  
@@ -73,9 +73,9 @@ def compute_noise_certification_data(approach_mission  = None, takeoff_mission  
     approach_pos[:,0]   -= 2000 
     
     # append takeoff noise  
-    cert_SPL_dBA_max  = np.max(np.concatenate((approach_noise_data.SPL_dBA,takeoff_noise_data.SPL_dBA), axis = 0) ,axis = 0)     
-    cert_EPNL_max     = np.max(np.concatenate((approach_noise_data.EPNL[None,:, :],takeoff_noise_data.EPNL[None,:, :]), axis = 0) ,axis = 0)                 
-    cert_pos          = np.concatenate((approach_pos, takeoff_noise_data.aircraft_position), axis = 0)     
+    cert_SPL_dBA_max  = rp.max(rp.concatenate((approach_noise_data.SPL_dBA,takeoff_noise_data.SPL_dBA), axis = 0) ,axis = 0)     
+    cert_EPNL_max     = rp.max(rp.concatenate((approach_noise_data.EPNL[None,:, :],takeoff_noise_data.EPNL[None,:, :]), axis = 0) ,axis = 0)                 
+    cert_pos          = rp.concatenate((approach_pos, takeoff_noise_data.aircraft_position), axis = 0)     
     cert_mic_locs     = takeoff_noise_data.microphone_locations 
      
     noise_data = Data(
@@ -83,13 +83,13 @@ def compute_noise_certification_data(approach_mission  = None, takeoff_mission  
         certification_trajectory          = cert_pos,     
         certification_microphone_locations= cert_mic_locs,
 
-        approach_SPL_dBA_max              = np.max(approach_noise_data.SPL_dBA,axis = 0),
+        approach_SPL_dBA_max              = rp.max(approach_noise_data.SPL_dBA,axis = 0),
         approach_SPL_dBA                  = approach_noise_data.SPL_dBA, 
         approach_time                     = approach_noise_data.time,   
         approach_trajectory               = approach_pos,     
         approach_microphone_locations     = takeoff_noise_data.microphone_locations, 
 
-        takeoff_SPL_dBA_max               = np.max(takeoff_noise_data.SPL_dBA,axis = 0),
+        takeoff_SPL_dBA_max               = rp.max(takeoff_noise_data.SPL_dBA,axis = 0),
         takeoff_SPL_dBA                   = takeoff_noise_data.SPL_dBA, 
         takeoff_time                      = takeoff_noise_data.time,   
         takeoff_trajectory                = takeoff_noise_data.aircraft_position,     

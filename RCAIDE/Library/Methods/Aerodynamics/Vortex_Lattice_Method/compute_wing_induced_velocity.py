@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     """ This computes the induced velocities at each control point of the vehicle vortex lattice 
@@ -46,39 +46,39 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     TE_ind       = VD.trailing_edge_indices
     n_cp         = VD.n_cp
     n_mach       = len(mach)
-    mach         = np.array(mach,dtype=np.float32)
+    mach         = rp.array(mach,dtype=rp.float32)
 
     # Control points from the VLM 
-    XAH   = np.array(np.atleast_2d(VD.XAH*1.),dtype=np.float32)
-    YAH   = np.array(np.atleast_2d(VD.YAH*1.),dtype=np.float32)
-    ZAH   = np.array(np.atleast_2d(VD.ZAH*1.),dtype=np.float32)
-    XBH   = np.array(np.atleast_2d(VD.XBH*1.),dtype=np.float32)
-    YBH   = np.array(np.atleast_2d(VD.YBH*1.),dtype=np.float32)
-    ZBH   = np.array(np.atleast_2d(VD.ZBH*1.),dtype=np.float32)
-    XA1   = np.array(np.atleast_2d(VD.XA1*1.),dtype=np.float32)
-    YA1   = np.array(np.atleast_2d(VD.YA1*1.),dtype=np.float32)
-    ZA1   = np.array(np.atleast_2d(VD.ZA1*1.),dtype=np.float32)
-    XB1   = np.array(np.atleast_2d(VD.XB1*1.),dtype=np.float32)
-    YB1   = np.array(np.atleast_2d(VD.YB1*1.),dtype=np.float32)
-    ZB1   = np.array(np.atleast_2d(VD.ZB1*1.),dtype=np.float32)
-    XA2   = np.array(np.atleast_2d(VD.XA2*1.),dtype=np.float32)
-    YA2   = np.array(np.atleast_2d(VD.YA2*1.),dtype=np.float32)
-    ZA2   = np.array(np.atleast_2d(VD.ZA2*1.),dtype=np.float32)
-    XB2   = np.array(np.atleast_2d(VD.XB2*1.),dtype=np.float32)
-    YB2   = np.array(np.atleast_2d(VD.YB2*1.),dtype=np.float32)
-    ZB2   = np.array(np.atleast_2d(VD.ZB2*1.),dtype=np.float32)
-    XC    = np.array(np.atleast_2d(VD.XC*1.),dtype=np.float32)
-    YC    = np.array(np.atleast_2d(VD.YC*1.),dtype=np.float32)
-    ZC    = np.array(np.atleast_2d(VD.ZC*1.),dtype=np.float32)
-    XA_TE = np.array(np.atleast_2d(VD.XA_TE*1.),dtype=np.float32)
-    XB_TE = np.array(np.atleast_2d(VD.XB_TE*1.),dtype=np.float32)
+    XAH   = rp.array(rp.atleast_2d(VD.XAH*1.),dtype=rp.float32)
+    YAH   = rp.array(rp.atleast_2d(VD.YAH*1.),dtype=rp.float32)
+    ZAH   = rp.array(rp.atleast_2d(VD.ZAH*1.),dtype=rp.float32)
+    XBH   = rp.array(rp.atleast_2d(VD.XBH*1.),dtype=rp.float32)
+    YBH   = rp.array(rp.atleast_2d(VD.YBH*1.),dtype=rp.float32)
+    ZBH   = rp.array(rp.atleast_2d(VD.ZBH*1.),dtype=rp.float32)
+    XA1   = rp.array(rp.atleast_2d(VD.XA1*1.),dtype=rp.float32)
+    YA1   = rp.array(rp.atleast_2d(VD.YA1*1.),dtype=rp.float32)
+    ZA1   = rp.array(rp.atleast_2d(VD.ZA1*1.),dtype=rp.float32)
+    XB1   = rp.array(rp.atleast_2d(VD.XB1*1.),dtype=rp.float32)
+    YB1   = rp.array(rp.atleast_2d(VD.YB1*1.),dtype=rp.float32)
+    ZB1   = rp.array(rp.atleast_2d(VD.ZB1*1.),dtype=rp.float32)
+    XA2   = rp.array(rp.atleast_2d(VD.XA2*1.),dtype=rp.float32)
+    YA2   = rp.array(rp.atleast_2d(VD.YA2*1.),dtype=rp.float32)
+    ZA2   = rp.array(rp.atleast_2d(VD.ZA2*1.),dtype=rp.float32)
+    XB2   = rp.array(rp.atleast_2d(VD.XB2*1.),dtype=rp.float32)
+    YB2   = rp.array(rp.atleast_2d(VD.YB2*1.),dtype=rp.float32)
+    ZB2   = rp.array(rp.atleast_2d(VD.ZB2*1.),dtype=rp.float32)
+    XC    = rp.array(rp.atleast_2d(VD.XC*1.),dtype=rp.float32)
+    YC    = rp.array(rp.atleast_2d(VD.YC*1.),dtype=rp.float32)
+    ZC    = rp.array(rp.atleast_2d(VD.ZC*1.),dtype=rp.float32)
+    XA_TE = rp.array(rp.atleast_2d(VD.XA_TE*1.),dtype=rp.float32)
+    XB_TE = rp.array(rp.atleast_2d(VD.XB_TE*1.),dtype=rp.float32)
     
     
     # Panel Dihedral Angle, using AH and BH location
-    D      = np.sqrt((YAH-YBH)**2+(ZAH-ZBH)**2)
+    D      = rp.sqrt((YAH-YBH)**2+(ZAH-ZBH)**2)
     COS_DL = (YBH-YAH)/D    
-    DL     = np.arccos(COS_DL)
-    DL[DL>np.pi/2] = DL[DL>np.pi/2] - np.pi # This flips the dihedral angle for the other side of the wing
+    DL     = rp.arccos(COS_DL)
+    DL[DL>rp.pi/2] = DL[DL>rp.pi/2] - rp.pi # This flips the dihedral angle for the other side of the wing
     
     # -------------------------------------------------------------------------------------------
     # Compute velocity induced by horseshoe vortex segments on every control point by every panel
@@ -116,9 +116,9 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     zo = ZC[:,:,None] 
     
     # Incline the vortex
-    theta    = np.arctan2(zb-za,yb-ya)
-    costheta = np.cos(theta)
-    sintheta = np.sin(theta)
+    theta    = rp.arctan2(zb-za,yb-ya)
+    costheta = rp.cos(theta)
+    sintheta = rp.sin(theta)
     
     # rotated axes
     x1bar = (xb - xc)
@@ -129,9 +129,9 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     zobar =-(yo - yc)*sintheta + (zo - zc)*costheta
     
     # COMPUTE COORDINATES OF RECEIVING POINT WITH RESPECT TO END POINTS OF SKEWED LEG.
-    shape   = np.shape(xobar)  
-    s       = np.repeat(np.abs(y1bar),shape[1],axis=1)
-    t       = np.repeat(x1bar/y1bar ,shape[1],axis=1)
+    shape   = rp.shape(xobar)  
+    s       = rp.repeat(rp.abs(y1bar),shape[1],axis=1)
+    t       = rp.repeat(x1bar/y1bar ,shape[1],axis=1)
     
     X1 = xobar + t*s # In a planar case XC-XAH
     Y1 = yobar + s   # In a planar case YC-YAH
@@ -145,7 +145,7 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     XTY = xobar - t*yobar
     
     # The notation in this method is flipped from the paper
-    B2 = np.atleast_3d(mach**2-1.)
+    B2 = rp.atleast_3d(mach**2-1.)
     
     # SET VALUES OF NUMERICAL TOLERANCE CONSTANTS.
     TOL    = s /500.0
@@ -165,40 +165,40 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     RO2      = B2*RTV2 
     
     # ZERO-OUT PERTURBATION VELOCITY COMPONENTS
-    U = np.zeros((n_mach,shape[1],shape[2] ),dtype=np.float32)
-    V = np.zeros((n_mach,shape[1],shape[2] ),dtype=np.float32)
-    W = np.zeros((n_mach,shape[1],shape[2] ),dtype=np.float32)    
+    U = rp.zeros((n_mach,shape[1],shape[2] ),dtype=rp.float32)
+    V = rp.zeros((n_mach,shape[1],shape[2] ),dtype=rp.float32)
+    W = rp.zeros((n_mach,shape[1],shape[2] ),dtype=rp.float32)    
     
-    if np.sum(sub)>0:
+    if rp.sum(sub)>0:
         # COMPUTATION FOR SUBSONIC HORSESHOE VORTEX
         U_sub, V_sub, W_sub = subsonic(zobar,XSQ1,RO1,XSQ2,RO2,XTY,t,B2,ZSQ,TOLSQ,X1,Y1,X2,Y2,RTV1,RTV2)   
         U[sub], V[sub], W[sub] = U_sub[sub], V_sub[sub], W_sub[sub]
     
     # COMPUTATION FOR SUPERSONIC HORSESHOE VORTEX. some values computed in a preprocessing section in VLM
     sup = (B2>=0)[:,0,0]
-    RFLAG = np.ones((n_mach,shape[2]),dtype=np.int8)
-    if np.sum(sup)>0:  
+    RFLAG = rp.ones((n_mach,shape[2]),dtype=rp.int8)
+    if rp.sum(sup)>0:  
         RNMAX       = VD.panels_per_strip 
-        CHORD       = np.repeat(VD.chord_lengths[:, np.newaxis, :],shape[1],axis=1)
+        CHORD       = rp.repeat(VD.chord_lengths[:, rp.newaxis, :],shape[1],axis=1)
         U_sup, V_sup, W_sup, RFLAG_sup  = supersonic(zobar,XSQ1,RO1,XSQ2,RO2,XTY,t,B2,ZSQ,TOLSQ,TOL,TOLSQ2,\
                                                     X1,Y1,X2,Y2,RTV1,RTV2,CUTOFF,CHORD,RNMAX,n_cp,TE_ind,LE_ind)
         U[sup], V[sup], W[sup], RFLAG[sup,:]  = U_sup[sup], V_sup[sup], W_sup[sup], RFLAG_sup[sup,:] 
     
     # Rotate into the vehicle frame and pack into a velocity matrix
-    C_mn = np.stack([U, V*costheta - W*sintheta, V*sintheta + W*costheta],axis=-1)
+    C_mn = rp.stack([U, V*costheta - W*sintheta, V*sintheta + W*costheta],axis=-1)
     
     
     if compute_EW == True:
         # Calculate the W velocity in the VORLAX frame for later calcs
         # The angles are Dihedral angle of the current panel - dihedral angle of the influencing panel
-        COS1   = np.cos(DL[:,:,None] - DL[:,None,:])
-        SIN1   = np.sin(DL[:,:,None] - DL[:,None,:]) 
+        COS1   = rp.cos(DL[:,:,None] - DL[:,None,:])
+        SIN1   = rp.sin(DL[:,:,None] - DL[:,None,:]) 
         WEIGHT = 1
         
         EW = (W*COS1-V*SIN1)*WEIGHT
     else:
         # Assume that this function is being used outside of VLM, EW is not needed
-        EW = np.nan
+        EW = rp.nan
         
 
     return C_mn, s, RFLAG, EW
@@ -244,14 +244,14 @@ def subsonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,X1,Y1,X2,Y2,RTV1,RTV2):
     N/A
     """  
     
-    CPI  = 4 * np.pi
-    RAD1 = np.sqrt(XSQ1 - RO1)
-    RAD2 = np.sqrt(XSQ2 - RO2)
+    CPI  = 4 * rp.pi
+    RAD1 = rp.sqrt(XSQ1 - RO1)
+    RAD2 = rp.sqrt(XSQ2 - RO2)
     
     TBZ  = (T*T-B2)*ZSQ
     DENOM = XTY * XTY + TBZ
     
-    TOLSQ = np.broadcast_to(TOLSQ,np.shape(DENOM))
+    TOLSQ = rp.broadcast_to(TOLSQ,rp.shape(DENOM))
     
     DENOM[DENOM<TOLSQ] = TOLSQ[DENOM<TOLSQ]
     
@@ -322,25 +322,25 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     N/A
     """      
     
-    CPI    = 2 * np.pi
+    CPI    = 2 * rp.pi
     T2     = T*T
     ZETAPI = Z/CPI
-    shape  = np.shape(RO1)
-    RAD1   = np.sqrt(XSQ1 - RO1)
-    RAD2   = np.sqrt(XSQ2 - RO2)
+    shape  = rp.shape(RO1)
+    RAD1   = rp.sqrt(XSQ1 - RO1)
+    RAD2   = rp.sqrt(XSQ2 - RO2)
     
-    RAD1[np.isnan(RAD1)] = 0. 
-    RAD2[np.isnan(RAD2)] = 0. 
+    RAD1[rp.isnan(RAD1)] = 0. 
+    RAD2[rp.isnan(RAD2)] = 0. 
     
     DENOM             = XTY * XTY + (T2 - B2) *ZSQ # The last part of this is the TBZ term
-    SIGN              = np.ones(shape,dtype=np.int8)
+    SIGN              = rp.ones(shape,dtype=rp.int8)
     SIGN[DENOM<0]     = -1.
-    TOLSQ             = np.broadcast_to(TOLSQ,shape)
-    DENOM_COND        = np.abs(DENOM)<TOLSQ
+    TOLSQ             = rp.broadcast_to(TOLSQ,shape)
+    DENOM_COND        = rp.abs(DENOM)<TOLSQ
     DENOM[DENOM_COND] = SIGN[DENOM_COND]*TOLSQ[DENOM_COND]
     
     # Create a boolean for various conditions for F1 that goes to zero
-    bool1           = np.ones(shape,dtype=bool)  
+    bool1           = rp.ones(shape,dtype=bool)  
     bool1[X1<TOL]   = False
     bool1[RAD1==0.] = False
     RAD1[X1<TOL]    = 0.0
@@ -354,16 +354,16 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     FT1[RTV1<TOLSQ] = 0.
     
     # Use the boolean to turn things off
-    FB1[np.isnan(FB1)] = 1.
-    FT1[np.isnan(FT1)] = 1.
-    FB1[np.isinf(FB1)] = 1.
-    FT1[np.isinf(FT1)] = 1.    
+    FB1[rp.isnan(FB1)] = 1.
+    FT1[rp.isnan(FT1)] = 1.
+    FB1[rp.isinf(FB1)] = 1.
+    FT1[rp.isinf(FT1)] = 1.    
     FB1 = FB1*bool1
     FT1 = FT1*bool1
     
     # Round 2
     # Create a boolean for various conditions for F2 that goes to zero
-    bool2           = np.ones(shape,dtype=bool)  
+    bool2           = rp.ones(shape,dtype=bool)  
     bool2[X2<TOL] = False
     bool2[RAD2==0.] = False
     RAD2[X2<TOL]  = 0.0
@@ -377,10 +377,10 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     FT2[RTV2<TOLSQ] = 0.
     
     # Use the boolean to turn things off
-    FB2[np.isnan(FB2)] = 1.
-    FT2[np.isnan(FT2)] = 1.
-    FB2[np.isinf(FB2)] = 1.
-    FT2[np.isinf(FT2)] = 1.    
+    FB2[rp.isnan(FB2)] = 1.
+    FT2[rp.isnan(FT2)] = 1.
+    FB2[rp.isinf(FB2)] = 1.
+    FT2[rp.isinf(FT2)] = 1.    
     FB2 = FB2*bool2
     FT2 = FT2*bool2
     
@@ -390,7 +390,7 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     W  = - (QB *XTY + FT1 *Y1 - FT2 *Y2) /CPI    
     
     # COMPUTATION FOR SUPERSONIC HORSESHOE VORTEX WHEN RECEIVING POINT IS IN THE PLANE OF THE HORSESHOE
-    in_plane = np.broadcast_to(ZSQ<TOLSQ2,shape)
+    in_plane = rp.broadcast_to(ZSQ<TOLSQ2,shape)
     RAD1_in  = RAD1[in_plane]
     RAD2_in  = RAD2[in_plane] 
     Y1_in    = Y1[ZSQ<TOLSQ2]
@@ -398,7 +398,7 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     XTY_in   = XTY[ZSQ<TOLSQ2]
     TOL_in   = TOL[ZSQ<TOLSQ2]
     
-    if np.sum(in_plane)>0:
+    if rp.sum(in_plane)>0:
         W_in = supersonic_in_plane(RAD1_in, RAD2_in, Y1_in, Y2_in, TOL_in, XTY_in, CPI)
     else:
         W_in = []
@@ -413,12 +413,12 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     size   = shape[1]
     n_mach = shape[0]    
     T2S    = T2[:,0,:] 
-    T2F    = np.zeros((n_mach,size))
-    T2A    = np.zeros((n_mach,size))
+    T2F    = rp.zeros((n_mach,size))
+    T2A    = rp.zeros((n_mach,size))
     
     # Setup masks
-    F_mask = np.ones((n_mach,size),dtype=bool) 
-    A_mask = np.ones((n_mach,size),dtype=bool) 
+    F_mask = rp.ones((n_mach,size),dtype=bool) 
+    A_mask = rp.ones((n_mach,size),dtype=bool) 
     F_mask[TE_ind] = False
     A_mask[LE_ind] = False
     
@@ -432,22 +432,22 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
 
     TRANS = (B2[:,:,0]-T2F)*(B2[:,:,0]-T2A)
     
-    RFLAG = np.ones((n_mach,size),dtype=np.int8)
+    RFLAG = rp.ones((n_mach,size),dtype=rp.int8)
     RFLAG[TRANS<0] = 0.
     
-    FLAG_bool          = np.zeros_like(TRANS,dtype=bool)
+    FLAG_bool          = rp.zeros_like(TRANS,dtype=bool)
     FLAG_bool[TRANS<0] = True
-    FLAG_bool          = np.reshape(FLAG_bool,(n_mach,size,-1))
+    FLAG_bool          = rp.reshape(FLAG_bool,(n_mach,size,-1))
     
 
     # COMPUTE THE GENERALIZED PRINCIPAL PART OF THE VORTEX-INDUCED VELOCITY INTEGRAL, WWAVE.
     # FROM LINE 2647 VORLAX, the IR .NE. IRR means that we're looking at vortices that affect themselves
-    WWAVE   = np.zeros(shape,dtype=np.float32)
+    WWAVE   = rp.zeros(shape,dtype=rp.float32)
     COX     = CHORD /RNMAX[:, :, None] 
-    T2      = np.broadcast_to(T2,shape)*np.eye(n_cp[0, 0],dtype=np.int8)
-    B2_full = np.broadcast_to(B2,shape)*np.eye(n_cp[0, 0],dtype=np.int8)
-    COX     = np.broadcast_to(COX,shape)*np.eye(n_cp[0, 0],dtype=np.int8)
-    WWAVE[B2_full>T2] = - 0.5 *np.sqrt(B2_full[B2_full>T2] -T2[B2_full>T2] )/COX[B2_full>T2] 
+    T2      = rp.broadcast_to(T2,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
+    B2_full = rp.broadcast_to(B2,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
+    COX     = rp.broadcast_to(COX,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
+    WWAVE[B2_full>T2] = - 0.5 *rp.sqrt(B2_full[B2_full>T2] -T2[B2_full>T2] )/COX[B2_full>T2] 
 
     W = W + WWAVE    
     
@@ -458,27 +458,61 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     # IN FRONT OF AND BEHIND IT.
     
     # Zero out the row
-    FLAG_bool_rep     = np.broadcast_to(FLAG_bool,shape)
+    FLAG_bool_rep     = rp.broadcast_to(FLAG_bool,shape)
     W[FLAG_bool_rep]  = 0. # Default to zero
 
-    # The self velocity goes to 2
-    FLAG_bool_split   = np.array(np.split(FLAG_bool.ravel(),n_mach))
-    FLAG_ind          = np.array(np.where(FLAG_bool_split))
-    squares           = np.zeros((size,size,n_mach))
-    squares[FLAG_ind[1],FLAG_ind[1],FLAG_ind[0]] = 1
-    squares           = np.ravel(squares,order='F')
+    # # The self velocity goes to 2
+    # FLAG_bool_split   = rp.array(rp.split(FLAG_bool.ravel(),n_mach))
+    # FLAG_ind          = rp.array(rp.where(FLAG_bool_split))
+    # squares           = rp.zeros((size,size,n_mach))
+    # squares[FLAG_ind[1],FLAG_ind[1],FLAG_ind[0]] = 1
+    # squares           = rp.ravel(squares,order='F')
     
-    FLAG_bool_self    = np.where(squares==1)[0]
-    W                 = W.ravel()
-    W[FLAG_bool_self] = 2. # It's own value, -2
+    # FLAG_bool_self    = rp.where(squares==1)[0]
+    # W                 = W.ravel()
+    # W[FLAG_bool_self] = 2. # It's own value, -2
     
-    # The panels before and after go to -1
+    # # The panels before and after go to -1
+    # FLAG_bool_bef = FLAG_bool_self - 1
+    # FLAG_bool_aft = FLAG_bool_self + 1
+    # W[FLAG_bool_bef] = -1.
+    # W[FLAG_bool_aft] = -1.
+    
+    # W = rp.reshape(W,shape)
+
+    # Split boolean mask into n_mach chunks
+    FLAG_bool_split = rp.array(rp.split(FLAG_bool.ravel(), n_mach))
+
+    # JAX-compatible replacement for np.where(FLAG_bool_split)
+    # Returns (mach_idx, panel_idx)
+    mach_idx, panel_idx = rp.nonzero(FLAG_bool_split)
+
+    # Allocate squares
+    squares = rp.zeros((size, size, n_mach))
+
+    # JAX-compatible indexed assignment
+    squares = squares.at[panel_idx, panel_idx, mach_idx].set(1)
+
+    # Flatten in Fortran order
+    squares = rp.ravel(squares, order="F")
+
+    # JAX-compatible replacement for np.where(squares == 1)
+    FLAG_bool_self = rp.nonzero(squares == 1)[0]
+
+    # Update W
+    W = W.ravel()
+    W = W.at[FLAG_bool_self].set(2.0)
+
+    # Panels before and after → -1
     FLAG_bool_bef = FLAG_bool_self - 1
     FLAG_bool_aft = FLAG_bool_self + 1
-    W[FLAG_bool_bef] = -1.
-    W[FLAG_bool_aft] = -1.
-    
-    W = np.reshape(W,shape)
+
+    W = W.at[FLAG_bool_bef].set(-1.0)
+    W = W.at[FLAG_bool_aft].set(-1.0)
+
+    # Restore original shape
+    W = rp.reshape(W, shape)
+
 
     return U, V, W, RFLAG
 
@@ -514,21 +548,21 @@ def supersonic_in_plane(RAD1,RAD2,Y1,Y2,TOL,XTY,CPI):
     N/A
     """    
     
-    shape = np.shape(RAD2)
-    F1    = np.zeros(shape)
-    F2    = np.zeros(shape)
+    shape = rp.shape(RAD2)
+    F1    = rp.zeros(shape)
+    F2    = rp.zeros(shape)
     
-    reps  = int(shape[0]/np.size(Y1))
+    reps  = int(shape[0]/rp.size(Y1))
     
-    Y1  = np.tile(Y1,reps)
-    Y2  = np.tile(Y2,reps)
-    TOL = np.tile(TOL,reps)
-    XTY = np.tile(XTY,reps)
+    Y1  = rp.tile(Y1,reps)
+    Y2  = rp.tile(Y2,reps)
+    TOL = rp.tile(TOL,reps)
+    XTY = rp.tile(XTY,reps)
     
-    F1[np.abs(Y1)>TOL] = RAD1[np.abs(Y1)>TOL]/Y1[np.abs(Y1)>TOL]
-    F2[np.abs(Y2)>TOL] = RAD2[np.abs(Y2)>TOL]/Y2[np.abs(Y2)>TOL]
+    F1[rp.abs(Y1)>TOL] = RAD1[rp.abs(Y1)>TOL]/Y1[rp.abs(Y1)>TOL]
+    F2[rp.abs(Y2)>TOL] = RAD2[rp.abs(Y2)>TOL]/Y2[rp.abs(Y2)>TOL]
     
-    W = np.zeros(shape)
-    W[np.abs(XTY)>TOL] = (-F1[np.abs(XTY)>TOL] + F2[np.abs(XTY)>TOL])/(XTY[np.abs(XTY)>TOL]*CPI)
+    W = rp.zeros(shape)
+    W[rp.abs(XTY)>TOL] = (-F1[rp.abs(XTY)>TOL] + F2[rp.abs(XTY)>TOL])/(XTY[rp.abs(XTY)>TOL]*CPI)
 
     return W

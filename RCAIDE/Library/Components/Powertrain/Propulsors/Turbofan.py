@@ -14,7 +14,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan.compute_turbofan_perf
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia                             import compute_cylinder_moment_of_inertia 
  
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Fan Component

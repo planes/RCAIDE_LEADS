@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.Design.blade_geometry_se
 from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.Design.procedure_setup         import procedure_setup
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Optimization Setuo 
@@ -118,25 +118,29 @@ def optimization_setup(rotor, number_of_stations, print_iterations):
     inputs.append([ 'chord_p'               ,  2        , 0.25       , 2.0       , 1.0     ,  1*Units.less])
     inputs.append([ 'chord_q'               ,  1        , 0.25       , 1.5       , 1.0     ,  1*Units.less])
     inputs.append([ 'chord_t'               ,  0.1*R    , 0.02*R     , 0.1*R     , 1.0     ,  1*Units.less])  
-    inputs.append([ 'twist_r'               ,  np.pi/6  ,  0         , np.pi/4   , 1.0     ,  1*Units.less])
+    inputs.append([ 'twist_r'               ,  rp.pi/6  ,  0         , rp.pi/4   , 1.0     ,  1*Units.less])
     inputs.append([ 'twist_p'               ,  1        , 0.25       , 2.0       , 1.0     ,  1*Units.less])
     inputs.append([ 'twist_q'               ,  0.5      , 0.25       , 1.5       , 1.0     ,  1*Units.less])
-    inputs.append([ 'twist_t'               ,  np.pi/6  , 0          , np.pi/4   , 1.0     ,  1*Units.less])  
+    inputs.append([ 'twist_t'               ,  rp.pi/6  , 0          , rp.pi/4   , 1.0     ,  1*Units.less])  
     inputs.append([ 'hover_tip_mach'        , tm_0_h    , tm_ll_h    , tm_ul_h   , 1.0     ,  1*Units.less])
     inputs.append([ 'OEI_tip_mach'          , tm_0_h    , tm_ll_h    , 0.85      , 1.0     ,  1*Units.less])
-    inputs.append([ 'OEI_collective_pitch'  , 0         , -np.pi/5   , np.pi/5   , 1.0     ,  1*Units.less])
+    inputs.append([ 'OEI_collective_pitch'  , 0         , -rp.pi/5   , rp.pi/5   , 1.0     ,  1*Units.less])
     if nexus.prop_rotor_flag: 
-        inputs.append([ 'cruise_tip_mach'         , tm_ll_c , tm_ll_c    , tm_ul_c  , 1.0     ,  1*Units.less]) 
-        inputs.append([ 'cuise_collective_pitch'  , np.pi/8 , -np.pi/5   , np.pi/5, 1.0     ,  1*Units.less]) 
-    problem.inputs = np.array(inputs,dtype=object)   
+        inputs.append([ 'cruise_tip_mach'         , (tm_ll_c+ tm_ul_c)/2 , tm_ll_c    , tm_ul_c  , 1.0     ,  1*Units.less]) 
+        inputs.append([ 'cuise_collective_pitch'  , rp.pi/8 , -rp.pi/5   , rp.pi/5, 1.0     ,  1*Units.less]) 
+    problem.inputs = Data()
+    problem.inputs.name = rp.array(inputs,dtype=object)[:,0]
+    problem.inputs.value = rp.array(rp.array(inputs,dtype=object)[:,1:],dtype=rp.float32)   
 
     # -------------------------------------------------------------------
     # Objective
     # ------------------------------------------------------------------- 
-    problem.objective = np.array([  
-                                 [  'objective'  ,  1.0   ,    1*Units.less] 
-    ],dtype=object)
-    
+    problem.objective = Data()
+    problem.objective.value = rp.array([  
+                                 [ 1.0   ,    1*Units.less] 
+    ],dtype=rp.float32)
+    problem.objective.name = rp.array([[  'objective' ]],dtype=object)
+
     # -------------------------------------------------------------------
     # Constraints
     # -------------------------------------------------------------------  
@@ -152,7 +156,9 @@ def optimization_setup(rotor, number_of_stations, print_iterations):
     if nexus.prop_rotor_flag:
         constraints.append([ 'cruise_thrust_pow_res'     ,  '<'  ,  1E-3 ,   1.0   , 1*Units.less]) 
         constraints.append([ 'max_sectional_cl_cruise'   ,  '<'  ,  0.8 ,   1.0   , 1*Units.less])   
-    problem.constraints =  np.array(constraints,dtype=object)                
+    problem.constraints = Data()
+    problem.constraints.name_signs = rp.array(constraints,dtype=object)[:,0:2]
+    problem.constraints.value = rp.array(rp.array(constraints,dtype=object)[:,2:],dtype=rp.float32)   
     
     # -------------------------------------------------------------------
     #  Aliases

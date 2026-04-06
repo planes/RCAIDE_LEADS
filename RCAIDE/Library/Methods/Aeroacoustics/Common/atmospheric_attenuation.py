@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Atmospheric Attenuation
@@ -38,15 +38,15 @@ def atmospheric_attenuation(dist,center_frequencies):
     """ 
     ctrl_pts  = len(dist)
     # Atmospheric attenuation factor for a 70% humidity and 25 Celsius at 1000ft - Based SAE model 
-    Att_dB = np.array([0.033,0.033,0.033,0.066,0.066,0.098,0.131,0.131,
+    Att_dB = rp.array([0.033,0.033,0.033,0.066,0.066,0.098,0.131,0.131,
                        0.197,0.230,0.295,0.361,0.459,0.590,0.754,0.983,1.311,1.705,2.295,3.115,
                        3.607,5.246,7.213,9.836])
     if len(center_frequencies)>24: 
-        no_Att_dB = np.zeros(len(center_frequencies)-24)
-        Att_dB    = np.hstack((no_Att_dB,Att_dB)) 
+        no_Att_dB = rp.zeros(len(center_frequencies)-24)
+        Att_dB    = rp.hstack((no_Att_dB,Att_dB)) 
     
     # Calculates de delta SPL as a function of the distance
-    delta_spl = np.tile(Att_dB[None,:],(ctrl_pts,1))*(np.tile(dist[:,None],(1,len(Att_dB))))/100
+    delta_spl = rp.tile(Att_dB[None,:],(ctrl_pts,1))*(rp.tile(dist[:,None],(1,len(Att_dB))))/100
     
     return delta_spl
 

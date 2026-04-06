@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core   import Data , orientation_product, orientation_transpose  
 
 # package imports
-import  numpy as  np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  RFMT_performance
@@ -77,7 +77,7 @@ def RFMT_performance(ducted_fan,conditions):
     T_inertial2body         = orientation_transpose(T_body2inertial)
     V_body                  = orientation_product(T_inertial2body,Vv)
     body2thrust,orientation = ducted_fan.body_to_prop_vel(commanded_TV) 
-    T_body2thrust           = orientation_transpose(np.ones_like(T_body2inertial[:])*body2thrust)
+    T_body2thrust           = orientation_transpose(rp.ones_like(T_body2inertial[:])*body2thrust)
     V_thrust                = orientation_product(T_body2thrust,V_body)
 
     # Check and correct for hover
@@ -88,7 +88,7 @@ def RFMT_performance(ducted_fan,conditions):
     
     thrust                  = Ct * rho * (n**2)*(D**4) 
     power                   = Cp * rho * (n**3)*(D**5)           
-    thrust_prop_frame       = np.zeros((ctrl_pts,3))
+    thrust_prop_frame       = rp.zeros((ctrl_pts,3))
     thrust_prop_frame[:,0]  = thrust[:,0]       
     thrust_vector           = orientation_product(orientation_transpose(T_body2thrust),thrust_prop_frame)     
     torque                  = power/omega
@@ -120,7 +120,7 @@ def compute_ducted_fan_efficiency(ducted_fan, V, omega):
         Calculated propeller efficiency
     """
 
-    n = omega/(2*np.pi)
+    n = omega/(2*rp.pi)
     D = 2*ducted_fan.tip_radius
     J = V/(n*D)
 

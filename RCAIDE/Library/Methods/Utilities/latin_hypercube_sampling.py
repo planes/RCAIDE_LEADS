@@ -8,7 +8,7 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
+import RNUMPY as rp
 
 ## If needed for mapping to normal distribution:
 #from scipy.stats.distributions import norm 
@@ -46,22 +46,22 @@ def latin_hypercube_sampling(num_dimensions,num_samples,bounds=None,criterion='r
     samples = num_samples
     
     segsize = 1./samples
-    lhd = np.zeros((samples,n))
+    lhd = rp.zeros((samples,n))
     
     if( criterion == "random" ): # sample is randomly chosen from within segment
-        segment_starts = np.arange(samples)*segsize
-        lhd_base       = np.transpose(np.tile(segment_starts,(n,1)))
-        lhd            = lhd_base + np.random.rand(samples,n)*segsize
+        segment_starts = rp.arange(samples)*segsize
+        lhd_base       = rp.transpose(rp.tile(segment_starts,(n,1)))
+        lhd            = lhd_base + rp.random.rand(samples,n)*segsize
     elif( criterion == "center" ): # sample is chosen as center of segment
-        segment_starts = np.arange(samples)*segsize
-        lhd_base       = np.transpose(np.tile(segment_starts,(n,1)))
+        segment_starts = rp.arange(samples)*segsize
+        lhd_base       = rp.transpose(rp.tile(segment_starts,(n,1)))
         lhd            = lhd_base + 0.5*segsize           
     else:
         raise NotImplementedError("Other sampling criterion not implemented")
         
     # Randomly switch values around to create Latin Hypercube
     for jj in range(n):
-        np.random.shuffle(lhd[:,jj])
+        rp.random.shuffle(lhd[:,jj])
         
     ## Map samples to the standard normal distribution (if needed for future functionality)
     #lhd = norm(loc=0,scale=1).ppf(lhd)
@@ -89,7 +89,7 @@ if __name__ == '__main__':
     from mpl_toolkits.mplot3d import Axes3D
     import matplotlib.pyplot as plt
     
-    np.random.seed(0)
+    rp.random.seed(0)
     
     
     # 2D Test Case
@@ -103,8 +103,8 @@ if __name__ == '__main__':
     y = lhd[:,1]
     
     axes.scatter(x,y)  
-    axes.set_xticks(np.linspace(0,1,num_2d_samples+1))
-    axes.set_yticks(np.linspace(0,1,num_2d_samples+1))
+    axes.set_xticks(rp.linspace(0,1,num_2d_samples+1))
+    axes.set_yticks(rp.linspace(0,1,num_2d_samples+1))
     axes.grid()
     
     
@@ -120,9 +120,9 @@ if __name__ == '__main__':
     z = lhd[:,2]
     
     axes.scatter(x,y,z)
-    axes.set_xticks(np.linspace(0,1,num_3d_samples+1))
-    axes.set_yticks(np.linspace(0,1,num_3d_samples+1))
-    axes.set_zticks(np.linspace(0,1,num_3d_samples+1))
+    axes.set_xticks(rp.linspace(0,1,num_3d_samples+1))
+    axes.set_yticks(rp.linspace(0,1,num_3d_samples+1))
+    axes.set_zticks(rp.linspace(0,1,num_3d_samples+1))
     
     
     # Display plots for both cases

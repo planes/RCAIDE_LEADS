@@ -21,7 +21,7 @@ except ImportError:
     except ImportError:
         # This allows RCAIDE to build without OpenVSP
         pass
-import numpy as np
+import RNUMPY as rp
 import os
 from copy import deepcopy
 

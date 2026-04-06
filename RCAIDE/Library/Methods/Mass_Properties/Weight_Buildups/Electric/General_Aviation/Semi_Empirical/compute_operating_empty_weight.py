@@ -10,7 +10,7 @@ from RCAIDE.Framework.Core import Data ,  Units
 from RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.Common import compute_payload_weight
 import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.General_Aviation.FLOPS as FLOPS
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Operating Empty Weight 
@@ -108,8 +108,8 @@ def compute_operating_empty_weight(vehicle, settings=None):
     WTNFA  = W_energy_network.W_engine + W_energy_network.W_thrust_reverser + W_energy_network.W_starter \
             + 0.25 * W_energy_network.W_engine_controls + 0.11 * W_systems.W_instruments + 0.13 * W_systems.W_electrical \
             + 0.13 * W_systems.W_hyd_pnu + 0.25 * W_energy_network.W_fuel_system
-    WPOD += WTNFA / np.max([1, NENG]) + W_energy_network.W_nacelle / np.max(
-        [1.0, NENG + 1. / 2 * (NENG - 2 * np.floor(NENG / 2.))])
+    WPOD += WTNFA / rp.max([1, NENG]) + W_energy_network.W_nacelle / rp.max(
+        [1.0, NENG + 1. / 2 * (NENG - 2 * rp.floor(NENG / 2.))])
  
     output.empty.propulsion.total               = W_energy_network_cumulative
     output.empty.propulsion.battery             = W_energy_network.W_battery
@@ -131,14 +131,14 @@ def compute_operating_empty_weight(vehicle, settings=None):
         if isinstance(wing, Wings.Main_Wing) or isinstance(wing, Wings.Blended_Wing_Body):  # Main wing
             fidelity = settings.FLOPS.fidelity
             W_wing = FLOPS.compute_wing_weight(vehicle, wing, WPOD, fidelity, settings, num_main_wings)
-            if np.isnan(W_wing):
+            if rp.isnan(W_wing):
                 W_wing = 0.
             # Pack and sum
             wing.mass_properties.mass = W_wing
             W_main_wing += W_wing
         if isinstance(wing, Wings.Horizontal_Tail): # Horizontal tail
             W_tail = FLOPS.compute_horizontal_tail_weight(vehicle)
-            if type(W_tail) == np.ndarray:
+            if type(W_tail) == rp.ndarray:
                 W_tail = sum(W_tail)
             # Pack and sum
             wing.mass_properties.mass = W_tail

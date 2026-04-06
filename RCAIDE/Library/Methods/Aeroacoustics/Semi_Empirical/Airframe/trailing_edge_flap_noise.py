@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
 
-import numpy as np
+import RNUMPY as rp
 from RCAIDE.Framework.Core import Units
 
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -60,35 +60,35 @@ def trailing_edge_flap_noise(Sf, cf, deltaf, slots, velocity, M, phi, theta, dis
     """
 
     # Process
-    G      = np.zeros(24)
+    G      = rp.zeros(24)
 
-    test   = frequency*cf/(velocity/Units.ft*(1-M*np.cos(theta)))
+    test   = frequency*cf/(velocity/Units.ft*(1-M*rp.cos(theta)))
 
     if (slots==1 or slots==2):
         for i in range (0,24):
             if (test[i]<2):
-                G[i] = 99+10*np.log10(test[i])
+                G[i] = 99+10*rp.log10(test[i])
             elif (test[i]<20):
-                G[i] = 103.82-6*np.log10(test[i])
+                G[i] = 103.82-6*rp.log10(test[i])
             else:
-                G[i] = 135.04-30*np.log10(test[i])
+                G[i] = 135.04-30*rp.log10(test[i])
 
     elif slots==3:
         for i in range(0,24):
             if(test[i]<2):
-                G[i] = 99+10*np.log10(test[i])
+                G[i] = 99+10*rp.log10(test[i])
             elif (test[i]<75):
-                G[i] = 102.61-2*np.log10(test[i])
+                G[i] = 102.61-2*rp.log10(test[i])
             else:
-                G[i] = 158.11-30*np.log10(test[i])
+                G[i] = 158.11-30*rp.log10(test[i])
 
-    G = np.transpose(G)
+    G = rp.transpose(G)
     
-    if theta+deltaf>=np.pi:
+    if theta+deltaf>=rp.pi:
         directivity = 0.0
     else:     
-        directivity = 20.0*np.log10(np.sin(theta)* (np.cos(phi))**2 * np.sin(theta+deltaf))
+        directivity = 20.0*rp.log10(rp.sin(theta)* (rp.cos(phi))**2 * rp.sin(theta+deltaf))
 
-    SPL = G+10*np.log10(Sf*(np.sin(deltaf))**2/(distance**2))+  60*np.log10((velocity/Units.kts)/100.0)+directivity
+    SPL = G+10*rp.log10(Sf*(rp.sin(deltaf))**2/(distance**2))+  60*rp.log10((velocity/Units.kts)/100.0)+directivity
 
     return SPL 

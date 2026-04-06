@@ -14,7 +14,7 @@ from RCAIDE.Framework.Mission.Common                          import Conditions
 from RCAIDE.Library.Plots                                     import * 
 
 # package imports  
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 
@@ -44,7 +44,7 @@ def main():
     # PLot parameters 
     marker                = ['s' ,'o' ,'P']
     linestyles            = ['-','--',':']
-    linecolors            = cm.inferno(np.linspace(0.2,0.8,3))     
+    linecolors            = cm.inferno(rp.linspace(0.2,0.8,3))     
 
     fuel_cell_tpye     =  ['Larminie', 'PEM']
     
@@ -76,9 +76,9 @@ def main():
         fuel_cell_tag = list(results.segments[0].conditions.energy.busses['bus'].fuel_cell_stacks.keys())[0]
         mdot_H2       = results.segments[0].conditions.energy.busses['bus'].fuel_cell_stacks[fuel_cell_tag].H2_mass_flow_rate
         print('Mass Flow Rate: ' + str(mdot_H2[0,0]))
-        mdot_H2_diff   = np.abs(mdot_H2[0,0] - mdot_H2_true[i]) 
+        mdot_H2_diff   = rp.abs(mdot_H2[0,0] - mdot_H2_true[i]) 
         print(mdot_H2_diff) 
-        assert np.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6  
+        assert rp.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6  
 
         time     = results.segments[0].conditions.frames.inertial.time[:,0] 
         axes1.plot(time , mdot_H2 , marker= marker[i], linestyle = linestyles[i],  color= linecolors[i]  , markersize=marker_size   ,label = fuel_cell_tpye[i])             

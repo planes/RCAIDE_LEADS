@@ -14,7 +14,7 @@ from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_E
 from RCAIDE.Library.Plots.Thermal_Management.plot_cross_flow_heat_exchanger_conditions    import plot_cross_flow_heat_exchanger_conditions 
 
 import os
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Cross Flow Heat Exchanger 
@@ -321,7 +321,7 @@ class Cross_Flow_Heat_Exchanger(Component):
         ospath    = os.path.abspath(__file__)
         separator = os.path.sep
         rel_path  = os.path.dirname(ospath) + separator   
-        x         = np.loadtxt(rel_path + 'rectangular_passage_Kc.csv', dtype=float, 
+        x         = rp.loadtxt(rel_path + 'rectangular_passage_Kc.csv', dtype=float, 
                              delimiter=',', comments='Kc') 
         return x 
     
@@ -337,6 +337,6 @@ class Cross_Flow_Heat_Exchanger(Component):
         ospath    = os.path.abspath(__file__)
         separator = os.path.sep
         rel_path  = os.path.dirname(ospath) + separator 
-        x         = np.loadtxt(rel_path +'rectangular_passage_Ke.csv', dtype=float, 
+        x         = rp.loadtxt(rel_path +'rectangular_passage_Ke.csv', dtype=float, 
                              delimiter=',', comments='Ke')
         return x 

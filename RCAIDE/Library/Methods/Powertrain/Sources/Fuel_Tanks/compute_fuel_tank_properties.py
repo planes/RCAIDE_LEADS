@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.update_moments_of_inertia import update_fuel_tank_moment_of_inertia
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -56,6 +56,6 @@ def compute_fuel_tank_properties(tank,state,distributor):
     tank_conditions.mass_flow_rate                 = mass_flow_rate
     if len(mass_flow_rate) > 1:
         # update mass 
-        state.conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  np.dot(I, -mass_flow_rate).flatten()
+        state.conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten()
         
     return 

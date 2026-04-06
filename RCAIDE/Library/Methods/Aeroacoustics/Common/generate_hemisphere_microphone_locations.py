@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  generate_hemisphere_microphone_locations
@@ -40,12 +40,12 @@ def generate_hemisphere_microphone_locations(settings):
     phi   = settings.noise_hemisphere_phi_angles   
     theta = settings.noise_hemisphere_theta_angles   
  
-    x     = r * np.outer(np.sin(phi), np.cos(theta))
-    y     = r * np.outer(np.sin(phi), np.sin(theta))
-    z     = r * np.outer(np.cos(phi), np.ones(np.size(theta))) 
+    x     = r * rp.outer(rp.sin(phi), rp.cos(theta))
+    y     = r * rp.outer(rp.sin(phi), rp.sin(theta))
+    z     = r * rp.outer(rp.cos(phi), rp.ones(rp.size(theta))) 
  
     num_gm                = len(z.flatten())
-    gm_mic_locations      = np.zeros((num_gm,3))  
+    gm_mic_locations      = rp.zeros((num_gm,3))  
     gm_mic_locations[:,0] = x.flatten() 
     gm_mic_locations[:,1] = y.flatten() 
     gm_mic_locations[:,2] = z.flatten()

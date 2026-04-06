@@ -21,7 +21,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Turboshaft         import size
 from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions 
 
 # Python package imports   
-import numpy                                                                as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Design Turboshaft
@@ -138,18 +138,18 @@ def design_turboshaft(turboshaft):
         conditions = RCAIDE.Framework.Mission.Common.Results()
     
         # freestream conditions    
-        conditions.freestream.altitude                    = np.atleast_1d(turboshaft.design_altitude)
-        conditions.freestream.mach_number                 = np.atleast_1d(turboshaft.design_mach_number)
-        conditions.freestream.pressure                    = np.atleast_1d(p)
-        conditions.freestream.temperature                 = np.atleast_1d(T)
-        conditions.freestream.density                     = np.atleast_1d(rho)
-        conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
-        conditions.freestream.gravity                     = np.atleast_1d(planet.compute_gravity(turboshaft.design_altitude))
-        conditions.freestream.isentropic_expansion_factor = np.atleast_1d(turboshaft.working_fluid.compute_gamma(T,p))
-        conditions.freestream.Cp                          = np.atleast_1d(turboshaft.working_fluid.compute_cp(T,p))
-        conditions.freestream.R                           = np.atleast_1d(turboshaft.working_fluid.gas_specific_constant)
-        conditions.freestream.speed_of_sound              = np.atleast_1d(a)
-        conditions.freestream.velocity                    = np.atleast_1d(a*turboshaft.design_mach_number)
+        conditions.freestream.altitude                    = rp.atleast_1d(turboshaft.design_altitude)
+        conditions.freestream.mach_number                 = rp.atleast_1d(turboshaft.design_mach_number)
+        conditions.freestream.pressure                    = rp.atleast_1d(p)
+        conditions.freestream.temperature                 = rp.atleast_1d(T)
+        conditions.freestream.density                     = rp.atleast_1d(rho)
+        conditions.freestream.dynamic_viscosity           = rp.atleast_1d(mu)
+        conditions.freestream.gravity                     = rp.atleast_1d(planet.compute_gravity(turboshaft.design_altitude))
+        conditions.freestream.isentropic_expansion_factor = rp.atleast_1d(turboshaft.working_fluid.compute_gamma(T,p))
+        conditions.freestream.Cp                          = rp.atleast_1d(turboshaft.working_fluid.compute_cp(T,p))
+        conditions.freestream.R                           = rp.atleast_1d(turboshaft.working_fluid.gas_specific_constant)
+        conditions.freestream.speed_of_sound              = rp.atleast_1d(a)
+        conditions.freestream.velocity                    = rp.atleast_1d(a*turboshaft.design_mach_number)
          
           
     fuel_line                = RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line()    # may not need
@@ -292,7 +292,7 @@ def design_turboshaft(turboshaft):
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmo_data_sea_level  = atmosphere.compute_values(0.0,0.0)   
     V                    = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state      = setup_operating_conditions(turboshaft,velocity_range=np.array([V]), altitude = 0, angle_of_attack=0,temperature_deviation=0)  
+    operating_state      = setup_operating_conditions(turboshaft,velocity_range=rp.array([V]), altitude = 0, angle_of_attack=0,temperature_deviation=0)  
     operating_state.conditions.energy.converters[turboshaft.tag].throttle[:,0] = 1.0  
     sls_P,_,_                                                       = turboshaft.compute_performance(operating_state,fuel_line) 
     turboshaft.sealevel_static_power                                = sls_P[0][0]

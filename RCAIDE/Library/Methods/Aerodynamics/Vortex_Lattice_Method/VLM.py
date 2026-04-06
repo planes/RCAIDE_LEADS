@@ -14,9 +14,9 @@ from .compute_wing_induced_velocity      import compute_wing_induced_velocity
 from .generate_vortex_distribution       import generate_vortex_distribution 
 from .compute_RHS_matrix                 import compute_RHS_matrix
 
-from scipy.integrate import trapezoid
+from RNUMPY.scipy.integrate import trapezoid
 from copy import  deepcopy
-import numpy as np
+import RNUMPY as rp
 # ----------------------------------------------------------------------
 #  Vortex Lattice
 # ----------------------------------------------------------------------
@@ -134,7 +134,7 @@ def VLM(conditions,settings,geometry):
     # Generate Panelization and Vortex Distribution
     # ------------------ -------------------------------------------------------------------- 
     VD                                                    = generate_vortex_distribution(conditions,settings,geometry) 
-    settings.vortex_distribution.chord_lengths            = VD.chord_lengths[VD.leading_edge_indices].reshape(len(VD.n_sw),np.sum(VD.n_sw[0]))
+    settings.vortex_distribution.chord_lengths            = VD.chord_lengths[VD.leading_edge_indices].reshape(len(VD.n_sw),rp.sum(VD.n_sw[0]))
     settings.vortex_distribution.n_sw                     = VD.n_sw 
     settings.vortex_distribution.n_cw                     = VD.n_cw 
     settings.vortex_distribution.n_w                      = VD.n_w 
@@ -179,7 +179,7 @@ def VLM(conditions,settings,geometry):
     if not conditions.freestream.velocity.all():
         if settings.use_surrogate:
             velocity                       = conditions.freestream.velocity
-            velocity[velocity==0]          = np.ones(len(velocity[velocity==0])) * 1e-6
+            velocity[velocity==0]          = rp.ones(len(velocity[velocity==0])) * 1e-6
             conditions.freestream.velocity = velocity
         else:
             raise AssertionError("VLM requires that conditions.freestream.velocity be specified and non-zero")    
@@ -202,15 +202,15 @@ def VLM(conditions,settings,geometry):
     XB1 = VD.XB1*1. 
     
     # Compute X and Z BAR ouside of generate_vortex_distribution to avoid requiring x_m and z_m as inputs 
-    VD.XBAR = np.ones(( len_mach,sum(LE_ind[0]))) * x_m 
-    VD.ZBAR = np.ones(( len_mach,sum(LE_ind[0]))) * z_m  
+    VD.XBAR = rp.ones(( len_mach,sum(LE_ind[0]))) * x_m 
+    VD.ZBAR = rp.ones(( len_mach,sum(LE_ind[0]))) * z_m  
     
     # ---------------------------------------------------------------------------------------
     # STEP 10: Generate A and RHS matrices from VD and geometry
     # ------------------ --------------------------------------------------------------------    
     # Compute flow tangency conditions
-    phi   = np.arctan((VD.ZBC - VD.ZAC)/(VD.YBC - VD.YAC)) # dihedral angle 
-    delta = np.arctan((VD.ZC - VD.ZCH)/((VD.XC - VD.XCH))) # mean camber surface angle 
+    phi   = rp.arctan((VD.ZBC - VD.ZAC)/(VD.YBC - VD.YAC)) # dihedral angle 
+    delta = rp.arctan((VD.ZC - VD.ZCH)/((VD.XC - VD.XCH))) # mean camber surface angle 
 
     # Build the RHS vector    
     rhs     = compute_RHS_matrix(VD,delta,phi,conditions,settings,geometry,pwm) 
@@ -223,22 +223,22 @@ def VLM(conditions,settings,geometry):
     # Turn off sonic vortices when Mach>1
     RHS = RHS*RFLAG
     
-    # To ensure compatibility for np.linalg.solve across numpy1.0 and numpy2.0
-    RHS = np.atleast_3d(RHS)
+    # To ensure compatibility for rp.linalg.solve across numpy1.0 and numpy2.0
+    RHS = rp.atleast_3d(RHS)
 
     # Build Aerodynamic Influence Coefficient Matrix
     use_VORLAX_induced_velocity = settings.use_VORLAX_matrix_calculation
     if not use_VORLAX_induced_velocity:
-        A =   np.multiply(C_mn[:,:,:,0],np.atleast_3d(np.sin(delta)*np.cos(phi))) \
-            + np.multiply(C_mn[:,:,:,1],np.atleast_3d(np.cos(delta)*np.sin(phi))) \
-            - np.multiply(C_mn[:,:,:,2],np.atleast_3d(np.cos(phi)*np.cos(delta)))   # validated from book eqn 7.42 
+        A =   rp.multiply(C_mn[:,:,:,0],rp.atleast_3d(rp.sin(delta)*rp.cos(phi))) \
+            + rp.multiply(C_mn[:,:,:,1],rp.atleast_3d(rp.cos(delta)*rp.sin(phi))) \
+            - rp.multiply(C_mn[:,:,:,2],rp.atleast_3d(rp.cos(phi)*rp.cos(delta)))   # validated from book eqn 7.42 
     else:
         A = EW
 
     # Compute vortex strength
-    GAMMA  = np.linalg.solve(A,RHS)
+    GAMMA  = rp.linalg.solve(A,RHS)
 
-    # To ensure compatibility for np.linalg.solve across numpy1.0 and numpy2.0
+    # To ensure compatibility for rp.linalg.solve across numpy1.0 and numpy2.0
     RHS    = RHS.squeeze(axis=2)
     GAMMA  = GAMMA.squeeze(axis=2)
 
@@ -251,12 +251,12 @@ def VLM(conditions,settings,geometry):
     RJTS = 0                         
     
     # COMPUTE FREE-STREAM AND ONSET FLOW PARAMETERS. Used throughout the remainder of VLM
-    B2     = np.tile((mach**2 - 1),VD.n_cp[0])
-    SINALF = np.sin(aoa)
-    COSALF = np.cos(aoa)
-    TANALF = np.tan(aoa)
-    SINPSI = np.sin(PSI)
-    COPSI  = np.cos(PSI)
+    B2     = rp.tile((mach**2 - 1),int(VD.n_cp[0]))
+    SINALF = rp.sin(aoa)
+    COSALF = rp.cos(aoa)
+    TANALF = rp.tan(aoa)
+    SINPSI = rp.sin(PSI)
+    COPSI  = rp.cos(PSI)
     COSIN  = COSALF *SINPSI *2.0
     COSINP = COSALF *SINPSI
     COSCOS = COSALF *COPSI
@@ -265,33 +265,33 @@ def VLM(conditions,settings,geometry):
     YAW    = YAWQ /VINF    
     
     # reshape CHORD 
-    dim_1 = len(np.sum(LE_ind, axis=1))
-    dim_2 = np.sum(LE_ind, axis=1)[0]
+    dim_1 = len(rp.sum(LE_ind, axis=1))
+    dim_2 = rp.sum(LE_ind, axis=1)[0]
     
     # COMPUTE EFFECT OF SIDESLIP on DCP intermediate variables. needs change if cosine chorwise spacing added
     FORAXL = COSCOS
     FORLAT = COSIN 
-    TAN_LEi= (VD.XB1[:,LE_ind[0]]-VD.XA1[:,LE_ind[0]])/  np.sqrt((VD.ZB1[:,LE_ind[0]]-VD.ZA1[:,LE_ind[0]])**2 +  (VD.YB1[:,LE_ind[0]]-VD.YA1[:,LE_ind[0]])**2)  
-    TAN_TE = (VD.XB_TE - VD.XA_TE)/ np.sqrt((VD.ZB_TE-VD.ZA_TE)**2 + (VD.YB_TE-VD.YA_TE)**2) 
-    TAN_LE = np.repeat( TAN_LEi, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1)
+    TAN_LEi= (VD.XB1[:,LE_ind[0]]-VD.XA1[:,LE_ind[0]])/  rp.sqrt((VD.ZB1[:,LE_ind[0]]-VD.ZA1[:,LE_ind[0]])**2 +  (VD.YB1[:,LE_ind[0]]-VD.YA1[:,LE_ind[0]])**2)  
+    TAN_TE = (VD.XB_TE - VD.XA_TE)/ rp.sqrt((VD.ZB_TE-VD.ZA_TE)**2 + (VD.YB_TE-VD.YA_TE)**2) 
+    TAN_LE = rp.repeat( TAN_LEi, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1)
     
     TAN_LE = TAN_LE
     TNL    = TAN_LE * 1 # VORLAX's SIGN variable not needed, as these are taken directly from geometry
     TNT    = TAN_TE * 1
-    XIA    = np.broadcast_to((RK-1)/RNMAX, np.shape(B2))
-    XIB    = np.broadcast_to((RK  )/RNMAX, np.shape(B2))
+    XIA    = rp.broadcast_to((RK-1)/RNMAX, rp.shape(B2))
+    XIB    = rp.broadcast_to((RK  )/RNMAX, rp.shape(B2))
     TANA   = TNL *(1. - XIA) + TNT *XIA
     TANB   = TNL *(1. - XIB) + TNT *XIB
     
-    # cumsum GANT loop if KTOP > 0 (don't actually need KTOP with vectorized arrays and np.roll)
+    # cumsum GANT loop if KTOP > 0 (don't actually need KTOP with vectorized arrays and rp.roll)
     GFX    = VD.chord_lengths
     GANT   = strip_cumsum(GFX*GAMMA, chord_breaks[0], RNMAX[LE_ind].reshape(dim_1,dim_2)[0]  )
-    GANT   = np.roll(GANT,1)
+    GANT   = rp.roll(GANT,1)
     GANT[LE_ind] = 0 
     
     GLAT   = GANT *(TANA - TANB) - GFX *GAMMA *TANB
     cos_DL = (YBH-YAH)[LE_ind].reshape(dim_1,dim_2)/VD.D
-    COS_DL = np.repeat( cos_DL, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1)
+    COS_DL = rp.repeat( cos_DL, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1)
     DCPSID = FORLAT * COS_DL *GLAT /(XIB - XIA)
     FACTOR = FORAXL + ONSET
     
@@ -313,13 +313,13 @@ def VLM(conditions,settings,geometry):
     TLE   = TAN_LE[LE_ind].reshape(dim_1,dim_2)
     B2_LE = B2[LE_ind].reshape(dim_1,dim_2)
     T2    = TLE*TLE
-    STB   = np.zeros_like(B2_LE)
-    STB[B2_LE<T2] = np.sqrt(T2[B2_LE<T2]-B2_LE[B2_LE<T2])
+    STB   = rp.zeros_like(B2_LE)
+    STB[B2_LE<T2] = rp.sqrt(T2[B2_LE<T2]-B2_LE[B2_LE<T2])
     
     # DL IS THE DIHEDRAL ANGLE (WITH RESPECT TO THE X-Y PLANE) OF
     # THE IR STREAMWISE STRIP OF HORSESHOE VORTICES. 
-    COD = np.cos(phi[LE_ind]).reshape(dim_1,dim_2)  # Just the LE values 
-    SID = np.sin(phi[LE_ind]).reshape(dim_1,dim_2)  # Just the LE values
+    COD = rp.cos(phi[LE_ind]).reshape(dim_1,dim_2)  # Just the LE values 
+    SID = rp.sin(phi[LE_ind]).reshape(dim_1,dim_2)  # Just the LE values
 
     # Now on to each strip
     PION = 2.0 /RNMAX
@@ -344,8 +344,8 @@ def VLM(conditions,settings,geometry):
 
     # Split into chordwise strengths and sum into strips    
     # SICPLE = COUPLE (ABOUT STRIP CENTERLINE) DUE TO SIDESLIP.
-    CNC    = np.add.reduceat(SINF       ,chord_breaks[0],axis=1)
-    SICPLE = np.add.reduceat(SINF*CORMED,chord_breaks[0],axis=1)
+    CNC    = rp.add.reduceat(SINF       ,chord_breaks[0],axis=1)
+    SICPLE = rp.add.reduceat(SINF*CORMED,chord_breaks[0],axis=1)
 
     # COMPUTE SLOPE (TX) WITH RESPECT TO X-AXIS AT LOAD POINTS BY INTER
     # POLATING BETWEEN CONTROL POINTS AND TAKING INTO ACCOUNT THE LOCAL
@@ -356,8 +356,8 @@ def VLM(conditions,settings,geometry):
     BMLE  = (XLE-XX)*SINF        # These are moment on each panel
     
     # Sum onto the panel
-    CAXL = np.add.reduceat(CAXL,chord_breaks[0],axis=1)
-    BMLE = np.add.reduceat(BMLE,chord_breaks[0],axis=1)
+    CAXL = rp.add.reduceat(CAXL,chord_breaks[0],axis=1)
+    BMLE = rp.add.reduceat(BMLE,chord_breaks[0],axis=1)
     
     SICPLE *= (-1) * COSIN * COD * GAF
     DCP_LE = DCP[LE_ind].reshape(dim_1,dim_2)
@@ -371,41 +371,41 @@ def VLM(conditions,settings,geometry):
     
     # Leading edge suction multiplier. See documentation. This is a negative integer if used
     # Default to 1 unless specified otherwise
-    SPC  = K_SPC*np.ones_like(DCP_LE)
+    SPC  = K_SPC*rp.ones_like(DCP_LE)
     
     # If the vehicle is subsonic and there is vortex lift enabled then SPC changes to -1
-    VL   = np.repeat(VD.vortex_lift,VD.n_sw[0], axis=1)
-    m_b  = np.atleast_2d(mach[:,0]<1.)
+    VL   = rp.repeat(VD.vortex_lift,VD.n_sw[0], axis=1)
+    m_b  = rp.atleast_2d(mach[:,0]<1.)
     SPC_cond      = VL*m_b.T
     SPC[SPC_cond] = -1.
     SPC           = SPC * exposed_leading_edge_flag
     
-    CLE  = CLE + 0.5* DCP_LE *np.sqrt(XLE[LE_ind].reshape(dim_1,dim_2))
-    CSUC = 0.5*np.pi*np.abs(SPC)*(CLE**2)*STB 
+    CLE  = CLE + 0.5* DCP_LE *rp.sqrt(XLE[LE_ind].reshape(dim_1,dim_2))
+    CSUC = 0.5*rp.pi*rp.abs(SPC)*(CLE**2)*STB 
 
     # TFX AND TFZ ARE THE COMPONENTS OF LEADING EDGE FORCE VECTOR ALONG
     # ALONG THE X AND Z BODY AXES.   
     
     SLE  = VD.SLOPE[LE_ind].reshape(dim_1,dim_2)
     ZETA = ZETA[LE_ind].reshape(dim_1,dim_2)
-    XCOS = np.cos(SLE-ZETA) 
-    XSIN = np.sin(SLE-ZETA) 
+    XCOS = rp.cos(SLE-ZETA) 
+    XSIN = rp.sin(SLE-ZETA) 
     TFX  =  1.*XCOS
     TFZ  = -1.*XSIN
 
     # If a negative number is used for SPC a different correction is used. See VORLAX documentation for Lan reference
-    TFX[SPC<0] = XSIN[SPC<0]*np.sign(DCP_LE)[SPC<0]
-    TFZ[SPC<0] = np.abs(XCOS)[SPC<0]*np.sign(DCP_LE)[SPC<0]
+    TFX[SPC<0] = XSIN[SPC<0]*rp.sign(DCP_LE)[SPC<0]
+    TFZ[SPC<0] = rp.abs(XCOS)[SPC<0]*rp.sign(DCP_LE)[SPC<0]
 
     CAXL = CAXL - TFX*CSUC
     
     # Add a dimension into the suction to be chordwise
-    CNC   = CNC + CSUC*np.sqrt(1+T2)*TFZ
+    CNC   = CNC + CSUC*rp.sqrt(1+T2)*TFZ
     
     # FCOS AND FSIN ARE THE COSINE AND SINE OF THE ANGLE BETWEEN
     # THE CHORDLINE OF THE IR-STRIP AND THE X-AXIS    
-    FCOS = np.cos(ZETA)
-    FSIN = np.sin(ZETA)
+    FCOS = rp.cos(ZETA)
+    FSIN = rp.sin(ZETA)
     
     # BFX, BFY, AND BFZ ARE THE COMPONENTS ALONG THE BODY AXES
     # OF THE STRIP FORCE CONTRIBUTION.
@@ -440,8 +440,8 @@ def VLM(conditions,settings,geometry):
 
     # Lift coefficient
     Clift_y   = LIFT/CHORD_strip/ES  
-    CL_wing   = np.add.reduceat(LIFT,span_breaks[0],axis=1)/VD.wing_areas  
-    CLift     = np.atleast_2d(np.sum(LIFT,axis=1)/S_ref).T          
+    CL_wing   = rp.add.reduceat(LIFT,span_breaks[0],axis=1)/VD.wing_areas  
+    CLift     = rp.atleast_2d(rp.sum(LIFT,axis=1)/S_ref).T          
 
     # Drag coefficient
     results   = compute_trefftz_plane_induced_drag(conditions, VD,Clift_y, X, Y, Z, CHORD_strip,S_ref,b_ref)       
@@ -449,12 +449,12 @@ def VLM(conditions,settings,geometry):
     # force coefficeints 
     CX_for   = (TANALF * CLift -  results.CDrag_induced)/(COSALF - SINALF*TANALF)
     CZ_for   = (results.CDrag_induced+ CX_for*COSALF)/SINALF  
-    CY_for   = np.atleast_2d(np.sum(FY,axis=1)/S_ref).T  
+    CY_for   = rp.atleast_2d(rp.sum(FY,axis=1)/S_ref).T  
 
     # moment coefficients 
-    CM_mom   = np.atleast_2d(np.sum(MOMENT,axis=1)/S_ref).T/c_ref  
-    CL_mom   = np.atleast_2d(np.sum(RM,axis=1)/S_ref).T    /b_ref*(-1)                             
-    CN_mom   = np.atleast_2d(np.sum(YM,axis=1)/S_ref).T    /b_ref*(-1)                            
+    CM_mom   = rp.atleast_2d(rp.sum(MOMENT,axis=1)/S_ref).T/c_ref  
+    CL_mom   = rp.atleast_2d(rp.sum(RM,axis=1)/S_ref).T    /b_ref*(-1)                             
+    CN_mom   = rp.atleast_2d(rp.sum(YM,axis=1)/S_ref).T    /b_ref*(-1)                            
    
     # ---------------------------------------------------------------------------------------
     # STEP 13: Pack outputs
@@ -469,8 +469,8 @@ def VLM(conditions,settings,geometry):
     results.spanwise_stations = Y 
     results.CLift_wing        = CL_wing   
     results.sectional_CLift   = Clift_y     
-    results.CP                = np.array(CP    , dtype=settings.floating_point_precision )
-    results.gamma             = np.array(GAMMA , dtype=settings.floating_point_precision ) 
+    results.CP                = rp.array(CP    , dtype=settings.floating_point_precision )
+    results.gamma             = rp.array(GAMMA , dtype=settings.floating_point_precision ) 
     results.V_distribution    = rhs.V_distribution
     results.V_x               = rhs.Vx_ind_total
     results.V_z               = rhs.Vz_ind_total 
@@ -484,12 +484,12 @@ def VLM(conditions,settings,geometry):
     for wing in geometry.wings.values():
         ref = wing.areas.reference
         if wing.xz_plane_symmetric:
-            Clift_wings[wing.tag]      = np.atleast_2d(np.sum(dim_wing_lifts[:,i:(i+2)],axis=1)).T/ref
-            Cdrag_wings[wing.tag]      = np.atleast_2d(np.sum(dim_wing_drags[:,i:(i+2)],axis=1)).T/ref
+            Clift_wings[wing.tag]      = rp.atleast_2d(rp.sum(dim_wing_lifts[:,i:(i+2)],axis=1)).T/ref
+            Cdrag_wings[wing.tag]      = rp.atleast_2d(rp.sum(dim_wing_drags[:,i:(i+2)],axis=1)).T/ref
             i+=1
         else:
-            Clift_wings[wing.tag]      = np.atleast_2d(dim_wing_lifts[:,i]).T/ref
-            Cdrag_wings[wing.tag]      = np.atleast_2d(dim_wing_drags[:,i]).T/ref
+            Clift_wings[wing.tag]      = rp.atleast_2d(dim_wing_lifts[:,i]).T/ref
+            Cdrag_wings[wing.tag]      = rp.atleast_2d(dim_wing_drags[:,i]).T/ref
         i+=1 
     results.CLift_wings         = Clift_wings
     results.CDrag_induced_wings = Cdrag_wings
@@ -513,14 +513,14 @@ def compute_rotation_effects(VD, settings, EW_large, GAMMA, X, CHORD, XLE, XBAR,
     """
     LE_ind   = VD.leading_edge_indices
     RNMAX    = VD.panels_per_strip
-    dim_1    = len(np.sum(LE_ind, axis=1))
-    dim_2    = np.sum(LE_ind, axis=1)[0]
+    dim_1    = len(rp.sum(LE_ind, axis=1))
+    dim_2    = rp.sum(LE_ind, axis=1)[0]
     dim_3    = len(LE_ind[0])
     
     # Computate rotational effects (pitch, roll, yaw rates) on LE suction
     # pick leading edge strip values for EW and reshape GAMMA -> gamma accordingly
     EW    = EW_large[LE_ind, :].reshape(dim_1, dim_2, dim_3) 
-    gamma = np.array(np.split(np.repeat(GAMMA, dim_2, axis=0), dim_1))
+    gamma = rp.array(rp.split(rp.repeat(GAMMA, dim_2, axis=0), dim_1))
     CLE   = (EW*gamma).sum(axis=2)
     
     # Up till EFFINC, some of the following values were computed in compute_RHS_matrix().
@@ -528,7 +528,7 @@ def compute_rotation_effects(VD, settings, EW_large, GAMMA, X, CHORD, XLE, XBAR,
     # LOCATE VORTEX LATTICE CONTROL POINT WITH RESPECT TO THE
     # ROTATION CENTER (XBAR, 0, ZBAR). THE RELATIVE COORDINATES
     # ARE XGIRO, YGIRO, AND ZGIRO. 
-    XGIRO = X - CHORD*XLE - np.repeat( XBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
+    XGIRO = X - CHORD*XLE - rp.repeat( XBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
     YGIRO = rhs.YGIRO
     ZGIRO = rhs.ZGIRO
     
@@ -545,7 +545,7 @@ def compute_rotation_effects(VD, settings, EW_large, GAMMA, X, CHORD, XLE, XBAR,
     #          LEADING EDGE.
     EFFINC = VX *rhs.SCNTL + VY *rhs.CCNTL *rhs.SID - VZ *rhs.CCNTL *rhs.COD 
     CLE = CLE - EFFINC[LE_ind].reshape(dim_1,dim_2) 
-    CLE = np.where(STB > 0, CLE /RNMAX[LE_ind].reshape(dim_1,dim_2) /STB, CLE)
+    CLE = rp.where(STB > 0, CLE /RNMAX[LE_ind].reshape(dim_1,dim_2) /STB, CLE)
     
     return CLE
 
@@ -559,10 +559,10 @@ def strip_cumsum(arr, chord_breaks, strip_lengths):
     Assumptions:
     chordwise_breaks always starts at 0
     """    
-    cumsum  = np.cumsum(arr, axis=1)
+    cumsum  = rp.cumsum(arr, axis=1)
     offsets = cumsum[:,chord_breaks-1]
     offsets[:,0]  = 0
-    offsets = np.repeat(offsets, strip_lengths, axis=1)
+    offsets = rp.repeat(offsets, strip_lengths, axis=1)
     return cumsum - offsets
     
     
@@ -578,11 +578,11 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
     # ------------------------------------------------------------------------------------------
 
     # Initialize results storage
-    CDi_total         = np.zeros(n_cases)
-    CDi_wing          = np.zeros((n_cases, n_wings))
-    D_induced         = np.zeros((n_cases, n_wings))
-    Cd_i_distribution = np.zeros_like(cl)
-    alpha_i           = np.zeros_like(cl) 
+    CDi_total         = rp.zeros(n_cases)
+    CDi_wing          = rp.zeros((n_cases, n_wings))
+    D_induced         = rp.zeros((n_cases, n_wings))
+    Cd_i_distribution = rp.zeros_like(cl)
+    alpha_i           = rp.zeros_like(cl) 
 
     # Calculate circulation for this case
     circulation_dist = 0.5 * chord_dist[0] * v_inf * cl 
@@ -590,7 +590,7 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
     ws = 0
     # Induced velocity calculation for this case 
     for wing_index,wing_segments in enumerate(VD.n_sw[0]):
-        ws_prev = ws
+        ws_prev = ws*1
         ws += wing_segments
         circulation_segments = circulation_dist[:,ws_prev:ws]
         cl_segments = cl[:, ws_prev:ws]
@@ -606,64 +606,74 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
         x_centerpoints = (x_control_points[:,:-1] + x_control_points[:,1:]) / 2
 
         # Shed vortex segments for this case
-        differences = np.diff(y_control_points,axis=1)
-        direction   = np.sign(differences) * np.ones_like(y_centerpoints)
-        shed_vortex_segments = direction * np.diff(circulation_segments, axis=1)
+        differences = rp.diff(y_control_points,axis=1)
+        direction   = rp.sign(differences) * rp.ones_like(y_centerpoints)
+        shed_vortex_segments = direction * rp.diff(circulation_segments, axis=1)
 
         # Trefftz Plane Y-Z location:
         TP_y_centerpoints   = y_centerpoints
-        TP_z_centerpoints   = np.cos(alpha) * z_centerpoints - np.sin(alpha) * x_centerpoints
+        TP_z_centerpoints   = rp.cos(alpha) * z_centerpoints - rp.sin(alpha) * x_centerpoints
         TP_y_control_points = y_control_points
-        TP_z_control_points = np.cos(alpha) * z_control_points - np.sin(alpha) * x_control_points
+        TP_z_control_points = rp.cos(alpha) * z_control_points - rp.sin(alpha) * x_control_points
 
-        V_induced = np.zeros_like(y_control_points)
+        V_induced = rp.zeros_like(y_control_points)
         for j in range(len(y_control_points[0])): # Loop through each control point
             # Distance from segment to control point
-            A = ( np.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)**2
-            B = ( np.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)**2
+            A = ( rp.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)**2
+            B = ( rp.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)**2
             r = (A + B) ** (0.5)
             
             # Calculate normal vector to the wake trace
             if len(TP_y_control_points[0]) < 2 or len(TP_z_control_points[0]) < 2 : 
-                slope =  np.zeros((n_cases,1)) 
+                slope =  rp.zeros((n_cases,1)) 
                 V_induced[:,j] = 0                
             else:
-                slope = np.gradient(TP_z_control_points, TP_y_control_points[0],axis=1)
+                # TODO: this slope should be calculated in relative to the spanwise direction
+                # slope = rp.gradient(TP_z_control_points, TP_y_control_points[0],axis=1)
+
+                dz = TP_z_control_points[:, 1:] - TP_z_control_points[:, :-1]
+                dy = TP_y_control_points[0, 1:] - TP_y_control_points[0, :-1]
+
+                # Replace zero spacing with 1.0 (or any constant)
+                dy = rp.where(dy == 0, rp.ones_like(dy), dy)
+
+                slope = dz / dy
+                slope = rp.concatenate([slope[:, :1], slope], axis=1)
             
                 # Normal vector to the wake trace
-                n_hat      = np.zeros((n_cases,2 ))
-                n_hat[:,0] = np.cos(np.arctan2(-1, slope[:,j]))
-                n_hat[:,1] = np.sin(np.arctan2(-1, slope[:,j]))
+                n_hat      = rp.zeros((n_cases,2 ))
+                n_hat[:,0] = rp.cos(rp.arctan2(-1, slope[:,j]))
+                n_hat[:,1] = rp.sin(rp.arctan2(-1, slope[:,j]))
                 
                 # Calculate induced velocity vector
-                v_hat         =  np.zeros((n_cases ,2, len(TP_z_centerpoints[0]) ))
-                v_hat[:,0,:]  = -1*( np.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)/r
-                v_hat[:,1,:]  =    ( np.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)/r 
-                v = v_hat * np.tile(shed_vortex_segments[:,None,:],(1, 2,1)) / (2*np.pi*np.tile(r[:,None, :],(1, 2, 1)))
+                v_hat         =  rp.zeros((n_cases ,2, len(TP_z_centerpoints[0]) ))
+                v_hat[:,0,:]  = -1*( rp.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)/r
+                v_hat[:,1,:]  =    ( rp.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)/r 
+                v = v_hat * rp.tile(shed_vortex_segments[:,None,:],(1, 2,1)) / (2*rp.pi*rp.tile(r[:,None, :],(1, 2, 1)))
                 
                 # Downwash. Dot product of normal vector and induced velocity vector.
-                V_induced[:,j] = np.sum( np.tile(n_hat[:,0][:, None], (1,len(TP_z_centerpoints[0]) )) *v[:,0,:] +  np.tile(n_hat[:,1][:, None], (1,len(TP_z_centerpoints[0]) ))*v[:,1,:], axis=1) 
+                V_induced[:,j] = rp.sum( rp.tile(n_hat[:,0][:, None], (1,len(TP_z_centerpoints[0]) )) *v[:,0,:] +  rp.tile(n_hat[:,1][:, None], (1,len(TP_z_centerpoints[0]) ))*v[:,1,:], axis=1) 
 
-        drag_sum = np.sqrt(np.square(y_control_points[:, 0]) + np.square(z_control_points[:, 0]))
-        s_wake   = np.atleast_2d(deepcopy(drag_sum)).T
+        drag_sum = rp.sqrt(rp.square(y_control_points[:, 0]) + rp.square(z_control_points[:, 0]))
+        s_wake   = rp.atleast_2d(deepcopy(drag_sum)).T
         for j in range(1,len(y_control_points[0])): 
-            drag_sum +=  np.sqrt(np.square(y_control_points[:,j] - y_control_points[:,j-1]) + np.square(z_control_points[:,j] - z_control_points[:,j-1]))
-            s_wake    =  np.hstack((s_wake, np.atleast_2d(drag_sum).T))
+            drag_sum +=  rp.sqrt(rp.square(y_control_points[:,j] - y_control_points[:,j-1]) + rp.square(z_control_points[:,j] - z_control_points[:,j-1]))
+            s_wake    =  rp.hstack((s_wake, rp.atleast_2d(drag_sum).T))
         D_induced[:,wing_index] = -0.5 * rho * trapezoid(V_induced * circulation_segments, s_wake, axis=1)
 
         # Per-wing CDi (using wing's reference area)
         CDi_wing[:,wing_index] = D_induced[:,wing_index] / (0.5 * rho * v_inf**2 * VD.wing_areas[:,wing_index])
 
         # Store results for this case
-        alpha_i_case = np.arctan(V_induced/ v_inf)
-        Cd_i_distribution[:,ws_prev:ws] = cl_segments * np.sin(-alpha_i_case)
+        alpha_i_case = rp.arctan(V_induced/ v_inf)
+        Cd_i_distribution[:,ws_prev:ws] = cl_segments * rp.sin(-alpha_i_case)
         alpha_i[:,ws_prev:ws] = alpha_i_case
 
-    CDi_total = np.sum(D_induced, axis=1) / (0.5 * rho * v_inf**2 * SREF) 
+    CDi_total = rp.sum(D_induced, axis=1) / (0.5 * rho * v_inf**2 * SREF) 
  
     # Package results
     results                          = Data()
-    results.CDrag_induced            = CDi_total[:, np.newaxis]
+    results.CDrag_induced            = CDi_total[:, rp.newaxis]
     results.sectional_CDrag_induced  = Cd_i_distribution
     results.CDrag_induced_wing       = CDi_wing
     results.alpha_induced            = alpha_i 

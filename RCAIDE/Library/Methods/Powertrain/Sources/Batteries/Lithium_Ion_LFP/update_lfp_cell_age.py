@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np  
+import RNUMPY as rp  
  
 # ----------------------------------------------------------------------------------------------------------------------
 # update_lfp_cell_age
@@ -70,14 +70,14 @@ def update_lfp_cell_age(battery_module, segment, battery_conditions, increment_b
     t                  = battery_conditions.cell.cycle_in_day         
     charge_thougput    = battery_conditions.cell.charge_throughput
     Temp               = (battery_conditions.cell.temperature) 
-    C_rate             = np.sqrt(np.mean(I**2)) /battery_module.cell.nominal_capacity
+    C_rate             = rp.sqrt(rp.mean(I**2)) /battery_module.cell.nominal_capacity
     
     # Semi Emperical aging model  
-    E_fade_factor = 1-(((Temp**2*2.0916e-8)+(-1.2179e-5*Temp)+0.0018)*np.exp(((-1.7082e-6*Temp)+0.0556)*C_rate) \
-                        * charge_thougput + (5.9808e6) * np.exp(0.68989*SOC) * np.exp(-6.4647e3/Temp) * t**(0.5))
+    E_fade_factor = 1-(((Temp**2*2.0916e-8)+(-1.2179e-5*Temp)+0.0018)*rp.exp(((-1.7082e-6*Temp)+0.0556)*C_rate) \
+                        * charge_thougput + (5.9808e6) * rp.exp(0.68989*SOC) * rp.exp(-6.4647e3/Temp) * t**(0.5))
 
 
-    battery_conditions.cell.capacity_fade_factor     = np.minimum(E_fade_factor[-1][0],battery_conditions.cell.capacity_fade_factor)
+    battery_conditions.cell.capacity_fade_factor     = rp.minimum(E_fade_factor[-1][0],battery_conditions.cell.capacity_fade_factor)
     
     if increment_battery_age_by_one_day:
         battery_conditions.cell.cycle_in_day += 1 # update battery age by one day 

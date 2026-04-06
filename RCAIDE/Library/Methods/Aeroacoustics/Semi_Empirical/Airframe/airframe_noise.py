@@ -17,7 +17,7 @@ from RCAIDE.Library.Methods.Aeroacoustics.Metrics  import A_weighting_metric
 from RCAIDE.Library.Methods.Aeroacoustics.Common   import SPL_arithmetic 
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Airframe Noise 
@@ -157,30 +157,30 @@ def airframe_noise(microphone_locations, segment, config, settings):
     
     viscosity           = segment.conditions.freestream.kinematic_viscosity[:,0] 
     M                   = segment.conditions.freestream.mach_number 
-    SPL_total_history   = np.zeros((n_cpts,n_mic,num_f)) 
-    SPLt_dBA_history    = np.zeros((n_cpts,n_mic,num_f))   
+    SPL_total_history   = rp.zeros((n_cpts,n_mic,num_f)) 
+    SPLt_dBA_history    = rp.zeros((n_cpts,n_mic,num_f))   
 
     # Distance vector from the aircraft position in relation to the microphone coordinates [meters]
-    distance          = np.linalg.norm(microphone_locations,axis = 1)
+    distance          = rp.linalg.norm(microphone_locations,axis = 1)
     
     altitude          = abs(microphone_locations[:,2])
     sideline_distance =  microphone_locations[:,1] 
     
     # Polar angle emission vector relatively to the aircraft to the microphone coordinates, [rad] 
 
-    theta     =  np.zeros(n_mic)
+    theta     =  rp.zeros(n_mic)
     bool_1    = (microphone_locations[:,1] > 0) &  (microphone_locations[:,0] > 0)
     bool_2    = (microphone_locations[:,1] > 0) &  (microphone_locations[:,0] < 0)
     bool_3    = (microphone_locations[:,1] < 0) &  (microphone_locations[:,0] < 0)
     bool_4    = (microphone_locations[:,1] < 0) &  (microphone_locations[:,0] > 0)
     
-    theta[bool_1] =  np.pi - np.arctan(microphone_locations[:,1]/microphone_locations[:,0])[bool_1]
-    theta[bool_2] =  np.arctan(microphone_locations[:,1]/ abs(microphone_locations[:,0]))[bool_2]
-    theta[bool_3] =  np.arctan(abs(microphone_locations[:,1])/ abs(microphone_locations[:,0]))[bool_3]
-    theta[bool_4] =  np.pi - np.arctan(abs(microphone_locations[:,1])/ microphone_locations[:,0])[bool_4]
+    theta[bool_1] =  rp.pi - rp.arctan(microphone_locations[:,1]/microphone_locations[:,0])[bool_1]
+    theta[bool_2] =  rp.arctan(microphone_locations[:,1]/ abs(microphone_locations[:,0]))[bool_2]
+    theta[bool_3] =  rp.arctan(abs(microphone_locations[:,1])/ abs(microphone_locations[:,0]))[bool_3]
+    theta[bool_4] =  rp.pi - rp.arctan(abs(microphone_locations[:,1])/ microphone_locations[:,0])[bool_4]
     
      # Azimuthal (sideline) angle emission vector relatively to the aircraft to the microphone coordinates, [rad] 
-    phi   = np.arctan(sideline_distance/altitude)
+    phi   = rp.arctan(sideline_distance/altitude)
     
     
     # START LOOP FOR EACH POSITION OF AIRCRAFT   
@@ -193,13 +193,13 @@ def airframe_noise(microphone_locations, segment, config, settings):
       
             # Flap noise 
             if deltaf==0:
-                SPL_flap = np.zeros(num_f)
+                SPL_flap = rp.zeros(num_f)
             else:
                 SPL_flap = trailing_edge_flap_noise(Sf,cf,deltaf,slots,velocity[i,0],M[i],phi[j],theta[j],distance[j],frequency)  
     
             # Main landing gear noise     
             if main_gear_extended == False:  
-                SPL_main_landing_gear = np.zeros(num_f)
+                SPL_main_landing_gear = rp.zeros(num_f)
             else:
                 SPL_main_landing_gear = landing_gear_noise(Dp,Hp,main_wheels,M[i],velocity[i,0],phi[j],theta[j],distance[j],frequency)   
                 if main_units>1: # Incoherent summation of each main landing gear unit
@@ -207,12 +207,12 @@ def airframe_noise(microphone_locations, segment, config, settings):
                 
             # Nose landing gear noise
             if nose_gear_extended == False:                  
-                SPL_nose_landing_gear = np.zeros(num_f)
+                SPL_nose_landing_gear = rp.zeros(num_f)
             else:
                 SPL_nose_landing_gear = landing_gear_noise(Dn,Hn,nose_wheels,M[i],velocity[i,0],phi[j],theta[j],distance[j],frequency)   
                
             # Total Airframe Noise
-            SPL_total = 10.*np.log10( 10.0**(0.1*SPL_wing)+ 10.0**(0.1*SPLht) + 10.0**(0.1*SPLvt) + 10.0**(0.1*SPL_flap) + 10.0**(0.1*SPL_main_landing_gear)+ 10.0**(0.1*SPL_nose_landing_gear))      
+            SPL_total = 10.*rp.log10( 10.0**(0.1*SPL_wing)+ 10.0**(0.1*SPLht) + 10.0**(0.1*SPLvt) + 10.0**(0.1*SPL_flap) + 10.0**(0.1*SPL_main_landing_gear)+ 10.0**(0.1*SPL_nose_landing_gear))      
                 
             SPL_total_history[i,j,:]             = SPL_total  
             
@@ -223,6 +223,6 @@ def airframe_noise(microphone_locations, segment, config, settings):
     airframe_noise                        = Data()  
     airframe_noise.SPL                    = SPL_arithmetic(SPL_total_history, sum_axis= 2)
     airframe_noise.SPL_1_3_spectrum       = SPL_total_history
-    airframe_noise.SPL_dBA                = SPL_arithmetic(np.atleast_2d(SPLt_dBA_history), sum_axis= 2) 
+    airframe_noise.SPL_dBA                = SPL_arithmetic(rp.atleast_2d(SPLt_dBA_history), sum_axis= 2) 
     airframe_noise.noise_time             = noise_time 
     return airframe_noise

@@ -16,7 +16,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Rotor.compute_electri
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Rotor.append_electric_rotor_residual_and_unknown import append_electric_rotor_residual_and_unknown
  
 # python imports 
-import numpy as np
+import RNUMPY as rp
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Electric_Rotor
 # ----------------------------------------------------------------------------------------------------------------------  

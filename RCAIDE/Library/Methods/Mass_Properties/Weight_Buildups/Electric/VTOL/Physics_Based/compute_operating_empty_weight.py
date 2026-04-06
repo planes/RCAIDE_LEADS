@@ -15,7 +15,7 @@ import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Electric.Common as
 from RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.Common import compute_payload_weight
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute Operating Empty Weight 
@@ -221,7 +221,7 @@ def compute_operating_empty_weight(vehicle,settings = None):
 
             # Add associated weights
             weight.BRS   += (prop_BRS_weight + lift_rotor_BRS_weight)
-            maxLiftPower = 1.15*maxLift*(disk_area_factor*np.sqrt(maxLift/(2*rho_ref*np.pi*rTip_ref**2)) + bladeSol_ref*AvgBladeCD/8*maxVTip**3/(maxLift/(rho_ref*np.pi*rTip_ref**2)))
+            maxLiftPower = 1.15*maxLift*(disk_area_factor*rp.sqrt(maxLift/(2*rho_ref*rp.pi*rTip_ref**2)) + bladeSol_ref*AvgBladeCD/8*maxVTip**3/(maxLift/(rho_ref*rp.pi*rTip_ref**2)))
             # Tail Rotor
             if number_of_lift_rotors == 1: # this assumes that the vehicle is an electric helicopter with a tail rotor
                 maxLiftOmega   = maxVTip/rTip_ref
@@ -362,7 +362,7 @@ def compute_operating_empty_weight(vehicle,settings = None):
             print('Weight convergence failed!')
             return output 
         
-    print('Converged MTOW = ' + str(round(MTOW)) + ' kg')
+    print('Converged MTOW = ' + str(round(float(MTOW))) + ' kg')
 
     return output
 

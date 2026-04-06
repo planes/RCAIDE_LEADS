@@ -10,7 +10,7 @@
 import RCAIDE 
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -68,18 +68,18 @@ def initialize_conditions_unpack_unknowns(segment):
     # check for initial velocity
     if q is None: 
         if not segment.state.initials: raise AttributeError('dynamic pressure not set')
-        v_mag = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        v_mag = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
     else: 
         # Update freestream to get density
         RCAIDE.Library.Mission.Common.Update.atmosphere(segment)
         rho = conditions.freestream.density[:,0]       
     
         # process velocity vector
-        v_mag = np.sqrt(2*q/rho)
+        v_mag = rp.sqrt(2*q/rho)
         
-    v_x   = np.cos(beta)*v_mag * np.cos(climb_angle)
-    v_y   = np.sin(beta)*v_mag * np.cos(climb_angle)
-    v_z   = -v_mag * np.sin(climb_angle)
+    v_x   = rp.cos(beta)*v_mag * rp.cos(climb_angle)
+    v_y   = rp.sin(beta)*v_mag * rp.cos(climb_angle)
+    v_z   = -v_mag * rp.sin(climb_angle)
     
     # pack conditions    
     conditions.frames.inertial.velocity_vector[:,0] = v_x
@@ -160,7 +160,7 @@ def update_differentials(segment):
     vz = -v[:,2,None] # maintain column array
 
     # get overall time step
-    dt = (dz/np.dot(I,vz))[-1]
+    dt = (dz/rp.dot(I,vz))[-1]
 
     # rescale operators
     x = x * dt
@@ -168,7 +168,7 @@ def update_differentials(segment):
     I = I * dt
     
     # Calculate the altitudes
-    alt = np.dot(I,vz) + alt0
+    alt = rp.dot(I,vz) + alt0
     
     # pack
     t_initial                                       = segment.state.conditions.frames.inertial.time[0,0]

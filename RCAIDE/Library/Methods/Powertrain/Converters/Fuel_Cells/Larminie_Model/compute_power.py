@@ -5,7 +5,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 from .compute_voltage import compute_voltage 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Find Power Larminie
@@ -32,5 +32,5 @@ def compute_power(current_density, fuel_cell, sign=1.0):
     i1            = current_density
     A             = fuel_cell.interface_area
     v             = compute_voltage(fuel_cell,current_density)   # useful voltage vector
-    power_out     = sign* np.multiply(v,i1)*A                    # obtain power output in W/cell 
+    power_out     = sign* rp.multiply(v,i1)*A                    # obtain power output in W/cell 
     return power_out

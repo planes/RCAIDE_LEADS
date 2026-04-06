@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core  import Units ,  Data 
  
 # python imports 
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 import os
 # ----------------------------------------------------------------------------------------------------------------------

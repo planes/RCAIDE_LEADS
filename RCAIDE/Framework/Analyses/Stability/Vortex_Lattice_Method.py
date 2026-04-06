@@ -13,7 +13,7 @@ from RCAIDE.Framework.Analyses                                 import Process
 from RCAIDE.Library.Methods.Stability                          import Common
 from .Stability                                                import Stability     
 from RCAIDE.Library.Methods.Stability.Vortex_Lattice_Method    import *  
-import  numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vortex_Lattice_Method
@@ -74,12 +74,12 @@ class Vortex_Lattice_Method(Stability):
         self.settings.vortex_distribution                           = Data()
         self.settings.leading_edge_suction_multiplier               = 1.0  
         self.settings.use_VORLAX_matrix_calculation                 = False
-        self.settings.floating_point_precision                      = np.float32 
+        self.settings.floating_point_precision                      = rp.float32 
         
         # conditions table, used for surrogate model training
         self.training                                               = Data()  
-        self.training.angle_of_attack                               = np.array([-5., -2. , 1E-20 , 2.0, 5.0, 8.0, 12., 45., 75.]) * Units.deg 
-        self.training.Mach                                          = np.array([0.1  ,0.3,  0.5,  0.65 , 0.85 , 0.9, 1.3, 1.35 , 1.5 , 2.0, 2.25 , 2.5  , 3.5])             
+        self.training.angle_of_attack                               = rp.array([-5., -2. , 1E-20 , 2.0, 5.0, 8.0, 12., 45., 75.]) * Units.deg 
+        self.training.Mach                                          = rp.array([0.1  ,0.3,  0.5,  0.65 , 0.85 , 0.9, 1.3, 1.35 , 1.5 , 2.0, 2.25 , 2.5  , 3.5])             
                       
         self.training.subsonic                                      = None
         self.training.supersonic                                    = None

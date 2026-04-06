@@ -14,7 +14,7 @@ from   RCAIDE.Library.Methods.Emissions.Chemical_Reactor_Network_Method import e
 
 # Python imports
 import pandas as pd
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  References
@@ -114,7 +114,7 @@ def main():
     print(df.to_string(index=False))
 
 
-    error = np.abs((rcaide_values["EI_CO2"] - ICAO_EI["EI_CO2"]) / ICAO_EI["EI_CO2"]) * 100
+    error = rp.abs((rcaide_values["EI_CO2"] - ICAO_EI["EI_CO2"]) / ICAO_EI["EI_CO2"]) * 100
     print("\nError in CO2 [%]:", error)
     assert error < 10
 

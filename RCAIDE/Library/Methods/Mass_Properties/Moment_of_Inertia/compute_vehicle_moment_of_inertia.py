@@ -8,7 +8,7 @@
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.compute_component_moment_of_inertia import compute_component_moment_of_inertia
 
 # python imports
-import numpy as  np
+import RNUMPY as rp
 # ------------------------------------------------------------------        
 #  Component moments of inertia (MOI) tensors
 # ------------------------------------------------------------------  
@@ -32,18 +32,18 @@ def compute_vehicle_moment_of_inertia(vehicle, moment_of_inertia_df,overwrite_mo
     N/A
     '''    
     if verbose:
-        print("\n\n=== COMPONENT MOMENT OF INTERTIA BREAKDOWN REPORT ===" )    
+        print("\n\n=== COMPONENT MOMENT OF inertia BREAKDOWN REPORT ===" )    
         print("Component \t \t \t Ixx \t \t Iyy  \t \t Izz" )        
      
-    # Compute the moment of intertia of all components   
-    total_MOI    = np.zeros((3, 3))               
+    # Compute the moment of inertia of all components   
+    total_MOI    = rp.zeros((3, 3))               
     for key in vehicle.keys():
         item       = vehicle[key]  
         total_MOI  = compute_component_moment_of_inertia(moment_of_inertia_df,item,vehicle,total_MOI ,segment, verbose)
     moment_of_inertia_df = moment_of_inertia_df[moment_of_inertia_df["Mass (kg)"] != 0].reset_index(drop=True)
     # print center of gravity  
     if verbose:
-        print('\n ***** Aircraft moment of intertia tensor ***** ')
+        print('\n ***** Aircraft moment of inertia tensor ***** ')
         print(total_MOI) 
     moment_of_inertia_df.loc[len(moment_of_inertia_df)] = [
     "Aircraft Total",
@@ -69,7 +69,7 @@ def compute_vehicle_moment_of_inertia(vehicle, moment_of_inertia_df,overwrite_mo
         segment.state.conditions.weights.vehicle.moments_of_inertia_Izy  = total_MOI[2,1] * ones_row(1)
         segment.state.conditions.weights.vehicle.moments_of_inertia_Izz  = total_MOI[2,2] * ones_row(1)        
     
-    if overwrite_moment_of_intertia:
+    if overwrite_moment_of_inertia:
         vehicle.mass_properties.moments_of_inertia.tensor = total_MOI 
         
     return total_MOI,moment_of_inertia_df

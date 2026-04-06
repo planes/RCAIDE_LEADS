@@ -270,8 +270,8 @@ def compute_combustor_performance(results, combustor, Temp_air, Pres_air, mdot_a
         V_PZ              = (combustor.volume/combustor.length) * combustor.L_PZ # [m^3] Volume of the Primary Zone
         V_PZ_PSR          = V_PZ / combustor.N_PZ                          # [m^3] Volume of each PSR
         mdot_air_PZ       = f_air_PZ * mdot_air                            # [kg/s] Air mass flow rate in the Primary Zone
-        phi_PSR           = np.linspace(phi_sign - 2 * sigma_phi, phi_sign + 2 * sigma_phi, combustor.N_PZ) # [-] Equivalence ratio in each PSR 
-        Delta_phi         = np.abs(phi_PSR[0] - phi_PSR[1])                # [-] Equivalence ratio step in the Primary Zone
+        phi_PSR           = rp.linspace(phi_sign - 2 * sigma_phi, phi_sign + 2 * sigma_phi, combustor.N_PZ) # [-] Equivalence ratio in each PSR 
+        Delta_phi         = rp.abs(phi_PSR[0] - phi_PSR[1])                # [-] Equivalence ratio step in the Primary Zone
 
         fuel              = ct.Solution(gas)                               # [-] Fuel object
         fuel.TPX          = combustor.fuel_data.temperature, combustor.fuel_data.pressure, combustor.fuel_data.fuel_surrogate_S1                   # [K, Pa, -] Temperauture, Pressure and Mole fraction composition of fuel
@@ -281,15 +281,15 @@ def compute_combustor_performance(results, combustor, Temp_air, Pres_air, mdot_a
         air_reservoir     = ct.Reservoir(air)                              # [-] Air reservoir
         fuel_hot          = ct.Solution(gas)                               # [-] Fuel hot state
         fuel_hot.TPX      = Temp_air, Pres_air, combustor.fuel_data.fuel_surrogate_S1                     # [K, Pa, -] Temperauture, Pressure and Mole fraction composition of hot fuel
-        delta_h           = np.abs(fuel.h - fuel_hot.h)                    # [J/kg] Fuel specific enthalpy difference
+        delta_h           = rp.abs(fuel.h - fuel_hot.h)                    # [J/kg] Fuel specific enthalpy difference
 
         PZ_Structures     = {"PSRs": {}, "MFC_AirToPSR": {}, "MFC_FuelToPSR": {}, "PSR_Networks": {}, "MFC_PSRToMixer": {}} # [-] Primary Zone structures
         mdot_PZ, f_PSR_data, mass_psr_list = [], [], [] # [-] Arrays to store results
         mixer             = ct.ConstPressureReactor(air)                   # [-] Mixer object
 
         phi_diff          = phi_PSR - phi_sign                             # [-] Equivalence ratio difference
-        f_PSR_data        = (1 / (np.sqrt(2 * np.pi) * sigma_phi)) * np.exp(-(phi_diff ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-] Fraction of mass flow entering each reactor
-        f_PSR_data       /= np.sum(f_PSR_data)                             # [-] Normalizes mass flow rate fraction in each PSR
+        f_PSR_data        = (1 / (rp.sqrt(2 * rp.pi) * sigma_phi)) * rp.exp(-(phi_diff ** 2) / (2 * sigma_phi ** 2)) * Delta_phi # [-] Fraction of mass flow entering each reactor
+        f_PSR_data       /= rp.sum(f_PSR_data)                             # [-] Normalizes mass flow rate fraction in each PSR
         
         # ------------------------------------------------------------------
         #  Primary Zone (PZ)
@@ -378,7 +378,7 @@ def compute_combustor_performance(results, combustor, Temp_air, Pres_air, mdot_a
         mdot_total_sm                       = combustor.f_SM * mdot_tot_PZ # [kg/s] Initial total mass flow rate in slow mode
         mdot_total_fm                       = f_FM * mdot_tot_PZ           # [kg/s] Initial total mass flow rate in fast mode
         dz                                  = combustor.L_SZ / combustor.N_SZ # [m] Discretization step size
-        z_positions                         = np.linspace(0, combustor.L_SZ, combustor.N_SZ + 1) # [m] Axial position array
+        z_positions                         = rp.linspace(0, combustor.L_SZ, combustor.N_SZ + 1) # [m] Axial position array
 
         # Slow Mode 
         mixed_gas_sm                        = ct.Solution(gas)             # [-] Slow mode gas object

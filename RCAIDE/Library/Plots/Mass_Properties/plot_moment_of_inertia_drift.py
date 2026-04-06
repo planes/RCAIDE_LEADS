@@ -1,4 +1,4 @@
-# RCAIDE/Library/Plots/Mass_Properties/plot_moment_of_intertia_drift.py
+# RCAIDE/Library/Plots/Mass_Properties/plot_moment_of_inertia_drift.py
 # 
 # 
 # Created:  Jul 2023, M. Clarke
@@ -15,7 +15,7 @@ import numpy as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  PLOTS
 # ----------------------------------------------------------------------------------------------------------------------    
-def plot_moment_of_intertia_drift(results,
+def plot_moment_of_inertia_drift(results,
                              save_figure = False,
                              show_legend = True,
                              save_filename = "Moment_of_Inertia" ,
@@ -152,7 +152,7 @@ def plot_moment_of_intertia_drift(results,
     fig.subplots_adjust(top=0.8)
     
     # set title of plot 
-    title_text    = 'Moment of Intertia'      
+    title_text    = 'Moment of inertia'      
     fig.suptitle(title_text)
     
     if save_figure:

@@ -12,7 +12,7 @@ import  RCAIDE
 from RCAIDE.Framework.Core    import Units ,  Data
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Propulsion Systems Weight 
@@ -268,7 +268,7 @@ def compute_nacelle_weight(ref_propulsor,ref_nacelle,NENG):
         - L is nacelle length [ft]
         - T is sea level static thrust [lb]
     """ 
-    TNAC   = NENG + 0.5 * (NENG - 2 * np.floor(NENG / 2.))
+    TNAC   = NENG + 0.5 * (NENG - 2 * rp.floor(NENG / 2.))
     DNAC   = ref_nacelle.diameter / Units.ft
     XNAC   = ref_nacelle.length / Units.ft
     FTHRST = ref_propulsor.sealevel_static_thrust * 1 / Units.lbf
@@ -308,7 +308,7 @@ def compute_thrust_reverser_weight(ref_propulsor,NENG):
         - T is sea level static thrust [lb]
         - N is number of engines
     """ 
-    TNAC = NENG + 1. / 2 * (NENG - 2 * np.floor(NENG / 2.))
+    TNAC = NENG + 1. / 2 * (NENG - 2 * rp.floor(NENG / 2.))
     THRUST = ref_propulsor.sealevel_static_thrust * 1 / Units.lbf
     WTHR = 0.034 * THRUST * TNAC
     return WTHR * Units.lbs

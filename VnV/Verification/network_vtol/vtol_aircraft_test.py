@@ -14,7 +14,8 @@ from RCAIDE.Library.Plots  import *
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed    import estimate_stall_speed 
   
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
+rp.use_torch = True
 import sys
 import matplotlib.pyplot as plt    
 import os
@@ -93,14 +94,14 @@ def tiltrotor_transition_test(update_regression_values):
     
     # Store errors 
     error = Data() 
-    error.hover_throttle  = np.max(np.abs( hover_throttle_truth - hover_throttle )/ hover_throttle_truth )
-    error.cruise_rpm      = np.max(np.abs( cruise_rpm_truth - cruise_rpm  )/ cruise_rpm_truth )
+    error.hover_throttle  = rp.max(rp.abs( hover_throttle_truth - hover_throttle )/ hover_throttle_truth )
+    error.cruise_rpm      = rp.max(rp.abs( cruise_rpm_truth - cruise_rpm  )/ cruise_rpm_truth )
     
     print('Errors:')
     print(error)
       
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-1)  
+        assert(rp.abs(v)<1e-1)  
     return
  
 
@@ -138,15 +139,15 @@ def tiltwing_transition_test(update_regression_values):
     
     # Store errors 
     error = Data() 
-    error.hover_throttle             = np.max(np.abs( hover_throttle_truth            - hover_throttle            )/ hover_throttle_truth            )
-    error.vertical_climb_1_throttle  = np.max(np.abs( vertical_climb_1_throttle_truth - vertical_climb_1_throttle )/ vertical_climb_1_throttle_truth ) 
-    error.vertical_descent_throttle  = np.max(np.abs( vertical_descent_throttle_truth - vertical_descent_throttle )/ vertical_descent_throttle_truth )
+    error.hover_throttle             = rp.max(rp.abs( hover_throttle_truth            - hover_throttle            )/ hover_throttle_truth            )
+    error.vertical_climb_1_throttle  = rp.max(rp.abs( vertical_climb_1_throttle_truth - vertical_climb_1_throttle )/ vertical_climb_1_throttle_truth ) 
+    error.vertical_descent_throttle  = rp.max(rp.abs( vertical_descent_throttle_truth - vertical_descent_throttle )/ vertical_descent_throttle_truth )
  
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-1)   # lower tolerance due to lose bounds on prop-rotor blade design 
+        assert(rp.abs(v)<1e-1)   # lower tolerance due to lose bounds on prop-rotor blade design 
     return
 
 def stopped_rotor_transition_test(update_regression_values):
@@ -183,15 +184,15 @@ def stopped_rotor_transition_test(update_regression_values):
     
     # Store errors 
     error = Data() 
-    error.hover_throttle = np.max(np.abs( hover_throttle_truth  - hover_throttle  )/ hover_throttle_truth )
-    error.lst_throttle   = np.max(np.abs( lst_throttle_truth    - lst_throttle    )/ lst_throttle_truth   ) 
-    error.hsct_throttle  = np.max(np.abs( hsct_throttle_truth   - hsct_throttle   )/ hsct_throttle_truth  )
+    error.hover_throttle = rp.max(rp.abs( hover_throttle_truth  - hover_throttle  )/ hover_throttle_truth )
+    error.lst_throttle   = rp.max(rp.abs( lst_throttle_truth    - lst_throttle    )/ lst_throttle_truth   ) 
+    error.hsct_throttle  = rp.max(rp.abs( hsct_throttle_truth   - hsct_throttle   )/ hsct_throttle_truth  )
  
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()):
-        assert(np.abs(v)<1.5e-1)   # lower tolerance due to lose bounds on prop-rotor blade design 
+        assert(rp.abs(v)<1.5e-1)   # lower tolerance due to lose bounds on prop-rotor blade design 
     return     
  
 # ----------------------------------------------------------------------

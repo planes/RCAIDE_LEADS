@@ -10,7 +10,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Data 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute RHS matrix 
@@ -67,18 +67,18 @@ def compute_RHS_matrix(VD,delta,phi,conditions,settings,geometry,propeller_wake_
     aoa              = conditions.aerodynamics.angles.alpha 
     PSI              = conditions.aerodynamics.angles.beta
     num_eval_pts     = len(VD.XC[0])
-    PSI_distribution = np.repeat(PSI,num_eval_pts, axis = 1) 
-    V_distribution   =  np.ones_like(aoa) * conditions.freestream.velocity
+    PSI_distribution = rp.repeat(PSI,num_eval_pts, axis = 1) 
+    V_distribution   =  rp.ones_like(aoa) * conditions.freestream.velocity
     num_ctrl_pts     = len(aoa)  
 
-    rot_V_wake_ind   = np.zeros((num_ctrl_pts,num_eval_pts,3))
-    Vx_ind_total     = np.zeros_like(V_distribution)
-    Vy_ind_total     = np.zeros_like(V_distribution)
-    Vz_ind_total     = np.zeros_like(V_distribution) 
+    rot_V_wake_ind   = rp.zeros((num_ctrl_pts,num_eval_pts,3))
+    Vx_ind_total     = rp.zeros_like(V_distribution)
+    Vy_ind_total     = rp.zeros_like(V_distribution)
+    Vz_ind_total     = rp.zeros_like(V_distribution) 
     dt               = 0
     for network in geometry.networks:
         if propeller_wake_model:
-            rot_V_wake_ind = np.zeros((num_ctrl_pts,num_eval_pts,3))
+            rot_V_wake_ind = rp.zeros((num_ctrl_pts,num_eval_pts,3))
             for propulsor in network.propulsors: 
                 if 'rotor' in  propulsor:
                     rotor =  propulsor.rotor
@@ -142,8 +142,8 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     """
     LE_ind  = VD.leading_edge_indices
     RNMAX   = VD.panels_per_strip 
-    dim_1   = len(np.sum(LE_ind, axis=1))
-    dim_2   = np.sum(LE_ind, axis=1)[0]
+    dim_1   = len(rp.sum(LE_ind, axis=1))
+    dim_2   = rp.sum(LE_ind, axis=1)[0]
 
 
     # VORLAX frame RHS calculation---------------------------------------------------------
@@ -154,9 +154,9 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     YAWQ   = conditions.static_stability.yaw_rate
     VINF   = conditions.freestream.velocity
 
-    SINALF = np.sin(ALFA)
-    COSIN  = np.cos(ALFA) * np.sin(PSIRAD)
-    COSCOS = np.cos(ALFA) * np.cos(PSIRAD)
+    SINALF = rp.sin(ALFA)
+    COSIN  = rp.cos(ALFA) * rp.sin(PSIRAD)
+    COSCOS = rp.cos(ALFA) * rp.cos(PSIRAD)
     PITCH  = PITCHQ / VINF
     ROLL   = ROLLQ  / VINF
     YAW    = YAWQ   / VINF
@@ -174,9 +174,9 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     # LOCATE VORTEX LATTICE CONTROL POINT WITH RESPECT TO THE
     # ROTATION CENTER (XBAR, 0, ZBAR). THE RELATIVE COORDINATES
     # ARE XGIRO, YGIRO, AND ZGIRO. 
-    X_MAT  = np.repeat( XBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
-    Z_MAT  = np.repeat( ZBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
-    phi_LE = np.repeat(phi[LE_ind].reshape(dim_1,dim_2)  ,RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
+    X_MAT  = rp.repeat( XBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
+    Z_MAT  = rp.repeat( ZBAR, RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
+    phi_LE = rp.repeat(phi[LE_ind].reshape(dim_1,dim_2)  ,RNMAX[LE_ind].reshape(dim_1,dim_2)[0] , axis=1) 
      
     XGIRO = X + CHORD*DELTAX - X_MAT
     YGIRO = YY
@@ -190,10 +190,10 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     VZ = (SINALF - ROLL *YGIRO + PITCH*XGIRO)
     
     #COMPUTE DIRECTION COSINES.
-    SCNTL  = VD.SLOPE/np.sqrt(1. + VD.SLOPE **2)
-    CCNTL  = 1. / np.sqrt(1.0 + SCNTL**2) 
-    COD    = np.cos(phi_LE)
-    SID    = np.sin(phi_LE)
+    SCNTL  = VD.SLOPE/rp.sqrt(1. + VD.SLOPE **2)
+    CCNTL  = 1. / rp.sqrt(1.0 + SCNTL**2) 
+    COD    = rp.cos(phi_LE)
+    SID    = rp.sin(phi_LE)
 
     # COMPUTE ONSET FLOW COMPONENT ALONG THE OUTWARD NORMAL TO
     # THE SURFACE AT THE CONTROL POINT, ALOC.
@@ -209,17 +209,17 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     Vy_rotation       = -YAWQ  *XGIRO + ROLLQ *ZGIRO
     Vz_rotation       = -ROLLQ *YGIRO + PITCHQ*XGIRO
 
-    Vx                = V_distribution*np.cos(aoa_distribution)*np.cos(PSI_distribution) + Vx_rotation + Vx_ind_total
-    Vy                = V_distribution*np.cos(aoa_distribution)*np.sin(PSI_distribution) + Vy_rotation + Vy_ind_total
-    Vz                = V_distribution*np.sin(aoa_distribution)                          + Vz_rotation + Vz_ind_total    
+    Vx                = V_distribution*rp.cos(aoa_distribution)*rp.cos(PSI_distribution) + Vx_rotation + Vx_ind_total
+    Vy                = V_distribution*rp.cos(aoa_distribution)*rp.sin(PSI_distribution) + Vy_rotation + Vy_ind_total
+    Vz                = V_distribution*rp.sin(aoa_distribution)                          + Vz_rotation + Vz_ind_total    
     
-    aoa_distribution  = np.arctan(Vz/ np.sqrt(Vx**2 + Vy**2) )
-    PSI_distribution  = np.arctan(Vy / Vx)
+    aoa_distribution  = rp.arctan(Vz/ rp.sqrt(Vx**2 + Vy**2) )
+    PSI_distribution  = rp.arctan(Vy / Vx)
 
     # compute RHS: dot(v, panel_normals)
-    V_unit_vector    = ((np.array([Vx,Vy,Vz])/V_distribution).T).swapaxes(0,1)[:, :,np.newaxis,:] 
-    panel_normals    = VD.normals[:, :,np.newaxis,:]         
-    RHS_from_normals = np.sum(np.sum(V_unit_vector*panel_normals, axis=2), axis=2 )   
+    V_unit_vector    = ((rp.array([Vx,Vy,Vz])/V_distribution).T).swapaxes(0,1)[:, :,rp.newaxis,:] 
+    panel_normals    = VD.normals[:, :,rp.newaxis,:]         
+    RHS_from_normals = rp.sum(rp.sum(V_unit_vector*panel_normals, axis=2), axis=2 )   
 
     #pack values--------------------------------------------------------------------------
     use_VORLAX_RHS = settings.use_VORLAX_matrix_calculation

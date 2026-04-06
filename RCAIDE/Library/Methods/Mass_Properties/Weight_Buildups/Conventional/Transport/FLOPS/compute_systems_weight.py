@@ -10,7 +10,7 @@ import  RCAIDE
 from RCAIDE.Framework.Core    import Units, Data
 from RCAIDE.Library.Components import Component
 # python imports
-import  numpy as  np
+import RNUMPY as rp
 # ----------------------------------------------------------------------------------------------------------------------
 # Systems Weight
 # ----------------------------------------------------------------------------------------------------------------------
@@ -169,7 +169,7 @@ def compute_systems_weight(vehicle):
     WFURN   = 127 * NFLCR + 112 * NPF + 78 * NPB + 44 * NPE \
                 + 2.6 * XLP * (WF + DF) * NFUSE  # furnishing weight
     WAC     = (3.2 * (FPAREA * DF) ** 0.6 + 9 * NPASS ** 0.83) * VMAX + 0.075 * WAVONC  # ac weight
-    WAI     = ref_wing.spans.projected / Units.ft * 1. / np.cos(ref_wing.sweeps.quarter_chord) + 3.8 * FNAC * NENG + 1.5 * WF  # anti-ice weight
+    WAI     = ref_wing.spans.projected / Units.ft * 1. / rp.cos(ref_wing.sweeps.quarter_chord) + 3.8 * FNAC * NENG + 1.5 * WF  # anti-ice weight
     
     for system in vehicle.systems:
         if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Auxillary_Power_Unit: 

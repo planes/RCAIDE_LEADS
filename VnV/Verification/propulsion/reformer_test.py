@@ -14,11 +14,11 @@ from RCAIDE.Library.Methods.Powertrain.Converters import Reformer
 from RCAIDE.Library.Methods.Powertrain.Converters.Reformer.compute_reformer_performance import compute_reformer_performance
 
 import os
-import numpy as np 
+import RNUMPY as rp 
 import matplotlib.pyplot as plt
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
@@ -42,9 +42,9 @@ def main():
 
     reformer_conditions = RCAIDE.Framework.Mission.Common.Conditions()
 
-    reformer_conditions.fuel_volume_flow_rate  = np.ones((ctrl_pts,1)) * reformer.eta * 4.5e-9       # [m**3/s]        Jet-A feed rate
-    reformer_conditions.steam_volume_flow_rate = np.ones((ctrl_pts,1)) * reformer.eta * 1.6667e-8    # [m**3/s]        Deionized water feed rate
-    reformer_conditions.air_volume_flow_rate   = np.ones((ctrl_pts,1)) * reformer.eta * 1e-5         # [m**3/s]        Air feed rate
+    reformer_conditions.fuel_volume_flow_rate  = rp.ones((ctrl_pts,1)) * reformer.eta * 4.5e-9       # [m**3/s]        Jet-A feed rate
+    reformer_conditions.steam_volume_flow_rate = rp.ones((ctrl_pts,1)) * reformer.eta * 1.6667e-8    # [m**3/s]        Deionized water feed rate
+    reformer_conditions.air_volume_flow_rate   = rp.ones((ctrl_pts,1)) * reformer.eta * 1e-5         # [m**3/s]        Air feed rate
 
     compute_reformer_performance(reformer,reformer_conditions)
 
@@ -59,20 +59,20 @@ def main():
 
     # Truth values 
     error = Data()
-    error.Q_R_test     = np.max(np.abs(Q_R_truth     - Q_R[0][0]  ))
-    error.eta_ref_test = np.max(np.abs(eta_ref_truth - eta_ref[0][0]))
-    error.X_H2_test    = np.max(np.abs(X_H2_truth    - X_H2[0][0]))
-    error.GHSV_test    = np.max(np.abs(GHSV_truth    - GHSV[0][0]))
-    error.LHSV_test    = np.max(np.abs(LHSV_truth    - LHSV[0][0]))
-    error.S_C_test     = np.max(np.abs(S_C_truth     - S_C[0][0]))
-    error.O_C_test     = np.max(np.abs(O_C_truth     - O_C[0][0]))
-    error.phi_test     = np.max(np.abs(phi_truth     - phi[0][0]))
+    error.Q_R_test     = rp.max(rp.abs(Q_R_truth     - Q_R[0][0]  ))
+    error.eta_ref_test = rp.max(rp.abs(eta_ref_truth - eta_ref[0][0]))
+    error.X_H2_test    = rp.max(rp.abs(X_H2_truth    - X_H2[0][0]))
+    error.GHSV_test    = rp.max(rp.abs(GHSV_truth    - GHSV[0][0]))
+    error.LHSV_test    = rp.max(rp.abs(LHSV_truth    - LHSV[0][0]))
+    error.S_C_test     = rp.max(rp.abs(S_C_truth     - S_C[0][0]))
+    error.O_C_test     = rp.max(rp.abs(O_C_truth     - O_C[0][0]))
+    error.phi_test     = rp.max(rp.abs(phi_truth     - phi[0][0]))
 
     print('Errors:')
     print(error)
     
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-6) 
+        assert(rp.abs(v)<1e-6) 
                
     return    
 

@@ -10,7 +10,7 @@
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.compute_component_center_of_gravity import compute_component_center_of_gravity 
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 import pandas as pd
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -56,7 +56,7 @@ def compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df, overwrite_ce
     # --------------------------------------------------------------------------------------    
     # Mission Center of Gravity 
     # --------------------------------------------------------------------------------------
-    mission_moment = np.array([[0.0,0.0,0.0]])
+    mission_moment = rp.array([[0.0,0.0,0.0]])
     dummy_pd = pd.DataFrame(columns=[
         "Component",
         "Mass (kg)",
@@ -64,7 +64,7 @@ def compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df, overwrite_ce
         "CG y (m)",
         "CG z (m)"
         ])
-    mission_mass   = np.array([0.0])                
+    mission_mass   = rp.array([0.0])                
     for key in vehicle.keys():
         item = vehicle[key]  
         mission_mass,mission_moment = compute_component_center_of_gravity(dummy_pd,item,vehicle,mission_mass,mission_moment,segment,verbose,include_payload,include_fuel)    
@@ -75,7 +75,7 @@ def compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df, overwrite_ce
     if verbose:
         print('\n*************** Center of Gravity *************** ')
         print('OEW Center of Gravity            : ', OEW_CG) 
-        print('% Mass used in OEW CG calculation: ', round(OEW_mass_percentage,2), '%')  
+        print('% Mass used in OEW CG calculation: ', round(float(OEW_mass_percentage),2), '%')  
         print('Mission Center of Gravity        : ', CG)   
     centre_of_gravity_df.loc[len(centre_of_gravity_df)] = [
                 'Operating_Empty',

@@ -16,7 +16,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Ducted_Fan.compute_el
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Ducted_Fan.append_electric_ducted_fan_residual_and_unknown import append_electric_ducted_fan_residual_and_unknown
  
 # python imports 
-import numpy as np
+import RNUMPY as rp
 # ----------------------------------------------------------------------
 #  Electric Ducted Fan Component
 # ----------------------------------------------------------------------

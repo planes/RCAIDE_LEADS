@@ -17,7 +17,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Compression_Nozzle import comp
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet           import compute_thrust
 
 # python imports 
-import  numpy as  np 
+import RNUMPY as rp 
 from copy import  deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -337,7 +337,7 @@ def compute_turbojet_performance(turbojet, state, center_of_gravity=[[0.0, 0.0, 
     moment_vector[:,0]         = turbojet.origin[0][0] -   center_of_gravity[0][0] 
     moment_vector[:,1]         = turbojet.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]         = turbojet.origin[0][2]  -  center_of_gravity[0][2]
-    M                          = np.cross(moment_vector, turbojet_conditions.thrust)   
+    M                          = rp.cross(moment_vector, turbojet_conditions.thrust)   
     moment                     = M 
     power                      = turbojet_conditions.power 
     turbojet_conditions.moment = moment 
@@ -458,7 +458,7 @@ def reuse_stored_turbojet_data(turbojet,state,network,stored_propulsor_tag,cente
     moment_vector[:,0] = turbojet.origin[0][0] -   center_of_gravity[0][0] 
     moment_vector[:,1] = turbojet.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2] = turbojet.origin[0][2]  -  center_of_gravity[0][2]
-    moment             = np.cross(moment_vector,thrust_vector)    
+    moment             = rp.cross(moment_vector,thrust_vector)    
   
     power                                             = conditions.energy.propulsors[turbojet.tag].power 
     conditions.energy.propulsors[turbojet.tag].moment = moment

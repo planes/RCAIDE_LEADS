@@ -9,14 +9,14 @@
 import RCAIDE
 
 # # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Cuboid Moment of Inertia
 # ----------------------------------------------------------------------------------------------------------------------   
 def compute_cuboid_moment_of_inertia(component,outer_length, outer_width, outer_height,
                                      inner_length = 0, inner_width = 0, inner_height = 0,
-                                     center_of_gravity = np.array([[0,0,0]]),fuel_tank=False):  
+                                     center_of_gravity = rp.array([[0,0,0]]),fuel_tank=False):  
     ''' computes the moment of inertia tensor for a hollow cuboid
 
     Assumptions:
@@ -47,7 +47,7 @@ def compute_cuboid_moment_of_inertia(component,outer_length, outer_width, outer_
     # ----------------------------------------------------------------------------------------------------------------------    
     # Setup
     # ----------------------------------------------------------------------------------------------------------------------
-    I = np.zeros((3, 3)) 
+    I = rp.zeros((3, 3)) 
     
     # calcualte volumes
     V2 = outer_length * outer_width * outer_height # Outer volume

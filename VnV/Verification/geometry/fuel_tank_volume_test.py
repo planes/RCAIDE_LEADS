@@ -14,7 +14,7 @@ from RCAIDE.Library.Plots                           import *
 
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import os
 import matplotlib.pyplot as plt  
@@ -221,7 +221,7 @@ def non_conformal_lh2_fuel_tank_volume_test():
     fuel_tank_4.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_4.fuel.gravimetric_efficiency   = 0.5
     fuel_tank_4.xz_plane_symmetric            = False
-    fuel_tank_4.orientation_euler_angles      = [0,0,np.pi/2]
+    fuel_tank_4.orientation_euler_angles      = [0,0,rp.pi/2]
     fuel_tank_4.bwb_aft_tank                  = True
     fuel_tank_4.aft_tank_root_chord_bounds    = [0.65,0.9]
     fuel_tank_4.aft_tank_segment_bound        = 'fuel_wall'
@@ -236,7 +236,7 @@ def non_conformal_lh2_fuel_tank_volume_test():
     fuel_tank_4a.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_4a.fuel.gravimetric_efficiency   = 0.5
     fuel_tank_4a.xz_plane_symmetric            = False
-    fuel_tank_4a.orientation_euler_angles      = [0,0,np.pi/2]
+    fuel_tank_4a.orientation_euler_angles      = [0,0,rp.pi/2]
     fuel_tank_4a.bwb_aft_tank                  = True
     fuel_tank_4a.aft_tank_root_chord_bounds    = [0.65,0.9]
     fuel_tank_4a.aft_tank_segment_bound        = 'cabin_wall'
@@ -250,7 +250,7 @@ def non_conformal_lh2_fuel_tank_volume_test():
     fuel_tank_5.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
     fuel_tank_5.fuel.gravimetric_efficiency   = 0.5
     fuel_tank_5.xz_plane_symmetric            = False
-    fuel_tank_5.orientation_euler_angles      = [0,0,np.pi/2]
+    fuel_tank_5.orientation_euler_angles      = [0,0,rp.pi/2]
     fuel_tank_5.bwb_aft_tank                  = True
     fuel_tank_5.aft_tank_root_chord_bounds    = [0.65,0.9] 
     fuel_tank_5.aft_tank_segment_bound        = 'cabin_wall'

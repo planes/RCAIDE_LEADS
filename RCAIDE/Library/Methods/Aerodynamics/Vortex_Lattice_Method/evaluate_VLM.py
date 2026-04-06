@@ -13,7 +13,7 @@ from RCAIDE.Library.Mission.Common.Update                                import 
 from RCAIDE.Library.Mission.Common.Unpack_Unknowns                       import orientation
 
 # package imports
-import numpy   as np
+import RNUMPY as rp
 from copy      import  deepcopy 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -43,10 +43,10 @@ def evaluate_surrogate(state,settings,vehicle):
     sub_sur          = aerodynamics.surrogates.subsonic
     sup_sur          = aerodynamics.surrogates.supersonic
     trans_sur        = aerodynamics.surrogates.transonic  
-    AoA              = np.atleast_2d(conditions.aerodynamics.angles.alpha)  
-    Beta             = np.atleast_2d(conditions.aerodynamics.angles.beta)    
-    Mach             = np.atleast_2d(conditions.freestream.mach_number)  
-    ones_row         = np.ones_like(AoA)  
+    AoA              = rp.atleast_2d(conditions.aerodynamics.angles.alpha)  
+    Beta             = rp.atleast_2d(conditions.aerodynamics.angles.beta)    
+    Mach             = rp.atleast_2d(conditions.freestream.mach_number)  
+    ones_row         = rp.ones_like(AoA)  
     hsub_min         = aerodynamics.surrogates.subsonic_smoothing_min   
     hsub_max         = aerodynamics.surrogates.subsonic_smoothing_max   
     hsup_min         = aerodynamics.surrogates.supersonic_smoothing_min 
@@ -59,7 +59,7 @@ def evaluate_surrogate(state,settings,vehicle):
     h_sup            = lambda M:sup_trans_spline.compute(M)            
     
     #Alpha 
-    pts_alpha   = np.hstack((AoA,Mach))
+    pts_alpha   = rp.hstack((AoA,Mach))
     results_alpha = compute_coefficients(sub_sur.Clift_alpha,  sub_sur.Cdrag_induced_alpha,  sub_sur.CX_alpha,  sub_sur.CY_alpha,  sub_sur.CZ_alpha,  sub_sur.CL_alpha,  sub_sur.CM_alpha,   sub_sur.CN_alpha,
                                          trans_sur.Clift_alpha,trans_sur.Cdrag_induced_alpha,trans_sur.CX_alpha,trans_sur.CY_alpha,trans_sur.CZ_alpha,trans_sur.CL_alpha,trans_sur.CM_alpha, trans_sur.CN_alpha,
                                          sup_sur.Clift_alpha,  sup_sur.Cdrag_induced_alpha,  sup_sur.CX_alpha,  sup_sur.CY_alpha,  sup_sur.CZ_alpha,  sup_sur.CL_alpha,  sup_sur.CM_alpha,   sup_sur.CN_alpha,
@@ -339,8 +339,8 @@ def evaluate_no_surrogate(state,settings,vehicle):
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Flap: 
                 aerodynamics.flap_flag      = True
                 
-    no_beta   = np.all(conditions.aerodynamics.angles.beta == 0) 
-    no_bank   = np.all(conditions.aerodynamics.angles.phi == 0)  
+    no_beta   = rp.all(conditions.aerodynamics.angles.beta == 0) 
+    no_bank   = rp.all(conditions.aerodynamics.angles.phi == 0)  
 
     if no_beta and (aerodynamics.rudder_flag == False) and (aerodynamics.aileron_flag ==False) and no_bank:
         CY = CY * 0 
@@ -524,9 +524,9 @@ def evaluate_no_surrogate(state,settings,vehicle):
     pertubation_conditions                                       = deepcopy(equilibrium_conditions) 
     pertubation_conditions.frames.inertial.velocity_vector[:,0]  += delta_speed 
     pertubation_conditions.freestream.velocity            [:,0]  += delta_speed 
-    pertubation_conditions.freestream.mach_number                = np.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] /  equilibrium_conditions.freestream.speed_of_sound 
+    pertubation_conditions.freestream.mach_number                = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] /  equilibrium_conditions.freestream.speed_of_sound 
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity * wing.chords.mean_aerodynamic/equilibrium_conditions.freestream.dynamic_viscosity   
-    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * np.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
+    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * rp.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
         
     VLM_results = VLM(pertubation_conditions,settings,vehicle)
     Clift_i_u_prime = VLM_results.CLift
@@ -588,10 +588,10 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # ------------------------------------------------------------------------------------------- 
     pertubation_conditions                                       = deepcopy(equilibrium_conditions)    
     pertubation_conditions.frames.inertial.velocity_vector[:,1]  += delta_speed
-    pertubation_conditions.freestream.velocity                   = np.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] 
+    pertubation_conditions.freestream.velocity                   = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] 
     pertubation_conditions.freestream.mach_number                = pertubation_conditions.freestream.velocity/ pertubation_conditions.freestream.speed_of_sound   
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity / pertubation_conditions.freestream.dynamic_viscosity   
-    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * np.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
+    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * rp.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
     
 
     VLM_results = VLM(pertubation_conditions,settings,vehicle)
@@ -618,10 +618,10 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # --------------------------------------------------------------------------------------------  
     pertubation_conditions                                       = deepcopy(equilibrium_conditions)     
     pertubation_conditions.frames.inertial.velocity_vector[:,2]  += delta_speed 
-    pertubation_conditions.freestream.velocity                   = np.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None]     
+    pertubation_conditions.freestream.velocity                   = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None]     
     pertubation_conditions.freestream.mach_number                =pertubation_conditions.freestream.velocity / pertubation_conditions.freestream.speed_of_sound   
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity /  pertubation_conditions.freestream.dynamic_viscosity 
-    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * np.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
+    pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * rp.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
      
     VLM_results = VLM(pertubation_conditions,settings,vehicle)
     Clift_w_prime = VLM_results.CLift
@@ -954,14 +954,14 @@ def compute_coefficients(sub_sur_Clift,sub_sur_Cdrag,sub_sur_CX,sub_sur_CY,sub_s
     
 
      #  subsonic 
-    sub_Clift     = np.atleast_2d(sub_sur_Clift(pts)).T  
-    sub_Cdrag     = np.atleast_2d(sub_sur_Cdrag(pts)).T  
-    sub_CX        = np.atleast_2d(sub_sur_CX(pts)).T 
-    sub_CY        = np.atleast_2d(sub_sur_CY(pts)).T     
-    sub_CZ        = np.atleast_2d(sub_sur_CZ(pts)).T     
-    sub_CL        = np.atleast_2d(sub_sur_CL(pts)).T     
-    sub_CM        = np.atleast_2d(sub_sur_CM(pts)).T     
-    sub_CN        = np.atleast_2d(sub_sur_CN(pts)).T
+    sub_Clift     = rp.atleast_2d(sub_sur_Clift(pts)).T  
+    sub_Cdrag     = rp.atleast_2d(sub_sur_Cdrag(pts)).T  
+    sub_CX        = rp.atleast_2d(sub_sur_CX(pts)).T 
+    sub_CY        = rp.atleast_2d(sub_sur_CY(pts)).T     
+    sub_CZ        = rp.atleast_2d(sub_sur_CZ(pts)).T     
+    sub_CL        = rp.atleast_2d(sub_sur_CL(pts)).T     
+    sub_CM        = rp.atleast_2d(sub_sur_CM(pts)).T     
+    sub_CN        = rp.atleast_2d(sub_sur_CN(pts)).T
     
     
     if trans_sur_Clift ==  None and  sup_sur_Clift == None:
@@ -980,24 +980,24 @@ def compute_coefficients(sub_sur_Clift,sub_sur_Cdrag,sub_sur_CX,sub_sur_CY,sub_s
    
     
     # transonic   
-    trans_Clift   = np.atleast_2d(trans_sur_Clift(pts)).T  
-    trans_Cdrag   = np.atleast_2d(trans_sur_Cdrag(pts)).T  
-    trans_CX      = np.atleast_2d(trans_sur_CX(pts)).T 
-    trans_CY      = np.atleast_2d(trans_sur_CY(pts)).T     
-    trans_CZ      = np.atleast_2d(trans_sur_CZ(pts)).T     
-    trans_CL      = np.atleast_2d(trans_sur_CL(pts)).T     
-    trans_CM      = np.atleast_2d(trans_sur_CM(pts)).T     
-    trans_CN      = np.atleast_2d(trans_sur_CN(pts)).T
+    trans_Clift   = rp.atleast_2d(trans_sur_Clift(pts)).T  
+    trans_Cdrag   = rp.atleast_2d(trans_sur_Cdrag(pts)).T  
+    trans_CX      = rp.atleast_2d(trans_sur_CX(pts)).T 
+    trans_CY      = rp.atleast_2d(trans_sur_CY(pts)).T     
+    trans_CZ      = rp.atleast_2d(trans_sur_CZ(pts)).T     
+    trans_CL      = rp.atleast_2d(trans_sur_CL(pts)).T     
+    trans_CM      = rp.atleast_2d(trans_sur_CM(pts)).T     
+    trans_CN      = rp.atleast_2d(trans_sur_CN(pts)).T
 
     # supersonic 
-    sup_Clift     = np.atleast_2d(sup_sur_Clift(pts)).T  
-    sup_Cdrag     = np.atleast_2d(sup_sur_Cdrag(pts)).T  
-    sup_CX        = np.atleast_2d(sup_sur_CX(pts)).T 
-    sup_CY        = np.atleast_2d(sup_sur_CY(pts)).T     
-    sup_CZ        = np.atleast_2d(sup_sur_CZ(pts)).T     
-    sup_CL        = np.atleast_2d(sup_sur_CL(pts)).T     
-    sup_CM        = np.atleast_2d(sup_sur_CM(pts)).T     
-    sup_CN        = np.atleast_2d(sup_sur_CN(pts)).T            
+    sup_Clift     = rp.atleast_2d(sup_sur_Clift(pts)).T  
+    sup_Cdrag     = rp.atleast_2d(sup_sur_Cdrag(pts)).T  
+    sup_CX        = rp.atleast_2d(sup_sur_CX(pts)).T 
+    sup_CY        = rp.atleast_2d(sup_sur_CY(pts)).T     
+    sup_CZ        = rp.atleast_2d(sup_sur_CZ(pts)).T     
+    sup_CL        = rp.atleast_2d(sup_sur_CL(pts)).T     
+    sup_CM        = rp.atleast_2d(sup_sur_CM(pts)).T     
+    sup_CN        = rp.atleast_2d(sup_sur_CN(pts)).T            
 
     # apply 
     results       = Data() 
@@ -1016,17 +1016,17 @@ def compute_coefficients(sub_sur_Clift,sub_sur_Cdrag,sub_sur_CX,sub_sur_CY,sub_s
 def compute_coefficient(sub_sur_coef,trans_sur_coef, sup_sur_coef, h_sub,h_sup,Mach, pts): 
 
     #  subsonic 
-    sub_coef  = np.atleast_2d(sub_sur_coef(pts)).T     
+    sub_coef  = rp.atleast_2d(sub_sur_coef(pts)).T     
    
     if trans_sur_coef == None and sup_sur_coef == None:
         coef = h_sub(Mach) 
         return  coef
     
     # transonic 
-    trans_coef  = np.atleast_2d(trans_sur_coef(pts)).T    
+    trans_coef  = rp.atleast_2d(trans_sur_coef(pts)).T    
 
     # supersonic 
-    sup_coef  = np.atleast_2d(sub_sur_coef(pts)).T             
+    sup_coef  = rp.atleast_2d(sub_sur_coef(pts)).T             
 
     # apply  
     coef = h_sub(Mach)*sub_coef +   (1 - (h_sup(Mach) + h_sub(Mach)))*trans_coef  + h_sub(Mach)*sup_coef 

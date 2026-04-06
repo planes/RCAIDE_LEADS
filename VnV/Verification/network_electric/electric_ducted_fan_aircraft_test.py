@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core                          import Units , Data
 from RCAIDE.Library.Plots                           import *        
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import matplotlib.pyplot as plt  
 import os
@@ -65,20 +65,20 @@ def main():
                 error = Data()
                 error.thrust   = 0
             else:  
-                thurst         =  np.linalg.norm(results.segments.cruise.conditions.energy.propulsors['center_propulsor'].thrust, axis=1)  
+                thurst         =  rp.linalg.norm(results.segments.cruise.conditions.energy.propulsors['center_propulsor'].thrust, axis=1)  
                 error          = Data()
-                error.thrust   = np.max(np.abs(thrust_truth[i]   - thurst[0] ))        
+                error.thrust   = rp.max(rp.abs(thrust_truth[i]   - thurst[0] ))        
                 
         elif ducted_fan_type[i] ==  'Rankine_Froude_Momentum_Theory':  
-            thurst         =  np.linalg.norm(results.segments.cruise.conditions.energy.propulsors['starboard_propulsor'].thrust, axis=1)  
+            thurst         =  rp.linalg.norm(results.segments.cruise.conditions.energy.propulsors['starboard_propulsor'].thrust, axis=1)  
             error          = Data()
-            error.thrust   = np.max(np.abs(thrust_truth[i]   - thurst[0] ))   
+            error.thrust   = rp.max(rp.abs(thrust_truth[i]   - thurst[0] ))   
         
         print('Errors:')
         print(error)
         
         for k,v in list(error.items()):
-            assert(np.abs(v)<1e-6) 
+            assert(rp.abs(v)<1e-6) 
 
     return 
 

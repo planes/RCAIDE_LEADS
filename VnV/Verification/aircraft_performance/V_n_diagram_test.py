@@ -14,10 +14,10 @@ from RCAIDE.Library.Methods.Geometry.Planform import wing_planform
 import matplotlib.pyplot as plt
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 import sys
 import os
-import numpy as np 
+import RNUMPY as rp 
 
 # import vehicle file
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -137,7 +137,7 @@ def part_23_V_n_Diagram():
 
 
     for k,v in error.items():
-        assert(np.abs(v)<1E-6)  
+        assert(rp.abs(v)<1E-6)  
 
     return 
 # ----------------------------------------------------------------------        

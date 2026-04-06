@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Utilities         import Cubic_Spline_Blender
 from RCAIDE.Library.Methods.Aerodynamics.Common.Drag.compressible_turbulent_flat_plate import compressible_turbulent_flat_plate
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Supersonic Parasite Drag Nacekke 
@@ -173,7 +173,7 @@ def nacelle_drag(state,settings, nacelle):
     Re               = freestream.reynolds_number
     low_mach_cutoff  = settings.supersonic.begin_drag_rise_mach_number
     high_mach_cutoff = settings.supersonic.end_drag_rise_mach_number 
-    Sref             = np.pi * nacelle.diameter * nacelle.length 
+    Sref             = rp.pi * nacelle.diameter * nacelle.length 
     Swet             = nacelle.areas.wetted
     
     # Reynolds number
@@ -185,7 +185,7 @@ def nacelle_drag(state,settings, nacelle):
     # Form factor according to Raymer equation
     form_factor  = 1 + 0.35 / ( nacelle.length/nacelle.diameter)   
          
-    if np.all((Mach<=1.0) == True): 
+    if rp.all((Mach<=1.0) == True): 
         # subsonic condition 
         parasite_drag = form_factor * cf_prop * Swet / Sref 
     else:

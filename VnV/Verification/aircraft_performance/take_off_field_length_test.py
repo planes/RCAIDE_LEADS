@@ -12,11 +12,11 @@ from RCAIDE.Framework.Core   import Data,Units
 from RCAIDE.Library.Methods.Performance.estimate_take_off_field_length import estimate_take_off_field_length
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
-import numpy as np
+import RNUMPY as rp
 from  copy import  deepcopy
 
 # import vehicle file
@@ -51,10 +51,10 @@ def main():
 
     # CLmax for a given configuration may be informed by user
     # configuration.maximum_lift_coefficient = 2.XX 
-    w_vec                = np.linspace(40000.,52000.,10)
+    w_vec                = rp.linspace(40000.,52000.,10)
     engines              = (2,3,4)
-    takeoff_field_length = np.zeros((len(w_vec),len(engines)))
-    second_seg_clb_grad  = np.zeros((len(w_vec),len(engines)))
+    takeoff_field_length = rp.zeros((len(w_vec),len(engines)))
+    second_seg_clb_grad  = rp.zeros((len(w_vec),len(engines)))
     
     compute_clb_grad = 1 # flag for Second segment climb estimation
     
@@ -93,7 +93,7 @@ def main():
         for fuel_line in  network.fuel_lines: 
             fuel_line.assigned_propulsors = []                       
         
-    truth_TOFL =  np.array([[ 794.60424913,  533.36112737,  387.47202765],
+    truth_TOFL =  rp.array([[ 794.60424913,  533.36112737,  387.47202765],
                             [ 832.17783845,  556.13537318,  403.85945168],
                             [ 871.17389057,  579.71257077,  420.80815616],
                             [ 911.61084502,  604.09816421,  438.32046249],
@@ -107,7 +107,7 @@ def main():
     print(' takeoff_field_length = ',  takeoff_field_length)
     print(' second_seg_clb_grad  = ', second_seg_clb_grad)                      
                              
-    truth_clb_grad =  np.array([[0.24418264, 0.57762141, 0.9122123 ],   
+    truth_clb_grad =  rp.array([[0.24418264, 0.57762141, 0.9122123 ],   
                                 [0.23344729, 0.55619043, 0.88001254],
                                 [0.22337257, 0.53608302, 0.84980603],
                                 [0.21389915, 0.51718006, 0.82141307],
@@ -119,8 +119,8 @@ def main():
                                 [0.16712212, 0.42391163, 0.68138275]])
 
 
-    TOFL_error = np.max(np.abs(truth_TOFL-takeoff_field_length)/truth_TOFL)                           
-    GRAD_error = np.max(np.abs(truth_clb_grad-second_seg_clb_grad)/truth_clb_grad)
+    TOFL_error = rp.max(rp.abs(truth_TOFL-takeoff_field_length)/truth_TOFL)                           
+    GRAD_error = rp.max(rp.abs(truth_clb_grad-second_seg_clb_grad)/truth_clb_grad)
     
     print('Maximum Take OFF Field Length Error= %.4e' % TOFL_error)
     print('Second Segment Climb Gradient Error= %.4e' % GRAD_error)    

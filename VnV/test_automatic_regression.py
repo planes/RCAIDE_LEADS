@@ -10,6 +10,10 @@ import sys, os, traceback, time
 sys.path.append(os.path.join(sys.path[0], 'Vehicles'))
 sys.path.append(os.path.join(sys.path[0], 'Vehicles', 'Rotors'))
 
+import RNUMPY as rp
+rp.use_torch = True
+
+
 modules = [ 
     'Verification/analysis_aerodynamics/airfoil_panel_method_test.py',    
     'Verification/analysis_aerodynamics/airfoil_panel_method_convergence.py',

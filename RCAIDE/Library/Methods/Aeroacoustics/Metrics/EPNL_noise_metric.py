@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  EPNL_noise_metric
@@ -33,13 +33,13 @@ def EPNL_noise_metric(PNLT):
         N/A  
     """
     # Maximum PNLT on the time history data    
-    PNLT_max = np.max(PNLT,axis=0)
+    PNLT_max = rp.max(PNLT,axis=0)
     n_mic_x  = len(PNLT[0,:, 0])
     n_mic_y  = len(PNLT[0,0,:])
     
     # Calculates the number of discrete points on the trajectory
     nsteps   = len(PNLT)    
-    EPNL     = np.zeros((n_mic_x,n_mic_y))
+    EPNL     = rp.zeros((n_mic_x,n_mic_y))
     for n_x in range(n_mic_x):
         for n_y in range(n_mic_y):
             # Finding the time duration for the noise history where PNL is higher than the maximum PNLT - 10 dB
@@ -63,7 +63,7 @@ def EPNL_noise_metric(PNLT):
                 sumation = 10**(PNLT[i][n_x][n_y]/10)+sumation
                 
             # Duration Correction calculation
-            duration_correction = 10*np.log10(sumation)-PNLT_max[n_x][n_y]-13
+            duration_correction = 10*rp.log10(sumation)-PNLT_max[n_x][n_y]-13
                         
             # Final EPNL calculation
             EPNL[n_x][n_y] = PNLT_max[n_x][n_y]+duration_correction

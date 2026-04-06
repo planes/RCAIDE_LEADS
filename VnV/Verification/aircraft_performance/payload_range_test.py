@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core import Units , Container
 from RCAIDE.Library.Methods.Performance.compute_payload_range_diagram        import compute_payload_range_diagram
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import matplotlib.pyplot as plt  
 import os
@@ -306,7 +306,7 @@ def electric_aircraft_base_analysis(vehicle):
     aerodynamics          = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
     aerodynamics.settings.number_of_spanwise_vortices   = 5
     aerodynamics.settings.number_of_chordwise_vortices  = 2     
-    aerodynamics.training.Mach                          = np.array([0.1  ,0.3,  0.5,  0.65 , 0.95])  
+    aerodynamics.training.Mach                          = rp.array([0.1  ,0.3,  0.5,  0.65 , 0.95])  
     analyses.append(aerodynamics)   
 
     # ------------------------------------------------------------------

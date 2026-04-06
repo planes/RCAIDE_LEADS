@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------  
 
-import numpy as np
+import RNUMPY as rp
 from RCAIDE.Framework.Core import Units
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -63,18 +63,18 @@ def clean_wing_noise(S, b, ND, IsHorz, velocity, viscosity, M, phi, theta, dista
     distance_ft   = distance /Units.ft
     delta         = 0.37*(S/b)*(velocity*S/(b*viscosity))**(-0.2) 
     if IsHorz==1:
-        DIR = np.cos(phi)
+        DIR = rp.cos(phi)
     elif IsHorz==0:
-        DIR = np.sin(phi)
+        DIR = rp.sin(phi)
 
     if DIR==0:
-        SPL = np.zeros(24)
+        SPL = rp.zeros(24)
     else:
 
         fmax      = 0.1*velocity / delta   # eqn 7   
-        OASPL     = 50*np.log10((velocity*Units.ft/Units.kts)/100.0) + 10*np.log10(delta*Units.ft*b*Units.ft/((distance*Units.ft)**2.0)) * (DIR ** 2) * (np.cos(theta/2)) ** 2 + 101.3 
-        SPL       = OASPL + 10.0*np.log10( 0.613* (frequency/fmax)**4 * ((frequency/fmax)**1.5 + 0.5)**(-4)) # eqn 5 
-        Delta_SPL = -0.03* (distance_ft/500 ) * np.abs(((frequency/fmax)-1))**1.5 # eqn 6
+        OASPL     = 50*rp.log10((velocity*Units.ft/Units.kts)/100.0) + 10*rp.log10(delta*Units.ft*b*Units.ft/((distance*Units.ft)**2.0)) * (DIR ** 2) * (rp.cos(theta/2)) ** 2 + 101.3 
+        SPL       = OASPL + 10.0*rp.log10( 0.613* (frequency/fmax)**4 * ((frequency/fmax)**1.5 + 0.5)**(-4)) # eqn 5 
+        Delta_SPL = -0.03* (distance_ft/500 ) * rp.abs(((frequency/fmax)-1))**1.5 # eqn 6
         
         SPL += Delta_SPL
         

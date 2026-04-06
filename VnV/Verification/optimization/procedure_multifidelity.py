@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------- 
 from RCAIDE.Framework.Analyses.Process import Process
 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------        
 #   Setup

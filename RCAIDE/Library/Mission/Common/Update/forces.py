@@ -10,7 +10,7 @@
 # RCAIDE imports
 import  RCAIDE 
 from RCAIDE.Framework.Core   import orientation_product, orientation_transpose  
-import  numpy as  np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Update Forces
@@ -58,8 +58,8 @@ def forces(segment):
     
     if type(segment) ==  RCAIDE.Framework.Mission.Segments.Vertical_Flight.Climb or \
         type(segment) ==  RCAIDE.Framework.Mission.Segments.Vertical_Flight.Descent:        
-        F_aero_i =  np.zeros_like(F_thrust_i)
-        F_aero_w =  np.zeros_like(F_thrust_i)
+        F_aero_i =  rp.zeros_like(F_thrust_i)
+        F_aero_w =  rp.zeros_like(F_thrust_i)
         F_weight_wind[:, [0, 2]] = F_weight_wind[:, [2, 0]]
         F_thrust_wind[:, [0, 2]] = F_thrust_wind[:, [2, 0]]
     

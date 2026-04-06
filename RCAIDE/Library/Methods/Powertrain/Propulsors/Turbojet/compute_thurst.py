@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core      import Units 
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_thrust
@@ -164,14 +164,14 @@ def compute_thrust(turbojet,conditions):
     TSFC             = f*g/(Fsp*a0)*(1.-SFC_adjustment) * Units.hour # 1/s is converted to 1/hr here
 
     # Computing the core mass flow
-    mdot_core        = mdhc*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
+    mdot_core        = mdhc*rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
 
     # Computing the dimensional thrust
     FD2              = Fsp*a0*mdot_core* turbojet_conditions.throttle
 
     # Fuel flow rate
-    a = np.array([0.])        
-    m_dot_fuel   = np.fmax(FD2*TSFC/g,a)*1./Units.hour
+    a = rp.array([0.])        
+    m_dot_fuel   = rp.fmax(FD2*TSFC/g,a)*1./Units.hour
 
     # Computing the power 
     power            = FD2*u0

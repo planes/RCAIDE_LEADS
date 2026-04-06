@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Initialize Conditions
@@ -58,13 +58,13 @@ def initialize_conditions(segment):
     # check for initial velocity
     if air_speed is None: 
         if not segment.state.initials: raise AttributeError('airspeed not set')
-        air_speed = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        air_speed = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
         
     # process velocity vector
     v_mag = air_speed
-    v_x   = np.cos(beta)*v_mag * np.cos(climb_angle)
-    v_y   = np.sin(beta)*v_mag * np.cos(climb_angle)
-    v_z   = -v_mag * np.sin(climb_angle)    
+    v_x   = rp.cos(beta)*v_mag * rp.cos(climb_angle)
+    v_y   = rp.sin(beta)*v_mag * rp.cos(climb_angle)
+    v_z   = -v_mag * rp.sin(climb_angle)    
 
     #initial altitude
     alt0 = 10.668   #(35ft)
@@ -109,11 +109,11 @@ def expand_state(segment):
     x0 = 6500 #Position of the Flyover microphone relatively to the break-release point
     
     # process velocity vector
-    v_x=air_speed*np.cos(climb_angle)
+    v_x=air_speed*rp.cos(climb_angle)
     
     #number of time steps (space discretization)
     total_time=(x0+500)/v_x    
-    n_points   = np.int(np.ceil(total_time/dt +1))       
+    n_points   = rp.int(rp.ceil(total_time/dt +1))       
     
     segment.state.numerics.number_of_control_points = n_points
     

@@ -1,5 +1,5 @@
 import RCAIDE
-import numpy as np
+import RNUMPY as rp
 from tqdm import tqdm
 
 def sequential_segments(mission):

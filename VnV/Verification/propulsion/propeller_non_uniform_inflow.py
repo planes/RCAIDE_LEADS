@@ -11,7 +11,7 @@ from RCAIDE.Framework.Core   import Units, Data
 from RCAIDE.Library.Methods.Performance    import rotor_aerodynamic_analysis  
 from RCAIDE.Library.Plots import  *
 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt
 import os
 import sys
@@ -63,7 +63,7 @@ def inclined_angle_test():
 
     # set operating conditions for propeller test
     # define velocity range 
-    velocity_range =  np.array([[49.1744]])
+    velocity_range =  rp.array([[49.1744]])
     
     # define RPM
     angular_velocity = 207.16160479940007
@@ -78,7 +78,7 @@ def inclined_angle_test():
                                    
     
     # spin propeller in nonuniform flow
-    thrust  = np.linalg.norm( results.thrust )
+    thrust  = rp.linalg.norm( results.thrust )
     torque  = results.torque[0][0] 
     power   = results.power[0][0] 
     Cp      = results.power_coefficient[0][0] 
@@ -93,16 +93,16 @@ def inclined_angle_test():
     Cp_r     = 0.10904336568423793
     etap_r   = 0.791544502251096
     print('\nCase 1 Errors: \n')
-    print('Thrust difference = ', np.abs(thrust - thrust_r) / thrust_r )
-    print('Torque difference = ', np.abs(torque - torque_r) / torque_r )
-    print('Power difference = ', np.abs(power - power_r) / power_r )
-    print('Cp difference = ', np.abs(Cp - Cp_r) / Cp_r )
-    print('Etap difference = ', np.abs(etap - etap_r) / etap_r )
-    assert (np.abs(thrust - thrust_r) / thrust_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Thrust Test"
-    assert (np.abs(torque - torque_r) / torque_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Torque Test"
-    assert (np.abs(power - power_r) / power_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Power Test"
-    assert (np.abs(Cp - Cp_r) / Cp_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Power Coefficient Test"
-    assert (np.abs(etap - etap_r) / etap_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Efficiency Test"
+    print('Thrust difference = ', rp.abs(thrust - thrust_r) / thrust_r )
+    print('Torque difference = ', rp.abs(torque - torque_r) / torque_r )
+    print('Power difference = ', rp.abs(power - power_r) / power_r )
+    print('Cp difference = ', rp.abs(Cp - Cp_r) / Cp_r )
+    print('Etap difference = ', rp.abs(etap - etap_r) / etap_r )
+    assert (rp.abs(thrust - thrust_r) / thrust_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Thrust Test"
+    assert (rp.abs(torque - torque_r) / torque_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Torque Test"
+    assert (rp.abs(power - power_r) / power_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Power Test"
+    assert (rp.abs(Cp - Cp_r) / Cp_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Power Coefficient Test"
+    assert (rp.abs(etap - etap_r) / etap_r < 1e-2), "Nonuniform Propeller Thrust Angle Regression Failed at Efficiency Test"
 
     return
 
@@ -119,9 +119,9 @@ def arbitrary_nonuniform_freestream_test():
     # set an arbitrary nonuniform freestream disturbance
     Na             = 16
     Nr             = 20
-    psi            = np.linspace(0,2*np.pi,Na+1)[:-1]
-    psi_2d         = np.tile(np.atleast_2d(psi),(Nr,1))
-    psi_2d         = np.repeat(psi_2d[None,:,:], 1, axis=0)
+    psi            = rp.linspace(0,2*rp.pi,Na+1)[:-1]
+    psi_2d         = rp.tile(rp.atleast_2d(psi),(Nr,1))
+    psi_2d         = rp.repeat(psi_2d[None,:,:], 1, axis=0)
 
     va = (1+psi_2d) * 1.1
     vt = (1+psi_2d) * 2.0
@@ -134,7 +134,7 @@ def arbitrary_nonuniform_freestream_test():
 
     # set operating conditions for propeller test
     # define velocity range 
-    velocity_range =  np.array([[49.1744]])
+    velocity_range =  rp.array([[49.1744]])
     
     # define RPM
     angular_velocity = 2500*Units.rpm 
@@ -147,7 +147,7 @@ def arbitrary_nonuniform_freestream_test():
                                                 altitude = 0,)
     
     # spin propeller in nonuniform flow
-    thrust  = np.linalg.norm( results.thrust )
+    thrust  = rp.linalg.norm( results.thrust )
     torque  = results.torque[0][0] 
     power   = results.power[0][0] 
     Cp      = results.power_coefficient[0][0] 
@@ -163,16 +163,16 @@ def arbitrary_nonuniform_freestream_test():
     Cp_r     = 0.10109215484548903
     etap_r   = 0.6807102296693119
     print('\nCase 2 Errors: \n')
-    print('Thrust difference = ', np.abs(thrust - thrust_r) / thrust_r )
-    print('Torque difference = ', np.abs(torque - torque_r) / torque_r )
-    print('Power difference = ', np.abs(power - power_r) / power_r )
-    print('Cp difference = ', np.abs(Cp - Cp_r) / Cp_r )
-    print('Etap difference = ', np.abs(etap - etap_r) / etap_r )
-    assert (np.abs(thrust - thrust_r) / thrust_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Thrust Test"
-    assert (np.abs(torque - torque_r) / torque_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Torque Test"
-    assert (np.abs(power - power_r) / power_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Power Test"
-    assert (np.abs(Cp - Cp_r) / Cp_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Power Coefficient Test"
-    assert (np.abs(etap - etap_r) / etap_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Efficiency Test"
+    print('Thrust difference = ', rp.abs(thrust - thrust_r) / thrust_r )
+    print('Torque difference = ', rp.abs(torque - torque_r) / torque_r )
+    print('Power difference = ', rp.abs(power - power_r) / power_r )
+    print('Cp difference = ', rp.abs(Cp - Cp_r) / Cp_r )
+    print('Etap difference = ', rp.abs(etap - etap_r) / etap_r )
+    assert (rp.abs(thrust - thrust_r) / thrust_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Thrust Test"
+    assert (rp.abs(torque - torque_r) / torque_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Torque Test"
+    assert (rp.abs(power - power_r) / power_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Power Test"
+    assert (rp.abs(Cp - Cp_r) / Cp_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Power Coefficient Test"
+    assert (rp.abs(etap - etap_r) / etap_r < 1e-2), "Nonuniform Propeller Inflow Regression Failed at Efficiency Test"
 
     return
 

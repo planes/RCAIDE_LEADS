@@ -11,7 +11,7 @@ from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.update_center_of_g
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.update_moments_of_inertia import update_moments_of_inertia
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------
 # Update Weights
@@ -68,7 +68,7 @@ def weights(segment):
                         fuel =  fuel_tank.fuel
                         mass_flow_rate = conditions.energy.fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].mass_flow_rate              
                         m_0_fuel       = conditions.weights.components.mass[fuel.tag][0,0]     
-                        conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  np.dot(I, -mass_flow_rate).flatten() 
+                        conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten() 
                 
             update_center_of_gravity(segment.state, vehicle)
             
@@ -81,7 +81,7 @@ def weights(segment):
         # --------------------------------------------------------------------------                  
         # update mass 
         # --------------------------------------------------------------------------  
-        m = m_0_vehicle + np.dot(I, -m_dot_vehicle) 
+        m = m_0_vehicle + rp.dot(I, -m_dot_vehicle) 
         W = m*g 
         conditions.weights.vehicle.mass[1:,0]                = m[1:,0]  
         conditions.frames.inertial.gravity_force_vector[:,2] = W[:,0]

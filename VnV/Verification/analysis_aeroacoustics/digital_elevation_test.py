@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Aeroacoustics.Common import post_process_noise_data
 import matplotlib.pyplot as plt  
 import sys 
 import os
-import numpy as np     
+import RNUMPY as rp     
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -49,7 +49,7 @@ def main():
     results.segments[0].analyses.aeroacoustics.settings.topography_file = data_file
     
     regression_plotting_flag = False 
-    flight_times = np.array(['06:00:00','06:05:00','06:10:00', 
+    flight_times = rp.array(['06:00:00','06:05:00','06:10:00', 
                              '07:40:00','07:45:00','07:50:00','07:55:00', 
                              '08:00:00'])
 
@@ -62,11 +62,11 @@ def main():
     plot_results(results,noise_data,regression_plotting_flag)
     plot_battery_pack_conditions(results) 
 
-    X57_SPL        = np.max(results.segments.cruise.conditions.aeroacoustics.hemisphere_SPL_dBA) 
+    X57_SPL        = rp.max(results.segments.cruise.conditions.aeroacoustics.hemisphere_SPL_dBA) 
     X57_SPL_true   = 80.32077228241845
-    X57_diff_SPL   = np.abs(X57_SPL - X57_SPL_true)
+    X57_diff_SPL   = rp.abs(X57_SPL - X57_SPL_true)
     print('Error: ',X57_diff_SPL)
-    assert np.abs((X57_SPL - X57_SPL_true)/X57_SPL_true) < 1e-3 
+    assert rp.abs((X57_SPL - X57_SPL_true)/X57_SPL_true) < 1e-3 
      
     return      
 
@@ -220,7 +220,7 @@ def plot_results(results,noise_data,regression_plotting_flag):
     
     # Maximum Sound Pressure Level   
     plot_3D_noise_contour(noise_data,
-                          noise_level      = np.max(noise_data.SPL_dBA,axis=0), 
+                          noise_level      = rp.max(noise_data.SPL_dBA,axis=0), 
                           min_noise_level  = 20,  
                           max_noise_level  = 90, 
                           noise_scale_label= 'SPL [dBA]',
@@ -272,7 +272,7 @@ def plot_results(results,noise_data,regression_plotting_flag):
     
     # Maximum Sound Pressure Level   
     plot_2D_noise_contour(noise_data,
-                        noise_level      = np.max(noise_data.SPL_dBA,axis=0), 
+                        noise_level      = rp.max(noise_data.SPL_dBA,axis=0), 
                         min_noise_level  = 0,  
                         max_noise_level  = 90, 
                         noise_scale_label= 'SPL [dBA]',

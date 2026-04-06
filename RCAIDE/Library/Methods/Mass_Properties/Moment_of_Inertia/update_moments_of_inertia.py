@@ -7,7 +7,7 @@
 # RCAIDE imports     
 
 # package imports
-import numpy   as np 
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  update_moments_of_inertia
@@ -43,7 +43,7 @@ def update_moments_of_inertia(state,vehicle):
     Returns
     -------
     CG : numpy.ndarray
-        Updated moment of intertia tensor variables
+        Updated moment of inertia tensor variables
         Shape: (1, N) where N is the number of flight conditions
 
     Notes
@@ -71,15 +71,15 @@ def update_moments_of_inertia(state,vehicle):
     # --------------------------------------------------------------------------     
     # update aircraft MOI
     # --------------------------------------------------------------------------
-    MOI_Ixx   = np.zeros((N,1))
-    MOI_Ixy   = np.zeros((N,1))
-    MOI_Ixz   = np.zeros((N,1))
-    MOI_Iyx   = np.zeros((N,1))
-    MOI_Iyy   = np.zeros((N,1))
-    MOI_Iyz   = np.zeros((N,1))
-    MOI_Izx   = np.zeros((N,1))
-    MOI_Izy   = np.zeros((N,1))
-    MOI_Izz   = np.zeros((N,1))
+    MOI_Ixx   = rp.zeros((N,1))
+    MOI_Ixy   = rp.zeros((N,1))
+    MOI_Ixz   = rp.zeros((N,1))
+    MOI_Iyx   = rp.zeros((N,1))
+    MOI_Iyy   = rp.zeros((N,1))
+    MOI_Iyz   = rp.zeros((N,1))
+    MOI_Izx   = rp.zeros((N,1))
+    MOI_Izy   = rp.zeros((N,1))
+    MOI_Izz   = rp.zeros((N,1))
     for item in conditions.weights.components.mass.keys():
         MOI_Ixx  += conditions.weights.components.moments_of_inertia_Ixx[item]
         MOI_Ixy  += conditions.weights.components.moments_of_inertia_Ixy[item]
@@ -116,13 +116,13 @@ def update_fuel_tank_moment_of_inertia(fuel_tank,state):
     MOI_fuel_non_dim  = fuel_tank.fuel.mass_properties.moments_of_inertia.non_dimensional_tensor
     
     # local dimensional tensor 
-    I_fuel_local      = M_fuel[:,:, None]  * np.array(MOI_fuel_non_dim)[None,:,:]
+    I_fuel_local      = M_fuel[:,:, None]  * rp.array(MOI_fuel_non_dim)[None,:,:]
     
     # moment arm 
-    s       = np.array(center_of_gravity) - conditions.weights.components.global_center_of_gravity[fuel_tag]
-    term_1  = np.repeat(np.repeat(np.vecdot(s, s)[:,None, None],3, axis=2), 3, axis=1)
-    term_2 = np.repeat(np.array(np.identity(3))[None,:,:],N, axis=0)
-    term_3  = np.multiply.outer(s, s)[:, :, 0, :]
+    s       = rp.array(center_of_gravity) - conditions.weights.components.global_center_of_gravity[fuel_tag]
+    term_1  = rp.repeat(rp.repeat(rp.vecdot(s, s)[:,None, None],3, axis=2), 3, axis=1)
+    term_2  = rp.repeat(rp.array(rp.identity(3))[None,:,:],N, axis=0)
+    term_3  = rp.multiply.outer(s, s)[:, :, 0, :]
     
     # parallel axis moment 
     I_fuel_par        = M_fuel[:,:, None] *  (term_1* term_2 - term_3 )     

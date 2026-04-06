@@ -12,7 +12,7 @@ from pylab import fill
 from .Propellant import Propellant 
 
 import os
-import numpy as np
+import RNUMPY as rp
 from scipy.interpolate  import interp1d 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -139,8 +139,8 @@ class Liquid_Hydrogen(Propellant):
             RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen.load_hydrogen_properties
          """
         data = load_hydrogen_properties()
-        temps = np.array(data["Temperature (K)"], dtype=float)
-        props = np.array(data[prop_name], dtype=float)
+        temps = rp.array(data["Temperature (K)"], dtype=float)
+        props = rp.array(data[prop_name], dtype=float)
         interp = interp1d(temps, props, kind="linear", fill_value=None)
         
         return interp(T)

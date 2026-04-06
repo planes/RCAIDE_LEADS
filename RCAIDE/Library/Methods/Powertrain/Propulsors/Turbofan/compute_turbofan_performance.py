@@ -17,7 +17,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Expansion_Nozzle     import co
 from RCAIDE.Library.Methods.Powertrain.Converters.Compression_Nozzle   import compute_compression_nozzle_performance
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan             import compute_thrust
 
-import  numpy as  np
+import RNUMPY as rp
 from copy import  deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -365,7 +365,7 @@ def compute_turbofan_performance(turbofan, state, center_of_gravity=[[0.0, 0.0, 
     moment_vector[:,0]         =  turbofan.origin[0][0] -   center_of_gravity[0][0]
     moment_vector[:,1]         =  turbofan.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]         =  turbofan.origin[0][2]  -  center_of_gravity[0][2]
-    M                          =  np.cross(moment_vector, turbofan_conditions.thrust)   
+    M                          =  rp.cross(moment_vector, turbofan_conditions.thrust)   
     moment                     = M 
     power                      = turbofan_conditions.power 
     turbofan_conditions.moment = moment 
@@ -506,7 +506,7 @@ def reuse_stored_turbofan_data(turbofan,state,network,stored_propulsor_tag,cente
     moment_vector[:,0] = turbofan.origin[0][0] -   center_of_gravity[0][0] 
     moment_vector[:,1] = turbofan.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2] = turbofan.origin[0][2]  -  center_of_gravity[0][2]
-    moment             = np.cross(moment_vector,thrust_vector)    
+    moment             = rp.cross(moment_vector,thrust_vector)    
   
     power                                             = conditions.energy.propulsors[turbofan.tag].power 
     conditions.energy.propulsors[turbofan.tag].moment = moment

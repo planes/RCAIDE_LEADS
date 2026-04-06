@@ -6,7 +6,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------      
 
-import numpy as np
+import RNUMPY as rp
 import types
 import json
 import pickle
@@ -119,7 +119,7 @@ def build_dict_r(v):
         return None
     
     # Transform to basic python data type as appropriate
-    if (tv == np.ndarray) or (tv == np.float64):
+    if (tv == rp.ndarray) or (tv == rp.float64):
         ret = v.tolist()
     elif (tv == str) or (tv == bool):
         ret = v

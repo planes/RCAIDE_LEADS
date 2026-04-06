@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Plots  import *        
   
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import matplotlib.pyplot as plt    
 import os
@@ -236,7 +236,7 @@ def bwb_aircraft_geometry_test(show_figure):
         fuel_tank_4.insulation_material           = RCAIDE.Library.Attributes.Materials.Vacuum_Cellular_Multilayer_Insulation()
         fuel_tank_4.fuel.gravimetric_efficiency   = 0.5
         fuel_tank_4.xz_plane_symmetric            = False
-        fuel_tank_4.orientation_euler_angles      = [0,0,np.pi/2]
+        fuel_tank_4.orientation_euler_angles      = [0,0,rp.pi/2]
         fuel_tank_4.bwb_aft_tank                  = True
         fuel_tank_4.aft_tank_root_chord_bounds    = [0.65,0.9]
         fuel_tank_4.aft_tank_segment_bound        = 'cabin_wall'

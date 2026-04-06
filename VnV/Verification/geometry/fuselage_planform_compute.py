@@ -11,7 +11,7 @@ from RCAIDE.Library.Methods.Geometry.Planform.fuselage_planform import fuselage_
 from RCAIDE.Library.Methods.Geometry.LOPA.compute_layout_of_passenger_accommodations import compute_layout_of_passenger_accommodations
 from RCAIDE.Library.Plots import *
 
-import numpy as np 
+import RNUMPY as rp 
 import matplotlib.pyplot as plt
 import sys
 import os
@@ -75,11 +75,11 @@ def main():
      
      # Compute Errors
      error             = Data()  
-     error.wetted_area = np.abs(fuselage.areas.wetted-wetted_area_truth)/wetted_area_truth
-     error.front_area  = np.abs(fuselage.areas.front_projected-frontal_area_truth)/frontal_area_truth 
+     error.wetted_area = rp.abs(fuselage.areas.wetted-wetted_area_truth)/wetted_area_truth
+     error.front_area  = rp.abs(fuselage.areas.front_projected-frontal_area_truth)/frontal_area_truth 
              
      for k,v in list(error.items()):
-          assert np.any(np.abs(v)<1e-6)
+          assert rp.any(rp.abs(v)<1e-6)
           
 if __name__ == '__main__': 
      main()

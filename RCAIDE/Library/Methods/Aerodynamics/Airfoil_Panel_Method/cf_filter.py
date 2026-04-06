@@ -11,8 +11,9 @@
 from RCAIDE.Framework.Core import Data
 
 # package imports  
-import numpy as np 
-from scipy.signal import lfilter 
+import RNUMPY as rp 
+# from scipy.signal import lfilter 
+from RNUMPY.scipy.signal import lfilter 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # cf_filter.py

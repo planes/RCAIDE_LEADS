@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core     import Data
 from RCAIDE.Framework.Analyses import Analysis  
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Aerodynamics
@@ -47,7 +47,7 @@ class Aerodynamics(Analysis):
         """           
         self.tag                                                         = 'aerodynamics'   
         self.settings                                                    = Data() 
-        self.settings.maximum_lift_coefficient                           = np.inf 
+        self.settings.maximum_lift_coefficient                           = rp.inf 
         self.settings.fuselage_lift_correction                           = 1.20
         self.settings.trim_drag_correction_factor                        = 1.02
         self.settings.wing_parasite_drag_form_factor                     = 1.1  

@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Relative Noise Evaluatation Locations
@@ -43,19 +43,19 @@ def compute_relative_noise_evaluation_locations(settings,microphone_locations, s
     
     # rediscretize time and aircraft position to get finer resolution 
     time              = segment.state.conditions.frames.inertial.time[:,0]
-    noise_time        = np.linspace(time[0], time[-1], N) 
-    noise_pos         = np.zeros((N,3)) 
-    noise_pos[:,0]    = np.interp(noise_time,time,pos[:,0])
-    noise_pos[:,1]    = np.interp(noise_time,time,pos[:,1])
-    noise_pos[:,2]    = np.interp(noise_time,time,pos[:,2])
+    noise_time        = rp.linspace(time[0], time[-1], N) 
+    noise_pos         = rp.zeros((N,3)) 
+    noise_pos[:,0]    = rp.interp(noise_time,time,pos[:,0])
+    noise_pos[:,1]    = rp.interp(noise_time,time,pos[:,1])
+    noise_pos[:,2]    = rp.interp(noise_time,time,pos[:,2])
     
     num_gm_mic        = len(microphone_locations)  
-    RML               = np.zeros((N,num_gm_mic,3)) 
-    PHI               = np.zeros((N,num_gm_mic))
-    THETA             = np.zeros((N,num_gm_mic)) 
+    RML               = rp.zeros((N,num_gm_mic,3)) 
+    PHI               = rp.zeros((N,num_gm_mic))
+    THETA             = rp.zeros((N,num_gm_mic)) 
     
     for cpt in range(N):  
-        relative_locations         = np.zeros((num_gm_mic,3))
+        relative_locations         = rp.zeros((num_gm_mic,3))
         relative_locations[:,0]    = microphone_locations[:,0] - (settings.aircraft_origin_location[0] + noise_pos[cpt,0])    
         relative_locations[:,1]    = microphone_locations[:,1] - (settings.aircraft_origin_location[1] + noise_pos[cpt,1]) 
         if MSL_altitude:
@@ -64,8 +64,8 @@ def compute_relative_noise_evaluation_locations(settings,microphone_locations, s
             relative_locations[:,2]    = -(noise_pos[cpt,2])
             
         RML[cpt,:,:]   = relative_locations 
-        PHI[cpt,:]     =  np.arctan2(np.sqrt(np.square(relative_locations[:, 0]) + np.square(relative_locations[:, 1])),  relative_locations[:, 2])  
-        THETA[cpt,:]   =  np.arctan2(relative_locations[:, 1], relative_locations[:, 0]) 
+        PHI[cpt,:]     =  rp.arctan2(rp.sqrt(rp.square(relative_locations[:, 0]) + rp.square(relative_locations[:, 1])),  relative_locations[:, 2])  
+        THETA[cpt,:]   =  rp.arctan2(relative_locations[:, 1], relative_locations[:, 0]) 
     
     return noise_time,noise_pos,RML,PHI,THETA,num_gm_mic 
  

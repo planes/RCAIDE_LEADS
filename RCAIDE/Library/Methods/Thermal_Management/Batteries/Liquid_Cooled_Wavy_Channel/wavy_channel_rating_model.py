@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Data   
 
 # python package imports 
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Wavy Channel Rating Model
@@ -69,7 +69,7 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     # Battery Properties
     d_cell                      = battery.cell.diameter                    
     h_cell                      = battery.cell.height                      
-    A_cell                      = np.pi*d_cell*h_cell 
+    A_cell                      = rp.pi*d_cell*h_cell 
     N_cells_geometric_config    = battery.geometrtic_configuration.parallel_count*battery.geometrtic_configuration.normal_count  
     cell_mass                   = battery.cell.mass 
     Nn_module_cells             = battery.electrical_configuration.series            
@@ -125,15 +125,15 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     NTU = U_total*A_chan/(m_coolant*cp)
     
     # Effectiveness of the Channel 
-    eff_HAS = 1 - np.exp(-NTU) 
+    eff_HAS = 1 - rp.exp(-NTU) 
     
     if T_inlet  < T_cell:
     
         # Calculate Outlet Temparture To ( eq 8)
-        T_o = ((T_cell-T_inlet)*(1-np.exp(-NTU)))+T_inlet   
+        T_o = ((T_cell-T_inlet)*(1-rp.exp(-NTU)))+T_inlet   
 
         # Calculate the Log mean temperature 
-        T_lm = ((T_cell-T_inlet)-(T_cell-T_o))/(np.log((T_cell-T_inlet)/(T_cell-T_o)))
+        T_lm = ((T_cell-T_inlet)-(T_cell-T_o))/(rp.log((T_cell-T_inlet)/(T_cell-T_o)))
         
         # Calculated Heat Convected 
         Q_convec = U_total*A_chan*T_lm*eff_HAS
@@ -151,10 +151,10 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
         # Reverse Heat Transfer
         
         # Calculate Outlet Temparture To ( eq 8)
-        T_o =  T_inlet - ((T_inlet - T_cell)*(1-np.exp(-NTU)))   
+        T_o =  T_inlet - ((T_inlet - T_cell)*(1-rp.exp(-NTU)))   
     
         # Calculate the Log mean temperature 
-        T_lm = ((T_inlet - T_cell)-(T_o - T_cell))/(np.log((T_inlet - T_cell)/(T_o - T_cell)))
+        T_lm = ((T_inlet - T_cell)-(T_o - T_cell))/(rp.log((T_inlet - T_cell)/(T_o - T_cell)))
             
         # Calculated Heat Convected 
         Q_convec = U_total*A_chan*T_lm*eff_HAS     

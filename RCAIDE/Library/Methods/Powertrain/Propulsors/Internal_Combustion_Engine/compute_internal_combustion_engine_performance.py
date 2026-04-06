@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.compute_rotor_performanc
 
 # pacakge imports  
 from copy import deepcopy
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_internal_combustion_engine_performance
@@ -112,7 +112,7 @@ def compute_internal_combustion_engine_performance(propulsor, state, center_of_g
     moment_vector[:,0]      = propeller.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1]      = propeller.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]      = propeller.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  =  np.cross(moment_vector, conditions.energy.converters[propeller.tag].thrust)       
+    moment                  =  rp.cross(moment_vector, conditions.energy.converters[propeller.tag].thrust)       
     
     # Create the outputs
     ice_conditions.fuel_mass_flow_rate       = conditions.energy.converters[engine.tag].fuel_mass_flow_rate  
@@ -173,7 +173,7 @@ def reuse_stored_internal_combustion_engine_data(propulsor,state,network,stored_
     moment_vector[:,0]      = propeller.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1]      = propeller.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]      = propeller.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  =  np.cross(moment_vector,thrust_vector)
+    moment                  =  rp.cross(moment_vector,thrust_vector)
     
     # pack 
     conditions.energy.converters[propeller.tag].moment = moment  

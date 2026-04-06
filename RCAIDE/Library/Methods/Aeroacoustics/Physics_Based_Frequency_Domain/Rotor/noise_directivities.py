@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Python Package imports  
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute Noise Directivities  
@@ -37,6 +37,6 @@ def noise_directivities(Theta_er,Phi_er,cos_zeta_r,M_tot):
     Properties Used:
        N/A   
     '''      
-    Dbar_h   = (2*(np.sin(Theta_er/2)**2)*((np.sin(Phi_er))**2) )/((1 - M_tot*cos_zeta_r)**4)  # eqn 20 Brooks & Burley
-    Dbar_l   = ((np.sin(Theta_er)**2)*((np.sin(Phi_er))**2) )/((1 - M_tot*cos_zeta_r)**4)  # eqn 19 Brooks & Burley  
+    Dbar_h   = (2*(rp.sin(Theta_er/2)**2)*((rp.sin(Phi_er))**2) )/((1 - M_tot*cos_zeta_r)**4)  # eqn 20 Brooks & Burley
+    Dbar_l   = ((rp.sin(Theta_er)**2)*((rp.sin(Phi_er))**2) )/((1 - M_tot*cos_zeta_r)**4)  # eqn 19 Brooks & Burley  
     return Dbar_h,Dbar_l 

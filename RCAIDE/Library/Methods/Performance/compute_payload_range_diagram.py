@@ -15,7 +15,7 @@ from RCAIDE.Library.Mission.Common.Pre_Process import mass_properties,geometry
 from RCAIDE.Library.Plots import *
  
 # Pacakge imports 
-import numpy as np
+import RNUMPY as rp
 from matplotlib import pyplot as plt
 import os,sys
  
@@ -266,7 +266,7 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
             missingFuel = FUEL[i] - TotalFuel - reserve_fuel
 
             # Current distance and fuel consuption in the cruise segment
-            CruiseDist = np.diff( segment.conditions.frames.inertial.position_vector[[0,-1],0] )[0]        # Distance [m]
+            CruiseDist = rp.diff( segment.conditions.frames.inertial.position_vector[[0,-1],0] )[0]        # Distance [m]
             CruiseFuel = segment.conditions.weights.vehicle.mass[0,0] - segment.conditions.weights.vehicle.mass[-1,0]    # [kg]
             
             # Current specific range (m/kg)
@@ -299,11 +299,11 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
 
     # packing results
     payload_range                          = Data()
-    payload_range.range                    = np.array(R)
-    payload_range.payload                  = np.array(PLD)
-    payload_range.oew_plus_payload         = np.array(OEW_PLD)
-    payload_range.fuel                     = np.array(FUEL)
-    payload_range.takeoff_weight           = np.array(TOW)
+    payload_range.range                    = rp.array(R)
+    payload_range.payload                  = rp.array(PLD)
+    payload_range.oew_plus_payload         = rp.array(OEW_PLD)
+    payload_range.fuel                     = rp.array(FUEL)
+    payload_range.takeoff_weight           = rp.array(TOW)
     payload_range.fuel_reserve_percentage  = fuel_reserve_percentage
     if plot_diagram:  
         # get plotting style 
@@ -379,7 +379,7 @@ def electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagr
     PLD =   [MaxPLD,    0.]     # Payload Weights
 
     # Initialize Range Array
-    R = np.zeros(2)
+    R = rp.zeros(2)
 
     # Calculate Vehicle Range for Max Payload and Ferry Conditions
     for i in range(2):
@@ -389,15 +389,15 @@ def electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagr
         R[i]    = segment.conditions.frames.inertial.position_vector[-1,0] 
 
     # Insert Starting Point for Diagram Construction
-    R   = np.insert(R, 0, 0)
-    PLD = np.insert(PLD, 0, MaxPLD)
-    TOW = np.insert(TOW, 0, 0)
+    R   = rp.insert(R, 0, 0)
+    PLD = rp.insert(PLD, 0, MaxPLD)
+    TOW = rp.insert(TOW, 0, 0)
 
     # Pack Results
     payload_range = Data()
-    payload_range.range             = np.array(R)
-    payload_range.payload           = np.array(PLD)
-    payload_range.takeoff_weight    = np.array(TOW)
+    payload_range.range             = rp.array(R)
+    payload_range.payload           = rp.array(PLD)
+    payload_range.takeoff_weight    = rp.array(TOW)
     
     if plot_diagram: 
         # get plotting style 

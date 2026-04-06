@@ -11,8 +11,8 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Larminie_Model import  compute_power, compute_voltage
 from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Proton_Exchange_Membrane.compute_fuel_cell_performance import  evaluate_PEM ,  evaluate_max_gross_power, set_rated_current_density 
-import  scipy as  sp
-import  numpy as  np
+import RNUMPY.scipy as sp
+import RNUMPY as rp
 import matplotlib.pyplot as  plt
 import matplotlib.cm as cm
 
@@ -101,15 +101,15 @@ def compute_stack_properties(fuel_cell_stack):
     width  = x2
     height = x3 *stacking_rows     
     
-    if  euler_angles[0] == (np.pi / 2):
+    if  euler_angles[0] == (rp.pi / 2):
         x1prime      = x2
         x2prime      = -x1
         x3prime      = x3 
-    if euler_angles[1] == (np.pi / 2):
+    if euler_angles[1] == (rp.pi / 2):
         x1primeprime = -x3prime
         x2primeprime = x2prime
         x3primeprime = x1prime
-    if euler_angles[2] == (np.pi / 2):
+    if euler_angles[2] == (rp.pi / 2):
         length       = x1primeprime
         width        = x3primeprime
         height       = -x2primeprime
@@ -127,8 +127,8 @@ def compute_stack_properties(fuel_cell_stack):
         maximum_current_density                = sp.optimize.fminbound(compute_power, lb, ub, args=(fuel_cell, sign)) 
         P_fuel_cell                            = compute_power(maximum_current_density,fuel_cell)  
         V_fuel_cell                            = compute_voltage(fuel_cell,maximum_current_density)  # useful voltage vector 
-        efficiency                             = np.divide(V_fuel_cell, fuel_cell.ideal_voltage)
-        mdot_H2                                = np.divide(P_fuel_cell,np.multiply(fuel_cell.propellant.specific_energy,efficiency))
+        efficiency                             = rp.divide(V_fuel_cell, fuel_cell.ideal_voltage)
+        mdot_H2                                = rp.divide(P_fuel_cell,rp.multiply(fuel_cell.propellant.specific_energy,efficiency))
         
         # store properties
         fuel_cell.rated_current_density       = maximum_current_density

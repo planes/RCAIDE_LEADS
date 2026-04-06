@@ -10,7 +10,7 @@ from RCAIDE.Framework.Core import Data
 from RCAIDE.Framework.Analyses import Analysis
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 # ----------------------------------------------------------------------
 #  Aeroacoustics
 # ----------------------------------------------------------------------
@@ -45,17 +45,17 @@ class Aeroacoustics(Analysis):
             """                   
         self.tag                                             = 'Aeroacoustics'      
         self.settings                                        = Data() 
-        self.settings.harmonics                              = np.arange(1,30) 
+        self.settings.harmonics                              = rp.arange(1,30) 
         self.settings.flyover                                = False    
         self.settings.approach                               = False
         self.settings.sideline                               = False
         self.settings.sideline_x_position                    = 0 
         self.settings.print_noise_output                     = False  
         self.settings.mean_sea_level_altitude                = True 
-        self.settings.aircraft_origin_location               = np.array([0,0,0])
-        self.settings.aircraft_destination_location          = np.array([0,0,0])
-        self.settings.aircraft_origin_coordinates            = np.array([0.0,0.0])
-        self.settings.aircraft_destination_coordinates       = np.array([0.0,0.0])
+        self.settings.aircraft_origin_location               = rp.array([0,0,0])
+        self.settings.aircraft_destination_location          = rp.array([0,0,0])
+        self.settings.aircraft_origin_coordinates            = rp.array([0.0,0.0])
+        self.settings.aircraft_destination_coordinates       = rp.array([0.0,0.0])
         self.settings.noise_reduction_factors                = Data()
         self.settings.noise_reduction_factors.SPL_dbA        = 0.0     # Reduction factors are proportional (.1 is a 10% weight reduction)
         self.settings.topography_file                        = None
@@ -73,16 +73,16 @@ class Aeroacoustics(Analysis):
         self.settings.noise_hemisphere                       = False 
         self.settings.noise_hemisphere_radius                = 20  
         epsilon                                              = 1E-10
-        self.settings.noise_hemisphere_phi_angles            = np.linspace(epsilon,   np.pi-epsilon,6)   
-        self.settings.noise_hemisphere_theta_angles          = np.linspace(epsilon - np.pi        ,   np.pi-epsilon,12)
+        self.settings.noise_hemisphere_phi_angles            = rp.linspace(epsilon,   rp.pi-epsilon,6)   
+        self.settings.noise_hemisphere_theta_angles          = rp.linspace(epsilon - rp.pi        ,   rp.pi-epsilon,12)
                 
         # settings for acoustic frequency resolution
-        self.settings.center_frequencies                     = np.array([16,20,25,31.5,40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, \
+        self.settings.center_frequencies                     = rp.array([16,20,25,31.5,40, 50, 63, 80, 100, 125, 160, 200, 250, 315, 400, \
                                                                     500, 630, 800, 1000, 1250, 1600, 2000, 2500, 3150,
                                                                     4000, 5000, 6300, 8000, 10000])        
-        self.settings.lower_frequencies                      = np.array([14,18,22.4,28,35.5,45,56,71,90,112,140,180,224,280,355,450,560,710,\
+        self.settings.lower_frequencies                      = rp.array([14,18,22.4,28,35.5,45,56,71,90,112,140,180,224,280,355,450,560,710,\
                                                                     900,1120,1400,1800,2240,2800,3550,4500,5600,7100,9000 ])
-        self.settings.upper_frequencies                      = np.array([18,22.4,28,35.5,45,56,71,90,112,140,180,224,280,355,450,560,710,900,1120,\
+        self.settings.upper_frequencies                      = rp.array([18,22.4,28,35.5,45,56,71,90,112,140,180,224,280,355,450,560,710,900,1120,\
                                                                  1400,1800,2240,2800,3550,4500,5600,7100,9000,11200 ])
         
         return

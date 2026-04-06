@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
  
 # Python package imports   
-import numpy as np   
+import RNUMPY as rp   
 
 # ----------------------------------------------------------------------------------------------------------------------     
 #  Secondary Noise Component
@@ -69,16 +69,16 @@ def secondary_noise_component(Velocity_primary, theta_s, sound_ambient, Velocity
         ((Velocity_secondary+Velocity_aircraft)/sound_ambient)**(1-velocity_exponent)
 
     # Determination of the noise model coefficients
-    Z1 = -18*((1.8*theta_s/np.pi)-0.6)**2
-    Z2 = -14-8*((1.8*theta_s/np.pi)-0.6)**3
+    Z1 = -18*((1.8*theta_s/rp.pi)-0.6)**2
+    Z2 = -14-8*((1.8*theta_s/rp.pi)-0.6)**3
     Z3 = -0.7
-    Z4 = 0.6 - 0.5*((1.8*theta_s/np.pi)-0.6)**2+0.5*(0.6-np.log10(1+Area_secondary/Area_primary))
-    Z5 = 51 + 54*theta_s/np.pi - 9*((1.8*theta_s/np.pi)-0.6)**3
-    Z6 = 99 + 36*theta_s/np.pi - 15*((1.8*theta_s/np.pi)-0.6)**4 + \
+    Z4 = 0.6 - 0.5*((1.8*theta_s/rp.pi)-0.6)**2+0.5*(0.6-rp.log10(1+Area_secondary/Area_primary))
+    Z5 = 51 + 54*theta_s/rp.pi - 9*((1.8*theta_s/rp.pi)-0.6)**3
+    Z6 = 99 + 36*theta_s/rp.pi - 15*((1.8*theta_s/rp.pi)-0.6)**4 + \
         5*Velocity_secondary*(Velocity_primary-Velocity_secondary)/(sound_ambient**2) +  DSPL_s + EX_s
 
     # Determination of Sound Pressure Level for the secondary jet component
-    SPL_s = (Z1*np.log10(FV)+Z2)*(np.log10(Str_s)-Z3*np.log10(FV)-Z4)**2 + Z5*np.log10(FV) + Z6
+    SPL_s = (Z1*rp.log10(FV)+Z2)*(rp.log10(Str_s)-Z3*rp.log10(FV)-Z4)**2 + Z5*rp.log10(FV) + Z6
 
     return SPL_s 
 

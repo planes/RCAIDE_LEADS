@@ -21,7 +21,7 @@ from RCAIDE.Framework.External_Interfaces.OpenVSP.vsp_wing             import re
 from RCAIDE.Framework.External_Interfaces.OpenVSP.vsp_nacelle          import read_vsp_nacelle
 from RCAIDE.Framework.External_Interfaces.OpenVSP.get_vsp_measurements import get_vsp_measurements
 
-import numpy as np
+import RNUMPY as rp
 from copy import deepcopy
 import sys
 import os
@@ -383,7 +383,7 @@ def import_vsp_vehicle(tag,
     # get origin of fuselage
     vsp_origin = 0
     for fuselage in vehicle.fuselages:
-        vsp_origin = np.minimum(vsp_origin, fuselage.origin[0][0])
+        vsp_origin = rp.minimum(vsp_origin, fuselage.origin[0][0])
         
     # shift all Components to new origin
     origin_shift =  -vsp_origin

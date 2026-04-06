@@ -14,7 +14,7 @@ from RCAIDE.Framework.Core    import Units, Data
 from RCAIDE.Library.Components import Component
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Systems Weight 
@@ -137,12 +137,12 @@ def compute_systems_weight(vehicle):
     WAVONCG  = 0.09 * DG**0.8  # Avionics Group from Commercial Airplane Design Principles by Pasquale Sforza eq. 8.35. Which is an improvment from Kroo's estimation
 
     D       = (fuse_w + fuse_h) / 2.
-    Sf      = np.pi * (L / D - 1.7) * D ** 2  # Fuselage wetted area, ft**2
+    Sf      = rp.pi * (L / D - 1.7) * D ** 2  # Fuselage wetted area, ft**2
     WFURN   = 0.0577 * flight_crew ** 0.1 * (cargo_weight) ** 0.393 * Sf ** 0.75 + 46 * num_pax
     WFURN  += 75 * flight_crew
     WFURN  += 2.5 * num_pax**1.33
 
-    Vpr = D ** 2 * np.pi / 4 * L
+    Vpr = D ** 2 * rp.pi / 4 * L
     WAC = 62.36 * num_pax ** 0.25 * (Vpr / 1000) ** 0.604 * Wuav ** 0.1
 
     WAI = 0.002 * DG

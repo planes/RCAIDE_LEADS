@@ -9,7 +9,7 @@
 from RCAIDE.Framework.Core                    import Data  
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Miscellaneous Drag Total
@@ -134,7 +134,7 @@ def miscellaneous_drag(state,settings,geometry):
     Mach           = conditions.freestream.mach_number 
    
     # landing gear drag  
-    landing_gear_drag  =  np.zeros_like(Mach)
+    landing_gear_drag  =  rp.zeros_like(Mach)
     for landing_gear in  geometry.landing_gears:
         if landing_gear.gear_extended == True:
             if landing_gear.fairing:
@@ -144,7 +144,7 @@ def miscellaneous_drag(state,settings,geometry):
             landing_gear_drag[:,0] +=  landing_gear.wheels *  cd_lg * (landing_gear.tire_diameter * landing_gear.tire_width) /S_ref 
          
     # subsonic 
-    miscellaneous_drag =  np.zeros_like(Mach) 
+    miscellaneous_drag =  rp.zeros_like(Mach) 
     swet_tot       = 0.
     for wing in geometry.wings:
         swet_tot += wing.areas.wetted 

@@ -6,10 +6,10 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------   
-import numpy as np 
+import RNUMPY as rp 
  
 # package imports
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Total Parasite Drag 
@@ -150,7 +150,7 @@ def parasite_total(state,settings,geometry):
         for propulsor in network.propulsors:   
             if propulsor.nacelle !=  None:                
                 nacelle       = propulsor.nacelle
-                front_area    = np.pi * (nacelle.diameter ** 2) /4  
+                front_area    = rp.pi * (nacelle.diameter ** 2) /4  
                 nacelle_parasite_drag = conditions.aerodynamics.coefficients.drag.parasite[nacelle.tag].total  
                 conditions.aerodynamics.coefficients.drag.parasite[nacelle.tag].total  = nacelle_parasite_drag * front_area/vehicle_reference_area
                 total_nacelle_parasite_drag += nacelle_parasite_drag * front_area/vehicle_reference_area

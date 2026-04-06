@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Analyses.Process   import Process  
 
 # Python package imports  
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Sizing Setup for Wavy Channel
@@ -75,7 +75,7 @@ def modify_wavy_channel_HAS(nexus):
     # Battery 
     d_cell    = battery.cell.diameter                    
     h_cell    = battery.cell.height                      
-    A_cell    = np.pi*d_cell*h_cell    
+    A_cell    = rp.pi*d_cell*h_cell    
     T_bat     = has_opt.design_battery_operating_temperature
     Q_module  = has_opt.design_heat_removed 
     
@@ -101,8 +101,8 @@ def modify_wavy_channel_HAS(nexus):
     A_chan = 2*N_cells*(theta)*A_cell 
     
     # Update Spacing of the battery pack
-    new_normal_spacing  = 2 * (d_cell + d) * np.sin(theta/2)
-    new_parllel_spacing  = (d_cell + d) * np.cos(theta/2)
+    new_normal_spacing  = 2 * (d_cell + d) * rp.sin(theta/2)
+    new_parllel_spacing  = (d_cell + d) * rp.cos(theta/2)
     
     #Length of Channel   
     L_chan  = (battery.geometrtic_configuration.normal_count*new_normal_spacing)*battery.geometrtic_configuration.parallel_count
@@ -157,13 +157,13 @@ def modify_wavy_channel_HAS(nexus):
     NTU = U_total*A_chan/(m_coolant*cp)
     
     # Effectiveness of the Channel 
-    eff_HAS = 1 - np.exp(-NTU)
+    eff_HAS = 1 - rp.exp(-NTU)
 
     # Calculate Outlet Temparture To ( eq 8)
-    T_o = ((T_bat-T_i)*(1-np.exp(-NTU)))+T_i
+    T_o = ((T_bat-T_i)*(1-rp.exp(-NTU)))+T_i
 
     # Calculate the Log mean temperature 
-    T_lm = ((T_bat-T_i)-(T_bat-T_o))/(np.log((T_bat-T_i)/(T_bat-T_o)))
+    T_lm = ((T_bat-T_i)-(T_bat-T_o))/(rp.log((T_bat-T_i)/(T_bat-T_o)))
 
     # Calculated Heat Convected 
     Q_convec = U_total*A_chan*T_lm*eff_HAS   

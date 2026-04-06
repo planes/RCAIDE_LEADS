@@ -14,13 +14,8 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  co
 from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
 
 # Python Imports 
-import numpy as np
-from scipy.interpolate import interp1d 
-from shapely import Polygon
-import shapely
-import matplotlib.pyplot as plt
-import trimesh
-from copy import deepcopy
+import RNUMPY as rp
+from rp.scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
@@ -83,7 +78,7 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
     origin_z         = 0
 
     if len(fuselage.segments) > 1:
-        segment_tank_moment = np.array([0.0, 0.0, 0.0])
+        segment_tank_moment = rp.array([0.0, 0.0, 0.0])
         seg_bounds = fuel_tank.segments_bounding_tank 
 
         # Collect all segment tags between start and end (inclusive)
@@ -103,16 +98,16 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
         
             h        = fuselage.lengths.total * (outer_segment.percent_x_location  - inner_segment.percent_x_location) 
             # volume of truncated cylinder 
-            A_1_o    = np.pi * inner_segment.height /2  *  inner_segment.width/2
-            A_2_o    = np.pi * outer_segment.height/2   *  outer_segment.width/2
-            volume_o = (1 /3) * ( A_1_o + A_2_o + np.sqrt(A_2_o*A_2_o)) *h
+            A_1_o    = rp.pi * inner_segment.height /2  *  inner_segment.width/2
+            A_2_o    = rp.pi * outer_segment.height/2   *  outer_segment.width/2
+            volume_o = (1 /3) * ( A_1_o + A_2_o + rp.sqrt(A_2_o*A_2_o)) *h
 
-            A_1_i    = np.pi * inner_segment.height /2  *  inner_segment.width/2
-            A_2_i    = np.pi * outer_segment.height/2   *  outer_segment.width/2 
-            volume_i = (1 /3) * ( A_1_i + A_2_i + np.sqrt(A_1_i*A_2_i)) *h
+            A_1_i    = rp.pi * inner_segment.height /2  *  inner_segment.width/2
+            A_2_i    = rp.pi * outer_segment.height/2   *  outer_segment.width/2 
+            volume_i = (1 /3) * ( A_1_i + A_2_i + rp.sqrt(A_1_i*A_2_i)) *h
                 
             total_fuel_mass        += volume_i * fuel_tank.fuel.density  
-            segment_cg             = np.array([[fuselage.lengths.total * (inner_segment.percent_x_location  + outer_segment.percent_x_location)/2 ,0, \
+            segment_cg             = rp.array([[fuselage.lengths.total * (inner_segment.percent_x_location  + outer_segment.percent_x_location)/2 ,0, \
                                          (inner_segment.height  + outer_segment.height)/2]])
             segment_tank_moment    += segment_cg[0] * volume_i * fuel_tank.fuel.density  
             tank_volume_i          += volume_i
@@ -264,7 +259,7 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
     fuel_tank.fuel.yz_plane_symmetric = wing.yz_plane_symmetric 
     
     if len(wing.segments) > 1: 
-
+        segment_tank_moment = np.array([0.0, 0.0, 0.0])
         seg_bounds =  fuel_tank.segments_bounding_tank  
         # Collect all segment tags between start and end (inclusive)
         collect = False
@@ -276,104 +271,42 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
                 seg_keys.append(segment.tag)
             if segment.tag == seg_bounds[1]:
                 break
+        
+        for i in range(len(seg_tags)-1):
+            inner_segment = wing.segments[seg_tags[i]]
+            outer_segment = wing.segments[seg_tags[i+1]]
 
-        segment_meshes = []
-        symm    = wing.xz_plane_symmetric
-
-        for i in range(len(seg_keys)-1):
-            # compute volume and assume unit density to get mass
-            inner_segment = wing.segments[seg_keys[i]]
-            outer_segment = wing.segments[seg_keys[i+1]] 
- 
-            # Compute segment span length
-            L = (outer_segment.percent_span_location - inner_segment.percent_span_location) * wing.spans.projected/(symm + 1)
-            spanwise_shift = inner_segment.percent_span_location * wing.spans.projected/2 
-            
-            airfoil_in = inner_segment.airfoil 
-            if  airfoil_in !=  None:                 
-                if type(airfoil_in) == RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil:
-                    geometry_in = compute_naca_4series(airfoil_in.NACA_4_Series_code,n_points)
-                elif type(airfoil_in) == RCAIDE.Library.Components.Airfoils.Airfoil: 
-                    geometry_in     = import_airfoil_geometry(airfoil_in.coordinate_file,n_points)
-            else:
-                geometry_in = compute_naca_4series('0012',n_points)
+            # compute volume of fuel in wing
+            volume = compute_segmented_wing_integral_tank_fuel_volume(wing,inner_segment,outer_segment,fuel_tank)
+            inner_segment.volume_properties.fuel = volume
     
-            airfoil_out = outer_segment.airfoil 
-            if  airfoil_out !=  None:                 
-                if type(airfoil_out) == RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil:
-                    geometry_out = compute_naca_4series(airfoil_out.NACA_4_Series_code,n_points)
-                elif type(airfoil_out) == RCAIDE.Library.Components.Airfoils.Airfoil: 
-                    geometry_out     = import_airfoil_geometry(airfoil_out.coordinate_file,n_points)
-            else:
-                geometry_out = compute_naca_4series('0012',n_points)
-            
-            
-            start_distance_in = inner_segment.origin[0][0]+wing.segments[seg_keys[i]].root_chord_percent* wing.chords.root * (fuel_tank.segments_percent_chord_start[i])
-            end_distance_in   = inner_segment.origin[0][0]+wing.segments[seg_keys[i]].root_chord_percent* wing.chords.root * (fuel_tank.segments_percent_chord_end[i])
+            total_fuel_mass      += volume * fuel_tank.fuel.density
+            segment_tank_moment  += np.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
+            total_fuel_volume    += volume
+     
+        inner_segment_x_start = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_start[0])
+        inner_segment_x_end   = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_end[0])
+        outer_segment_x_start = wing.segments[seg_tags[-1]].origin[0][0] + wing.segments[seg_tags[-1]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_start[1])
+        outer_segment_x_end   = wing.segments[seg_tags[-1]].origin[0][0] + wing.segments[seg_tags[-1]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_end[0])  
+        inner_segment_y       =  wing.segments[seg_tags[0]].origin[0][1]
+        outer_segment_y       =  wing.segments[seg_tags[-1]].origin[0][1]
 
-            start_distance_out = outer_segment.origin[0][0]+wing.segments[seg_keys[i+1]].root_chord_percent* wing.chords.root * (fuel_tank.segments_percent_chord_start[i+1])
-            end_distance_out   = outer_segment.origin[0][0]+wing.segments[seg_keys[i+1]].root_chord_percent* wing.chords.root * (fuel_tank.segments_percent_chord_end[i+1])
-                                
-            x_in  = np.array(geometry_in.x_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-            y_in  = np.array(geometry_in.y_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
-            x_out = np.array(geometry_out.x_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][0]
-            y_out = np.array(geometry_out.y_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][2]
+        p1x = inner_segment_x_start
+        p1y = inner_segment_y
+        p2x = inner_segment_x_end
+        p2y = inner_segment_y
+        p3x = outer_segment_x_end
+        p3y = outer_segment_y
+        p4x = outer_segment_x_start
+        p4y = outer_segment_y
 
-            # ---------------- Inner segment ----------------
-            mask_in = (x_in >= start_distance_in) & (x_in <= end_distance_in)
-
-            x_in_capped = x_in[mask_in]
-            y_in_capped = y_in[mask_in]
-            
-            # ---------------- Outer segment ----------------
-            mask_out = (x_out >= start_distance_out) & (x_out <= end_distance_out)
-
-            x_out_capped = x_out[mask_out]
-            y_out_capped = y_out[mask_out]
-
-            solid_segment =  compute_segment_meshes(x_in_capped,y_in_capped, x_out_capped, y_out_capped, L, spanwise_shift) 
-            segment_meshes.append(solid_segment)
+        A_num = (p1x*p2y - p2x*p1y + p2x*p3y - p3x*p2y + p3x*p4y - p4x*p3y + p4x*p1y - p1x*p4y)
+        A     = 0.5 * A_num
+        x_cg  = (1/(6*A)) * ((p1x + p2x)*(p1x*p2y - p2x*p1y) + (p2x + p3x)*(p2x*p3y - p3x*p2y) +
+                (p3x + p4x)*(p3x*p4y - p4x*p3y) +  (p4x + p1x)*(p4x*p1y - p1x*p4y))
         
-        combinde_mesh = trimesh.util.concatenate(segment_meshes)
-       
-       # Reflect across the YZ plane (mirror X)
-        Ry = np.diag([1, -1, 1])   # reflection matrix
-
-        # Compute centroid
-        centroid = combinde_mesh.centroid
-
-        # Create scaling transform about centroid
-        T = trimesh.transformations.scale_matrix(
-            scale_factor,
-            origin=centroid
-        )
-        combinde_mesh.apply_transform(T)
-
-        # 1. copy the mesh
-        combined_mesh_sym = deepcopy(combinde_mesh)
-
-        # 2. apply the mirror transform
-        combined_mesh_sym.vertices = (Ry @ combined_mesh_sym.vertices.T).T
-
-        # 3. fix face orientation (reverse winding)
-        combined_mesh_sym.faces = combined_mesh_sym.faces[:, ::-1]
-
-        # 4. concatenate original + mirrored
-        combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym]) 
-        combined_mesh_full.density = fuel_tank.fuel.density 
-        centroid = combined_mesh_full.centroid
-        cg_x     = centroid[0]
-        cg_y     = centroid[1]
-        cg_z     = centroid[2] 
         
-        # Shift inertia tensor from origin to the requested (actual) centroid
-        I = combined_mesh_full.moment_inertia 
-        total_fuel_volume   = combined_mesh_full.volume 
-        
-        fuel_tank.fuel.mass_properties.center_of_gravity          = [[cg_x, cg_y, cg_z]]
-        fuel_tank.fuel.mass_properties.moments_of_inertia.tensor  = I
-
-        fuel_tank.volume_properties.gross_volume          = total_fuel_volume
+        fuel_tank.fuel.mass_properties.center_of_gravity  = np.array([x_cg, 0, 0])
         fuel_tank.volume_properties.net_volume            = total_fuel_volume
 
          
@@ -466,7 +399,7 @@ def compute_wing_integral_tank_fuel_volume(wing,fuel_tank):
     A_1 = inner_wingbox_length * (inner_front_rib_length + inner_rear_rib_length) / 2 
     A_2 = outer_wingbox_length * (outer_front_rib_length + outer_rear_rib_length) / 2
     h =  wing.spans.projected
-    volume  = (1 /3) * ( A_1 + A_2 + np.sqrt(A_1*A_2)) *h   
+    volume  = (1 /3) * ( A_1 + A_2 + rp.sqrt(A_1*A_2)) *h   
 
     return volume
 
@@ -540,7 +473,7 @@ def compute_segmented_wing_integral_tank_fuel_volume(wing,inner_segment,outer_se
     A_1 = inner_wingbox_length * (inner_front_rib_length + inner_rear_rib_length) / 2 
     A_2 = outer_wingbox_length * (outer_front_rib_length + outer_rear_rib_length) / 2
     h   =  (outer_segment.percent_span_location -  inner_segment.percent_span_location) *  wing.spans.projected /2    # assumes wing is symmetric
-    volume = (1 /3) * ( A_1 + A_2 + np.sqrt(A_1*A_2)) *h
+    volume = (1 /3) * ( A_1 + A_2 + rp.sqrt(A_1*A_2)) *h
 
     if wing.xz_plane_symmetric:
         volume *= 2    

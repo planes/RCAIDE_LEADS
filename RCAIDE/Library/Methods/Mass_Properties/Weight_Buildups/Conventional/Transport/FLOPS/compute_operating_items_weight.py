@@ -12,7 +12,7 @@ import  RCAIDE
 from RCAIDE.Framework.Core    import Units ,  Data
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Operating Items Weight 
@@ -88,14 +88,14 @@ def compute_operating_items_weight(vehicle):
 
     if vehicle.number_of_passengers >= 150:
         NFLCR = 3  # number of flight crew
-        NGALC = 1 + np.floor(vehicle.number_of_passengers / 250.)  # number of galley crew
+        NGALC = 1 + rp.floor(vehicle.number_of_passengers / 250.)  # number of galley crew
     else:
         NFLCR = 2
         NGALC = 0
     if vehicle.number_of_passengers < 51:
         NFLA = 1  # number of flight attendants, NSTU in FLOPS
     else:
-        NFLA = 1 + np.floor(vehicle.number_of_passengers / 40.)
+        NFLA = 1 + rp.floor(vehicle.number_of_passengers / 40.)
 
     WFLAAB = NFLA * 155 + NGALC * 200  # flight attendant weight, WSTUAB in FLOPS
     WFLCRB = NFLCR * 225  # flight crew and baggage weight

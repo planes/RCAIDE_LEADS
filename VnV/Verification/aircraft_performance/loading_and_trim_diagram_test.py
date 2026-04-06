@@ -15,10 +15,10 @@ from RCAIDE.Library.Plots import  *
 
 # python imports      
 import os
-import numpy as np  
+import RNUMPY as rp  
 import pickle
 import sys 
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt
 
 # local imports 
@@ -65,12 +65,12 @@ def tube_and_wing_load_trim_test():
     
     save_results(load_data,'taw_loading_results') 
  
-    CG_Percent_of_LEMAC_truth = np.array([[-0.25688876,  0.67084672,  1.5985822 ],
+    CG_Percent_of_LEMAC_truth = rp.array([[-0.25688876,  0.67084672,  1.5985822 ],
        [-0.25688876,  0.67084672,  1.5985822 ],
        [-0.25688876,  0.67084672,  1.5985822 ]])
     plot_load_diagram(load_data,save_filename  = "TW_Aircraft_Loading_Trim_Dragram") 
 
-    LEMAC_error = np.max(abs((load_data.trim_results.CG_percent_of_LEMAC_location - CG_Percent_of_LEMAC_truth)/CG_Percent_of_LEMAC_truth))
+    LEMAC_error = rp.max(abs((load_data.trim_results.CG_percent_of_LEMAC_location - CG_Percent_of_LEMAC_truth)/CG_Percent_of_LEMAC_truth))
     print(f"LEMAC error: {LEMAC_error}")
     assert LEMAC_error < 1e-2, f"LEMAC error too large: {LEMAC_error}"
         
@@ -97,13 +97,13 @@ def blended_wing_body_load_trim_test():
     
     save_results(load_data,'bwb_loading_results')
  
-    CG_Percent_of_LEMAC_truth = np.array([[0.0376412 , 0.91179301, 1.78594483],
+    CG_Percent_of_LEMAC_truth = rp.array([[0.0376412 , 0.91179301, 1.78594483],
                                           [0.0376412 , 0.91179301, 1.78594483],
                                           [0.0376412 , 0.91179301, 1.78594483]])
     
     plot_load_diagram(load_data,save_filename  = "BWB_Aircraft_Loading_Trim_Dragram") 
 
-    LEMAC_error = np.max(abs((load_data.trim_results.CG_percent_of_LEMAC_location - CG_Percent_of_LEMAC_truth)))
+    LEMAC_error = rp.max(abs((load_data.trim_results.CG_percent_of_LEMAC_location - CG_Percent_of_LEMAC_truth)))
     print(f"LEMAC error: {LEMAC_error}")
     assert LEMAC_error < 5e-3, f"LEMAC error too large: {LEMAC_error}"
         

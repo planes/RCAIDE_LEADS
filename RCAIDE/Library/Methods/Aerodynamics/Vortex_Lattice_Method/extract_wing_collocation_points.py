@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core import Data 
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 
  
 def extract_wing_collocation_points(VD,conditions,settings,geometry, wing_instance_idx):
@@ -40,10 +40,10 @@ def extract_wing_collocation_points(VD,conditions,settings,geometry, wing_instan
     
     # Find the beginning and end indices of the wing
     # all breaks
-    breaks = np.hstack([0,np.cumsum(VD.n_cw*VD.n_sw)])
+    breaks = rp.hstack([0,rp.cumsum(VD.n_cw*VD.n_sw)])
     
     # Find the initial index of the wing
-    semispan_idx     = wing_instance_idx + np.sum(sym[0,0:wing_instance_idx])
+    semispan_idx     = wing_instance_idx + rp.sum(sym[0,0:wing_instance_idx])
     start_pt         = breaks[semispan_idx]
     
     # Find the final index of the wing
@@ -71,7 +71,7 @@ def extract_wing_collocation_points(VD,conditions,settings,geometry, wing_instan
     VD_wing.ZA2  = VD.ZA2[:,pt_ids]
     VD_wing.ZB1  = VD.ZB1[:,pt_ids]
     VD_wing.ZB2  = VD.ZB2[:,pt_ids]  
-    VD_wing.n_cp = np.tile(np.atleast_2d(np.array(len(VD_wing.XC[0]) )), (len(VD_wing.XC), 1))
+    VD_wing.n_cp = rp.tile(rp.atleast_2d(rp.array(len(VD_wing.XC[0]) )), (len(VD_wing.XC), 1))
     VD_wing.n_cw = VD.n_cw[:,ids]
     VD_wing.n_sw = VD.n_sw[:,ids]
       

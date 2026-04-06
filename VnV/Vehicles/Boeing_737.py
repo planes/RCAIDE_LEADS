@@ -14,7 +14,7 @@ from RCAIDE.Library.Plots                                   import *
 from RCAIDE.Library.Methods.Geometry.Planform.wing_planform import wing_planform
  
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy 
 import os
 
@@ -332,7 +332,7 @@ def vehicle_setup():
     fuselage.effective_diameter                 = 3.76     * Units.meter
     fuselage.areas.side_projected               = 142.1948 * Units['meters**2'] 
     fuselage.areas.wetted                       = 446.718  * Units['meters**2'] 
-    fuselage.areas.front_projected              = np.pi *(fuselage.effective_diameter **2) /4 
+    fuselage.areas.front_projected              = rp.pi *(fuselage.effective_diameter **2) /4 
     fuselage.differential_pressure              = 5.0e4 * Units.pascal 
     fuselage.heights.at_quarter_length          = 3.74 * Units.meter
     fuselage.heights.at_three_quarters_length   = 3.65 * Units.meter
@@ -615,7 +615,7 @@ def vehicle_setup():
     nacelle.tag                                 = 'nacelle_1'
     nacelle.inlet_diameter                      = 2.0
     nacelle.origin                              = [[13.5,4.38,-1.5]] 
-    nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length 
+    nacelle.areas.wetted                        = 1.1*rp.pi*nacelle.diameter*nacelle.length 
     nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code          = '2410'
     nacelle.append_airfoil(nacelle_airfoil)  

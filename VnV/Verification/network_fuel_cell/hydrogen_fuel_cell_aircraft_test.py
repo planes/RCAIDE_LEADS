@@ -13,14 +13,14 @@ from RCAIDE.Library.Plots    import *
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed  import estimate_stall_speed 
  
 # package imports  
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 
 # local imports 
 import sys 
 import os
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 base_dir = os.path.dirname(os.path.abspath(__file__))
 
@@ -63,9 +63,9 @@ def main():
         # Voltage Cell Regression
         mdot_H2        = results.segments[0].conditions.energy.busses['bus'].fuel_tanks['non_integral_tank'].mass_flow_rate[0,0] + results.segments[0].conditions.energy.busses['bus'].fuel_tanks['integral_tank'].mass_flow_rate[0,0] 
         print('Mass Flow Rate: ' + str(mdot_H2))
-        mdot_H2_diff   = np.abs(mdot_H2 - mdot_H2_true[i]) 
+        mdot_H2_diff   = rp.abs(mdot_H2 - mdot_H2_true[i]) 
         print(mdot_H2_diff) 
-        assert np.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6
+        assert rp.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6
         
         if i == 0: 
             plot_results(results)

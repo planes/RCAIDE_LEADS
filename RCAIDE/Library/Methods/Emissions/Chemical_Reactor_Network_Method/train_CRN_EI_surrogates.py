@@ -116,10 +116,10 @@ def train_CRN_EI_surrogates(emissions, vehicle):
     len_mdot = len(mdot)
     len_far  = len(FAR) 
     
-    EI_CO2 = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_CO  = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_H2O = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_NOx = np.zeros((len_P,len_T,len_mdot,len_far))
+    EI_CO2 = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_CO  = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_H2O = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_NOx = rp.zeros((len_P,len_T,len_mdot,len_far))
     
     if combustor == False:
         emissions.no_combustor = True

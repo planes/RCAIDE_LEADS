@@ -7,7 +7,7 @@
 #  Initialize Conditions
 # ----------------------------------------------------------------------------------------------------------------------  
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Initialize Conditions
@@ -100,15 +100,15 @@ def initialize_conditions(segment):
         if not segment.state.initials: raise AttributeError('altitude not set')
         alt = -1.0 *segment.state.initials.conditions.frames.inertial.position_vector[-1,2]
     
-    v_x  = np.cos(beta)*air_speed 
-    v_y  = np.sin(beta)*air_speed
+    v_x  = rp.cos(beta)*air_speed 
+    v_y  = rp.sin(beta)*air_speed
         
     # pack
     segment.state.conditions.freestream.altitude[:,0]             = alt
     segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
     segment.state.conditions.frames.inertial.velocity_vector[:,0] = v_x 
     segment.state.conditions.frames.inertial.velocity_vector[:,1] = v_y 
-    segment.state.conditions.frames.inertial.acceleration_vector  = np.array([[acceleration,0.0,linear_acceleration_z]])  
+    segment.state.conditions.frames.inertial.acceleration_vector  = rp.array([[acceleration,0.0,linear_acceleration_z]])  
     segment.state.conditions.static_stability.roll_rate[:,0]      = roll_rate         
     segment.state.conditions.static_stability.pitch_rate[:,0]     = pitch_rate
     segment.state.conditions.static_stability.yaw_rate[:,0]       = yaw_rate      

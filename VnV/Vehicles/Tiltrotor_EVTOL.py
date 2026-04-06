@@ -16,7 +16,7 @@ from RCAIDE import  load
 from RCAIDE import  save  
 
 import os
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 import matplotlib.pyplot as plt 
 import  pickle 
@@ -46,7 +46,7 @@ def vehicle_setup(redesign_rotors=True) :
     vehicle.mass_properties.max_payload               = 350  
     vehicle.mass_properties.min_payload               = 350  
     vehicle.mass_properties.center_of_gravity         = [[2.0144,   0.  ,  0. ]]      
-    vehicle.mass_properties.moments_of_inertia.tensor = np.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
+    vehicle.mass_properties.moments_of_inertia.tensor = rp.array([[1, 0, 0], [0, 1, 0], [0, 0, 1]])
     vehicle.reference_area                            = 10.39
     vehicle.flight_envelope.ultimate_load             = 5.7   
     vehicle.flight_envelope.positive_limit_load       = 3.  
@@ -374,7 +374,7 @@ def vehicle_setup(redesign_rotors=True) :
     
                        # starboard   | port        | front  | rear 
     modules_origins = [[1.8, 2.0,1.0 ],[1.8, -2.0, 1.0  ],[0.3, 0.0, 0.0 ],[2, 0.0, 0.0]]  
-    orientation     = [[0, 0.0, np.pi],[0, 0.0, np.pi ],[0, 0.0, 0 ],[0, 0.0,0 ]]   
+    orientation     = [[0, 0.0, rp.pi],[0, 0.0, rp.pi ],[0, 0.0, 0 ],[0, 0.0,0 ]]   
     for m_i in range(bus.number_of_battery_modules):
         module =  deepcopy(battery_module)
         module.tag = 'nmc_module_' + str(m_i+1) 
@@ -410,11 +410,11 @@ def vehicle_setup(redesign_rotors=True) :
 
     prop_rotor.hover.design_altitude              = 40 * Units.feet  
     prop_rotor.hover.design_thrust                = Hover_Load/6
-    prop_rotor.hover.design_freestream_velocity   = np.sqrt(prop_rotor.hover.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))
+    prop_rotor.hover.design_freestream_velocity   = rp.sqrt(prop_rotor.hover.design_thrust/(2*1.2*rp.pi*(prop_rotor.tip_radius**2)))
     
     prop_rotor.oei.design_altitude                = 40 * Units.feet  
     prop_rotor.oei.design_thrust                  = Hover_Load/5  
-    prop_rotor.oei.design_freestream_velocity     = np.sqrt(prop_rotor.oei.design_thrust/(2*1.2*np.pi*(prop_rotor.tip_radius**2)))
+    prop_rotor.oei.design_freestream_velocity     = rp.sqrt(prop_rotor.oei.design_thrust/(2*1.2*rp.pi*(prop_rotor.tip_radius**2)))
     
     prop_rotor.cruise.design_altitude             = 1500 * Units.feet  
     prop_rotor.cruise.design_thrust               = 1500   

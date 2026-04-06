@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units
 
 # Package imports 
-import numpy as np
+import RNUMPY as rp
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -46,17 +46,17 @@ def curvilinear_inertial_horizontal_position(segment):
     vx          = conditions.frames.inertial.velocity_vector[:,0:1+1]
     I           = segment.state.numerics.time.integrate 
     R           = segment.turn_radius
-    sign        = np.sign(segment.turn_angle) 
-
+    sign        = rp.sign(segment.turn_angle)
+    
     # integrate
-    speed       = np.sqrt(vx[:, 0]**2+vx[:, 1]**2)
-    arc_length  = np.dot(I,speed)
+    speed       = rp.sqrt(vx[:, 0]**2+vx[:, 1]**2)
+    arc_length  = rp.dot(I,speed)
     
     theta       = psi - sign * 90 * Units.degrees         # Angle from circle center to the flight trajectory
     beta        =  psi[0, 0] + sign * 90 * Units.degrees  # Angle to the center of the circle from the initial position
     
-    delta_x     = R * np.cos(beta) + R * np.cos(theta) # vector addition with a vector from the starting point to the center and then from the center to the position
-    delta_y     = R * np.sin(beta) + R * np.sin(theta)
+    delta_x     = R * rp.cos(beta) + R * rp.cos(theta) # vector addition with a vector from the starting point to the center and then from the center to the position
+    delta_y     = R * rp.sin(beta) + R * rp.sin(theta)
     x_position  = x0 + delta_x
     y_position  = y0 + delta_y
     

@@ -14,7 +14,7 @@ from RCAIDE.Library.Plots                                                 import
 import RCAIDE.Framework.External_Interfaces.OpenVSP as openvsp
 
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os
@@ -22,7 +22,6 @@ import sys
 
 def vehicle_setup(vehicle_name = 'Boeing_787-8', number_of_passengers = 248) :
                 
-
     # ------------------------------------------------------------------
     #   Initialize the Vehicle
     # ------------------------------------------------------------------      
@@ -372,10 +371,10 @@ def vehicle_setup(vehicle_name = 'Boeing_787-8', number_of_passengers = 248) :
     fuselage.heights.maximum                    = 5.9  * Units.meter
     fuselage.effective_diameter                 = 5.9     * Units.meter
     fuselage.areas.side_projected               = fuselage.heights.maximum * fuselage.lengths.total * Units['meters**2'] 
-    fuselage.areas.wetted                       = np.pi*fuselage.width/2*(fuselage.width/2+ np.sqrt( fuselage.lengths.nose **2 +(fuselage.width/2)**2)) + \
-                                                 np.pi*fuselage.width/2*(fuselage.width/2+ np.sqrt( fuselage.lengths.tail**2 +(fuselage.width/2)**2))+ \
-                                                    np.pi * fuselage.width * ( fuselage.lengths.total - (fuselage.lengths.tail+ fuselage.lengths.nose)) * Units['meters**2'] 
-    fuselage.areas.front_projected              = np.pi * (fuselage.width/2) **2   
+    fuselage.areas.wetted                       = rp.pi*fuselage.width/2*(fuselage.width/2+ rp.sqrt( fuselage.lengths.nose **2 +(fuselage.width/2)**2)) + \
+                                                 rp.pi*fuselage.width/2*(fuselage.width/2+ rp.sqrt( fuselage.lengths.tail**2 +(fuselage.width/2)**2))+ \
+                                                    rp.pi * fuselage.width * ( fuselage.lengths.total - (fuselage.lengths.tail+ fuselage.lengths.nose)) * Units['meters**2'] 
+    fuselage.areas.front_projected              = rp.pi * (fuselage.width/2) **2   
     fuselage.differential_pressure              = 5.0e4 * Units.pascal
     fuselage.heights.at_quarter_length          = fuselage.heights.maximum * Units.meter
     fuselage.heights.at_three_quarters_length   = fuselage.heights.maximum * Units.meter
@@ -692,7 +691,7 @@ def vehicle_setup(vehicle_name = 'Boeing_787-8', number_of_passengers = 248) :
     nacelle.tag                                 = 'nacelle_1'
     nacelle.inlet_diameter                      = 2.5
     nacelle.origin                              = [[18, 10.000,-0.953]] 
-    nacelle.areas.wetted                        = np.pi*nacelle.diameter*nacelle.length
+    nacelle.areas.wetted                        = rp.pi*nacelle.diameter*nacelle.length
     nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code          = '0010'
     nacelle.append_airfoil(nacelle_airfoil) 

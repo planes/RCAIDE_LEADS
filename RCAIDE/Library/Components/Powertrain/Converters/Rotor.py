@@ -13,8 +13,8 @@ from RCAIDE.Library.Components                          import Component
 from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.append_rotor_conditions import  append_rotor_conditions
 
 # package imports
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
+import RNUMPY.scipy as sp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Generalized Rotor Class
@@ -309,7 +309,7 @@ class Rotor(Component):
         * Rotation sequence is fixed
         """
 
-        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,rp.pi,0]).as_matrix()
 
         return rot_mat
     
@@ -373,12 +373,12 @@ class Rotor(Component):
         """
 
         # Go from velocity to vehicle frame
-        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0.,rp.pi,0.]).as_matrix()
 
         # Go from vehicle frame to propeller vehicle frame: rot 1 including the extra body rotation
-        cpts       = len(np.atleast_1d(commanded_thrust_vector))
-        rots       = np.array(self.orientation_euler_angles) * 1.
-        rots       = np.repeat(rots[None,:], cpts, axis=0) 
+        cpts       = len(rp.atleast_1d(commanded_thrust_vector))
+        rots       = rp.array(self.orientation_euler_angles) * 1.
+        rots       = rp.repeat(rots[None,:], cpts, axis=0) 
         rots[:,1] += commanded_thrust_vector[:,0]
         
         vehicle_2_prop_vec = sp.spatial.transform.Rotation.from_rotvec(rots).as_matrix()
@@ -387,8 +387,8 @@ class Rotor(Component):
         prop_vec_2_prop_vel = self.vec_to_vel()
 
         # Do all the matrix multiplies
-        rot1    = np.matmul(body_2_vehicle,vehicle_2_prop_vec)
-        rot_mat = np.matmul(rot1,prop_vec_2_prop_vel)
+        rot1    = rp.matmul(body_2_vehicle,vehicle_2_prop_vec)
+        rot_mat = rp.matmul(rot1,prop_vec_2_prop_vel)
  
         return rot_mat , rots
 

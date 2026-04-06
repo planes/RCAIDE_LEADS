@@ -7,7 +7,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Imports 
 # ----------------------------------------------------------------------------------------------------------------------   
-import  numpy as  np 
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # compute_combustor_performance
@@ -108,7 +108,7 @@ def compute_combustor_performance(combustor, conditions):
     Tt_in    = combustor_conditions.inputs.stagnation_temperature
     Pt_in    = combustor_conditions.inputs.stagnation_pressure
     nondim_r = combustor_conditions.inputs.nondim_mass_ratio 
-    Tt4      = combustor.turbine_inlet_temperature *  np.ones_like(Tt_in)
+    Tt4      = combustor.turbine_inlet_temperature *  rp.ones_like(Tt_in)
     pib      = combustor.pressure_ratio
     eta_b    = combustor.efficiency
     htf      = combustor.fuel_data.specific_energy 

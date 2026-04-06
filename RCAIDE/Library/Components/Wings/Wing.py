@@ -12,7 +12,7 @@ from RCAIDE.Library.Components  import Component
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.compute_wing_moment_of_inertia import  compute_wing_moment_of_inertia
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.compute_wing_center_of_gravity import  compute_wing_center_of_gravity
 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Wing
@@ -158,7 +158,7 @@ class Wing(Component):
         Sets default values for the wing attributes.
         """         
         self.tag                                    = 'wing'
-        self.origin                                 = np.array([[0.0,0.0,0.0]]) 
+        self.origin                                 = rp.array([[0.0,0.0,0.0]]) 
         self.xz_plane_symmetric                     = True 
         self.vertical                               = False
         self.t_tail                                 = False 

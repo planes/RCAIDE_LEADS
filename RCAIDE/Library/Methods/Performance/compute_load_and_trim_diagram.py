@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity  import compute_ve
 from RCAIDE.Library.Mission.Common.Pre_Process import  geometry, mass_properties
 import pandas as pd
 # Pacakge imports 
-import numpy as np
+import RNUMPY as rp
 from copy import  deepcopy
 
 #------------------------------------------------------------------------------
@@ -121,11 +121,11 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
     total_sims =   2 *  discretization **3   
     
     # define discretization 
-    percent_fuel         =  np.linspace(0.0, 1,discretization)
-    percent_pax          =  np.linspace(0.0, 1,discretization)
-    percent_cargo        =  np.linspace(0.0, 1,discretization) 
-    percent_weight       =  np.linspace(0.0, 1,discretization)  
-    percent_cg_shift     =  np.linspace(0.8,1.2,discretization)  
+    percent_fuel         =  rp.linspace(0.0, 1,discretization)
+    percent_pax          =  rp.linspace(0.0, 1,discretization)
+    percent_cargo        =  rp.linspace(0.0, 1,discretization) 
+    percent_weight       =  rp.linspace(0.0, 1,discretization)  
+    percent_cg_shift     =  rp.linspace(0.8,1.2,discretization)  
     filling_order        =  ['ascending','descending']
     
     # create empty data structures
@@ -133,19 +133,19 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
     RES.loading_results                             =  Data()
     RES.trim_results                                =  Data()
     RES.discretization                              = discretization
-    RES.loading_results.mass                        = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.CG_location                 = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.LEMAC_location              = np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.CG_percent_of_LEMAC_location= np.zeros((2,discretization,discretization,discretization))
-    RES.loading_results.static_margin               = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_cargo                               = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_pax                                 = np.zeros((2,discretization,discretization,discretization))
-    RES.percent_cargo                               = np.zeros((2,discretization,discretization,discretization))
-    RES.trim_results.neutral_point                  = np.zeros((discretization,discretization))
-    RES.trim_results.static_margin                  = np.zeros((discretization,discretization)) 
-    RES.trim_results.mass                           = np.zeros((discretization,discretization)) 
-    RES.trim_results.LEMAC_location                 = np.zeros((discretization,discretization)) 
-    RES.trim_results.CG_percent_of_LEMAC_location   = np.zeros((discretization,discretization)) 
+    RES.loading_results.mass                        = rp.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.CG_location                 = rp.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.LEMAC_location              = rp.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.CG_percent_of_LEMAC_location= rp.zeros((2,discretization,discretization,discretization))
+    RES.loading_results.static_margin               = rp.zeros((2,discretization,discretization,discretization))
+    RES.percent_cargo                               = rp.zeros((2,discretization,discretization,discretization))
+    RES.percent_pax                                 = rp.zeros((2,discretization,discretization,discretization))
+    RES.percent_cargo                               = rp.zeros((2,discretization,discretization,discretization))
+    RES.trim_results.neutral_point                  = rp.zeros((discretization,discretization))
+    RES.trim_results.static_margin                  = rp.zeros((discretization,discretization)) 
+    RES.trim_results.mass                           = rp.zeros((discretization,discretization)) 
+    RES.trim_results.LEMAC_location                 = rp.zeros((discretization,discretization)) 
+    RES.trim_results.CG_percent_of_LEMAC_location   = rp.zeros((discretization,discretization)) 
     RES.MTOW                                        = MTOW     
     RES.OEW                                         = OEW
     RES.MLW                                         = MLW    

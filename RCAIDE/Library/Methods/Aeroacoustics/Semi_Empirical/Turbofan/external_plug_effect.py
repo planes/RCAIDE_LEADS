@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core  import Data
 
 # Python package imports   
-import numpy as np   
+import RNUMPY as rp   
 
 # ----------------------------------------------------------------------------------------------------------------------     
 #  External Plug Effect
@@ -73,13 +73,13 @@ def external_plug_effect(Velocity_primary, Velocity_secondary, Velocity_mixed, D
     """
 
     # Primary jet
-    PG_p = 0.1*(Velocity_primary/sound_ambient)*(10-(18*theta_p/np.pi))*Plug_diameter/Diameter_primary
+    PG_p = 0.1*(Velocity_primary/sound_ambient)*(10-(18*theta_p/rp.pi))*Plug_diameter/Diameter_primary
     
     # Secondary jet
-    PG_s = 0.1*(Velocity_secondary/sound_ambient)*(6-(18*theta_s/np.pi))*Plug_diameter/Diameter_secondary
+    PG_s = 0.1*(Velocity_secondary/sound_ambient)*(6-(18*theta_s/rp.pi))*Plug_diameter/Diameter_secondary
     
     # Mixed jet
-    PG_m = 0.1*(Velocity_primary*Velocity_mixed/(sound_ambient**2))*(9-(18*theta_m/np.pi))*Plug_diameter/Diameter_mixed
+    PG_m = 0.1*(Velocity_primary*Velocity_mixed/(sound_ambient**2))*(9-(18*theta_m/rp.pi))*Plug_diameter/Diameter_mixed
     
     # Pack Results 
     jet_plug_effects = Data()

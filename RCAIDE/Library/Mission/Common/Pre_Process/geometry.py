@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Geometry.LOPA      import  compute_layout_of_passeng
 from RCAIDE.Library.Methods.Geometry.Planform  import  fuselage_planform, wing_planform , compute_fuel_volume 
 
 # python imports 
-import numpy as  np 
+importRNUMPY as rp 
 import os, sys
 import pandas as pd
 from copy import deepcopy 
@@ -82,8 +82,8 @@ def geometry_preprocess_routine(analyses):
     for fuselage in vehicle.fuselages: 
         compute_layout_of_passenger_accommodations(fuselage) 
         fuselage_planform(fuselage) 
-        vehicle.length = np.maximum(vehicle.length, fuselage.lengths.total)
-        A_fuselage     = np.maximum(A_fuselage,fuselage.areas.front_projected) 
+        vehicle.length = rp.maximum(vehicle.length, fuselage.lengths.total)
+        A_fuselage     = rp.maximum(A_fuselage,fuselage.areas.front_projected) 
         
         for cabin in fuselage.cabins: 
             defined_cabins = True
@@ -147,13 +147,13 @@ def geometry_preprocess_routine(analyses):
                 vehicle.LEMAC          = wing.LEMAC 
              
         # reference chord 
-        vehicle.reference_chord  = np.maximum(vehicle.reference_chord , wing.chords.mean_aerodynamic)
+        vehicle.reference_chord  = rp.maximum(vehicle.reference_chord , wing.chords.mean_aerodynamic)
         
         # reference span 
-        vehicle.reference_span   = np.maximum(vehicle.reference_span  , wing.spans.projected)
+        vehicle.reference_span   = rp.maximum(vehicle.reference_span  , wing.spans.projected)
         
         # total length 
-        vehicle.length = np.maximum(vehicle.length, wing.chords.root)            
+        vehicle.length = rp.maximum(vehicle.length, wing.chords.root)            
 
     # --------------------------------------------------------------------------------------------------------------------
     # Update passenger imformation 

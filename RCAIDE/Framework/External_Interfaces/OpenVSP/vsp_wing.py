@@ -16,7 +16,7 @@ from RCAIDE.Framework.Core import Units , Data
 from RCAIDE.Library.Components.Airfoils.Airfoil import Airfoil
 from RCAIDE.Library.Methods.Geometry.Planform import wing_planform 
 
-import numpy as np
+import RNUMPY as rp
 import string
 import os
 import sys
@@ -90,7 +90,7 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
     if  abs(x_rot) >=70:
         wing = RCAIDE.Library.Components.Wings.Vertical_Tail()
         wing.vertical = True
-        sign = (np.sign(x_rot))
+        sign = (rp.sign(x_rot))
         x_rot = (sign*90 - sign*x_rot) * Units.deg
     else: 
         if blended_wing_body:
@@ -221,7 +221,7 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
                 segment.dihedral_outboard     = segment_dihedral[i]
 
                 segment_spans[i] 	      = vsp.GetParmVal(wing_id, 'Span', 'XSec_' + str(i)) * units_factor
-                proj_span_sum += segment_spans[i] * np.cos(segment_dihedral[i])
+                proj_span_sum += segment_spans[i] * rp.cos(segment_dihedral[i])
                 span_sum      += segment_spans[i]
             else:
                 segment.root_chord_percent    = (vsp.GetParmVal(wing_id, 'Tip_Chord', 'XSec_' + str(i-1))) * units_factor /root_chord
@@ -239,19 +239,19 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
                     camber_loc = vsp.GetParmVal(wing_id, 'CamberLoc', 'XSecCurve_' + str(jj))
 
                 airfoil.geometry.thickness_to_chord = thick_cord
-                camber_round               = int(np.around(camber*100))
-                camber_loc_round           = int(np.around(camber_loc*10))
-                thick_cord_round           = int(np.around(thick_cord*100))
+                camber_round               = int(rp.around(camber*100))
+                camber_loc_round           = int(rp.around(camber_loc*10))
+                thick_cord_round           = int(rp.around(thick_cord*100))
                 airfoil.tag                = 'NACA ' + str(camber_round) + str(camber_loc_round) + str(thick_cord_round)
 
             elif vsp.GetXSecShape(xsec_id) == vsp.XS_SIX_SERIES: 	# XSec shape: NACA 6-series
-                thick_cord_round = int(np.around(thick_cord*100))
+                thick_cord_round = int(rp.around(thick_cord*100))
                 a_value          = vsp.GetParmVal(wing_id, 'A', 'XSecCurve_' + str(jj))
-                ideal_CL         = int(np.around(vsp.GetParmVal(wing_id, 'IdealCl', 'XSecCurve_' + str(jj))*10))
+                ideal_CL         = int(rp.around(vsp.GetParmVal(wing_id, 'IdealCl', 'XSecCurve_' + str(jj))*10))
                 series_vsp       = int(vsp.GetParmVal(wing_id, 'Series', 'XSecCurve_' + str(jj)))
                 series_dict      = {0:'63',1:'64',2:'65',3:'66',4:'67',5:'63A',6:'64A',7:'65A'} # VSP series values.
                 series           = series_dict[series_vsp]
-                airfoil.tag      = 'NACA ' + series + str(ideal_CL) + str(thick_cord_round) + ' a=' + str(np.around(a_value,1))
+                airfoil.tag      = 'NACA ' + series + str(ideal_CL) + str(thick_cord_round) + ' a=' + str(rp.around(a_value,1))
 
 
             elif vsp.GetXSecShape(xsec_id) == vsp.XS_FILE_AIRFOIL:	# XSec shape: 12 is type AF_FILE
@@ -275,11 +275,11 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
 
         for ii in range(1, segment_num):
             span_sum_alt      += segment_spans[ii]
-            proj_span_sum_alt += segment_spans[ii] * np.cos(segment_dihedral[ii])  # Use projected span to find total wing dihedral.
-            sweeps_sum        += segment_spans[ii] * np.tan(segment_sweeps_quarter_chord[ii])
+            proj_span_sum_alt += segment_spans[ii] * rp.cos(segment_dihedral[ii])  # Use projected span to find total wing dihedral.
+            sweeps_sum        += segment_spans[ii] * rp.tan(segment_sweeps_quarter_chord[ii])
 
-        wing.dihedral              = np.arccos(proj_span_sum_alt / span_sum_alt)
-        wing.sweeps.quarter_chord  = -np.arctan(sweeps_sum / span_sum_alt)  # Minus sign makes it positive sweep.
+        wing.dihedral              = rp.arccos(proj_span_sum_alt / span_sum_alt)
+        wing.sweeps.quarter_chord  = -rp.arctan(sweeps_sum / span_sum_alt)  # Minus sign makes it positive sweep.
 
         # Add a tip segment, all values are zero except the tip chord
         tc = vsp.GetParmVal(wing_id, 'Tip_Chord', 'XSec_' + str(segment_num-1)) * units_factor
@@ -365,7 +365,7 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
     for cs_idx in range(num_cs):
         aileron_present = False
         if num_cs > 1:
-            aileron_loc = np.argmax(np.array(U_starts))
+            aileron_loc = rp.argmax(rp.array(U_starts))
             if cs_idx == aileron_loc:
                 aileron_present = True
         if LE_flags[cs_idx] == 1.0:
@@ -384,8 +384,8 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
         U_scale = 1/(N+2) # U scaling
         
         # Determine which segment the control surfaces begin and end, use floor
-        segment_start = int(np.floor(U_starts[cs_idx]/U_scale)) - 1
-        segment_end   = int(np.floor(U_ends[cs_idx]/U_scale)) - 1
+        segment_start = int(rp.floor(U_starts[cs_idx]/U_scale)) - 1
+        segment_end   = int(rp.floor(U_ends[cs_idx]/U_scale)) - 1
         
         segment_normalized_start = U_starts[cs_idx]/U_scale - (segment_start+1)
         segment_normalized_end   = U_ends[cs_idx]/U_scale   - (segment_end+1)
@@ -402,8 +402,8 @@ def read_vsp_wing(wing_id, main_wing_tag = None,blended_wing_body = False , last
         span_start = segment_normalized_start * start_span + start_offset
         span_end   = segment_normalized_end   * end_span   + end_offset
 
-        CS.span_fraction_start = np.max([span_start, 0])
-        CS.span_fraction_end   = np.min([span_end,1])
+        CS.span_fraction_start = rp.max([span_start, 0])
+        CS.span_fraction_end   = rp.min([span_end,1])
         if CS.span_fraction_start > 1 or CS.span_fraction_end < 0:
             raise AssertionError("RCAIDE import of VSP files does not allow control surfaces defined for the wing caps.")
 
@@ -519,7 +519,7 @@ def write_vsp_wing(vehicle,wing, area_tags, fuel_tank_set_ind, OML_set_ind):
     # Twists
     if n_segments != 0: 
         segment_keys   = list(wing.segments.keys())        
-        if np.isclose(wing.segments[segment_keys[0]].percent_span_location,0.):
+        if rp.isclose(wing.segments[segment_keys[0]].percent_span_location,0.):
             vsp.SetParmVal( wing_id,'Twist',x_secs[0],wing.segments[segment_keys[0]].twist / Units.deg) # root
         else:
             vsp.SetParmVal( wing_id,'Twist',x_secs[0],root_twist) # root
@@ -615,7 +615,7 @@ def write_vsp_wing(vehicle,wing, area_tags, fuel_tank_set_ind, OML_set_ind):
         vsp.SetParmVal( wing_id,'Span',x_secs[1],local_span)
         vsp.SetParmVal( wing_id,'Tip_Chord',x_secs[1],sec_tip_chord)
     else:
-        vsp.SetParmVal( wing_id,'Span',x_secs[1],span/np.cos(dihedral*Units.degrees))
+        vsp.SetParmVal( wing_id,'Span',x_secs[1],span/rp.cos(dihedral*Units.degrees))
 
     vsp.Update()
 
@@ -653,9 +653,9 @@ def write_vsp_wing(vehicle,wing, area_tags, fuel_tank_set_ind, OML_set_ind):
 
         # Calculate the local span
         if i_segs == n_segments:
-            span_i = span*(1 - wing.segments[segment_keys[i_segs-1]].percent_span_location)/np.cos(dihedral_i*Units.deg)
+            span_i = span*(1 - wing.segments[segment_keys[i_segs-1]].percent_span_location)/rp.cos(dihedral_i*Units.deg)
         else:
-            span_i = span*(wing.segments[segment_keys[i_segs]].percent_span_location-wing.segments[segment_keys[i_segs-1]].percent_span_location)/np.cos(dihedral_i*Units.deg)
+            span_i = span*(wing.segments[segment_keys[i_segs]].percent_span_location-wing.segments[segment_keys[i_segs-1]].percent_span_location)/rp.cos(dihedral_i*Units.deg)
 
         # Insert the new wing section with specified airfoil if available
         if  wing.segments[segment_keys[i_segs-1]].airfoil != None:
@@ -769,7 +769,7 @@ def write_vsp_control_surface(wing,wing_id,ctrl_surf):
         # Location of breaks
         breaks = [0.,1.]
         
-    breaks = np.array(breaks)    
+    breaks = rp.array(breaks)    
     
     span_start = ctrl_surf.span_fraction_start
     span_end   = ctrl_surf.span_fraction_end
@@ -787,8 +787,8 @@ def write_vsp_control_surface(wing,wing_id,ctrl_surf):
         # U values are only linear about the section in which they are defined
         
         # Identify the segments they start and end with, if there are no segments there is one segment
-        segment_start = np.where(breaks<span_start)[0][-1]
-        segment_end   = np.where(breaks>=span_end)[0][0] -1
+        segment_start = rp.where(breaks<span_start)[0][-1]
+        segment_end   = rp.where(breaks>=span_end)[0][0] -1
         
         # Find where in the segment it starts and ends (normalized)
         start_span   = breaks[segment_start+1] - breaks[segment_start]
@@ -870,11 +870,11 @@ def write_wing_conformal_fuel_tank(vehicle,wing, wing_id,fuel_tank,fuel_tank_set
     vsp.SetGeomName(tank_id, fuel_tank.tag)
     n_segments        = len(wing.segments.keys())
     if n_segments > 0.:
-        seg_span_percents  = np.array([v['percent_span_location'] for (k,v)\
+        seg_span_percents  = rp.array([v['percent_span_location'] for (k,v)\
                                        in wing.segments.iteritems()])
-        vsp_segment_breaks = np.linspace(0.,1.,n_segments)
+        vsp_segment_breaks = rp.linspace(0.,1.,n_segments)
     else:
-        seg_span_percents = np.array([0.,1.])
+        seg_span_percents = rp.array([0.,1.])
     span = wing.spans.projected
 
     # Offset
@@ -997,7 +997,7 @@ def convert_sweep(sweep,sweep_loc,new_sweep_loc,AR,taper):
     Properties Used:
     N/A
     """
-    sweep_LE  = np.arctan(np.tan(sweep)+4*sweep_loc* (1-taper)/(AR*(1+taper))) 
-    new_sweep = np.arctan(np.tan(sweep_LE)-4*new_sweep_loc* (1-taper)/(AR*(1+taper)))
+    sweep_LE  = rp.arctan(rp.tan(sweep)+4*sweep_loc* (1-taper)/(AR*(1+taper))) 
+    new_sweep = rp.arctan(rp.tan(sweep_LE)-4*new_sweep_loc* (1-taper)/(AR*(1+taper)))
 
     return new_sweep

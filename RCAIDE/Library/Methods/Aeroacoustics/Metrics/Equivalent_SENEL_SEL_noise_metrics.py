@@ -11,7 +11,7 @@ from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Aeroacoustics.Common.background_noise   import background_noise
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Equivalent_SENEL_SEL_noise_metrics
@@ -50,9 +50,9 @@ def Equivalent_SENEL_SEL_noise_metrics(noise_data, flight_times = ['12:00:00'],t
     time_step                 = flight_time[1]-flight_time[0] 
     number_of_flights         = len(flight_times)   
     duration                  = t_end - t_start 
-    p_div_p_ref_sq_L_eq       = np.zeros((N_gm_x,N_gm_y)) 
-    p_div_p_ref_sq_L_24hr     = np.zeros((N_gm_x,N_gm_y))
-    p_div_p_ref_sq_L_dn       = np.zeros((N_gm_x,N_gm_y)) 
+    p_div_p_ref_sq_L_eq       = rp.zeros((N_gm_x,N_gm_y)) 
+    p_div_p_ref_sq_L_24hr     = rp.zeros((N_gm_x,N_gm_y))
+    p_div_p_ref_sq_L_dn       = rp.zeros((N_gm_x,N_gm_y)) 
     
     ambient_noise_duration      = t_end - t_start  
     ambient_noise_duration_24hr = 24 * Units.hrs 
@@ -64,46 +64,46 @@ def Equivalent_SENEL_SEL_noise_metrics(noise_data, flight_times = ['12:00:00'],t
         ambient_noise_duration_24hr -= flight_time[-1]
 
         # create noise penalty 
-        noise_penality          = np.zeros((len(flight_time),N_gm_x,N_gm_y))         
+        noise_penality          = rp.zeros((len(flight_time),N_gm_x,N_gm_y))         
         noise_penality[t_flight_during_day<t_7am]  = 10
         noise_penality[t_flight_during_day>t_10pm] = 10         
         
         # convert SPL to pressure and multiply by duration 
-        p_sq_ref_flight_sq     = np.nansum(time_step * (10**(SPL/10)), axis=0)   
-        p_sq_ref_flight_sq_dn  = np.nansum(time_step * (10**( (noise_penality + SPL)/10)), axis=0)  
+        p_sq_ref_flight_sq     = rp.nansum(time_step * (10**(SPL/10)), axis=0)   
+        p_sq_ref_flight_sq_dn  = rp.nansum(time_step * (10**( (noise_penality + SPL)/10)), axis=0)  
     
         # add to current  
-        p_div_p_ref_sq_L_eq    = np.nansum(np.concatenate((p_sq_ref_flight_sq[:,:,None],p_div_p_ref_sq_L_eq[:,:,None]),axis = 2), axis =2)
-        p_div_p_ref_sq_L_24hr  = np.nansum(np.concatenate((p_sq_ref_flight_sq[:,:,None],p_div_p_ref_sq_L_24hr[:,:,None]),axis = 2), axis =2)
-        p_div_p_ref_sq_L_dn    = np.nansum(np.concatenate((p_sq_ref_flight_sq_dn[:,:,None],p_div_p_ref_sq_L_dn[:,:,None]),axis = 2), axis =2) 
+        p_div_p_ref_sq_L_eq    = rp.nansum(rp.concatenate((p_sq_ref_flight_sq[:,:,None],p_div_p_ref_sq_L_eq[:,:,None]),axis = 2), axis =2)
+        p_div_p_ref_sq_L_24hr  = rp.nansum(rp.concatenate((p_sq_ref_flight_sq[:,:,None],p_div_p_ref_sq_L_24hr[:,:,None]),axis = 2), axis =2)
+        p_div_p_ref_sq_L_dn    = rp.nansum(rp.concatenate((p_sq_ref_flight_sq_dn[:,:,None],p_div_p_ref_sq_L_dn[:,:,None]),axis = 2), axis =2) 
     
     # add on background noise for remainder of time
-    ambient_noise_duration       = np.maximum(ambient_noise_duration,0)
-    ambient_noise_duration_24hr  = np.maximum(ambient_noise_duration_24hr,0)
+    ambient_noise_duration       = rp.maximum(ambient_noise_duration,0)
+    ambient_noise_duration_24hr  = rp.maximum(ambient_noise_duration_24hr,0)
     p_div_p_ref_sq_L_eq         += ambient_noise_duration *  (10**(background_noise()/10))
     p_div_p_ref_sq_L_24hr       += ambient_noise_duration_24hr *  (10**(background_noise()/10))
     p_div_p_ref_sq_L_dn         += ambient_noise_duration *  (10**(background_noise()/10))
     
-    noise_data.L_eq              = 10*np.log10((1/(t_end-t_start))*p_div_p_ref_sq_L_eq)
-    noise_data.L_eq_24hr         = 10*np.log10((1/(24*Units.hours))*p_div_p_ref_sq_L_24hr)   
-    noise_data.L_dn              = 10*np.log10((1/(t_end-t_start))*p_div_p_ref_sq_L_dn)
+    noise_data.L_eq              = 10*rp.log10((1/(t_end-t_start))*p_div_p_ref_sq_L_eq)
+    noise_data.L_eq_24hr         = 10*rp.log10((1/(24*Units.hours))*p_div_p_ref_sq_L_24hr)   
+    noise_data.L_dn              = 10*rp.log10((1/(t_end-t_start))*p_div_p_ref_sq_L_dn)
       
         
     # Compute Day-Night Sound Level and Noise Equivalent Noise  
-    SPL_max = np.max(SPL,axis = 0)
+    SPL_max = rp.max(SPL,axis = 0)
      
     p_sq_ref_flight_sq_SEL  = time_step * (10**(SPL/10))     
     
     # subtract 10 db to get bounds 
     SPL_max_min10 = SPL_max - 10 
-    time_history  = np.tile(flight_time[:,None,None], (1,len(SPL[0,:,0]),len(SPL[0,0,:])))
+    time_history  = rp.tile(flight_time[:,None,None], (1,len(SPL[0,:,0]),len(SPL[0,0,:])))
  
-    t_window      = np.ma.masked_array(time_history, SPL >SPL_max_min10)
+    t_window      = rp.ma.masked_array(time_history, SPL >SPL_max_min10)
     t_interval    = t_window[-1] -  t_window[0]
     
     # mask all noise values that are lower than L-10 level
-    P0                = np.ma.masked_array(p_sq_ref_flight_sq_SEL, SPL >SPL_max_min10)
-    P0_tot            = np.nansum((1/(t_interval))*P0, axis=0)
-    SENEL             = 10*np.log10(P0_tot)
+    P0                = rp.ma.masked_array(p_sq_ref_flight_sq_SEL, SPL >SPL_max_min10)
+    P0_tot            = rp.nansum((1/(t_interval))*P0, axis=0)
+    SENEL             = 10*rp.log10(P0_tot)
     noise_data.SENEL  = SENEL 
     return  

@@ -10,8 +10,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core              import Data
 from .Converter  import Converter
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Nacalle

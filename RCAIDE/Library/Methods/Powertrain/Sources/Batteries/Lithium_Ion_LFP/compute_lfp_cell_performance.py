@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 from RCAIDE.Framework.Core import Units
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -187,7 +187,7 @@ def compute_lfp_cell_performance(battery_module, state, bus, coolant_lines, t_id
     V_ul_cell[t_idx]      = compute_lfp_cell_state(battery_module,battery_module_data,SOC_cell[t_idx],T_cell[t_idx],abs(I_cell[t_idx])) 
  
     # Effective Power flowing through battery_module 
-    P_module[t_idx]       = P_bus[t_idx] /no_modules + np.abs(Q_heat_module[t_idx]) 
+    P_module[t_idx]       = P_bus[t_idx] /no_modules + rp.abs(Q_heat_module[t_idx]) 
 
     # store remaining variables  
     V_ul_module[t_idx]     = V_ul_cell[t_idx]*n_series  
@@ -209,8 +209,8 @@ def compute_lfp_cell_performance(battery_module, state, bus, coolant_lines, t_id
             T_cell[t_idx+1]    = T_cell[t_idx] + dT_dt*delta_t[t_idx]
             
         # Compute state of charge and depth of discarge of the battery_module
-        E_module[t_idx+1]                                     = np.float32(E_module[t_idx] -P_module[t_idx]*delta_t[t_idx])
-        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = np.float32(E_module_max)
+        E_module[t_idx+1]                                     = rp.float32(E_module[t_idx] -P_module[t_idx]*delta_t[t_idx])
+        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = rp.float32(E_module_max)
         SOC_cell[t_idx+1]                                     = E_module[t_idx+1]/E_module_max 
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]>1]                = 1.
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]<0]                = 0. 

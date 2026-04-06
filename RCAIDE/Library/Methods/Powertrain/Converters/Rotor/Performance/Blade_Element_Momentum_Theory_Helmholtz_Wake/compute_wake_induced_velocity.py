@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports  
-import numpy as np 
+import RNUMPY as rp 
 from scipy.interpolate import interp1d
 
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -111,47 +111,52 @@ def compute_wake_induced_velocity(rotor, rotor_conditions, evaluation_points, ct
     n_cp = len(evaluation_points.XC[0])
 
     # initialize rotor wake induced velocities
-    rotor_V_wake_ind = np.zeros((ctrl_pts,n_cp,3))
+    rotor_V_wake_ind = rp.zeros((ctrl_pts,n_cp,3))
 
     R            = rotor.tip_radius
     r            = rotor_conditions.disc_radial_distribution[0,:,0]
 
     # Ignore points within hub or outside tip radius
     hub_y_center = rotor.origin[0][1]
-    inboard_r    = np.flip(hub_y_center - r) 
+    inboard_r    = rp.flip(hub_y_center - r) 
     outboard_r   = hub_y_center + r 
-    rotor_y_range = np.append(inboard_r, outboard_r)
+    rotor_y_range = rp.append(inboard_r, outboard_r)
 
-    # within this range, add an induced x- and z- velocity from rotor wake
-    bool_inboard  = ( evaluation_points.YC > inboard_r[0] )  * ( evaluation_points.YC < inboard_r[-1] )
-    bool_outboard = ( evaluation_points.YC > outboard_r[0] ) * ( evaluation_points.YC < outboard_r[-1] )
-    bool_in_range = bool_inboard + bool_outboard
-    new_dim       = np.sum(bool_in_range, axis=1)[0]
-    YC_in_range   = evaluation_points.YC[bool_in_range].reshape(ctrl_pts,new_dim) 
+    # Identify points inside the inboard and outboard wake regions
+    bool_inboard  = (evaluation_points.YC > inboard_r[0])  & (evaluation_points.YC < inboard_r[-1])
+    bool_outboard = (evaluation_points.YC > outboard_r[0]) & (evaluation_points.YC < outboard_r[-1])
+    bool_in_range = bool_inboard | bool_outboard
 
-    y_vals  = YC_in_range
-    val_ids = np.where(bool_in_range==True)
+    # Count how many points per control station fall inside the wake
+    new_dim = rp.sum(bool_in_range, axis=1)[0]
 
-    s  = evaluation_points.XC[val_ids].reshape(ctrl_pts,new_dim)  - rotor.origin[0][0]
-    kd = 1 + s/(np.sqrt(s**2 + R**2))    
+    # Extract YC values for those points
+    YC_in_range = evaluation_points.YC[bool_in_range].reshape(ctrl_pts, new_dim)
 
-    # extract radial and azimuthal velocities at blade
+    # Compute streamwise distance s for those same points
+    s = evaluation_points.XC[bool_in_range].reshape(ctrl_pts, new_dim) - rotor.origin[0][0]
+
+    # Induction factor kd
+    kd = 1.0 + s / rp.sqrt(s**2 + R**2)
+
+    # Extract radial and azimuthal induced velocities
     va = rotor_conditions.blade_axial_induced_velocity[0]
     vt = rotor_conditions.blade_tangential_induced_velocity[0]
+
     
     if rotor.clockwise_rotation:
         rotation = 1
     else:
         rotation =  -1
 
-    va_y_range  = np.append(np.flipud(va), va)
-    vt_y_range  = np.append(np.flipud(vt), vt)*rotation
+    va_y_range  = rp.append(rp.flipud(va), va)
+    vt_y_range  = rp.append(rp.flipud(vt), vt)*rotation
     va_interp   = interp1d(rotor_y_range, va_y_range)
     vt_interp   = interp1d(rotor_y_range, vt_y_range)
     
     # preallocate va_new and vt_new
     va_new = kd*va_interp((y_vals))
-    vt_new = np.zeros((ctrl_pts,new_dim))
+    vt_new = rp.zeros((ctrl_pts,new_dim))
 
     # invert inboard vt values
     inboard_bools                = (y_vals < hub_y_center)

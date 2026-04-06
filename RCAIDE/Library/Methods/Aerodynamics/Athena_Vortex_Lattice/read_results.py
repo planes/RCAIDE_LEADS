@@ -10,7 +10,7 @@ from RCAIDE.Framework.Core import Data
 from RCAIDE.Library.Methods.Aerodynamics.Athena_Vortex_Lattice.AVL_Objects.Wing import Control_Surface_Data ,  Control_Surface_Results
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  read_results
@@ -131,14 +131,14 @@ def read_results(avl_object, vehicle):
             if avl_object.settings.model_fuselage:          
                 n_fus_sec += 2
         
-        wing_area            = np.zeros(n_wings)
-        wing_CL              = np.zeros(n_wings)
-        wing_CD              = np.zeros(n_wings)  
-        wing_local_span      = np.zeros((n_wings,n_sw))
-        wing_sectional_chord = np.zeros((n_wings,n_sw))
-        wing_cl              = np.zeros((n_wings,n_sw))
-        alpha_i              = np.zeros((n_wings,n_sw))
-        wing_cd              = np.zeros((n_wings,n_sw))   
+        wing_area            = rp.zeros(n_wings)
+        wing_CL              = rp.zeros(n_wings)
+        wing_CD              = rp.zeros(n_wings)  
+        wing_local_span      = rp.zeros((n_wings,n_sw))
+        wing_sectional_chord = rp.zeros((n_wings,n_sw))
+        wing_cl              = rp.zeros((n_wings,n_sw))
+        alpha_i              = rp.zeros((n_wings,n_sw))
+        wing_cd              = rp.zeros((n_wings,n_sw))   
         
         # Extract resulst from surface forces result file
         with open(case.aero_result_filename_2,'r') as aero_res_file:

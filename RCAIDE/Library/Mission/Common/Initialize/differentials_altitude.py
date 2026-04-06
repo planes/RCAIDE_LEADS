@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Update Differentials Altitude
@@ -76,7 +76,7 @@ def differentials_altitude(segment):
     vz = v[:,2,None] # maintain column array
 
     # get overall time step
-    dt = np.dot( I[-1,:] * dz , 1/ vz[:,0] )
+    dt = rp.dot( I[-1,:] * dz , 1/ vz[:,0] )
 
     # rescale operators
     t = t * dt

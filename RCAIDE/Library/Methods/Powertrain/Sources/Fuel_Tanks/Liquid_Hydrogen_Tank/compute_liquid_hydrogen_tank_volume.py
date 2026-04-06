@@ -12,8 +12,8 @@ from RCAIDE.Framework.Core import Units, Data
 
 # Python imports
 from copy import deepcopy
-import numpy as np
-from scipy.optimize import minimize, minimize_scalar, brentq
+import RNUMPY as rp
+from rp.scipy.optimize import minimize, minimize_scalar, brentq
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Structural Solver
@@ -99,7 +99,7 @@ def compute_liquid_hydrogen_tank_volume(fuel_tank,fuel_tanks):
     while abs(error) > tol and iteration < max_iter:
         # Compute internal tank geometry
         V_total = V_guess / (1 - fuel_tank.ullage_volume_fraction)  
-        r_inner = ( V_total/(2*np.pi*(fuel_tank.aspect_ratio-1/3)) )**(1/3)
+        r_inner = ( V_total/(2*rp.pi*(fuel_tank.aspect_ratio-1/3)) )**(1/3)
         L_inner = (2 * r_inner * fuel_tank.aspect_ratio)-2*r_inner
 
         # Optimize wall thickness ratio (ro/ri) using von Mises criterion
@@ -180,17 +180,17 @@ def compute_liquid_hydrogen_tank_volume(fuel_tank,fuel_tanks):
     fuel_tank.insulation_thickness           = t_ins 
 
     # Insulation geometry and mass
-    a_ins = 2 * np.pi * fuel_tank.diameters.external/2 * (fuel_tank.lengths.external) + 4 * np.pi * (fuel_tank.diameters.external/2)**2
-    v_ins = (np.pi * (fuel_tank.diameters.external/2)**2 * (fuel_tank.lengths.external) + (4/3) * np.pi * (fuel_tank.diameters.external/2)**3)-\
-            (np.pi * (fuel_tank.inner_structure.outer_diameter/2)**2 * (fuel_tank.inner_structure.outer_length) + (4/3) * np.pi * (fuel_tank.inner_structure.outer_diameter/2)**3)
+    a_ins = 2 * rp.pi * fuel_tank.diameters.external/2 * (fuel_tank.lengths.external) + 4 * rp.pi * (fuel_tank.diameters.external/2)**2
+    v_ins = (rp.pi * (fuel_tank.diameters.external/2)**2 * (fuel_tank.lengths.external) + (4/3) * rp.pi * (fuel_tank.diameters.external/2)**3)-\
+            (rp.pi * (fuel_tank.inner_structure.outer_diameter/2)**2 * (fuel_tank.inner_structure.outer_length) + (4/3) * rp.pi * (fuel_tank.inner_structure.outer_diameter/2)**3)
          
     mass_ins = (v_ins * fuel_tank.insulation_material.density
                + a_ins * fuel_tank.insulation_material.specific_density)
 
     # Material volume between inner and outer shells (cylinder + two hemispherical caps)
     L_outer = fuel_tank.inner_structure.outer_length
-    V_outer = np.pi * r_outer**2 * L_outer + (4.0/3.0) * np.pi * r_outer**3
-    V_inner = np.pi * r_inner**2 * L_inner + (4.0/3.0) * np.pi * r_inner**3
+    V_outer = rp.pi * r_outer**2 * L_outer + (4.0/3.0) * rp.pi * r_outer**3
+    V_inner = rp.pi * r_inner**2 * L_inner + (4.0/3.0) * rp.pi * r_inner**3
     V_material = V_outer - V_inner
 
     if fuel_tank.xz_plane_symmetric:
@@ -248,7 +248,7 @@ def tank_width(ro_ri, P_internal, P_external, safety_factor, fuel_tank):
     sigma_z     = A        # axial stress
 
     # Von Mises equivalent stress
-    sigma_vm = np.sqrt(((sigma_theta - sigma_r)**2 + 
+    sigma_vm = rp.sqrt(((sigma_theta - sigma_r)**2 + 
                         (sigma_r - sigma_z)**2 + 
                         (sigma_z - sigma_theta)**2) / 2)
 
@@ -304,7 +304,7 @@ def insulation_width(t_ins, Ta, PI_Q, fuel_tank, atmo_data,r_o,r_i,l_i):
 
     Qc_mat = fuel_tank.insulation_wall_conductive_heat_transfer
 
-    return PI_Q * Qc_mat / (2*np.pi*r_i*(l_i) + 4*np.pi*r_i**2) - Qo
+    return PI_Q * Qc_mat / (2*rp.pi*r_i*(l_i) + 4*rp.pi*r_i**2) - Qo
 
 
 def heat_transfer_wrap(Te, t_ins, fuel_tank, atmo_data,ro,ri,li):
@@ -349,22 +349,22 @@ def heat_transfer_wrap(Te, t_ins, fuel_tank, atmo_data,ro,ri,li):
     Nu_cyl = (0.60 + 0.387 * Ra**(1/6) / (1 + (0.559/Pr)**(9/16))**(8/27))**2
     h_cyl  = Nu_cyl * k_air / (2*ro + 2*t_ins)
 
-    Qv_cyl = h_cyl * (np.pi * (2*ro + 2*t_ins) * (li)) * (Ta - Te)
-    Qr_cyl = (5.67e-8) * 0.03 * (np.pi * (2*ro + 2*t_ins) * (li)) * (Ta**4 - Te**4)
+    Qv_cyl = h_cyl * (rp.pi * (2*ro + 2*t_ins) * (li)) * (Ta - Te)
+    Qr_cyl = (5.67e-8) * 0.03 * (rp.pi * (2*ro + 2*t_ins) * (li)) * (Ta**4 - Te**4)
     Qc_cyl = (Te - Ti) / (
-        np.log(ro/ri) / (2*np.pi*(li)*fuel_tank.material.thermal_conductivity)
-        + np.log((ro+t_ins)/ro) / (2*np.pi*(li)*fuel_tank.insulation_material.thermal_conductivity)
+        rp.log(ro/ri) / (2*rp.pi*(li)*fuel_tank.material.thermal_conductivity)
+        + rp.log((ro+t_ins)/ro) / (2*rp.pi*(li)*fuel_tank.insulation_material.thermal_conductivity)
     )
 
     # ---- Spherical end caps ----
     Nu_sph = 2 + 0.589 * Ra**(1/4) / (1 + (0.469/Pr)**(9/16))**(4/9)
     h_sph  = Nu_sph * k_air / (2*ro + 2*t_ins)
 
-    Qv_sph = h_sph * (np.pi * (2*ro + 2*t_ins)**2) * (Ta - Te)
-    Qr_sph = (5.67e-8) * 0.03 * (np.pi * (2*ro + 2*t_ins)**2) * (Ta**4 - Te**4)
+    Qv_sph = h_sph * (rp.pi * (2*ro + 2*t_ins)**2) * (Ta - Te)
+    Qr_sph = (5.67e-8) * 0.03 * (rp.pi * (2*ro + 2*t_ins)**2) * (Ta**4 - Te**4)
     Qc_sph = (Te - Ti) / (
-        (ro - ri) / (4*np.pi*fuel_tank.material.thermal_conductivity*ri*ro)
-        + t_ins / (4*np.pi*fuel_tank.insulation_material.thermal_conductivity*ro*(ro+t_ins))
+        (ro - ri) / (4*rp.pi*fuel_tank.material.thermal_conductivity*ri*ro)
+        + t_ins / (4*rp.pi*fuel_tank.insulation_material.thermal_conductivity*ro*(ro+t_ins))
     )
 
     # Total heat transfer
@@ -384,10 +384,10 @@ def bracket_root(func, start=1e-6, factor=10, limit=1e2, args=()):
     fa = func(a, *args)
     b = a * factor
     fb = func(b, *args)
-    while np.sign(fa) == np.sign(fb) and b < limit:
+    while rp.sign(fa) == rp.sign(fb) and b < limit:
         a, fa = b, fb
         b *= factor
         fb = func(b, *args)
-    if np.sign(fa) == np.sign(fb):
+    if rp.sign(fa) == rp.sign(fb):
         return None
     return a, b

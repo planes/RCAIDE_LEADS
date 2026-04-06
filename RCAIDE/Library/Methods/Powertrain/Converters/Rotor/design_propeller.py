@@ -11,8 +11,8 @@ from RCAIDE.Framework.Core   import interp2d
 from RCAIDE.Library.Methods.Geometry.Airfoil    import compute_airfoil_properties, compute_naca_4series, import_airfoil_geometry
 
 # package imports 
-import numpy as np
-import scipy as sp 
+import RNUMPY as rp
+import RNUMPY.scipy as sp 
 from scipy.optimize import root 
 
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -168,12 +168,12 @@ def design_propeller(prop, number_of_stations=20):
 
         # Nondimensional thrust
         if (Thrust!= None) and (Power == None):
-            Tc = 2.*Thrust/(rho*(V*V)*np.pi*(R*R))     
+            Tc = 2.*Thrust/(rho*(V*V)*rp.pi*(R*R))     
             Pc = 0.0 
 
         elif (Thrust== None) and (Power != None):
             Tc = 0.0   
-            Pc = 2.*Power/(rho*(V*V*V)*np.pi*(R*R))  
+            Pc = 2.*Power/(rho*(V*V*V)*rp.pi*(R*R))  
 
         tol   = 1e-10 # Convergence tolerance
 
@@ -182,15 +182,15 @@ def design_propeller(prop, number_of_stations=20):
 
         # Step 2, determine F and phi at each blade station 
         chi0    = Rh/R # Where the propeller blade actually starts
-        chi     = np.linspace(chi0,1,N+1) # Vector of nondimensional radii
+        chi     = rp.linspace(chi0,1,N+1) # Vector of nondimensional radii
         chi     = chi[0:N]
         lamda   = V/(omega*R)             # Speed ratio
         r       = chi*R                   # Radial coordinate
         x       = omega*r/V               # Nondimensional distance
         diff    = 1.0                     # Difference between zetas
-        n       = omega/(2*np.pi)         # Cycles per second
+        n       = omega/(2*rp.pi)         # Cycles per second
         D       = 2.*R  
-        c       = 0.2 * np.ones_like(chi)
+        c       = 0.2 * rp.ones_like(chi)
 
         # if user defines airfoil, check dimension of stations
         num_airfoils = len(airfoils.keys())
@@ -217,37 +217,49 @@ def design_propeller(prop, number_of_stations=20):
             #Things that need a loop
             Tcnew   = Tc     
             tanphit = lamda*(1.+zeta/2.)   # Tangent of the flow angle at the tip
-            phit    = np.arctan(tanphit)   # Flow angle at the tip
+            phit    = rp.arctan(tanphit)   # Flow angle at the tip
             tanphi  = tanphit/chi          # Flow angle at every station
-            f       = (B/2.)*(1.-chi)/np.sin(phit) 
-            F       = (2./np.pi)*np.arccos(np.exp(-f)) #Prandtl momentum loss factor
-            phi     = np.arctan(tanphi)    # Flow angle at every station
+            f       = (B/2.)*(1.-chi)/rp.sin(phit) 
+            F       = (2./rp.pi)*rp.arccos(rp.exp(-f)) #Prandtl momentum loss factor
+            phi     = rp.arctan(tanphi)    # Flow angle at every station
 
             #Step 3, determine the product Wc, and RE
-            G       = F*x*np.cos(phi)*np.sin(phi) #Circulation function
-            Wc      = 4.*np.pi*lamda*G*V*R*zeta/(Cl*B)
+            G       = F*x*rp.cos(phi)*rp.sin(phi) #Circulation function
+            Wc      = 4.*rp.pi*lamda*G*V*R*zeta/(Cl*B)
             Ma      = Wc/speed_of_sound
             RE      = Wc/nu
 
             if num_airfoils>0:
                 # assign initial values 
-                alpha0   = np.ones(N)*0.05
+                alpha0   = rp.ones(N)*0.05
 
                 # solve for optimal alpha to meet design Cl target
                 sol      = root(objective, x0 = alpha0 , args=(airfoils,a_loc,RE,Cl,N))
                 alpha    = sol.x
 
                 # query surrogate for sectional Cls at stations 
-                Cdval    = np.zeros_like(RE) 
-                for j,airfoil in enumerate(airfoils):                   
-                    pd          = airfoil.polars
-                    Cdval_af    = interp2d(RE,alpha,pd.reynolds_numbers, pd.angle_of_attacks, pd.drag_coefficients)
-                    locs        = np.where(np.array(a_loc) == j )
-                    Cdval[locs] = Cdval_af[locs]    
+                Cdval    = rp.zeros_like(RE) 
+                for j, airfoil in enumerate(airfoils):
+                    pd = airfoil.polars
+
+                    # Interpolate Cd for this airfoil
+                    Cdval_af = interp2d(
+                        RE, alpha,
+                        pd.reynolds_numbers,
+                        pd.angle_of_attacks,
+                        pd.drag_coefficients
+                    )
+
+                    # Boolean mask for blade stations using this airfoil
+                    mask = (rp.array(a_loc) == j)
+
+                    # Scatter update into the correct columns
+                    Cdval = Cdval.at[mask].set(Cdval_af[mask])
+
 
             else:    
                 Cdval   = (0.108*(Cl**4)-0.2612*(Cl**3)+0.181*(Cl**2)-0.0139*Cl+0.0278)*((50000./RE)**0.2)
-                alpha   = Cl/(2.*np.pi)
+                alpha   = Cl/(2.*rp.pi)
 
             #More Cd scaling from Mach from AA241ab notes for turbulent skin friction
             Tw_Tinf = 1. + 1.78*(Ma**2)
@@ -260,26 +272,26 @@ def design_propeller(prop, number_of_stations=20):
             epsilon = Cd/Cl  
 
             #Step 6, determine a and a', and W 
-            a       = (zeta/2.)*(np.cos(phi)**2.)*(1.-epsilon*np.tan(phi)) 
-            W       = V*(1.+a)/np.sin(phi)
+            a       = (zeta/2.)*(rp.cos(phi)**2.)*(1.-epsilon*rp.tan(phi)) 
+            W       = V*(1.+a)/rp.sin(phi)
 
             #Step 7, compute the chord length and blade twist angle  
             c       = Wc/W
             beta    = alpha + phi # Blade twist angle
 
             #Step 8, determine 4 derivatives in I and J 
-            Iprime1 = 4.*chi*G*(1.-epsilon*np.tan(phi))
-            Iprime2 = lamda*(Iprime1/(2.*chi))*(1.+epsilon/np.tan(phi)
-                                                )*np.sin(phi)*np.cos(phi)
-            Jprime1 = 4.*chi*G*(1.+epsilon/np.tan(phi))
-            Jprime2 = (Jprime1/2.)*(1.-epsilon*np.tan(phi))*(np.cos(phi)**2.) 
-            dchi    = (chi[1]-chi[0])*np.ones_like(Jprime1)
+            Iprime1 = 4.*chi*G*(1.-epsilon*rp.tan(phi))
+            Iprime2 = lamda*(Iprime1/(2.*chi))*(1.+epsilon/rp.tan(phi)
+                                                )*rp.sin(phi)*rp.cos(phi)
+            Jprime1 = 4.*chi*G*(1.+epsilon/rp.tan(phi))
+            Jprime2 = (Jprime1/2.)*(1.-epsilon*rp.tan(phi))*(rp.cos(phi)**2.) 
+            dchi    = (chi[1]-chi[0])*rp.ones_like(Jprime1)
 
             #Integrate derivatives from chi=chi0 to chi=1 
-            I1      = np.dot(Iprime1,dchi)
-            I2      = np.dot(Iprime2,dchi)
-            J1      = np.dot(Jprime1,dchi)
-            J2      = np.dot(Jprime2,dchi)        
+            I1      = rp.dot(Iprime1,dchi)
+            I2      = rp.dot(Iprime2,dchi)
+            J1      = rp.dot(Jprime1,dchi)
+            J2      = rp.dot(Jprime2,dchi)        
 
             #Step 9, determine zeta and and Pc or zeta and Tc 
             if (Pc==0.)&(Tc!=0.): 
@@ -320,25 +332,47 @@ def design_propeller(prop, number_of_stations=20):
         # In this case the 1/4 chords are all aligned 
         MCA    = c/4. - c[0]/4.
 
-        Thrust = Tc*rho*(V**2)*np.pi*(R**2)/2
-        Power  = Pc*rho*(V**3)*np.pi*(R**2)/2 
+        Thrust = Tc*rho*(V**2)*rp.pi*(R**2)/2
+        Power  = Pc*rho*(V**3)*rp.pi*(R**2)/2 
         Ct     = Thrust/(rho*(n*n)*(D*D*D*D))
         Cp     = Power/(rho*(n*n*n)*(D*D*D*D*D))  
 
         # compute max thickness distribution  
-        t_max  = np.zeros(N)    
-        t_c    = np.zeros(N)   
-        if num_airfoils>0:
-            for j,airfoil in enumerate(airfoils): 
-                a_geo         = airfoil.geometry
-                locs          = np.where(np.array(a_loc) == j )
-                t_max[locs]   = a_geo.max_thickness*c[locs] 
-                t_c[locs]     = a_geo.thickness_to_chord 
-        else:     
-            c_blade = np.repeat(np.atleast_2d(np.linspace(0,1,N)),N, axis = 0)* np.repeat(np.atleast_2d(c).T,N, axis = 1)
-            t       = (5*c_blade)*(0.2969*np.sqrt(c_blade) - 0.1260*c_blade - 0.3516*(c_blade**2) + 0.2843*(c_blade**3) - 0.1015*(c_blade**4)) # local thickness distribution
-            t_max   = np.max(t,axis = 1) 
-            t_c     = np.max(t,axis = 1) /c  
+        t_max = rp.zeros(len(c))
+        t_c   = rp.zeros(len(c))
+
+        if num_airfoils > 0:
+            for j, airfoil in enumerate(airfoils):
+                a_geo = airfoil.geometry
+
+                # Boolean mask for blade stations using this airfoil
+                mask = (rp.array(a_loc) == j)
+
+                # Scatter updates
+                t_max = t_max.at[mask].set(a_geo.max_thickness * c[mask])
+                t_c   = t_c.at[mask].set(a_geo.thickness_to_chord)
+
+        else:
+            # Compute thickness distribution for a generic airfoil (NACA-like)
+            c_blade = (
+                rp.repeat(rp.atleast_2d(rp.linspace(0, 1, N)), N, axis=0)
+                * rp.repeat(rp.atleast_2d(c).T, N, axis=1)
+            )
+
+            t = (
+                5 * c_blade
+                * (
+                    0.2969 * rp.sqrt(c_blade)
+                    - 0.1260 * c_blade
+                    - 0.3516 * (c_blade**2)
+                    + 0.2843 * (c_blade**3)
+                    - 0.1015 * (c_blade**4)
+                )
+            )
+
+            t_max = rp.max(t, axis=1)
+            t_c   = t_max / c
+
 
         # Nondimensional thrust
         if prop.cruise.design_power == None: 
@@ -349,7 +383,7 @@ def design_propeller(prop, number_of_stations=20):
         # blade solidity
         r          = chi*R                     
         blade_area = sp.integrate.cumulative_trapezoid(B*c, r-r[0])
-        sigma      = blade_area[-1]/(np.pi*R**2)   
+        sigma      = blade_area[-1]/(rp.pi*R**2)   
 
         prop.cruise.design_torque                   = Power[0]/omega
         prop.max_thickness_distribution             = t_max
@@ -368,13 +402,24 @@ def design_propeller(prop, number_of_stations=20):
     
 def objective(x,airfoils,a_loc,RE,Cl,N):
     # query surrogate for sectional Cls at stations 
-    Cl_vals          = np.zeros(N)       
-    for j,airfoil in enumerate(airfoils): 
-        pd            = airfoil.polars
-        Cl_af         = interp2d(RE,x,pd.reynolds_numbers, pd.angle_of_attacks, pd.lift_coefficients)
-        locs          = np.where(np.array(a_loc) == j )
-        Cl_vals[locs] = Cl_af[locs] 
-        
+    Cl_vals          = rp.zeros(N)       
+    for j, airfoil in enumerate(airfoils):
+        pd = airfoil.polars
+
+        # Interpolate Cl for this airfoil
+        Cl_af = interp2d(
+            RE, x,
+            pd.reynolds_numbers,
+            pd.angle_of_attacks,
+            pd.lift_coefficients
+        )
+
+        # Boolean mask for blade stations using this airfoil
+        mask = (rp.array(a_loc) == j)
+
+        # Scatter update into the correct columns
+        Cl_vals = Cl_vals.at[mask].set(Cl_af[mask])
+
     # compute Cl residual    
     Cl_residuals = Cl_vals - Cl 
     return  Cl_residuals 

@@ -9,7 +9,7 @@
 
 # RCAIDE 
 from RCAIDE.Framework.Core import  Units
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Vertical Tail Weight 
@@ -66,7 +66,7 @@ def compute_vertical_tail_weight(wing, vehicle):
         T_tail_factor = 0.
 
     # Calculate weight of wing for traditional aircraft vertical tail without rudder
-    tail_vert_English = .073*(1+.2*T_tail_factor)*((Nult*W_0)**(.376))*(q**.122)*(S_vt**.873)*((100.*t_c_v/np.cos(sweep_v))**(-.49))*((AR_v/(np.cos(sweep_v)**2.))**.357)*(taper_v**.039)
+    tail_vert_English = .073*(1+.2*T_tail_factor)*((Nult*W_0)**(.376))*(q**.122)*(S_vt**.873)*((100.*t_c_v/rp.cos(sweep_v))**(-.49))*((AR_v/(rp.cos(sweep_v)**2.))**.357)*(taper_v**.039)
 
     # packup outputs
     W_tail_vertical = tail_vert_English * Units.lbs # Convert from lbs to kg

@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core    import Data , Units, orientation_product, orientation_transpose  
 
 # package imports
-import  numpy as  np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Generalized Rotor Class
@@ -74,9 +74,9 @@ def BEMT_performance(ducted_fan,conditions):
     alt                   = conditions.freestream.altitude 
      
     altitude       = alt/ 1000  
-    n              = omega/(2.*np.pi)   # Rotations per second
+    n              = omega/(2.*rp.pi)   # Rotations per second
     D              = ducted_fan.tip_radius * 2
-    A              = 0.25 * np.pi * (D ** 2)
+    A              = 0.25 * rp.pi * (D ** 2)
     
     # Unpack freestream conditions 
     Vv             = conditions.frames.inertial.velocity_vector 
@@ -91,7 +91,7 @@ def BEMT_performance(ducted_fan,conditions):
     T_inertial2body         = orientation_transpose(T_body2inertial)
     V_body                  = orientation_product(T_inertial2body,Vv)
     body2thrust,orientation = ducted_fan.body_to_prop_vel(commanded_TV) 
-    T_body2thrust           = orientation_transpose(np.ones_like(T_body2inertial[:])*body2thrust)
+    T_body2thrust           = orientation_transpose(rp.ones_like(T_body2inertial[:])*body2thrust)
     V_thrust                = orientation_product(T_body2thrust,V_body)
 
     # Check and correct for hover
@@ -110,10 +110,10 @@ def BEMT_performance(ducted_fan,conditions):
     Ct             = ducted_fan.performance_surrogates.thrust_coefficient(pts)    
     Cp             = ducted_fan.performance_surrogates.power_coefficient(pts) 
     Cq             = torque/(rho*(n*n)*(D*D*D*D*D))
-    FoM            = thrust*np.sqrt(thrust/(2*rho*A))/power  
+    FoM            = thrust*rp.sqrt(thrust/(2*rho*A))/power  
     
     # calculate coefficients    
-    thrust_prop_frame      = np.zeros((ctrl_pts,3))
+    thrust_prop_frame      = rp.zeros((ctrl_pts,3))
     thrust_prop_frame[:,0] = thrust[:,0]
     thrust_vector          = orientation_product(orientation_transpose(T_body2thrust),thrust_prop_frame)
     

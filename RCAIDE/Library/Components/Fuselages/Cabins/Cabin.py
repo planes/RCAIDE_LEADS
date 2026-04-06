@@ -26,7 +26,7 @@ class Cabin(Component):
         self.tag                       = 'cabin'
         self.number_of_passengers      = 0 
         self.number_of_seats           = 0 
-        self.filled_seats_arrangement  = 'random' # ['random','ascending','descending']
+        self.filled_seats_arrangement  = 'ascending' # ['random','ascending','descending']
         self.type_A_door_length        = 36 *  Units.inches
         self.galley_lavatory_length    = 32 *  Units.inches  
         self.emergency_exit_seat_pitch = 36 *  Units.inches  

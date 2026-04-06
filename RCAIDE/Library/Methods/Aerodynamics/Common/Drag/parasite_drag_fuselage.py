@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Aerodynamics.Common.Drag.compressible_turbulent_flat
 from RCAIDE.Library.Methods.Utilities         import Cubic_Spline_Blender   
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #   Parasite Drag Fuselage
@@ -157,17 +157,17 @@ def parasite_drag_fuselage(state,settings,fuselage):
     cf_fus, k_comp, k_reyn = compressible_turbulent_flat_plate(Re_fus,Mach,T)       
     d_d = d_fus/l_fus
  
-    if np.all((Mach<=1.0) == True): 
+    if rp.all((Mach<=1.0) == True): 
         # compute form factor for cylindrical bodies 
-        D             = np.zeros_like(Mach)    
-        D[Mach < 0.95]  = np.sqrt(1 - (1-Mach[Mach < 0.95]**2) * d_d**2)
-        D[Mach >= 0.95] = np.sqrt(1 - d_d**2)
+        D             = rp.zeros_like(Mach)    
+        D[Mach < 0.95]  = rp.sqrt(1 - (1-Mach[Mach < 0.95]**2) * d_d**2)
+        D[Mach >= 0.95] = rp.sqrt(1 - d_d**2)
     
-        a             = np.zeros_like(Mach)    
-        a[Mach < 0.95]  = 2 * (1-Mach[Mach < 0.95]**2) * (d_d**2) *(np.arctanh(D[Mach < 0.95])-D[Mach < 0.95]) / (D[Mach < 0.95]**3)
-        a[Mach >= 0.95] = 2  * (d_d**2) *(np.arctanh(D[Mach >= 0.95])-D[Mach >= 0.95]) / (D[Mach >= 0.95]**3)
+        a             = rp.zeros_like(Mach)    
+        a[Mach < 0.95]  = 2 * (1-Mach[Mach < 0.95]**2) * (d_d**2) *(rp.arctanh(D[Mach < 0.95])-D[Mach < 0.95]) / (D[Mach < 0.95]**3)
+        a[Mach >= 0.95] = 2  * (d_d**2) *(rp.arctanh(D[Mach >= 0.95])-D[Mach >= 0.95]) / (D[Mach >= 0.95]**3)
     
-        du_max_u               = np.zeros_like(Mach)    
+        du_max_u               = rp.zeros_like(Mach)    
         du_max_u[Mach < 0.95]  = a[Mach < 0.95] / ( (2-a[Mach < 0.95]) * (1-Mach[Mach < 0.95]**2)**0.5 ) 
         du_max_u[Mach >= 0.95] = a[Mach >= 0.95] / ( (2-a[Mach >= 0.95]) )
         
@@ -177,24 +177,24 @@ def parasite_drag_fuselage(state,settings,fuselage):
     else: 
         
         # supersonic condition  
-        D_low        = np.zeros_like(Mach)
-        a_low        = np.zeros_like(Mach)
-        du_max_u_low = np.zeros_like(Mach)
+        D_low        = rp.zeros_like(Mach)
+        a_low        = rp.zeros_like(Mach)
+        du_max_u_low = rp.zeros_like(Mach)
         
-        D_high        = np.zeros_like(Mach)
-        a_high        = np.zeros_like(Mach)
-        du_max_u_high = np.zeros_like(Mach) 
-        k_fus         = np.zeros_like(Mach)
+        D_high        = rp.zeros_like(Mach)
+        a_high        = rp.zeros_like(Mach)
+        du_max_u_high = rp.zeros_like(Mach) 
+        k_fus         = rp.zeros_like(Mach)
         
         low_inds      = Mach < high_cutoff
         high_inds     = Mach > low_cutoff
         
-        D_low[low_inds]        = np.sqrt(1 - (1-Mach[low_inds]**2) * d_d**2)
-        a_low[low_inds]        = 2 * (1-Mach[low_inds]**2) * (d_d**2) *(np.arctanh(D_low[low_inds])-D_low[low_inds]) / (D_low[low_inds]**3)
+        D_low[low_inds]        = rp.sqrt(1 - (1-Mach[low_inds]**2) * d_d**2)
+        a_low[low_inds]        = 2 * (1-Mach[low_inds]**2) * (d_d**2) *(rp.arctanh(D_low[low_inds])-D_low[low_inds]) / (D_low[low_inds]**3)
         du_max_u_low[low_inds] = a_low[low_inds] / ( (2-a_low[low_inds]) * (1-Mach[low_inds]**2)**0.5 )
         
-        D_high[high_inds]        = np.sqrt(1 - d_d**2)
-        a_high[high_inds]        = 2  * (d_d**2) *(np.arctanh(D_high[high_inds])-D_high[high_inds]) / (D_high[high_inds]**3)
+        D_high[high_inds]        = rp.sqrt(1 - d_d**2)
+        a_high[high_inds]        = 2  * (d_d**2) *(rp.arctanh(D_high[high_inds])-D_high[high_inds]) / (D_high[high_inds]**3)
         du_max_u_high[high_inds] = a_high[high_inds] / ( (2-a_high[high_inds]) )
         
         spline = Cubic_Spline_Blender(low_cutoff,high_cutoff)

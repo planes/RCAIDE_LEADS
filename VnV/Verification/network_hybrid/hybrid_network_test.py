@@ -12,7 +12,7 @@ from   RCAIDE.Library.Plots  import *
 from RCAIDE.Library.Plots.Common import set_axes, plot_style
 
 # python imports 
-import numpy as np   
+import RNUMPY as rp   
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 import os 
@@ -67,7 +67,7 @@ def main():
 
         cruise_CL        = conventional_results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0]   
         print("Conventional ATR 72 Cruise CL: " + str(cruise_CL)) 
-        error.conventional_cruise_CL = np.max(np.abs( convetional_cruise_CL_truth  - cruise_CL  )/ convetional_cruise_CL_truth )  
+        error.conventional_cruise_CL = rp.max(rp.abs( convetional_cruise_CL_truth  - cruise_CL  )/ convetional_cruise_CL_truth )  
         
         plot_data.append(conventional_results)
         powertrain_labels.append("Conventional")
@@ -82,7 +82,7 @@ def main():
 
         cruise_CL        = electric_results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0]   
         print("Electric ATR 72 Cruise CL: " + str(cruise_CL))   
-        error.electric_cruise_CL = np.max(np.abs( electric_cruise_CL_truth  - cruise_CL  )/ electric_cruise_CL_truth )  
+        error.electric_cruise_CL = rp.max(rp.abs( electric_cruise_CL_truth  - cruise_CL  )/ electric_cruise_CL_truth )  
         
         plot_data.append(electric_results)
         powertrain_labels.append("All-Electric")
@@ -96,7 +96,7 @@ def main():
     
         cruise_CL        = series_hybrid_results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0]
         print("Series Hybrid ATR 72 Cruise CL: " + str(cruise_CL))
-        error.series_hybrid_cruise_CL= np.max(np.abs( series_hybrid_cruise_CL_truth  - cruise_CL  )/ series_hybrid_cruise_CL_truth )  
+        error.series_hybrid_cruise_CL= rp.max(rp.abs( series_hybrid_cruise_CL_truth  - cruise_CL  )/ series_hybrid_cruise_CL_truth )  
         
         plot_data.append(series_hybrid_results)
         powertrain_labels.append("Series Hybrid")
@@ -110,7 +110,7 @@ def main():
     
         cruise_CL        = parallel_hybrid_results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0]
         print("Parallel Hybrid ATR 72 Cruise CL: " + str(cruise_CL))
-        error.parallel_hybrid_cruise_CL = np.max(np.abs( parallel_hybrid_cruise_CL_truth  - cruise_CL  )/ parallel_hybrid_cruise_CL_truth )
+        error.parallel_hybrid_cruise_CL = rp.max(rp.abs( parallel_hybrid_cruise_CL_truth  - cruise_CL  )/ parallel_hybrid_cruise_CL_truth )
         
         plot_data.append(parallel_hybrid_results)
         powertrain_labels.append("Parallel Hybrid")
@@ -122,7 +122,7 @@ def main():
     print('Errors:')
     print(error) 
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-6)
+        assert(rp.abs(v)<1e-6)
         
     plot_battery_pack_conditions(plot_data,powertrain_labels,save_figure = False, show_legend = False,)
     
@@ -278,7 +278,7 @@ def plot_battery_pack_conditions(plot_data,
     plt.rcParams.update(parameters)
     
 
-    line_colors   = cm.tab10(np.linspace(0, 1, 10)) 
+    line_colors   = cm.tab10(rp.linspace(0, 1, 10)) 
      
 
     fig_1 = plt.figure()

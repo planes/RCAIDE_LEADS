@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Motor.compute_motor_performanc
 from RCAIDE.Library.Methods.Powertrain.Converters.Ducted_Fan.compute_ducted_fan_performance              import * 
 
 # pacakge imports  
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ def compute_electric_ducted_fan_performance(propulsor, state, center_of_gravity=
     moment_vector[:,0] = ducted_fan.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1] = ducted_fan.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2] = ducted_fan.origin[0][2]  -  center_of_gravity[0][2]
-    moment             =  np.cross(moment_vector, conditions.energy.converters[ducted_fan.tag].thrust) 
+    moment             =  rp.cross(moment_vector, conditions.energy.converters[ducted_fan.tag].thrust) 
     
     # Detemine esc current 
     conditions.energy.modulators[esc.tag].outputs.current = conditions.energy.converters[motor.tag].inputs.current
@@ -197,7 +197,7 @@ def reuse_stored_electric_ducted_fan_data(propulsor,state,network,stored_propuls
     moment_vector[:,0]      = ducted_fan.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1]      = ducted_fan.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]      = ducted_fan.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  =  np.cross(moment_vector, thrust_vector)
+    moment                  =  rp.cross(moment_vector, thrust_vector)
     
     # pack results 
     conditions.energy.converters[ducted_fan.tag].moment = moment  

@@ -11,7 +11,7 @@
 import  RCAIDE 
 from RCAIDE.Framework.Core    import Units, Data
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Propulsion System Weight 
@@ -127,10 +127,10 @@ def compute_propulsion_system_weight(vehicle,network, settings):
             if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or  isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet): 
                 NENG  += 1
                 BPR    =  propulsor.bypass_ratio
-                WENG   += 0.084 *  (propulsor.sealevel_static_thrust/Units.lbf)**1.1 * np.exp(-0.045*BPR) * Units.lbs # Raymer 3rd Edition eq. 10.4 
+                WENG   += 0.084 *  (propulsor.sealevel_static_thrust/Units.lbf)**1.1 * rp.exp(-0.045*BPR) * Units.lbs # Raymer 3rd Edition eq. 10.4 
             if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop):
                 NENG  += 1
-                WENG   +=  0.1448/(9.81)*(propulsor.sealevel_static_thrust/2)**1.1*np.e**(-0.045*5) 
+                WENG   +=  0.1448/(9.81)*(propulsor.sealevel_static_thrust/2)**1.1*rp.e**(-0.045*5) 
             if propulsor.nacelle != None:
                 ref_nacelle =  propulsor.nacelle 
                     
@@ -189,7 +189,7 @@ def compute_nacelle_weight(vehicle,ref_nacelle, NENG, WENG):
     Nlt             = ref_nacelle.length / Units.ft
     Nw              = ref_nacelle.diameter / Units.ft
     Wec             = 2.331 * (WENG/Units.lbs) ** 0.901 * 1.18
-    Sn              = 2 * np.pi * Nw/2 * Nlt + np.pi * Nw**2/4 * 2
+    Sn              = 2 * rp.pi * Nw/2 * Nlt + rp.pi * Nw**2/4 * 2
     WNAC            = 0.6724 * Kng * Nlt ** 0.1 * Nw ** 0.294 * vehicle.flight_envelope.ultimate_load ** 0.119 \
                       * Wec ** 0.611 * NENG ** 0.984 * Sn ** 0.224
     return WNAC * Units.lbs

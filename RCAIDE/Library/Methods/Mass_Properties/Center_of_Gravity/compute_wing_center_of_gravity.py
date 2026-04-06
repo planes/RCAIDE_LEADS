@@ -10,7 +10,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  co
 from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
 
 # Python Imports 
-import numpy as np
+import RNUMPY as rp
 from scipy.interpolate import interp1d 
 import trimesh
 from copy import deepcopy
@@ -60,15 +60,15 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
          
          
             if vertical:
-                x_in  = np.array(geometry_in.x_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-                y_in  = np.array(geometry_in.y_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][1]
-                x_out = np.array(geometry_out.x_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][0]
-                y_out = np.array(geometry_out.y_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][1]
+                x_in  = rp.array(geometry_in.x_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
+                y_in  = rp.array(geometry_in.y_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][1]
+                x_out = rp.array(geometry_out.x_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][0]
+                y_out = rp.array(geometry_out.y_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][1]
             else:
-                x_in  = np.array(geometry_in.x_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-                y_in  = np.array(geometry_in.y_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
-                x_out = np.array(geometry_out.x_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][0]
-                y_out = np.array(geometry_out.y_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][2]
+                x_in  = rp.array(geometry_in.x_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
+                y_in  = rp.array(geometry_in.y_coordinates)[:-1] * wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
+                x_out = rp.array(geometry_out.x_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][0]
+                y_out = rp.array(geometry_out.y_coordinates)[:-1] * wing.chords.root *outer_segment.root_chord_percent + outer_segment.origin[0][2]
             
             solid_segment =  compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift) 
             segment_meshes.append(solid_segment)
@@ -76,7 +76,7 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
         combinde_mesh = trimesh.util.concatenate(segment_meshes)
     
         # Reflect across the YZ plane (mirror X)
-        Ry = np.diag([1, -1, 1])    
+        Ry = rp.diag([1, -1, 1])    
     
         # Compute centroid
         centroid = combinde_mesh.centroid 
@@ -124,15 +124,15 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
             geometry = compute_naca_4series('0012',n_points) 
 
         if vertical:
-            x_in  = np.array(geometry.x_coordinates)[:-1] * wing.chords.root 
-            y_in  = np.array(geometry.y_coordinates)[:-1] * wing.chords.root 
-            x_out = np.array(geometry.x_coordinates)[:-1] * wing.chords.tip  + L  
-            y_out = np.array(geometry.y_coordinates)[:-1] * wing.chords.tip  + L *np.tan(le_sweep)  
+            x_in  = rp.array(geometry.x_coordinates)[:-1] * wing.chords.root 
+            y_in  = rp.array(geometry.y_coordinates)[:-1] * wing.chords.root 
+            x_out = rp.array(geometry.x_coordinates)[:-1] * wing.chords.tip  + L  
+            y_out = rp.array(geometry.y_coordinates)[:-1] * wing.chords.tip  + L *rp.tan(le_sweep)  
         else: 
-            x_in  = np.array(geometry.x_coordinates)[:-1] * wing.chords.root 
-            y_in  = np.array(geometry.y_coordinates)[:-1] * wing.chords.root 
-            x_out = np.array(geometry.x_coordinates)[:-1] * wing.chords.tip  + L 
-            y_out = np.array(geometry.y_coordinates)[:-1] * wing.chords.tip  + L *np.tan(dihedral) 
+            x_in  = rp.array(geometry.x_coordinates)[:-1] * wing.chords.root 
+            y_in  = rp.array(geometry.y_coordinates)[:-1] * wing.chords.root 
+            x_out = rp.array(geometry.x_coordinates)[:-1] * wing.chords.tip  + L 
+            y_out = rp.array(geometry.y_coordinates)[:-1] * wing.chords.tip  + L *rp.tan(dihedral) 
         
         solid_segment =  compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift) 
         segment_meshes.append(solid_segment)
@@ -140,7 +140,7 @@ def compute_wing_center_of_gravity(wing,vehicle,n_points = 101):
         combinde_mesh = trimesh.util.concatenate(segment_meshes)
     
         # Reflect across the YZ plane (mirror X)
-        Ry = np.diag([1, -1, 1])    
+        Ry = rp.diag([1, -1, 1])    
     
         # Compute centroid
         centroid = combinde_mesh.centroid 

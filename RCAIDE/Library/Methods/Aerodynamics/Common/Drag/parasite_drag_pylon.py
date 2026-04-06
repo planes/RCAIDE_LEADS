@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core import Data 
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Pylon Drag Fuselage
@@ -120,7 +120,7 @@ def parasite_drag_pylon(state,settings,geometry):
             if propulsor.nacelle !=  None:
                 nacelle   =  propulsor.nacelle
                 if nacelle.has_pylon:
-                    ref_area             = nacelle.diameter**2 / 4 * np.pi
+                    ref_area             = nacelle.diameter**2 / 4 * rp.pi
                     pylon_parasite_drag  = pylon_factor *  drag.parasite[nacelle.tag].total* (ref_area/geometry.reference_area)
                     pylon_wetted_area    = pylon_factor *  drag.parasite[nacelle.tag].wetted_area
                     pylon_cf             = drag.parasite[nacelle.tag].skin_friction

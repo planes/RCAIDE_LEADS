@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core    import Units
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vertical Tail Weight 
@@ -110,7 +110,7 @@ def compute_vertical_tail_weight(vehicle, wing, settings):
     Lt = (wing_origin + wing_ac - main_origin - main_ac)
     Kz = Lt
     tail_weight = 0.0026 * (1 + H) ** 0.225 * DG ** 0.556 * Nult ** 0.536 \
-                  * Lt ** (-0.5) * Svt ** 0.5 * Kz ** 0.875 * np.cos(sweep) ** (-1) * Av ** 0.35 * t_c ** (-0.5)
+                  * Lt ** (-0.5) * Svt ** 0.5 * Kz ** 0.875 * rp.cos(sweep) ** (-1) * Av ** 0.35 * t_c ** (-0.5)
     if settings.advanced_composites:
         tail_weight *= 0.85
     

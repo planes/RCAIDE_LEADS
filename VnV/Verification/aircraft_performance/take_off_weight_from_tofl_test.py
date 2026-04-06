@@ -12,11 +12,11 @@ from RCAIDE.Framework.Core  import Data,Units
 from RCAIDE.Library.Methods.Performance.find_take_off_weight_given_tofl import find_take_off_weight_given_tofl
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
-import numpy as np
+import RNUMPY as rp
 
 # import vehicle file
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -55,7 +55,7 @@ def main():
     max_tow = find_take_off_weight_given_tofl(configuration,analyses,target_tofl)
 
     truth_max_tow = 56980.00000000001
-    max_tow_error = np.max(np.abs(max_tow[0]-truth_max_tow)) 
+    max_tow_error = rp.max(rp.abs(max_tow[0]-truth_max_tow)) 
     print('Range Error = %.4e' % max_tow_error)
     assert(max_tow_error   < 1e-6 )
 

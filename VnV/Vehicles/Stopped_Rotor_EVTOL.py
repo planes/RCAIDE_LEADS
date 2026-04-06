@@ -15,7 +15,7 @@ from RCAIDE.load    import load as load_propulsor
 from RCAIDE.save    import save as save_propulsor 
  
 import os
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy    
 
 # ----------------------------------------------------------------------
@@ -698,10 +698,10 @@ def vehicle_setup(new_regression=True) :
     lift_rotor.number_of_blades                            = 3     
     lift_rotor.hover.design_altitude                       = 40 * Units.feet  
     lift_rotor.hover.design_thrust                         = Hover_Load/8
-    lift_rotor.hover.design_freestream_velocity            = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
+    lift_rotor.hover.design_freestream_velocity            = rp.sqrt(lift_rotor.hover.design_thrust/(2*1.2*rp.pi*(lift_rotor.tip_radius**2)))  
     lift_rotor.oei.design_altitude                         = 40 * Units.feet  
     lift_rotor.oei.design_thrust                           = Hover_Load/7  
-    lift_rotor.oei.design_freestream_velocity              = np.sqrt(lift_rotor.oei.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
+    lift_rotor.oei.design_freestream_velocity              = rp.sqrt(lift_rotor.oei.design_thrust/(2*1.2*rp.pi*(lift_rotor.tip_radius**2)))  
     airfoil                                                = RCAIDE.Library.Components.Airfoils.Airfoil()   
     airfoil.coordinate_file                       =  local_path + 'Airfoils' + separator + 'NACA_4412.txt'
     airfoil.polar_files                           = [local_path + 'Airfoils' + separator + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt' ,
@@ -757,8 +757,8 @@ def vehicle_setup(new_regression=True) :
     # Front Rotors Locations 
     origins = [[  -0.073,  1.950, 1.2], [-0.073  , -1.950  , 1.2],[ 4.440 ,  1.950 , 1.2], [ 4.440  , -1.950  , 1.2],
                [ 0.219 ,  4.891 , 1.2], [ 0.219  , - 4.891 , 1.2], [ 4.196 ,  4.891 , 1.2], [ 4.196  , - 4.891 , 1.2]]
-    orientation_euler_angles = [[10.0*Units.degrees,np.pi/2.,0.],[-10.0* Units.degrees,np.pi/2.,0.], [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.], 
-                                [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.], [10.0* Units.degrees,np.pi/2.,0.], [-10.0* Units.degrees,np.pi/2.,0.]] # vector of angles defining default orientation of rotor
+    orientation_euler_angles = [[10.0*Units.degrees,rp.pi/2.,0.],[-10.0* Units.degrees,rp.pi/2.,0.], [10.0* Units.degrees,rp.pi/2.,0.], [-10.0* Units.degrees,rp.pi/2.,0.], 
+                                [10.0* Units.degrees,rp.pi/2.,0.], [-10.0* Units.degrees,rp.pi/2.,0.], [10.0* Units.degrees,rp.pi/2.,0.], [-10.0* Units.degrees,rp.pi/2.,0.]] # vector of angles defining default orientation of rotor
     
     
     assigned_propulsor_list = []        

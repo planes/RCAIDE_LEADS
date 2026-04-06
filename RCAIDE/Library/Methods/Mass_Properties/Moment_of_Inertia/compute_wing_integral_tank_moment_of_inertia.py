@@ -8,7 +8,7 @@
 import RCAIDE 
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Wing Moment of Inertia
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -47,8 +47,8 @@ def compute_wing_integral_tank_moment_of_inertia(fuel_tank,wing, center_of_gravi
     I_local_fuel_non_dim = I_local_fuel / mass
 
     # intialize matrices  
-    I_local_tank        = np.zeros((3, 3))
-    I_local_tank_non_dim =np.zeros((3, 3)) 
+    I_local_tank         = rp.zeros((3, 3))
+    I_local_tank_non_dim = rp.zeros((3, 3)) 
         
     # Store moment of inertia tensors of tank and fuel 
     fuel_tank.fuel.mass_properties.moments_of_inertia.tensor                 = I_local_fuel

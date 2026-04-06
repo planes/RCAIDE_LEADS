@@ -12,7 +12,7 @@ import RCAIDE.Library.Methods.Mass_Properties.Weight_Buildups.Conventional.Trans
 from RCAIDE.Framework.Core import Data
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Operating Empty Weight 
@@ -106,13 +106,13 @@ def compute_operating_empty_weight(vehicle, settings=None):
     for wing in vehicle.wings:
         if isinstance(wing, Wings.Main_Wing) or isinstance(wing, Wings.Blended_Wing_Body):  
             W_wing = Raymer.compute_main_wing_weight(vehicle, wing, settings) 
-            if np.isnan(W_wing):
+            if rp.isnan(W_wing):
                 W_wing = 0.
             wing.mass_properties.mass = W_wing
             W_main_wing += W_wing
         if isinstance(wing, Wings.Horizontal_Tail):
             W_tail = Raymer.compute_horizontal_tail_weight(vehicle, wing, settings)
-            if type(W_tail) == np.ndarray:
+            if type(W_tail) == rp.ndarray:
                 W_tail = sum(W_tail)
          
             # Pack and sum

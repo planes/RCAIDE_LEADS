@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core    import Units
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Main Wing Weight 
@@ -101,7 +101,7 @@ def compute_main_wing_weight(vehicle, wing, settings):
 
     if vehicle.systems.accessories == 'sst':
         sweep = 0
-    W_wing = 0.0051 * (Wdg * Nz) ** .557 * Sw ** .649 * A ** .5 * tc_root ** -.4 * (1 + taper) ** .1 * np.cos(
+    W_wing = 0.0051 * (Wdg * Nz) ** .557 * Sw ** .649 * A ** .5 * tc_root ** -.4 * (1 + taper) ** .1 * rp.cos(
         sweep) ** -1. * Scsw ** .1
     weight = W_wing * Units.lb
 

@@ -2,7 +2,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Method
@@ -13,8 +13,8 @@ def linear_data(N = 16, integration = True, **options):
     spaced samples in x.
     
     D and I are not symmetric
-    get derivatives with df_dy = np.dot(D,f)
-    get integral with    int_f = np.dot(I,f)
+    get derivatives with df_dy = rp.dot(D,f)
+    get integral with    int_f = rp.dot(I,f)
         where f is either a 1-d vector or 2-d column array
         
     A full example of how these operators are used is available in 
@@ -47,39 +47,39 @@ def linear_data(N = 16, integration = True, **options):
     # --- X vector
     
     # linear spaced in range [0,1]
-    x = np.linspace(0,1,N)   
+    x = rp.linspace(0,1,N)   
 
 
     # --- Differentiation Operator
     
     # coefficients
-    c = np.array( [2.] + [1.]*(N-2) + [2.] )
-    c = c * ( (-1.) ** np.arange(0,N) )
-    A = np.tile( x, (N,1) ).T
-    dA = A - A.T + np.eye( N )
+    c = rp.array( [2.] + [1.]*(N-2) + [2.] )
+    c = c * ( (-1.) ** rp.arange(0,N) )
+    A = rp.tile( x, (N,1) ).T
+    dA = A - A.T + rp.eye( N )
     cinv = 1./c; 
 
     # build operator
-    D = np.zeros( (N,N) );
+    D = rp.zeros( (N,N) );
     
     # math
-    c    = np.array(c)
-    cinv = np.array([cinv])
-    cs   = np.multiply(c,cinv.T)
-    D    = np.divide(cs.T,dA)
+    c    = rp.array(c)
+    cinv = rp.array([cinv])
+    cs   = rp.multiply(c,cinv.T)
+    D    = rp.divide(cs.T,dA)
 
     # more math
-    D = D - np.diag( np.sum( D.T, axis=0 ) );
+    D = D - rp.diag( rp.sum( D.T, axis=0 ) );
 
     # --- Integration operator
     
     if integration:
         # invert D except first row and column
-        I = np.linalg.inv(D[1:,1:]); 
+        I = rp.linalg.inv(D[1:,1:]); 
         
         # repack missing columns with zeros
-        I = np.append(np.zeros((1,N-1)),I,axis=0)
-        I = np.append(np.zeros((N,1)),I,axis=1)
+        I = rp.append(rp.zeros((1,N-1)),I,axis=0)
+        I = rp.append(rp.zeros((N,1)),I,axis=1)
         
     else:
         I = None

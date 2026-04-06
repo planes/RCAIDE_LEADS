@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  pressure_ratio_to_SPL_arithmetic
@@ -32,7 +32,7 @@ def pressure_ratio_to_SPL_arithmetic(p_pref_total):
         N/A 
     
     '''
-    SPL_total = 10*np.log10(np.nansum(p_pref_total, axis = 3))
+    SPL_total = 10*rp.log10(rp.nansum(p_pref_total, axis = 3))
     return SPL_total
 
 
@@ -73,7 +73,7 @@ def SPL_arithmetic(SPL, sum_axis):
         SPL_total = SPL 
     else:
         p_prefs   = 10**(SPL/10)
-        SPL_total = 10*np.log10(np.nansum(p_prefs, axis = sum_axis))
+        SPL_total = 10*rp.log10(rp.nansum(p_prefs, axis = sum_axis))
         
     return SPL_total
 
@@ -106,7 +106,7 @@ def SPL_average(SPL, avg_axis):
         SPL_total = SPL 
     else:
         p_prefs   = 10**(SPL/10)
-        SPL_total = 10*np.log10(np.average(p_prefs, axis = avg_axis))
+        SPL_total = 10*rp.log10(rp.average(p_prefs, axis = avg_axis))
         
     return SPL_total
 

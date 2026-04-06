@@ -17,7 +17,7 @@ from RCAIDE.Library.Mission                          import Common,Segments
 from RCAIDE.Library.Methods.skip                     import skip 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Set_Speed_Set_Altitude

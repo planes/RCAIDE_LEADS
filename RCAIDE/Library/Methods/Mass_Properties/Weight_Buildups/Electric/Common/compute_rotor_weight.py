@@ -7,7 +7,7 @@
 # Imports
 #-------------------------------------------------------------------------------
 from RCAIDE.Library.Attributes.Materials import  Bidirectional_Carbon_Fiber, Carbon_Fiber_Honeycomb, Paint, Unidirectional_Carbon_Fiber, Epoxy, Nickel, Aluminum_Alloy
-import numpy as np
+import RNUMPY as rp
 import copy as cp
 
 #-------------------------------------------------------------------------------
@@ -154,18 +154,18 @@ def compute_rotor_weight(rotor,
     #-------------------------------------------------------------------------------
     # Airfoil
     #-------------------------------------------------------------------------------
-    NACA       = np.multiply(5 * toc, [0.2969, -0.1260, -0.3516, 0.2843, -0.1015])
-    coord      = np.unique(fwdWeb+np.linspace(0,1,N).tolist())[:,np.newaxis]
-    coordMAT   = np.concatenate((coord**0.5,coord,coord**2,coord**3,coord**4),axis=1)
-    nacaMAT    = coordMAT.dot(NACA)[:, np.newaxis]
-    coord      = np.concatenate((coord,nacaMAT),axis=1)
-    coord      = np.concatenate((coord[-1:0:-1],coord.dot(np.array([[1.,0.],[0.,-1.]]))),axis=0)
+    NACA       = rp.multiply(5 * toc, [0.2969, -0.1260, -0.3516, 0.2843, -0.1015])
+    coord      = rp.unique(fwdWeb+rp.linspace(0,1,N).tolist())[:,rp.newaxis]
+    coordMAT   = rp.concatenate((coord**0.5,coord,coord**2,coord**3,coord**4),axis=1)
+    nacaMAT    = coordMAT.dot(NACA)[:, rp.newaxis]
+    coord      = rp.concatenate((coord,nacaMAT),axis=1)
+    coord      = rp.concatenate((coord[-1:0:-1],coord.dot(rp.array([[1.,0.],[0.,-1.]]))),axis=0)
     coord[:,0] = coord[:,0] - xShear
 
     #-------------------------------------------------------------------------------
     # Beam Geometry
     #-------------------------------------------------------------------------------
-    x         = np.linspace(0,rProp,N)
+    x         = rp.linspace(0,rProp,N)
     dx        = x[1] - x[0]
     fwdWeb[:] = [round(loc - xShear,2) for loc in fwdWeb]
 
@@ -180,16 +180,16 @@ def compute_rotor_weight(rotor,
     # Initial Mass Estimates
     #-------------------------------------------------------------------------------
     box               = coord * chord
-    skinLength        = np.sum(np.sqrt(np.sum(np.diff(box,axis=0)**2,axis=1)))
-    maxThickness      = (np.amax(box[:,1])-np.amin(box[:,1]))/2
+    skinLength        = rp.sum(rp.sqrt(rp.sum(rp.diff(box,axis=0)**2,axis=1)))
+    maxThickness      = (rp.amax(box[:,1])-rp.amin(box[:,1]))/2
     rootBendingMoment = SF*maxLiftingThrust/nBlades*0.75*rProp
     m                 = (bendDen*dx*rootBendingMoment/
                         (2*bendUSS*maxThickness))+ \
                         skinLength*shearMGT*dx*shearDen
-    m                 = m*np.ones(N)
+    m                 = m*rp.ones(N)
     error             = 1               # Initialize Error
     tolerance         = 1e-8        # Mass Tolerance
-    massOld           = np.sum(m)
+    massOld           = rp.sum(m)
 
     #-------------------------------------------------------------------------------
     # General Structural Properties
@@ -197,80 +197,80 @@ def compute_rotor_weight(rotor,
     seg = []                                            # List of Structural Segments
 
     # Torsion
-    enclosedArea = 0.5*np.abs(np.dot(box[:,0],np.roll(box[:,1],1))-
-        np.dot(box[:,1],np.roll(box[:,0],1)))           # Shoelace Formula
+    enclosedArea = 0.5*rp.abs(rp.dot(box[:,0],rp.roll(box[:,1],1))-
+        rp.dot(box[:,1],rp.roll(box[:,0],1)))           # Shoelace Formula
 
     # Flap Properties
     box = coord                                         # Box Initially Matches Airfoil
     box = box[box[:,0]<=fwdWeb[1]]                      # Trim Coordinates Aft of Aft Web
     box = box[box[:,0]>=fwdWeb[0]]                      # Trim Coordinates Fwd of Fwd Web
-    seg.append(box[box[:,1]>np.mean(box[:,1])]*chord)   # Upper Fwd Segment
-    seg.append(box[box[:,1]<np.mean(box[:,1])]*chord)   # Lower Fwd Segment
+    seg.append(box[box[:,1]>rp.mean(box[:,1])]*chord)   # Upper Fwd Segment
+    seg.append(box[box[:,1]<rp.mean(box[:,1])]*chord)   # Lower Fwd Segment
 
     # Flap & Drag Inertia
     capInertia = 0
     capLength  = 0
 
     for i in range(0,2):
-        l = np.sqrt(np.sum(np.diff(seg[i],axis=0)**2,axis=1))   # Segment Lengths
+        l = rp.sqrt(rp.sum(rp.diff(seg[i],axis=0)**2,axis=1))   # Segment Lengths
         c = (seg[i][1::]+seg[i][0::-1])/2                       # Segment Centroids
 
-        capInertia += np.abs(np.sum(l*c[:,1] **2))
-        capLength  += np.sum(l)
+        capInertia += rp.abs(rp.sum(l*c[:,1] **2))
+        capLength  += rp.sum(l)
 
     # Shear Properties
     box = coord
     box = box[box[:,0]<=fwdWeb[1]]
     z   = box[box[:,0]==fwdWeb[0],1]*chord
-    shearHeight = np.abs(z[0] - z[1])
+    shearHeight = rp.abs(z[0] - z[1])
 
     # Core Properties
     box = coord
     box = box[box[:,0]>=fwdWeb[0]]
     box = box*chord
-    coreArea = 0.5*np.abs(np.dot(box[:,0],np.roll(box[:,1],1))-
-        np.dot(box[:,1],np.roll(box[:,0],1)))                       # Shoelace Formula
+    coreArea = 0.5*rp.abs(rp.dot(box[:,0],rp.roll(box[:,1],1))-
+        rp.dot(box[:,1],rp.roll(box[:,0],1)))                       # Shoelace Formula
 
     # Shear/Moment Calculations
-    Vz = np.append(np.cumsum(( F[0:-1]*np.diff(x))[::-1])[::-1],0)  # Bending Moment
-    Mx = np.append(np.cumsum((Vz[0:-1]*np.diff(x))[::-1])[::-1],0)  # Torsion Moment
-    My = np.append(np.cumsum(( Q[0:-1]*np.diff(x))[::-1])[::-1],0)  # Drag Moment
+    Vz = rp.append(rp.cumsum(( F[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Bending Moment
+    Mx = rp.append(rp.cumsum((Vz[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Torsion Moment
+    My = rp.append(rp.cumsum(( Q[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Drag Moment
 
     #-------------------------------------------------------------------------------
     # Mass Calculation
     #-------------------------------------------------------------------------------
     while error > tolerance:
         CF = (SF*omega**2*
-            np.append(np.cumsum(( m[0:-1]*np.diff(x)*x[0:-1])[::-1])[::-1],0))  # Centripetal Force
+            rp.append(rp.cumsum(( m[0:-1]*rp.diff(x)*x[0:-1])[::-1])[::-1],0))  # Centripetal Force
 
         # Calculate Skin Weight Based on Torsion
         tTorsion = My/(2*torsUSS*enclosedArea)                 # Torsion Skin Thickness
-        tTorsion = np.maximum(tTorsion,torsMGT*np.ones(N))     # Gage Constraint
+        tTorsion = rp.maximum(tTorsion,torsMGT*rp.ones(N))     # Gage Constraint
         mTorsion = tTorsion * skinLength * torsDen             # Torsion Mass
 
         # Calculate Flap Mass Based on Bending
         tFlap = CF/(capLength*bendUTS) +   \
-            Mx*np.amax(np.abs(box[:,1]))/(capInertia*bendUTS)
+            Mx*rp.amax(rp.abs(box[:,1]))/(capInertia*bendUTS)
         mFlap = tFlap*capLength*bendDen
-        mGlue = glueMGT*glueDen*capLength*np.ones(N)
+        mGlue = glueMGT*glueDen*capLength*rp.ones(N)
 
         # Calculate Web Mass Based on Shear
         tShear = 1.5*Vz/(shearUSS*shearHeight)
-        tShear = np.maximum(tShear,shearMGT*np.ones(N))
+        tShear = rp.maximum(tShear,shearMGT*rp.ones(N))
         mShear = tShear*shearHeight*shearDen
 
         # Paint Weight
-        mPaint = skinLength*coverMGT*coverDen*np.ones(N)
+        mPaint = skinLength*coverMGT*coverDen*rp.ones(N)
 
         # Core Mass
-        mCore = coreArea*coreDen*np.ones(N)
-        mGlue += glueMGT*glueDen*skinLength*np.ones(N)
+        mCore = coreArea*coreDen*rp.ones(N)
+        mGlue += glueMGT*glueDen*skinLength*rp.ones(N)
 
         # Leading Edge Protection
         box      = coord * chord
         box      = box[box[:,0]<(0.1*chord)]
-        leLength = np.sum(np.sqrt(np.sum(np.diff(box,axis=0)**2,axis=1)))
-        mLE      = leLength*420e-6*leDen*np.ones(N)
+        leLength = rp.sum(rp.sqrt(rp.sum(rp.diff(box,axis=0)**2,axis=1)))
+        mLE      = leLength*420e-6*leDen*rp.ones(N)
 
         # Section Mass
         m = mTorsion + mCore + mFlap + mShear + mGlue + mPaint + mLE
@@ -280,14 +280,14 @@ def compute_rotor_weight(rotor,
 
         # Root Fitting
         box   = coord * chord
-        rRoot = (np.amax(box[:,1])-np.amin(box[:,1]))/2
-        t     = np.amax(CF)/(2*np.pi*rRoot*rootUTS) +    \
-                np.amax(Mx)/(3*np.pi*rRoot**2*rootUTS)
-        mRoot = 2*np.pi*rRoot*t*rootLength*rootDen
+        rRoot = (rp.amax(box[:,1])-rp.amin(box[:,1]))/2
+        t     = rp.amax(CF)/(2*rp.pi*rRoot*rootUTS) +    \
+                rp.amax(Mx)/(3*rp.pi*rRoot**2*rootUTS)
+        mRoot = 2*rp.pi*rRoot*t*rootLength*rootDen
 
         # Total Weight
-        mass    = nBlades*(np.sum(m[0:-1]*np.diff(x))+2*mRib+mRoot)
-        error   = np.abs(mass-massOld)
+        mass    = nBlades*(rp.sum(m[0:-1]*rp.diff(x))+2*mRib+mRoot)
+        error   = rp.abs(mass-massOld)
         massOld = mass
 
     mass = mass * grace

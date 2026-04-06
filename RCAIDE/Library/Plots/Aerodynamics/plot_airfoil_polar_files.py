@@ -106,7 +106,7 @@ def plot_airfoil_polar_files(polar_data,
       
     for j in range(n_Re):
         
-        Re_val = str(round(Re_raw[j])/1e6)+' x $10^6$'  
+        Re_val = str(round(float(Re_raw[j]))/1e6)+' x $10^6$'  
         
         axis_1 = plt.subplot(2,2,1)
         axis_1.plot(alpha, CL[j,:], color = line_colors[j], marker = ps.markers[0], linewidth = ps.line_width, label ='Re = '+Re_val)

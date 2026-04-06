@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Methods
@@ -69,15 +69,15 @@ def fuselage_planform(fuselage, circular_cross_section = True):
             area = truncated_elliptic_cone_lateral_area(seg_1.width/2, seg_1.height/2, seg_2.width/2, seg_2.height/2, delta_x)
             wetted_area += area
 
-            A_1  = np.pi *  (seg_1.height / 2) *  (seg_1.width / 2)   
-            A_2  = np.pi *  (seg_2.height / 2) *  (seg_2.width / 2)    
-            front_projected_area  = np.maximum(front_projected_area,np.maximum(A_1,A_2)  )
+            A_1  = rp.pi *  (seg_1.height / 2) *  (seg_1.width / 2)   
+            A_2  = rp.pi *  (seg_2.height / 2) *  (seg_2.width / 2)    
+            front_projected_area  = rp.maximum(front_projected_area,rp.maximum(A_1,A_2)  )
     else:    
         side_projected_area  = fuselage.heights.maximum * fuselage.lengths.total  
-        wetted_area          = np.pi*a*(a+ np.sqrt( fuselage.lengths.nose **2 +(a)**2)) + \
-                               np.pi*a*(a+ np.sqrt( fuselage.lengths.tail**2 +(a)**2))+ \
-                               np.pi * fuselage.width * ( fuselage.lengths.total - (fuselage.lengths.tail+ fuselage.lengths.nose))  
-        front_projected_area = np.pi * a *  b
+        wetted_area          = rp.pi*a*(a+ rp.sqrt( fuselage.lengths.nose **2 +(a)**2)) + \
+                               rp.pi*a*(a+ rp.sqrt( fuselage.lengths.tail**2 +(a)**2))+ \
+                               rp.pi * fuselage.width * ( fuselage.lengths.total - (fuselage.lengths.tail+ fuselage.lengths.nose))  
+        front_projected_area = rp.pi * a *  b
         
     effective_diameter             = ((fuselage_width/2)+(fuselage_height/2.))*(64.-3.*R**4)/(64.-16.*R**2)  
     fuselage.lengths.nose          = nose_length
@@ -93,7 +93,7 @@ def fuselage_planform(fuselage, circular_cross_section = True):
 
 def truncated_elliptic_cone_lateral_area(a, b, c, d, h):
     
-    s_major = np.sqrt(h**2 + (a - c)**2)  # slant length in major axis direction
-    s_minor = np.sqrt(h**2 + (b - d)**2)  # slant length in minor axis direction
-    wetted_area = np.pi * ((a + c)/2) * s_major + np.pi * ((b + d)/2) * s_minor
+    s_major = rp.sqrt(h**2 + (a - c)**2)  # slant length in major axis direction
+    s_minor = rp.sqrt(h**2 + (b - d)**2)  # slant length in minor axis direction
+    wetted_area = rp.pi * ((a + c)/2) * s_major + rp.pi * ((b + d)/2) * s_minor
     return wetted_area

@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Powertrain                       import setup_operat
 from RCAIDE.Library.Plots                                    import *     
 
 # python imports 
-import numpy   as np      
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #   Main
@@ -29,19 +29,19 @@ def main():
     PSFC_truth = 1.3475293781503966e-07
     
 
-    P_error = np.abs((P  - P_truth)/P_truth)
+    P_error = rp.abs((P  - P_truth)/P_truth)
     print('Power Error: ' + str(P_error)) 
-    print(np.abs((P  - P_truth)/P_truth))
+    print(rp.abs((P  - P_truth)/P_truth))
     assert P_error < 1e-6 
 
-    PSFC_error = np.abs((PSFC  - PSFC_truth)/PSFC_truth)
+    PSFC_error = rp.abs((PSFC  - PSFC_truth)/PSFC_truth)
     print('Power Error: ' + str(PSFC_error)) 
-    print(np.abs((PSFC  - PSFC_truth)/PSFC_truth))
+    print(rp.abs((PSFC  - PSFC_truth)/PSFC_truth))
     assert PSFC_error < 1e-6 
 
-    eta_error = np.abs((eta  - eta_truth)/eta_truth)
+    eta_error = rp.abs((eta  - eta_truth)/eta_truth)
     print('Power Error: ' + str(eta_error)) 
-    print(np.abs((eta  - eta_truth)/eta_truth))
+    print(rp.abs((eta  - eta_truth)/eta_truth))
     assert eta_error < 1e-6         
      
     

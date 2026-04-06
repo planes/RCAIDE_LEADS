@@ -14,7 +14,7 @@ from RCAIDE.load    import load
 from RCAIDE.save    import save     
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import matplotlib.pyplot as plt 
 import os
@@ -70,7 +70,7 @@ def main():
     
     # Store errors 
     error = Data() 
-    error.CL        = np.max(np.abs(L_D - L_D_truth   )/L_D_truth)
+    error.CL        = rp.max(rp.abs(L_D - L_D_truth   )/L_D_truth)
     
     # Save and Load Test 
     save(error, 'turbojet_network_errors.res')
@@ -80,7 +80,7 @@ def main():
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-6)
+        assert(rp.abs(v)<1e-6)
         
     return 
 

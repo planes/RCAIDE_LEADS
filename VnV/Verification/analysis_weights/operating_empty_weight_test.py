@@ -79,7 +79,7 @@ def Electric_Transport_Test(update_regression_values, show_figure):
             new_val = weight.deep_get(k)
             err = (new_val - old_val) / old_val
             print(f'{k} Error: {err:.6e}')
-            assert np.abs(err) < 1e-1, f'Check Failed: {k}'
+            assert rp.abs(err) < 1e-1, f'Check Failed: {k}'
         print('')
 
 
@@ -118,7 +118,7 @@ def Electric_General_Aviation_Test(update_regression_values, show_figure):
             new_val = weight.deep_get(k)
             err = (new_val - old_val) / old_val
             print(f'{k} Error: {err:.6e}')
-            assert np.abs(err) < 1e-6, f'Check Failed: {k}'
+            assert rp.abs(err) < 1e-6, f'Check Failed: {k}'
         print('')
 
 
@@ -164,7 +164,7 @@ def Transport_Hydrogen_Test(update_regression_values, show_figure):
             new_val = weight.deep_get(k)
             err = (new_val - old_val) / old_val
             print(f'{k} Error: {err:.6e}')
-            assert np.abs(err) < 1e-6, f'Check Failed: {k}'
+            assert rp.abs(err) < 1e-6, f'Check Failed: {k}'
         print('')
 
 def Transport_Aircraft_Test(update_regression_values, show_figure):
@@ -214,7 +214,7 @@ def Transport_Aircraft_Test(update_regression_values, show_figure):
                 new_val = weight.deep_get(k)
                 err = (new_val - old_val) / old_val
                 print(f'{k} Error: {err:.6e}')
-                assert np.abs(err) < 1e-6, f'Check Failed: {k}'
+                assert rp.abs(err) < 1e-6, f'Check Failed: {k}'
             print('')
 
 
@@ -273,7 +273,7 @@ def General_Aviation_Test(update_regression_values, show_figure):
                 new_val = weight.deep_get(k)
                 err = (new_val - old_val) / old_val
                 print(f'{k} Error: {err:.6e}')
-                assert np.abs(err) < 1e-6, f'Check Failed: {k}'
+                assert rp.abs(err) < 1e-6, f'Check Failed: {k}'
             print('')
 
     FLOPS_number = 0
@@ -320,7 +320,7 @@ def General_Aviation_Test(update_regression_values, show_figure):
             new_val = weight.deep_get(k)
             err = (new_val - old_val) / old_val
             print(f'{k} Error: {err:.6e}')
-            assert np.abs(err) < 1e-6, f'Check Failed: {k}'
+            assert rp.abs(err) < 1e-6, f'Check Failed: {k}'
         print('')
 
 def BWB_Hydrogen_Aircraft_Test(update_regression_values,show_figure):
@@ -377,7 +377,7 @@ def BWB_Hydrogen_Aircraft_Test(update_regression_values,show_figure):
                 new_val = weight.deep_get(k)
                 err = (new_val-old_val)/old_val
                 print('Error:' , err)
-                assert np.abs(err) < 1e-6 , 'Check Failed : %s' % k     
+                assert rp.abs(err) < 1e-6 , 'Check Failed : %s' % k     
 
                 print('')
 
@@ -430,7 +430,7 @@ def BWB_Aircraft_Test(update_regression_values,show_figure):
                 new_val = weight.deep_get(k)
                 err = (new_val-old_val)/old_val
                 print('Error:' , err)
-                assert np.abs(err) < 1e-6 , 'Check Failed : %s' % k     
+                assert rp.abs(err) < 1e-6 , 'Check Failed : %s' % k     
 
                 print('')
 
@@ -471,7 +471,7 @@ def EVTOL_Aircraft_Test(update_regression_values,show_figure):
         new_val = weight.deep_get(k)
         err = (new_val-old_val)/old_val
         print('Error:' , err)
-        assert np.abs(err) < 1e-3 , 'Check Failed : %s' % k     
+        assert rp.abs(err) < 1e-3 , 'Check Failed : %s' % k     
 
         print('')
 
@@ -571,7 +571,7 @@ def Jet_engine():
     nacelle.tag                                 = 'nacelle_1'
     nacelle.inlet_diameter                      = 2.0
     nacelle.origin                              = [[13.5,4.38,-1.5]] 
-    nacelle.areas.wetted                        = 1.1*np.pi*nacelle.diameter*nacelle.length 
+    nacelle.areas.wetted                        = 1.1*rp.pi*nacelle.diameter*nacelle.length 
     nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code          = '2410'
     nacelle.append_airfoil(nacelle_airfoil)  

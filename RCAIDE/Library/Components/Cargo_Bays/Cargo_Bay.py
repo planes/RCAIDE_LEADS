@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia import compute_cub
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity import compute_cargo_bay_center_of_gravity
 
 
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Cargo_Bay
@@ -67,5 +67,5 @@ class Cargo_Bay(Component):
             Reference point coordinates, defaults to [[0, 0, 0]]
             
         """ 
-        _,_ = compute_cuboid_moment_of_inertia(self,self.length,self.width,self.height, inner_length = 0, inner_width = 0, inner_height = 0, center_of_gravity = np.array([[0,0,0]]))  
+        _,_ = compute_cuboid_moment_of_inertia(self,self.length,self.width,self.height, inner_length = 0, inner_width = 0, inner_height = 0, center_of_gravity = rp.array([[0,0,0]]))  
         return       

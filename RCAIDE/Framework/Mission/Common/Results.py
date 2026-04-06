@@ -12,7 +12,7 @@
 from RCAIDE.Framework.Mission.Common import Conditions
 
 # python imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Results
@@ -99,7 +99,7 @@ class Results(Conditions):
         self.frames.body.moment_vector                                         = ones_3col * 0
         self.frames.body.velocity_vector                                       = ones_3col * 0
         self.frames.body.thrust_moment_vector                                  = ones_3col * 0 
-        self.frames.body.transform_to_inertial                                 = np.empty([0,0,0])
+        self.frames.body.transform_to_inertial                                 = rp.empty([0,0,0])
                                                                                
         # wind frame conditions                                                
         self.frames.wind                                                       = Conditions()
@@ -111,7 +111,7 @@ class Results(Conditions):
         self.frames.wind.angular_acceleration_vector                           = ones_3col * 0
         self.frames.wind.total_force_vector                                    = ones_3col * 0
         self.frames.wind.total_moment_vector                                   = ones_3col * 0
-        self.frames.wind.transform_to_inertial                                 = np.empty([0,0,0]) 
+        self.frames.wind.transform_to_inertial                                 = rp.empty([0,0,0]) 
                                                                                
         # planet frame conditions                                              
         self.frames.planet                                                     = Conditions()

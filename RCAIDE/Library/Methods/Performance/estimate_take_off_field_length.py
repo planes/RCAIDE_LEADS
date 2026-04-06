@@ -14,7 +14,7 @@ from RCAIDE.Library.Mission.Common.Pre_Process.energy import energy
 from RCAIDE.Library.Methods.Geometry.Planform import wing_planform
 
 # package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Compute field length required for takeoff
@@ -164,15 +164,15 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
     mu                                                = atmo_data.dynamic_viscosity 
 
     conditions                                        = RCAIDE.Framework.Mission.Common.Results() 
-    conditions.freestream.altitude                    = np.atleast_1d(0)
-    conditions.freestream.mach_number                 = np.atleast_1d(0.01)
-    conditions.freestream.pressure                    = np.atleast_1d(p)
-    conditions.freestream.temperature                 = np.atleast_1d(T)
-    conditions.freestream.density                     = np.atleast_1d(rho)
-    conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
-    conditions.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity) 
-    conditions.freestream.speed_of_sound              = np.atleast_1d(a)
-    conditions.freestream.velocity                    = np.atleast_1d(a*0.01)   
+    conditions.freestream.altitude                    = rp.atleast_1d(0)
+    conditions.freestream.mach_number                 = rp.atleast_1d(0.01)
+    conditions.freestream.pressure                    = rp.atleast_1d(p)
+    conditions.freestream.temperature                 = rp.atleast_1d(T)
+    conditions.freestream.density                     = rp.atleast_1d(rho)
+    conditions.freestream.dynamic_viscosity           = rp.atleast_1d(mu)
+    conditions.freestream.gravity                     = rp.atleast_2d(planet.sea_level_gravity) 
+    conditions.freestream.speed_of_sound              = rp.atleast_1d(a)
+    conditions.freestream.velocity                    = rp.atleast_1d(a*0.01)   
  
 
     analysis                 = RCAIDE.Framework.Analyses.Vehicle() 
@@ -191,15 +191,15 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
     # initalize mission
     energy(mission)      
 
-    thrust =  np.array([[0.0, 0.0, 0.0]]) 
+    thrust =  rp.array([[0.0, 0.0, 0.0]]) 
     for network in vehicle.networks:   
         for propulsor in  network.propulsors: 
-            segment.state.conditions.energy.propulsors[propulsor.tag].throttle = np.array([[1]])
+            segment.state.conditions.energy.propulsors[propulsor.tag].throttle = rp.array([[1]])
             
         for fuel_line in network.fuel_lines:
             for fuel_tank in  fuel_line.fuel_tanks:
                 fuel = fuel_tank.fuel
-                segment.state.conditions.weights.components.mass[fuel.tag] = np.array([[0]])                
+                segment.state.conditions.weights.components.mass[fuel.tag] = rp.array([[0]])                
                 
         network.evaluate(segment.state,center_of_gravity = vehicle.mass_properties.center_of_gravity) 
         thrust += conditions.energy.thrust_force_vector
@@ -209,7 +209,7 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
     # ==============================================
 
     # Defining takeoff distance equations coefficients 
-    takeoff_constants = np.zeros(3)
+    takeoff_constants = rp.zeros(3)
     if engine_number == 2:
         takeoff_constants[0] =   857.4
         takeoff_constants[1] =   2.476
@@ -246,11 +246,11 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
     if compute_2nd_seg_climb:
 
         # Getting engine thrust at V2 (update only speed related conditions)
-        state.conditions.freestream.dynamic_pressure  = np.array(np.atleast_1d(0.5 * rho * V2_speed**2))
-        state.conditions.freestream.velocity          = np.array(np.atleast_1d(V2_speed))
-        state.conditions.freestream.mach_number       = np.array(np.atleast_1d(V2_speed/ a))
-        state.conditions.freestream.dynamic_viscosity = np.array(np.atleast_1d(mu))
-        state.conditions.freestream.density           =  np.array(np.atleast_1d(rho))
+        state.conditions.freestream.dynamic_pressure  = rp.array(rp.atleast_1d(0.5 * rho * V2_speed**2))
+        state.conditions.freestream.velocity          = rp.array(rp.atleast_1d(V2_speed))
+        state.conditions.freestream.mach_number       = rp.array(rp.atleast_1d(V2_speed/ a))
+        state.conditions.freestream.dynamic_viscosity = rp.array(rp.atleast_1d(mu))
+        state.conditions.freestream.density           =  rp.array(rp.atleast_1d(rho))
 
         # engine condition
         num_propulsors =  0
@@ -259,7 +259,7 @@ def estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0,
             for propulsor in  network.propulsors: 
                 engine_out_location = propulsor.origin[0][1] 
         thrust  = thrust * (num_propulsors -1 )/num_propulsors
-        single_engine_thrust =  np.linalg.norm(thrust /num_propulsors)
+        single_engine_thrust =  rp.linalg.norm(thrust /num_propulsors)
 
         # Compute windmilling drag
         windmilling_drag_coefficient = windmilling_drag(vehicle,state)

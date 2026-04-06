@@ -9,7 +9,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  compute_wake_contraction_matrix
@@ -101,29 +101,29 @@ def compute_wake_contraction_matrix(prop, Nr, m, nts, X_pts, prop_outputs):
     r                 = prop.radius_distribution  
     rdim              = Nr-1
     B                 = prop.number_of_blades
-    va                = np.mean(prop_outputs.disc_axial_induced_velocity, axis=2)  # induced velocitied averaged around the azimuth
+    va                = rp.mean(prop_outputs.disc_axial_induced_velocity, axis=2)  # induced velocitied averaged around the azimuth
     R0                = prop.hub_radius 
     R_p               = prop.tip_radius  
     s                 = X_pts[0,:,0,-1,:] - prop.origin[0][0]    #  ( control point, blade number,  location on blade, time step)  
-    s2                = 1 + s/(np.sqrt(s**2 + R_p**2))
-    Kd                = np.repeat(np.atleast_2d(s2)[:, None, :], rdim , axis = 1)  
+    s2                = 1 + s/(rp.sqrt(s**2 + R_p**2))
+    Kd                = rp.repeat(rp.atleast_2d(s2)[:, None, :], rdim , axis = 1)  
     
     # TO DO: UPDATE FOR ANGLES SO THAT VELOCITY IS COMPONENT IN ROTOR AXIS FRAME
-    VX                = np.repeat(np.repeat(np.atleast_2d(prop_outputs.velocity[:,0]).T, rdim, axis = 1)[:, :, None], nts , axis = 2) # dimension (num control points, propeller distribution, wake points )
+    VX                = rp.repeat(rp.repeat(rp.atleast_2d(prop_outputs.velocity[:,0]).T, rdim, axis = 1)[:, :, None], nts , axis = 2) # dimension (num control points, propeller distribution, wake points )
    
-    prop_dif          = np.atleast_2d(va[:,1:] +  va[:,:-1])
-    prop_dif          = np.repeat(prop_dif[:,  :, None], nts, axis=2) 
+    prop_dif          = rp.atleast_2d(va[:,1:] +  va[:,:-1])
+    prop_dif          = rp.repeat(prop_dif[:,  :, None], nts, axis=2) 
      
     Kv                = (2*VX + prop_dif) /(2*VX + Kd*prop_dif)  
     
-    r_diff            = np.ones((m,rdim))*(r[1:]**2 - r[:-1]**2 )
-    r_diff            = np.repeat(np.atleast_2d(r_diff)[:, :, None], nts, axis = 2) 
-    r_prime           = np.zeros((m,Nr,nts))                
+    r_diff            = rp.ones((m,rdim))*(r[1:]**2 - r[:-1]**2 )
+    r_diff            = rp.repeat(rp.atleast_2d(r_diff)[:, :, None], nts, axis = 2) 
+    r_prime           = rp.zeros((m,Nr,nts))                
     r_prime[:,0,:]    = R0   
     for j in range(rdim):
-        r_prime[:,1+j,:]   = np.sqrt(r_prime[:,j,:]**2 + (r_diff*Kv)[:,j,:])                               
+        r_prime[:,1+j,:]   = rp.sqrt(r_prime[:,j,:]**2 + (r_diff*Kv)[:,j,:])                               
     
-    wake_contraction  = np.repeat((r_prime/np.repeat(np.atleast_2d(r)[:, :, None], nts, axis = 2))[:,None,:,:], B, axis = 1)            
+    wake_contraction  = rp.repeat((r_prime/rp.repeat(rp.atleast_2d(r)[:, :, None], nts, axis = 2))[:,None,:,:], B, axis = 1)            
     
     return wake_contraction 
             

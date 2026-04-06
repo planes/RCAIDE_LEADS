@@ -9,7 +9,7 @@
 from RCAIDE.Library.Methods.Geometry.LOPA.compute_layout_of_passenger_accommodations import compute_layout_of_passenger_accommodations
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Cabin Center of Gravity
@@ -26,11 +26,11 @@ def compute_cabin_center_of_gravity(cabin,comp):
     LOPA               = cabin.layout_of_passenger_accommodations.object_coordinates
     point_mass         = cabin_mass/num_pax 
     if arr == 'random':
-        idxs =  np.random.choice(range(0, num_seats), size=num_pax, replace=False)
+        idxs =  rp.random.choice(range(0, num_seats), size=num_pax, replace=False)
     elif arr == 'ascending':
-        idxs = np.arange(0,num_pax) 
+        idxs = rp.arange(0,num_pax) 
     elif  arr == 'descending':
-        idxs = np.arange(num_seats-num_pax, num_seats)  
+        idxs = rp.arange(num_seats-num_pax, num_seats)  
     
     # Apply the mask to filter seats 
     seat_mask = LOPA[:, 10] == 1
@@ -41,8 +41,8 @@ def compute_cabin_center_of_gravity(cabin,comp):
     LOPA_sorted_seats    = LOPA_seats[sorted_indices] 
     
     # find center of gravity 
-    cg_x       = np.sum(LOPA_sorted_seats[idxs,2]*point_mass)/cabin_mass
+    cg_x       = rp.sum(LOPA_sorted_seats[idxs,2]*point_mass)/cabin_mass
     cg_y       = 0
-    cg_z       = np.sum(LOPA_sorted_seats[idxs,4]*point_mass)/cabin_mass                    
+    cg_z       = rp.sum(LOPA_sorted_seats[idxs,4]*point_mass)/cabin_mass                    
     cabin.mass_properties.center_of_gravity = [[cg_x, cg_y, cg_z]]
     return cabin.mass_properties.center_of_gravity

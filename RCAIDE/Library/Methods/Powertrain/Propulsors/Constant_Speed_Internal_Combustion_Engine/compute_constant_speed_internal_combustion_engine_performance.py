@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.compute_rotor_performanc
  
 # pacakge imports  
 from copy import deepcopy
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 # internal_combustion_engine_constant_speed_propulsor
@@ -116,7 +116,7 @@ def compute_constant_speed_internal_combustion_engine_performance(propulsor, sta
     moment_vector[:,0]       = propeller.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1]       = propeller.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]       = propeller.origin[0][2]  -  center_of_gravity[0][2]
-    moment                   =  np.cross(moment_vector,ice_cs_conditions.thrust)
+    moment                   =  rp.cross(moment_vector,ice_cs_conditions.thrust)
     ice_cs_conditions.moment = moment   
 
     # Run the engine to calculate the throttle setting and the fuel burn
@@ -173,7 +173,7 @@ def reuse_stored_constant_speed_internal_combustion_engine_data(propulsor,state,
     moment_vector[:,0]      = propeller.origin[0][0]  -  center_of_gravity[0][0] 
     moment_vector[:,1]      = propeller.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2]      = propeller.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  = np.cross(moment_vector,conditions.energy.propulsors[propulsor.tag].thrust)
+    moment                  = rp.cross(moment_vector,conditions.energy.propulsors[propulsor.tag].thrust)
     conditions.energy.converters[propeller.tag].moment = moment   
     conditions.energy.propulsors[propulsor.tag].moment = moment 
     

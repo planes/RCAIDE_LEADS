@@ -10,7 +10,7 @@
 # RCAIDE 
 import RCAIDE
 from RCAIDE.Framework.Core import  Units, Data
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_propulsion_system_weight
@@ -68,7 +68,7 @@ def compute_jet_engine_weight(propulsor):
     """     
     # setup 
     BPR  = propulsor.bypass_ratio 
-    WENG = 0.084 *  (propulsor.sealevel_static_thrust/Units.lbf)**1.1 * np.exp(-0.045*BPR) * Units.lbs # Raymer 3rd Edition eq. 10.4 
+    WENG = 0.084 *  (propulsor.sealevel_static_thrust/Units.lbf)**1.1 * rp.exp(-0.045*BPR) * Units.lbs # Raymer 3rd Edition eq. 10.4 
     
     return WENG
  

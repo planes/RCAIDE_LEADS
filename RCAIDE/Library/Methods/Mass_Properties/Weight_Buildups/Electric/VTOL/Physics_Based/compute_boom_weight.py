@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
  
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute boom weight
@@ -44,7 +44,7 @@ def compute_boom_weight(boom,
     thickness   = 0.01  # thicness of boom is 1 cm
 
     # Calculate boom area assuming it is a hollow cylinder
-    S_wet  = 2* np.pi* (bHeight/2) *bLength + 2*np.pi*(bHeight/2)**2
+    S_wet  = 2* rp.pi* (bHeight/2) *bLength + 2*rp.pi*(bHeight/2)**2
     weight = S_wet *thickness* density 
     
     return weight

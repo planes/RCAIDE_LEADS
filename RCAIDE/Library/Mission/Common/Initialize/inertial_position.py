@@ -7,7 +7,7 @@
 #  Initialize Inertial Position
 # ----------------------------------------------------------------------------------------------------------------------
 def inertial_position(segment): 
-    """ Initializes intertial positon of vehicle
+    """ Initializes inertial positon of vehicle
     
         Assumptions:  
             Only used if there is an initial condition

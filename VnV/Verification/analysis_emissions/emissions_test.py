@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core                          import Units , Data
 from RCAIDE.Library.Plots                           import *        
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import os
 import matplotlib.pyplot as plt  
@@ -78,8 +78,8 @@ def main():
                 EI_H2O         = results.segments.cruise.conditions.emissions.index.H2O[0,0]  
                 true_EI_CO2    = true_EI_CO2s[i]
                 true_EI_H2O    = true_EI_H2Os[i]   
-                diff_EI_CO2    = np.abs(EI_CO2 - true_EI_CO2)
-                diff_EI_H2O    = np.abs(EI_H2O - true_EI_H2O)
+                diff_EI_CO2    = rp.abs(EI_CO2 - true_EI_CO2)
+                diff_EI_H2O    = rp.abs(EI_H2O - true_EI_H2O)
                 
                 if cantera_installation == False and  i > 0:
                     pass
@@ -137,10 +137,10 @@ def base_analysis(vehicle,emissions_method, use_surrogate):
     elif emissions_method == "Emission_Index_CRN_Method":
         emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method() 
         emissions.settings.use_surrogate     = use_surrogate 
-        emissions.training.pressure          = np.linspace(2.5,5, 1) *1E6
-        emissions.training.temperature       = np.linspace(710, 800, 1) 
-        emissions.training.air_mass_flowrate = np.linspace(40, 50, 1) 
-        emissions.training.fuel_to_air_ratio = np.linspace(0.025, 0.03, 1)     
+        emissions.training.pressure          = rp.linspace(2.5,5, 1) *1E6
+        emissions.training.temperature       = rp.linspace(710, 800, 1) 
+        emissions.training.air_mass_flowrate = rp.linspace(40, 50, 1) 
+        emissions.training.fuel_to_air_ratio = rp.linspace(0.025, 0.03, 1)     
     analyses.append(emissions)
         
     

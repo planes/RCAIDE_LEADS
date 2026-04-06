@@ -11,7 +11,7 @@ from RCAIDE.Library.Methods.Performance.compute_noise_certification_data import 
 
 import sys
 import matplotlib.pyplot as plt 
-import numpy as np      
+import RNUMPY as rp      
 import os
 
 # local imports 
@@ -53,7 +53,7 @@ def main():
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-2)
+        assert(rp.abs(v)<1e-2)
 
     return 
  

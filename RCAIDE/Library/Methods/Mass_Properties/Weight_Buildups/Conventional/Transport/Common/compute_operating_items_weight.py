@@ -12,7 +12,7 @@
 from RCAIDE.Framework.Core    import Units ,  Data
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Operating Items Weight 
@@ -76,7 +76,7 @@ def compute_operating_items_weight(vehicle):
     if vehicle.number_of_passengers < 51:
         flight_attendants = 1  # FLOPS: NSTU
     else:
-        flight_attendants = 1 + np.floor(vehicle.number_of_passengers / 40.)
+        flight_attendants = 1 + rp.floor(vehicle.number_of_passengers / 40.)
 
     W_flight_attendants = flight_attendants * (170 + 40)  # FLOPS: WSTUAB
     W_flight_crew = flight_crew * (190 + 50)  # FLOPS: WFLCRB

@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------    
 
 from RCAIDE.Framework.Core import Data   
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_naca_4series
@@ -52,16 +52,16 @@ def compute_naca_4series(airfoil_geometry_file,npoints= 201, leading_and_trailin
     camber_loc      = airfoil_digits[1]/10                         # maximum camber location as a fraction of chord
     thickness       = airfoil_digits[2]/10 + airfoil_digits[3]/100 # maximum thickness as a fraction of chord  
     
-    x_us  = np.linspace(0,1,int(np.ceil(half_npoints))+ (npoints%2 == 0))  
-    x_ls  = np.linspace(0,1,int(np.ceil(half_npoints)))  
+    x_us  = rp.linspace(0,1,int(rp.ceil(half_npoints))+ (npoints%2 == 0))  
+    x_ls  = rp.linspace(0,1,int(rp.ceil(half_npoints)))  
     if leading_and_trailing_edge_resolution_factor != None: 
         te = leading_and_trailing_edge_resolution_factor    # points per side and trailing-edge bunching factor 
         x_us  = 1 - (te+1)*x_us*(1-x_us)**te - (1-x_us)**(te+1)         # bunched points, x, 0 to 1
         x_ls  = 1 - (te+1)*x_ls*(1-x_ls)**te - (1-x_ls)**(te+1)         # bunched points, x, 0 to 1
 
     # normalized thickness, gap at trailing edge  
-    t_us = .2969*np.sqrt(x_us) - 0.126*x_us - 0.3516*(x_us**2) + 0.2843*(x_us**3) - 0.1015*(x_us**4)
-    t_ls = .2969*np.sqrt(x_ls) - 0.126*x_ls - 0.3516*(x_ls**2) + 0.2843*(x_ls**3) - 0.1015*(x_ls**4)
+    t_us = .2969*rp.sqrt(x_us) - 0.126*x_us - 0.3516*(x_us**2) + 0.2843*(x_us**3) - 0.1015*(x_us**4)
+    t_ls = .2969*rp.sqrt(x_ls) - 0.126*x_ls - 0.3516*(x_ls**2) + 0.2843*(x_ls**3) - 0.1015*(x_ls**4)
     t_us = t_us*thickness/.2
     t_ls = t_ls*thickness/.2
     m    = camber
@@ -72,21 +72,39 @@ def compute_naca_4series(airfoil_geometry_file,npoints= 201, leading_and_trailin
     if m == 0 and p == 0:
         pass
     else:
-        I_us = np.where(x_us<p)[0] 
-        I_ls = np.where(x_ls<p)[0]  
-        c_us[I_us] = m/p**2*(2*p*x_us[I_us]-x_us[I_us]**2) 
-        c_ls[I_ls] = m/p**2*(2*p*x_ls[I_ls]-x_ls[I_ls]**2) 
+        # I_us = rp.where(x_us<p)[0] 
+        # I_ls = rp.where(x_ls<p)[0]  
+        # c_us[I_us] = m/p**2*(2*p*x_us[I_us]-x_us[I_us]**2) 
+        # c_ls[I_ls] = m/p**2*(2*p*x_ls[I_ls]-x_ls[I_ls]**2) 
+        # Boolean masks
+        I_us = rp.nonzero(x_us < p)[0]
+        I_ls = rp.nonzero(x_ls < p)[0]
+
+        # Extract masked values
+        x_us_sel = x_us[I_us]
+        x_ls_sel = x_ls[I_ls]
+
+        # Compute updates
+        c_us_new = m/p**2 * (2*p*x_us_sel - x_us_sel**2)
+        c_ls_new = m/p**2 * (2*p*x_ls_sel - x_ls_sel**2)
+
+        # JAX-compatible assignment
+        c_us = c_us.at[I_us].set(c_us_new)
+        c_ls = c_ls.at[I_ls].set(c_ls_new)
+
+
+        
     
     x_up_surf = x_us[1:]
-    x_lo_surf = np.flip(x_ls)
+    x_lo_surf = rp.flip(x_ls)
     y_up_surf = (c_us + t_us)[1:] 
-    y_lo_surf = np.flip(c_ls - t_ls)
+    y_lo_surf = rp.flip(c_ls - t_ls)
    
     # concatenate upper and lower surfaces  
-    x_data = np.hstack((x_lo_surf,x_up_surf))
-    y_data = np.hstack((y_lo_surf, y_up_surf))  
+    x_data = rp.hstack((x_lo_surf,x_up_surf))
+    y_data = rp.hstack((y_lo_surf, y_up_surf))  
 
-    max_t  = np.max(thickness)
+    max_t  = rp.max(thickness)
     max_c  = max(x_data) - min(x_data)
     t_c    = max_t/max_c         
     
@@ -95,7 +113,7 @@ def compute_naca_4series(airfoil_geometry_file,npoints= 201, leading_and_trailin
     geometry.y_coordinates      = y_data      
     geometry.x_upper_surface    = x_us 
     geometry.x_lower_surface    = x_ls 
-    geometry.y_upper_surface    = np.append(0,y_up_surf) 
+    geometry.y_upper_surface    = rp.append(0,y_up_surf) 
     geometry.y_lower_surface    = y_lo_surf[::-1]           
     geometry.camber_coordinates = c_us         
     geometry.thickness_to_chord = t_c 

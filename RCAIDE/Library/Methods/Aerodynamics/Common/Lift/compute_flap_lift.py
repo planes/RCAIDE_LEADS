@@ -9,7 +9,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 from   RCAIDE import  * 
 from   RCAIDE.Framework.Core import Units
-import numpy  as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  compute_flap_lift
@@ -64,7 +64,7 @@ def compute_flap_lift(t_c,flap_type,flap_chord,flap_angle,sweep,wing_Sref,wing_a
     Kd = -1.7857E-04*fa**2 + 2.9214E-02*fa - 1.4000E-02
 
     # Sweep correction
-    Ksw = (1 - 0.08 * (np.cos(sweep))**2) * (np.cos(sweep)) ** 0.75
+    Ksw = (1 - 0.08 * (rp.cos(sweep))**2) * (rp.cos(sweep)) ** 0.75
 
     # Applying corrections
     dmax_flaps = Kc * Kd * Ksw * dmax_ref

@@ -13,7 +13,7 @@ from RCAIDE.Library.Plots import *
 import matplotlib.pyplot as plt  
 import sys 
 import os
-import numpy as np     
+import RNUMPY as rp     
 import time
 
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -58,7 +58,7 @@ def Propeller_Slipstream(wake_fidelity,identical_props):
     
     # lift coefficient and sectional lift coefficient check
     lift_coefficient_true       = 0.7471442722450158
-    sectional_lift_coeff_true   = np.array([7.11702984e-01, 6.91720619e-01, 6.48390130e-01, 5.20527453e-01,
+    sectional_lift_coeff_true   = rp.array([7.11702984e-01, 6.91720619e-01, 6.48390130e-01, 5.20527453e-01,
                                             6.20553156e-01, 6.70745402e-01, 6.27849971e-01, 6.15422147e-01,
                                             5.97612552e-01, 5.72167349e-01, 5.37742801e-01, 4.92328554e-01,
                                             4.26108478e-01, 9.02284446e-02, 1.01668869e-01, 7.11702982e-01,
@@ -78,11 +78,11 @@ def Propeller_Slipstream(wake_fidelity,identical_props):
                                             4.22264533e-15, 4.05347485e-15, 3.79628797e-15, 3.29544394e-15,
                                             2.62388100e-15, 1.85539643e-15, 1.08013074e-15])
 
-    diff_CL = np.abs(lift_coefficient  - lift_coefficient_true)
+    diff_CL = rp.abs(lift_coefficient  - lift_coefficient_true)
     print('CL difference')
     print(diff_CL)
 
-    diff_Cl_y   = max(np.abs(sectional_lift_coeff - sectional_lift_coeff_true))
+    diff_Cl_y   = max(rp.abs(sectional_lift_coeff - sectional_lift_coeff_true))
     print('Cl difference')
     print(diff_Cl_y)
     

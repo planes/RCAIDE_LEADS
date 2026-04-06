@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Aeroacoustics.Physics_Based_Frequency_Domain.Rotor.c
 from .Aeroacoustics      import Aeroacoustics
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Physics_Based
@@ -95,8 +95,8 @@ class Physics_Based_Frequency_Domain(Aeroacoustics):
         N_hemisphere_mics    = len(microphone_locations)
         
         # create empty arrays for results      
-        total_SPL_dBA          = np.ones((ctrl_pts,N_hemisphere_mics))*1E-16 
-        total_SPL_spectra      = np.ones((ctrl_pts,N_hemisphere_mics,dim_cf))*1E-16  
+        total_SPL_dBA          = rp.ones((ctrl_pts,N_hemisphere_mics))*1E-16 
+        total_SPL_spectra      = rp.ones((ctrl_pts,N_hemisphere_mics,dim_cf))*1E-16  
          
         # iterate through sources and iteratively add rotor noise
         rotor_tag = None
@@ -107,8 +107,8 @@ class Physics_Based_Frequency_Domain(Aeroacoustics):
                     for sub_tag , sub_item in  propulsor.items():
                         if isinstance(sub_item, RCAIDE.Library.Components.Powertrain.Converters.Rotor): 
                             rotor_tag         = compute_rotor_noise(microphone_locations,sub_item,segment,settings, rotor_index = i, previous_rotor_tag= rotor_tag, identical_propulsors=network.identical_propulsors)   
-                            total_SPL_dBA     = SPL_arithmetic(np.concatenate((total_SPL_dBA[:,None,:],conditions.aeroacoustics.converters[sub_item.tag].SPL_dBA[:,None,:]),axis =1),sum_axis=1)
-                            total_SPL_spectra = SPL_arithmetic(np.concatenate((total_SPL_spectra[:,None,:,:],conditions.aeroacoustics.converters[sub_item.tag].SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1) 
+                            total_SPL_dBA     = SPL_arithmetic(rp.concatenate((total_SPL_dBA[:,None,:],conditions.aeroacoustics.converters[sub_item.tag].SPL_dBA[:,None,:]),axis =1),sum_axis=1)
+                            total_SPL_spectra = SPL_arithmetic(rp.concatenate((total_SPL_spectra[:,None,:,:],conditions.aeroacoustics.converters[sub_item.tag].SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1) 
                             i += 1
                         
         conditions.aeroacoustics.hemisphere_SPL_dBA              = (total_SPL_dBA) *  (1 - settings.noise_reduction_factors.SPL_dbA)

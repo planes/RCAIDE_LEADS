@@ -11,7 +11,7 @@ from RCAIDE.Framework.Core import Units
 from .AVL_Objects.Run_Case import Run_Case
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  translate_data
@@ -49,7 +49,7 @@ def translate_conditions_to_cases(avl ,conditions, vehicle):
         case.conditions.freestream.gravitational_acceleration = conditions.freestream.gravity[i, 0]      
         case.conditions.aerodynamics.angles.alpha             = conditions.aerodynamics.angles.alpha[i, 0]/Units.deg
         case.conditions.aerodynamics.angles.beta              = conditions.aerodynamics.angles.beta[i, 0]/Units.deg 
-        if type(conditions.aerodynamics.coefficients.lift.total) == np.ndarray: 
+        if type(conditions.aerodynamics.coefficients.lift.total) == rp.ndarray: 
             case.conditions.aerodynamics.coefficients.lift.total= conditions.aerodynamics.coefficients.lift.total[i, 0]        
         else:      
             case.conditions.aerodynamics.coefficients.lift.total = None
@@ -94,17 +94,17 @@ def translate_results_to_conditions(cases,res,results):
     dim       = len(cases)
          
     # aero results 1: total surface forces and coefficeints
-    res.aerodynamics.coefficients.lift.inviscid.total = np.zeros((dim,1))
-    res.aerodynamics.wing_areas                       = np.zeros((dim,num_wings)) 
-    res.aerodynamics.wing_CLs                         = np.zeros_like(res.aerodynamics.wing_areas) 
-    res.aerodynamics.wing_CDs                         = np.zeros_like(res.aerodynamics.wing_areas) 
+    res.aerodynamics.coefficients.lift.inviscid.total = rp.zeros((dim,1))
+    res.aerodynamics.wing_areas                       = rp.zeros((dim,num_wings)) 
+    res.aerodynamics.wing_CLs                         = rp.zeros_like(res.aerodynamics.wing_areas) 
+    res.aerodynamics.wing_CDs                         = rp.zeros_like(res.aerodynamics.wing_areas) 
 
     # aero results 2 : sectional forces and coefficients 
-    res.aerodynamics.wing_local_spans              = np.zeros((dim,num_wings,n_sw))
-    res.aerodynamics.wing_section_chords           = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_cls              = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_induced_angle    = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_cds              = np.zeros_like(res.aerodynamics.wing_local_spans) 
+    res.aerodynamics.wing_local_spans              = rp.zeros((dim,num_wings,n_sw))
+    res.aerodynamics.wing_section_chords           = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_cls              = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_induced_angle    = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_cds              = rp.zeros_like(res.aerodynamics.wing_local_spans) 
     res.static_stability.control_surfaces_cases   = {}
     
     mach_case = list(results.keys())[0][5:9]   
@@ -202,6 +202,6 @@ def translate_results_to_conditions(cases,res,results):
         res.static_stability.control_surfaces_cases[tag]    = case_res.stability.control_surfaces
         
     if len(res.static_stability.coefficients.X) > 1:
-        res.static_stability.derivatives.CX_alpha[:, 0] =  np.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] )
-        res.static_stability.derivatives.CZ_alpha[:, 0] =  np.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] )
+        res.static_stability.derivatives.CX_alpha[:, 0] =  rp.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] )
+        res.static_stability.derivatives.CZ_alpha[:, 0] =  rp.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] )
     return  

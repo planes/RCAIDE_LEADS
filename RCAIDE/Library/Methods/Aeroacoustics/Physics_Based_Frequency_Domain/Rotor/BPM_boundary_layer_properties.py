@@ -11,7 +11,7 @@
 from RCAIDE.Framework.Core import  Data   
 
 # Python package imports   
-import numpy as np    
+import RNUMPY as rp    
 
 # ----------------------------------------------------------------------------------------------------------------------    
 #  BPM_boundary_layer_properties
@@ -39,24 +39,24 @@ def BPM_boundary_layer_properties(R_c,c,alpha_star):
         N/A   
     '''        
     # eqn 2
-    delta_0_div_c_tripped = 10**(1.892- 0.9045*np.log10(R_c) + 0.0596*(np.log10(R_c))**2)
+    delta_0_div_c_tripped = 10**(1.892- 0.9045*rp.log10(R_c) + 0.0596*(rp.log10(R_c))**2)
     
     # eqn 3  
     delta_star_0_div_c_tripped             = 0.0601*(R_c**-0.114) #R_c <= 0.3E6
-    delta_star_0_div_c_tripped[R_c>0.3E6]  = 10**(3.411 -1.5397*np.log10(R_c[R_c>0.3E6]) + 0.1059*(np.log10(R_c[R_c>0.3E6]))**2) # R_c > 0.3E6 
+    delta_star_0_div_c_tripped[R_c>0.3E6]  = 10**(3.411 -1.5397*rp.log10(R_c[R_c>0.3E6]) + 0.1059*(rp.log10(R_c[R_c>0.3E6]))**2) # R_c > 0.3E6 
     
     # eqn 4 
     theta_0_div_c_tripped             = 0.0723*(R_c**-0.1765) #R_c <= 0.3E6
-    theta_0_div_c_tripped[R_c>0.3E6]  = 10**(0.5578 -0.7079*np.log10(R_c[R_c>0.3E6]) + 0.0404*(np.log10(R_c[R_c>0.3E6]))**2) # R_c > 0.3E6 
+    theta_0_div_c_tripped[R_c>0.3E6]  = 10**(0.5578 -0.7079*rp.log10(R_c[R_c>0.3E6]) + 0.0404*(rp.log10(R_c[R_c>0.3E6]))**2) # R_c > 0.3E6 
         
     # eqn 5
-    delta_0_div_c_untripped       =  10**(1.6569 -0.9045*np.log10(R_c) + 0.0596*(np.log10(R_c))**2) 
+    delta_0_div_c_untripped       =  10**(1.6569 -0.9045*rp.log10(R_c) + 0.0596*(rp.log10(R_c))**2) 
     
     # eqn 6
-    #delta_star_0_div_c_untripped  =  10**(3.0187 -1.5397*np.log10(R_c) + 0.1059*(np.log10(R_c))**2) 
+    #delta_star_0_div_c_untripped  =  10**(3.0187 -1.5397*rp.log10(R_c) + 0.1059*(rp.log10(R_c))**2) 
 
     # eqn 7
-    #theta_0_div_c_untripped       =  10**(0.2021 -0.7079*np.log10(R_c) + 0.0404*(np.log10(R_c))**2) 
+    #theta_0_div_c_untripped       =  10**(0.2021 -0.7079*rp.log10(R_c) + 0.0404*(rp.log10(R_c))**2) 
     
     # boundary layer of pressure side for tripped and untripped 
     # eqn 8

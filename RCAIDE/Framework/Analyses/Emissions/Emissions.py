@@ -9,7 +9,7 @@
 
 from RCAIDE.Framework.Core import Data
 from RCAIDE.Framework.Analyses import Analysis
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Emissions

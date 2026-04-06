@@ -8,7 +8,7 @@
 import RCAIDE
 
 # package imports 
-import numpy as np  
+import RNUMPY as rp  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Wing Moment of Inertia
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -48,7 +48,7 @@ def compute_wing_moment_of_inertia(wing, center_of_gravity = [[0, 0, 0]]):
     vertical    = wing.vertical
     span        = wing.spans.projected
     
-    I_local   = np.zeros((3, 3)) 
+    I_local   = rp.zeros((3, 3)) 
     if xz_symm:  
         m_wing = mass * 0.5
     else:
@@ -145,16 +145,16 @@ def compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz
     delta = 1 # 1 for right wing, -1 for left wing. Assumes all non-symmetric wings are right-wings.
     
     Ixx        = m_wing * (56 * b ** 2 * kf * v0 + kg * v3) / (280 * ka * v0)
-    Iyy        = m_wing * (84 * b * (2 * b * kf * v0 * np.tan(A) ** 2 + kd * v1 * np.tan(A)) + 49 * ke * v2 + 3 * kg * v3) / (840 * ka * v0)
-    Izz        = m_wing * (12 * b * (2 * b * (np.tan(A) ** 2 + 1) * kf * v0 + kd * v1 * np.tan(A)) + 7 * ke * v2) / (120 * ka * v0)
-    Ixy        = -1 * delta * b * m_wing * (4 * b * kf * v0 * np.tan(A) + kd * v1) / (20 * ka * v0)
+    Iyy        = m_wing * (84 * b * (2 * b * kf * v0 * rp.tan(A) ** 2 + kd * v1 * rp.tan(A)) + 49 * ke * v2 + 3 * kg * v3) / (840 * ka * v0)
+    Izz        = m_wing * (12 * b * (2 * b * (rp.tan(A) ** 2 + 1) * kf * v0 + kd * v1 * rp.tan(A)) + 7 * ke * v2) / (120 * ka * v0)
+    Ixy        = -1 * delta * b * m_wing * (4 * b * kf * v0 * rp.tan(A) + kd * v1) / (20 * ka * v0)
     Ixz        = 0  # Ixz, Iyz are 0
     Iyz        = 0  # Ixz, Iyz are 0
-    I_wing_sys = np.array([[Ixx, -Ixy, -Ixz], [-Ixy, Iyy, -Iyz], [-Ixz, -Iyz, Izz]]) # inertia tensor in the wing system
+    I_wing_sys = rp.array([[Ixx, -Ixy, -Ixz], [-Ixy, Iyy, -Iyz], [-Ixz, -Iyz, Izz]]) # inertia tensor in the wing system
     
     # Dihedral. -1*dihedral for the right wing
-    R       = np.array([[1, 0, 0], [0, np.cos(-1*dihedral), -1 * np.sin(-1*dihedral)], [0, np.sin(-1*dihedral), np.cos(-1*dihedral)]])
-    I_local = R *I_wing_sys *np.transpose(R) 
+    R       = rp.array([[1, 0, 0], [0, rp.cos(-1*dihedral), -1 * rp.sin(-1*dihedral)], [0, rp.sin(-1*dihedral), rp.cos(-1*dihedral)]])
+    I_local = R *I_wing_sys *rp.transpose(R) 
       
     # ----------------------------------------------------------------------------------------------------------------------
     # Symmetric Wing
@@ -162,32 +162,32 @@ def compute_wing_section_moment_of_intertia(m_wing,tr,tt,ct,cr, b, A,dihedral,xz
     if xz_symm: # wing is symmetric
         
         # Rotation matrix for dihedral. Note no -1*dihedral for the symmetric wing
-        R = np.array([[1, 0, 0], [0, np.cos(dihedral), -1 * np.sin(dihedral)], [0, np.sin(dihedral), np.cos(dihedral)]])        
+        R = rp.array([[1, 0, 0], [0, rp.cos(dihedral), -1 * rp.sin(dihedral)], [0, rp.sin(dihedral), rp.cos(dihedral)]])        
         
         # Inertia matrix in local wing frame
         delta        = -1 # left wing
         Ixx          = m_wing * (56 * b ** 2 * kf * v0 + kg * v3) / (280 * ka * v0)
-        Iyy          = m_wing * (84 * b * (2 * b * kf * v0 * np.tan(A) ** 2 + kd * v1 * np.tan(A)) + 49 * ke * v2 + 3 * kg * v3) / (840 * ka * v0)
-        Izz          = m_wing * (12 * b * (2 * b * (np.tan(A) ** 2 + 1) * kf * v0 + kd * v1 * np.tan(A)) + 7 * ke * v2) / (120 * ka * v0)
-        Ixy          = -1 * delta * b * m_wing * (4 * b * kf * v0 * np.tan(A) + kd * v1) / (20 * ka * v0)
-        I_local_left = np.array([[Ixx, -Ixy, -Ixz], [-Ixy, Iyy, -Iyz], [-Ixz, -Iyz, Izz]])
+        Iyy          = m_wing * (84 * b * (2 * b * kf * v0 * rp.tan(A) ** 2 + kd * v1 * rp.tan(A)) + 49 * ke * v2 + 3 * kg * v3) / (840 * ka * v0)
+        Izz          = m_wing * (12 * b * (2 * b * (rp.tan(A) ** 2 + 1) * kf * v0 + kd * v1 * rp.tan(A)) + 7 * ke * v2) / (120 * ka * v0)
+        Ixy          = -1 * delta * b * m_wing * (4 * b * kf * v0 * rp.tan(A) + kd * v1) / (20 * ka * v0)
+        I_local_left = rp.array([[Ixx, -Ixy, -Ixz], [-Ixy, Iyy, -Iyz], [-Ixz, -Iyz, Izz]])
         
         # Dihedral rotation
-        I_local_left = R *I_local_left * np.transpose(R)
+        I_local_left = R *I_local_left * rp.transpose(R)
         I_local      = I_local + I_local_left # Add the left wing inertia tensor if wing is symmetric
     
     # ----------------------------------------------------------------------------------------------------------------------
     # Vertical Surface
     # ----------------------------------------------------------------------------------------------------------------------
     if vertical: # If it is a vertical tail
-        R         = np.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]) # Rotation matrix for a vertical surface
-        I_local   = R * I_local * np.transpose(R) # Rotation of inertia matrix to a vertical frame of reference         
+        R         = rp.array([[1, 0, 0], [0, 0, 1], [0, -1, 0]]) # Rotation matrix for a vertical surface
+        I_local   = R * I_local * rp.transpose(R) # Rotation of inertia matrix to a vertical frame of reference         
     
     # ----------------------------------------------------------------------------------------------------------------------
     # RCAIDE Coordinate system. (Local system is flipped 180 deg from RCAIDE coordinate system convention.)
     # ----------------------------------------------------------------------------------------------------------------------
-    Rr       = np.array([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
-    I_RCAIDE = Rr * I_local * np.transpose(Rr) 
+    Rr       = rp.array([[-1, 0, 0], [0, 1, 0], [0, 0, -1]])
+    I_RCAIDE = Rr * I_local * rp.transpose(Rr) 
   
     I_RCAIDE_non_dimensional = I_RCAIDE /m_wing 
         

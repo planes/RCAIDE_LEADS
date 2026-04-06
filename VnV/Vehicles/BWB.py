@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan      import design_tu
 from RCAIDE.Library.Plots                                       import *     
  
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy 
 import os
 
@@ -329,7 +329,7 @@ def vehicle_setup():
     wing.taper                   = 0.35 
     wing.areas.reference         = 20
     wing.sweeps.quarter_chord    = 45 * Units.degrees  
-    wing.spans.projected         = np.sqrt(wing.areas.reference  * wing.aspect_ratio)     
+    wing.spans.projected         = rp.sqrt(wing.areas.reference  * wing.aspect_ratio)     
     wing.areas.wetted            = wing.spans.projected * 2.1
     wing.chords.root             = (2 *wing.areas.reference  / wing.spans.projected ) /(wing.taper +1)    
     wing.chords.tip              = wing.taper *   wing.chords.root                           
@@ -507,7 +507,7 @@ def vehicle_setup():
     nacelle.tag                                 = 'nacelle_1'
     nacelle.inlet_diameter                      = 2.5
     nacelle.origin                              = [[30, 3, 3]] 
-    nacelle.areas.wetted                        = np.pi*nacelle.diameter*nacelle.length
+    nacelle.areas.wetted                        = rp.pi*nacelle.diameter*nacelle.length
     nacelle_airfoil                             = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code          = '3409'
     nacelle.append_airfoil(nacelle_airfoil) 

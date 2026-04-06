@@ -11,7 +11,7 @@ from RCAIDE.Framework.Core import Data
 from .Rotor import Rotor
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  LIFT ROTOR CLASS
@@ -165,7 +165,7 @@ class Lift_Rotor(Rotor):
 
 
         self.tag                              = 'lift_rotor'
-        self.orientation_euler_angles         = [0.,np.pi/2.,0.] # This is Z-direction thrust up in vehicle frame
+        self.orientation_euler_angles         = [0.,rp.pi/2.,0.] # This is Z-direction thrust up in vehicle frame
         self.use_2d_analysis                  = False 
 
         self.hover                            = Data()    

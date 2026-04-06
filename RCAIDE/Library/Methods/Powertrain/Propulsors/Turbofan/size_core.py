@@ -9,7 +9,7 @@
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan                      import compute_thrust
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  size_core
@@ -107,7 +107,7 @@ def size_core(turbofan, conditions):
     TSFC       = turbofan_conditions.thrust_specific_fuel_consumption
     Fsp        = turbofan_conditions.non_dimensional_thrust
     mdot_core  = turbofan.design_thrust/(Fsp*a0*(1+bypass_ratio)*turbofan_conditions.throttle)  
-    mdhc       = mdot_core/ (np.sqrt(Tref/Tt_ref)*(Pt_ref/Pref))
+    mdhc       = mdot_core/ (rp.sqrt(Tref/Tt_ref)*(Pt_ref/Pref))
 
     # Store results on turbofan data structure 
     turbofan.TSFC                                = TSFC

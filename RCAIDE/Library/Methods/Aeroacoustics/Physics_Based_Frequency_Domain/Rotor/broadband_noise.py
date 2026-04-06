@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Aeroacoustics.Physics_Based_Frequency_Domain.Rotor.T
 from RCAIDE.Library.Methods.Aeroacoustics.Physics_Based_Frequency_Domain.Rotor.noise_directivities           import noise_directivities
 
 # Python Package imports 
-import numpy as np  
+import RNUMPY as rp  
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute Broadband Noise 
@@ -83,47 +83,47 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
     blade_chords       = rotor.chord_distribution           # blade chord    
     r                  = rotor.radius_distribution          # radial location   
     Omega              = aeroacoustic_data.omega            # angular velocity    
-    L                  = np.zeros_like(r)
+    L                  = rp.zeros_like(r)
     del_r              = r[1:] - r[:-1]
     L[0]               = del_r[0]
     L[-1]              = del_r[-1]
     L[1:-1]            = (del_r[:-1]+ del_r[1:])/2
 
-    if np.all(Omega == 0):
-        aeroacoustics.p_pref_broadband                          = np.zeros((num_cpt,num_mic,num_cf)) 
-        aeroacoustics.SPL_prop_broadband_spectrum               = np.zeros_like(aeroacoustics.p_pref_broadband)
-        aeroacoustics.SPL_prop_broadband_spectrum_dBA           = np.zeros_like(aeroacoustics.p_pref_broadband)
-        aeroacoustics.SPL_prop_broadband_1_3_spectrum           = np.zeros((num_cpt,num_mic,num_cf))
-        aeroacoustics.SPL_prop_broadband_1_3_spectrum_dBA       = np.zeros((num_cpt,num_mic,num_cf))
-        aeroacoustics.p_pref_azimuthal_broadband                = np.zeros((num_cpt,num_mic,num_cf))
-        aeroacoustics.p_pref_azimuthal_broadband_dBA            = np.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
-        aeroacoustics.SPL_prop_azimuthal_broadband_spectrum     = np.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
-        aeroacoustics.SPL_prop_azimuthal_broadband_spectrum_dBA = np.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
+    if rp.all(Omega == 0):
+        aeroacoustics.p_pref_broadband                          = rp.zeros((num_cpt,num_mic,num_cf)) 
+        aeroacoustics.SPL_prop_broadband_spectrum               = rp.zeros_like(aeroacoustics.p_pref_broadband)
+        aeroacoustics.SPL_prop_broadband_spectrum_dBA           = rp.zeros_like(aeroacoustics.p_pref_broadband)
+        aeroacoustics.SPL_prop_broadband_1_3_spectrum           = rp.zeros((num_cpt,num_mic,num_cf))
+        aeroacoustics.SPL_prop_broadband_1_3_spectrum_dBA       = rp.zeros((num_cpt,num_mic,num_cf))
+        aeroacoustics.p_pref_azimuthal_broadband                = rp.zeros((num_cpt,num_mic,num_cf))
+        aeroacoustics.p_pref_azimuthal_broadband_dBA            = rp.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
+        aeroacoustics.SPL_prop_azimuthal_broadband_spectrum     = rp.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
+        aeroacoustics.SPL_prop_azimuthal_broadband_spectrum_dBA = rp.zeros_like(aeroacoustics.p_pref_azimuthal_broadband)
     else: 
         # dimension of matrices [control pt, microphone, # blades, # blade sections, # center frequencies, # azimuthal stations] 
-        c                 = np.tile(blade_chords[None,None,None,:,None,None],(num_cpt,num_mic,num_blades,1,num_cf,num_az))
-        L                 = np.tile(L[None,None,None,:,None,None],(num_cpt,num_mic,num_blades,1,num_cf,num_az))
-        f                 = np.tile(frequency[None,None,None,None,:,None],(num_cpt,num_mic,num_blades,num_sec,1,num_az)) 
+        c                 = rp.tile(blade_chords[None,None,None,:,None,None],(num_cpt,num_mic,num_blades,1,num_cf,num_az))
+        L                 = rp.tile(L[None,None,None,:,None,None],(num_cpt,num_mic,num_blades,1,num_cf,num_az))
+        f                 = rp.tile(frequency[None,None,None,None,:,None],(num_cpt,num_mic,num_blades,num_sec,1,num_az)) 
         
-        alpha_disk        = np.tile(alpha[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
-        V                 = np.zeros((num_cpt,num_mic,num_blades,num_sec,num_cf,num_az,3))
-        V[:,:,:,:,:,:,0]  = -np.tile(Vt[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)) 
-        V[:,:,:,:,:,:,2]  = np.tile(Va[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))  
-        V_tot             = np.linalg.norm(V, axis=6)
-        alpha_tip         = np.tile(alpha_tip[cpt,None,None,None,None,:],(1,num_mic,num_blades,num_sec,num_cf,1))  
-        c_0               = np.tile(speed_of_sound[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az))
-        rho               = np.tile(density[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az)) 
-        mu                = np.tile(dyna_visc[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az)) 
-        R_c               = np.tile(disc_Re[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
-        U                 = np.tile(disc_speed[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
-        M                 = np.tile(disc_Ma[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)) # U/c_0 
+        alpha_disk        = rp.tile(alpha[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
+        V                 = rp.zeros((num_cpt,num_mic,num_blades,num_sec,num_cf,num_az,3))
+        V[:,:,:,:,:,:,0]  = -rp.tile(Vt[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)) 
+        V[:,:,:,:,:,:,2]  = rp.tile(Va[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))  
+        V_tot             = rp.linalg.norm(V, axis=6)
+        alpha_tip         = rp.tile(alpha_tip[cpt,None,None,None,None,:],(1,num_mic,num_blades,num_sec,num_cf,1))  
+        c_0               = rp.tile(speed_of_sound[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az))
+        rho               = rp.tile(density[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az)) 
+        mu                = rp.tile(dyna_visc[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az)) 
+        R_c               = rp.tile(disc_Re[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
+        U                 = rp.tile(disc_speed[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
+        M                 = rp.tile(disc_Ma[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)) # U/c_0 
         M_tot             = V_tot/c_0   
           
-        X_prime_r         = np.tile(coordinates.X_prime_r[cpt,:,:,:,None,None,:],(1,1,1,1,num_cf,num_az,1))
-        cos_zeta_r        = np.sum(X_prime_r*V, axis = 6)/(np.linalg.norm(X_prime_r, axis = 6)*V_tot) 
-        r_er              = np.tile(np.linalg.norm(coordinates.X_e_r[cpt], axis = 3)[None,:,:,:,None,None],(1,1,1,1,num_cf,num_az))           
-        Phi_er            = np.tile(coordinates.phi_e_r[cpt,:,:,:,None,None],(1,1,1,1,num_cf,num_az))
-        Theta_er          = np.tile(coordinates.theta_e_r[cpt,:,:,:,None,None],(1,1,1,1,num_cf,num_az))    
+        X_prime_r         = rp.tile(coordinates.X_prime_r[cpt,:,:,:,None,None,:],(1,1,1,1,num_cf,num_az,1))
+        cos_zeta_r        = rp.sum(X_prime_r*V, axis = 6)/(rp.linalg.norm(X_prime_r, axis = 6)*V_tot) 
+        r_er              = rp.tile(rp.linalg.norm(coordinates.X_e_r[cpt], axis = 3)[None,:,:,:,None,None],(1,1,1,1,num_cf,num_az))           
+        Phi_er            = rp.tile(coordinates.phi_e_r[cpt,:,:,:,None,None],(1,1,1,1,num_cf,num_az))
+        Theta_er          = rp.tile(coordinates.theta_e_r[cpt,:,:,:,None,None],(1,1,1,1,num_cf,num_az))    
         
         # flatten matrices 
         R_c        = flatten_matrix(R_c,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az)
@@ -185,7 +185,7 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
         SPL_TIP              = unflatten_matrix(SPL_TIP,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az)
         
         # Pressure from each Broadband source
-        P_BWI                 = np.zeros((num_cpt,num_mic,num_blades,num_sec,num_cf,num_az)) # this will be replaced soon
+        P_BWI                 = rp.zeros((num_cpt,num_mic,num_blades,num_sec,num_cf,num_az)) # this will be replaced soon
         P_TBL_TE_tripped      = 10**(SPL_TBL_TE_tripped/10)
         P_TBL_TE_untripped    = 10**(SPL_TBL_TE_untripped/10)
         P_LBL_VS              = 10**(SPL_LBL_VS/10)
@@ -193,14 +193,14 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
         P_TIP[:,:,:,:-1,:,:]  = 0
         
         # Sum broadband Components along blade sections and blades to get self noise per rotor 
-        P_b_7                     = np.zeros((4,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az))
+        P_b_7                     = rp.zeros((4,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az))
         P_b_7[0,:,:,:,:,:,:]      = P_BWI
         P_b_7[1,:,:,:,:,:,:]      = P_TBL_TE_tripped 
         P_b_7[2,:,:,:,:,:,:]      = P_LBL_VS
         P_b_7[3,:,:,:,:,:,:]      = P_TIP
         
         # Sum all components of broadband noise pressures
-        P_b_6            = np.sum(P_b_7, axis=0)
+        P_b_6            = rp.sum(P_b_7, axis=0)
         
         # Take product of total broadband noise with Doppler shift factor and weighting factor
         M_tot            = unflatten_matrix(M_tot,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az)
@@ -209,15 +209,15 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
         P_b_6_shifted    = (1/num_az)*(1/Doppler_shift)*P_b_6
         
         # Sum broadband noise along blade sections
-        P_b_5            = np.sum(P_b_6_shifted, axis=3)
+        P_b_5            = rp.sum(P_b_6_shifted, axis=3)
         
         # Sum broadband noise for all blades
-        P_b_4            = np.sum(P_b_5, axis=2)
+        P_b_4            = rp.sum(P_b_5, axis=2)
         
         # Sum broadband noise along all azimuthal stations
-        P_b_3            = np.sum(P_b_4, axis=3)
+        P_b_3            = rp.sum(P_b_4, axis=3)
         
-        SPL_broadband    = 10*np.log10(P_b_3)
+        SPL_broadband    = 10*rp.log10(P_b_3)
         
         # store results 
         aeroacoustics.SPL_prop_broadband_spectrum                   = SPL_broadband
@@ -226,7 +226,7 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
     return
  
 def flatten_matrix(x,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az):
-    return np.reshape(x,(num_cpt*num_mic*num_blades*num_sec*num_cf*num_az))
+    return rp.reshape(x,(num_cpt*num_mic*num_blades*num_sec*num_cf*num_az))
  
 def unflatten_matrix(x,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az):
-    return np.reshape(x,(num_cpt,num_mic,num_blades,num_sec,num_cf,num_az))
+    return rp.reshape(x,(num_cpt,num_mic,num_blades,num_sec,num_cf,num_az))

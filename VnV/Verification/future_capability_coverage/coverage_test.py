@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import Units ,  Data
 from RCAIDE.Library.Plots             import *       
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os

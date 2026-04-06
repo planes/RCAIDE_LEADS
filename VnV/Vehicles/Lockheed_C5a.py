@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan   import design_turbo
 from RCAIDE.Library.Plots                 import *     
 
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy
 import matplotlib.pyplot as plt  
 import os
@@ -319,8 +319,8 @@ def vehicle_setup():
     fuselage.heights.maximum                    = 8.1  * Units.meter
     fuselage.effective_diameter                 = 7.75  * Units.meter
     fuselage.areas.side_projected               = fuselage.heights.maximum * fuselage.lengths.total * Units['meters**2'] 
-    fuselage.areas.wetted                       = np.pi * fuselage.width/2 * fuselage.lengths.total * Units['meters**2'] 
-    fuselage.areas.front_projected              = np.pi * fuselage.width/2      * Units['meters**2']  
+    fuselage.areas.wetted                       = rp.pi * fuselage.width/2 * fuselage.lengths.total * Units['meters**2'] 
+    fuselage.areas.front_projected              = rp.pi * fuselage.width/2      * Units['meters**2']  
     fuselage.differential_pressure              = 5.0e4 * Units.pascal
     fuselage.heights.at_quarter_length          = 8.0 * Units.meter
     fuselage.heights.at_three_quarters_length   = 6.75 * Units.meter
@@ -559,7 +559,7 @@ def vehicle_setup():
     nacelle.tag                                     = 'nacelle_1'
     nacelle.inlet_diameter                          = 2.46
     nacelle.origin                                  = [[26.429,17.6,0.2]] 
-    nacelle.areas.wetted                            = 1.1*np.pi*nacelle.diameter*nacelle.length
+    nacelle.areas.wetted                            = 1.1*rp.pi*nacelle.diameter*nacelle.length
     nacelle_airfoil                                 = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code              = '2410'
     nacelle.append_airfoil(nacelle_airfoil)

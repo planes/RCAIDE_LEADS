@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia.compute_bwb_moment
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity.compute_bwb_center_of_gravity import  compute_bwb_center_of_gravity
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Blended_Wing_Body

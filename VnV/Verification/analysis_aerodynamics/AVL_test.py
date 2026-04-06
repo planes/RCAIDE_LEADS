@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import Units ,  Data
 from RCAIDE.Library.Plots             import *       
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
@@ -75,12 +75,12 @@ def AVL_Surrogate_Mission(use_surrogate,trim_aircraft,keep_regression_files,new_
     cruise_CL_thruth = 0.4207404923969484
     # Truth values  
     error = Data()  
-    error.cruise_CL   = np.max(np.abs(cruise_CL - cruise_CL_thruth))   
+    error.cruise_CL   = rp.max(rp.abs(cruise_CL - cruise_CL_thruth))   
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
          
     return
 
@@ -110,12 +110,12 @@ def AVL_Single_Point_Trim_Mission(use_surrogate,trim_aircraft,keep_regression_fi
     
     # Truth values  
     error = Data()  
-    error.cruise_CL   = np.max(np.abs(cruise_CL     - cruise_CL_thruth))   
+    error.cruise_CL   = rp.max(rp.abs(cruise_CL     - cruise_CL_thruth))   
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
          
     return
 

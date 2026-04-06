@@ -8,8 +8,8 @@
 from RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Powertrain.Converters.Fuel_Cells.Larminie_Model   import compute_voltage, compute_power_difference
 
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
+import RNUMPY.scipy as sp
 
 # ----------------------------------------------------------------------
 #  Larminie Model to Compute Fuel Cell Performance
@@ -110,8 +110,8 @@ def compute_fuel_cell_performance(fuel_cell_stack, state, bus, coolant_lines, t_
     ub                          = 1.2/(Units.cm**2.)       # upper bound on fuel cell current density
     current_density             = sp.optimize.fminbound(compute_power_difference, lb, ub, args=(fuel_cell,P_cell)) 
     V_fuel_cell                 = compute_voltage(fuel_cell,current_density)    
-    efficiency                  = np.divide(V_fuel_cell, fuel_cell.ideal_voltage)
-    mdot_cell                   = np.divide(P_cell,np.multiply(fuel_cell.propellant.specific_energy,efficiency)) 
+    efficiency                  = rp.divide(V_fuel_cell, fuel_cell.ideal_voltage)
+    mdot_cell                   = rp.divide(P_cell,rp.multiply(fuel_cell.propellant.specific_energy,efficiency)) 
     
     I_cell = P_cell / V_fuel_cell
     I_stack = I_cell * n_parallel

@@ -12,12 +12,12 @@ from RCAIDE.Library.Plots                               import *
 from RCAIDE.Library.Methods.Performance                 import rotor_aerodynamic_analysis
 
 import os
-import numpy as np 
+import RNUMPY as rp 
 import matplotlib.pyplot as plt
 
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
@@ -50,7 +50,7 @@ def propeller_test():
     propeller      = Test_Propeller()
     
     # define velocity range 
-    velocity_range  = np.linspace(10, 100, 19) 
+    velocity_range  = rp.linspace(10, 100, 19) 
     
     # define RPM
     angular_velocity = 2500*Units.rpm
@@ -64,10 +64,10 @@ def propeller_test():
     plot_rotor_disc_performance(propeller,results,i=0,title=None,save_figure=False) 
     plot_rotor_performance(propeller,results,title=None,save_figure=False, show_figure=False)
     
-    thrust      = np.linalg.norm(results.thrust,axis=1)[0]
+    thrust      = rp.linalg.norm(results.thrust,axis=1)[0]
     thrust_true = 10043.181397103635
 
-    diff_thrust = np.abs((thrust- thrust_true)/thrust_true)  
+    diff_thrust = rp.abs((thrust- thrust_true)/thrust_true)  
     print('\nthrust difference')
     print(diff_thrust)
     assert diff_thrust  < 1e-3
@@ -84,7 +84,7 @@ def rotor_test(new_regression):
     rotor.orientation_euler_angles  = [0.,90 * Units.degrees ,0.]
     
     # define velocity range 
-    velocity_range  = np.linspace(1, 5, 10).T
+    velocity_range  = rp.linspace(1, 5, 10).T
     
     # define RPM
     angular_velocity = 2500*Units.rpm
@@ -95,10 +95,10 @@ def rotor_test(new_regression):
     # run analysis
     results        = rotor_aerodynamic_analysis(rotor, velocity_range, angular_velocity = angular_velocity, angle_of_attack=angle_of_attack)
     
-    thrust      = np.linalg.norm(results.thrust,axis=1)[0]
+    thrust      = rp.linalg.norm(results.thrust,axis=1)[0]
     thrust_true = 16686.234080457703
 
-    diff_thrust = np.abs((thrust- thrust_true)/thrust_true)  
+    diff_thrust = rp.abs((thrust- thrust_true)/thrust_true)  
     print('\nthrust difference')
     print(diff_thrust)
     assert diff_thrust  < 1e-3

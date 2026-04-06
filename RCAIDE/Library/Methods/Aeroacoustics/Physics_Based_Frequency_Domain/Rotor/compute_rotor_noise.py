@@ -21,7 +21,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil.import_airfoil_geometry            
 from RCAIDE.Library.Methods.Aerodynamics.Airfoil_Panel_Method.airfoil_analysis                       import airfoil_analysis
 
 # Python package imports   
-import numpy as np    
+import RNUMPY as rp    
 from RCAIDE.Framework.Core import interp2d 
 
 # ----------------------------------------------------------------------------------------------------------------------    
@@ -72,21 +72,21 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
     aeroacoustics   = Data()  
     Results     = Data()
 
-    Results.SPL                                           = np.zeros((num_cpt,num_mic))
-    Results.SPL_dBA                                       = np.zeros_like(Results.SPL)
-    Results.SPL_harmonic                                  = np.zeros_like(Results.SPL)
-    Results.SPL_broadband                                 = np.zeros_like(Results.SPL)
-    Results.blade_passing_frequencies                     = np.zeros(num_f)
-    Results.SPL_1_3_spectrum                              = np.zeros((num_cpt,num_mic,num_f)) 
-    Results.SPL_harmonic_bpf_spectrum                     = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_harmonic_bpf_spectrum_dBA                 = np.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL                                           = rp.zeros((num_cpt,num_mic))
+    Results.SPL_dBA                                       = rp.zeros_like(Results.SPL)
+    Results.SPL_harmonic                                  = rp.zeros_like(Results.SPL)
+    Results.SPL_broadband                                 = rp.zeros_like(Results.SPL)
+    Results.blade_passing_frequencies                     = rp.zeros(num_f)
+    Results.SPL_1_3_spectrum                              = rp.zeros((num_cpt,num_mic,num_f)) 
+    Results.SPL_harmonic_bpf_spectrum                     = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_harmonic_bpf_spectrum_dBA                 = rp.zeros_like(Results.SPL_1_3_spectrum)
     Results.one_third_frequency_spectrum                  = settings.center_frequencies 
-    Results.SPL_1_3_spectrum                              = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_1_3_spectrum_dBA                          = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_harmonic_1_3_spectrum                     = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_harmonic_1_3_spectrum_dBA                 = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_broadband_1_3_spectrum                    = np.zeros_like(Results.SPL_1_3_spectrum)
-    Results.SPL_broadband_1_3_spectrum_dBA                = np.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_1_3_spectrum                              = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_1_3_spectrum_dBA                          = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_harmonic_1_3_spectrum                     = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_harmonic_1_3_spectrum_dBA                 = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_broadband_1_3_spectrum                    = rp.zeros_like(Results.SPL_1_3_spectrum)
+    Results.SPL_broadband_1_3_spectrum_dBA                = rp.zeros_like(Results.SPL_1_3_spectrum)
 
     # compute position vector from point source (or should it be origin) at rotor hub to microphones 
     coordinates   = compute_rotor_point_source_coordinates(rotor,conditions,microphone_locations,settings)        
@@ -105,7 +105,7 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
             airfoils          = rotor.airfoils         
             for jj,airfoil in enumerate(airfoils):
                 airfoil_points      = airfoil.number_of_points 
-            chord_coord             = int(np.floor(airfoil_points/2))       
+            chord_coord             = int(rp.floor(airfoil_points/2))       
                 
             if (identical_propulsors == False) and rotor_index !=0: 
                 prev_aeroacoustic_data                   = segment.state.conditions.energy.converters[previous_rotor_tag]                 
@@ -118,17 +118,17 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
                 aeroacoustic_data.blade_lower_surface    = prev_aeroacoustic_data.blade_lower_surface
             else: 
                 # Lift and Drag - coefficients and distributions 
-                fL      = np.tile(np.zeros_like(Re)[:,:,:,None],(1,1,1,chord_coord))
-                fD      = np.zeros_like(fL)
-                CL      = np.zeros_like(Re)
-                CD      = np.zeros_like(Re) 
-                y_up    = np.zeros_like(fL)
-                y_low   = np.zeros_like(fL)
+                fL      = rp.tile(rp.zeros_like(Re)[:,:,:,None],(1,1,1,chord_coord))
+                fD      = rp.zeros_like(fL)
+                CL      = rp.zeros_like(Re)
+                CD      = rp.zeros_like(Re) 
+                y_up    = rp.zeros_like(fL)
+                y_low   = rp.zeros_like(fL)
                                   
                 for jj,airfoil in enumerate(airfoils):    
-                    locs                  = np.where(np.array(a_loc) == jj ) 
-                    alpha_azi             = np.atleast_2d(AOA_sec[cpt,locs,:].flatten())
-                    Re_azi                = np.atleast_2d(Re[cpt,locs,:].flatten())      
+                    locs                  = rp.where(rp.array(a_loc) == jj ) 
+                    alpha_azi             = rp.atleast_2d(AOA_sec[cpt,locs,:].flatten())
+                    Re_azi                = rp.atleast_2d(Re[cpt,locs,:].flatten())      
                     pd                    = airfoil.polars 
                     if settings.use_plane_loading_surrogate: 
                         fL[cpt,locs,:,:]      = pd.lift_distribution_func((alpha_azi,Re_azi)).reshape(1,len(a_loc), num_az,chord_coord) 
@@ -170,14 +170,14 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
         # ----------------------------------------------------------------------------------    
         # Atmospheric attenuation 
         # ----------------------------------------------------------------------------------
-        delta_atmo = atmospheric_attenuation(np.linalg.norm(coordinates.X_r[:,0,0,0,:],axis=1),settings.center_frequencies)
+        delta_atmo = atmospheric_attenuation(rp.linalg.norm(coordinates.X_r[:,0,0,0,:],axis=1),settings.center_frequencies)
     
         # ----------------------------------------------------------------------------------    
         # Combine Harmonic (periodic/tonal) and Broadband Noise
         # ----------------------------------------------------------------------------------
         num_mic      = len(coordinates.X_hub[0,:,0,0])
-        SPL_total_1_3_spectrum      = 10*np.log10( 10**(aeroacoustics.SPL_prop_harmonic_1_3_spectrum/10) + 10**(aeroacoustics.SPL_prop_broadband_1_3_spectrum/10)) - np.tile(delta_atmo[cpt,None,:],(1,num_mic,1))  
-        SPL_total_1_3_spectrum[np.isnan(SPL_total_1_3_spectrum)] = 0 
+        SPL_total_1_3_spectrum      = 10*rp.log10( 10**(aeroacoustics.SPL_prop_harmonic_1_3_spectrum/10) + 10**(aeroacoustics.SPL_prop_broadband_1_3_spectrum/10)) - rp.tile(delta_atmo[cpt,None,:],(1,num_mic,1))  
+        SPL_total_1_3_spectrum[rp.isnan(SPL_total_1_3_spectrum)] = 0 
     
         # ----------------------------------------------------------------------------------
         # Summation of spectra from propellers into one SPL and store results

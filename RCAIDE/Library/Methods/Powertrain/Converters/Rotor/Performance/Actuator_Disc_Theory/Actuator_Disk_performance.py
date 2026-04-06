@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core  import Data , Units, orientation_product, orientation_transpose  
 
 # package imports
-import  numpy as  np   
+import RNUMPY as rp   
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Actuator_Disk_performance
@@ -178,29 +178,29 @@ def Actuator_Disk_performance(rotor, conditions):
     T_inertial2body         = orientation_transpose(T_body2inertial)
     V_body                  = orientation_product(T_inertial2body,Vv)
     body2thrust,orientation = rotor.body_to_prop_vel(commanded_TV) 
-    T_body2thrust           = orientation_transpose(np.ones_like(T_body2inertial[:])*body2thrust)
+    T_body2thrust           = orientation_transpose(rp.ones_like(T_body2inertial[:])*body2thrust)
     V_thrust                = orientation_product(T_body2thrust,V_body)
 
     # Check and correct for hover
     V         = V_thrust[:,0,None]
     V[V==0.0] = 1E-6
 
-    n      = omega/(2.*np.pi)      
+    n      = omega/(2.*rp.pi)      
     D      = 2*R 
     torque = Cq * (rho*(n*n)*(D*D*D*D*D)) 
-    eta    = eta_p * np.ones_like(V) 
+    eta    = eta_p * rp.ones_like(V) 
     power  = torque * omega
     thrust = eta*power/V 
     Ct     = thrust/(rho*(n*n)*(D*D*D*D)) 
     Cp     = power / (rho*(n*n*n)*(D*D*D*D*D)) 
     
     ctrl_pts              = len(V) 
-    thrust_vector         = np.zeros((ctrl_pts,3))
+    thrust_vector         = rp.zeros((ctrl_pts,3))
     thrust_vector[:,0]    = thrust[:,0]         
-    disc_loading          = thrust/(np.pi*(R**2))
+    disc_loading          = thrust/(rp.pi*(R**2))
     power_loading         = thrust/(power)    
-    A                     = np.pi*(R**2 - rotor.hub_radius**2)
-    FoM                   = thrust*np.sqrt(thrust/(2*rho*A))/power  
+    A                     = rp.pi*(R**2 - rotor.hub_radius**2)
+    FoM                   = thrust*rp.sqrt(thrust/(2*rho*A))/power  
       
     conditions.energy.converters[rotor.tag]   = Data( 
             thrust                            = thrust_vector,  

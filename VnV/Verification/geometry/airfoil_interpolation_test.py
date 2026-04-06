@@ -7,7 +7,6 @@ from RCAIDE.Library.Methods.Geometry.Airfoil.generate_interpolated_airfoils  imp
 from RCAIDE.Library.Methods.Geometry.Airfoil.import_airfoil_geometry         import  import_airfoil_geometry
 from RCAIDE.Library.Plots.Geometry import plot_airfoil
 import os
-import numpy as np
 import matplotlib.pyplot as plt 
 
 def main():

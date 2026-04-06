@@ -9,7 +9,7 @@
 
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data 
-import numpy as np
+import RNUMPY as rp
 try:
     import vsp as vsp
 except ImportError:
@@ -389,7 +389,7 @@ def read_vsp_nacelle(nacelle_id,vsp_nacelle_type, units_type='SI'):
                 if i == 0:
                     nacelle.flow_through = True 
                     
-            diameter = np.max([np.sqrt(segment.height**2 + segment.width**2),diameter])
+            diameter = rp.max([rp.sqrt(segment.height**2 + segment.width**2),diameter])
                 
             nacelle.segments.append(segment)
             
@@ -399,9 +399,9 @@ def read_vsp_nacelle(nacelle_id,vsp_nacelle_type, units_type='SI'):
         segs         = nacelle.segments
         segment_list = list(nacelle.segments.keys())
         for seg in range(num_segs):    
-            segs[segment_list[seg]].percent_x_location = np.array(abs_x_location_vec[seg])/abs_x_location_vec[-1]
-            segs[segment_list[seg]].percent_y_location = np.array(abs_y_location_vec[seg])/abs_x_location_vec[-1]
-            segs[segment_list[seg]].percent_z_location = np.array(abs_z_location_vec[seg])/abs_x_location_vec[-1] 
+            segs[segment_list[seg]].percent_x_location = rp.array(abs_x_location_vec[seg])/abs_x_location_vec[-1]
+            segs[segment_list[seg]].percent_y_location = rp.array(abs_y_location_vec[seg])/abs_x_location_vec[-1]
+            segs[segment_list[seg]].percent_z_location = rp.array(abs_z_location_vec[seg])/abs_x_location_vec[-1] 
           
  
     elif vsp_nacelle_type =='BodyOfRevolution':

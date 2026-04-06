@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import  Data
 from RCAIDE.Library.Mission.Common.Pre_Process  import geometry_preprocess_routine 
  
 # Pacakge imports 
-import numpy as np  
+import RNUMPY as rp  
 import os, sys 
 
 #------------------------------------------------------------------------------
@@ -135,10 +135,10 @@ def aircraft_aerodynamic_analysis(analyses                         = None,
     ctrl_pts = len(angle_of_attacks[:, 0] )
     state                                              = RCAIDE.Framework.Mission.Common.State()
     state.conditions                                   = RCAIDE.Framework.Mission.Common.Results() 
-    state.conditions.freestream.density                = rho * np.ones_like(angle_of_attacks)
-    state.conditions.freestream.dynamic_viscosity      = mu  * np.ones_like(angle_of_attacks)
-    state.conditions.freestream.temperature            = T   * np.ones_like(angle_of_attacks)
-    state.conditions.freestream.pressure               = P   * np.ones_like(angle_of_attacks)
+    state.conditions.freestream.density                = rho * rp.ones_like(angle_of_attacks)
+    state.conditions.freestream.dynamic_viscosity      = mu  * rp.ones_like(angle_of_attacks)
+    state.conditions.freestream.temperature            = T   * rp.ones_like(angle_of_attacks)
+    state.conditions.freestream.pressure               = P   * rp.ones_like(angle_of_attacks)
     state.conditions.freestream.dynamic_pressure       = 0.5 * rho * V**2  
     state.conditions.aerodynamics.angles.alpha         = angle_of_attacks  
     state.conditions.aerodynamics.angles.beta          = angle_of_attacks *0  
@@ -148,7 +148,7 @@ def aircraft_aerodynamic_analysis(analyses                         = None,
     state.conditions.static_stability.roll_rate        = angle_of_attacks *0       
     state.conditions.static_stability.pitch_rate       = angle_of_attacks *0 
     state.conditions.static_stability.yaw_rate         = angle_of_attacks *0 
-    state.conditions.frames.wind.transform_to_inertial = np.tile( np.array([[[1., 0., 0.],[0., 1., 0.],[0., 0.,  1.]]]) , ( ctrl_pts,  1, 1)  ) 
+    state.conditions.frames.wind.transform_to_inertial = rp.tile( rp.array([[[1., 0., 0.],[0., 1., 0.],[0., 0.,  1.]]]) , ( ctrl_pts,  1, 1)  ) 
     state.conditions.expand_rows(ctrl_pts)
     state.conditions.control_surfaces = Data()
     analyses.aerodynamics.aileron_flag  = False
@@ -189,7 +189,7 @@ def aircraft_aerodynamic_analysis(analyses                         = None,
     state.conditions.freestream.mach_number                 = mach_numbers
     state.conditions.freestream.velocity                    = V
     state.conditions.freestream.reynolds_number             = non_dimensional_reynolds_numbers
-    state.conditions.frames.inertial.velocity_vector        = np.tile(np.array([[0, 0, 0]]), ( ctrl_pts,  1))
+    state.conditions.frames.inertial.velocity_vector        = rp.tile(rp.array([[0, 0, 0]]), ( ctrl_pts,  1))
     state.conditions.frames.inertial.velocity_vector[:,0]   = V[:,0]  
  
     # ---------------------------------------------------------------------------------------

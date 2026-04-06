@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core import  Container 
 
 # package imports
-import numpy   as np  
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  populate_control_sections
@@ -39,14 +39,14 @@ def populate_control_sections(wing):
     
     # loop throught the control surfaces on the wing 
     for cs in w_cs :
-        sf    = np.zeros(2) # set a temporary data structure to store the span fraction bounds
+        sf    = rp.zeros(2) # set a temporary data structure to store the span fraction bounds
         sf[0] = cs.span_fraction_start
         sf[1] = cs.span_fraction_end
         
         # loop though the segments on the wing
         for i , seg in enumerate(w_seg):
             append_CS = False
-            s_sf = np.zeros(2) 
+            s_sf = rp.zeros(2) 
             if i == 0: # the first segment (root) cannot have any control surfaces 
                 pass
             else: # the following block determines where the bounds of the control surface are in relation to the segment breaks
@@ -54,42 +54,42 @@ def populate_control_sections(wing):
                 prev_seg    =  list(w_seg.keys())[i-1]
                 current_seg =  list(w_seg.keys())[i]
                 if (sf[0] < w_seg[prev_seg].percent_span_location) and (sf[1] < w_seg[current_seg].percent_span_location) and (sf[1] > w_seg[prev_seg].percent_span_location) :
-                    s_sf = np.array([w_seg[prev_seg].percent_span_location,sf[1]])   
+                    s_sf = rp.array([w_seg[prev_seg].percent_span_location,sf[1]])   
                     append_CS = True 
                 
                 # Case 2
                 elif (sf[0] < w_seg[prev_seg].percent_span_location) and (sf[1] == w_seg[current_seg].percent_span_location):
-                    s_sf = np.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
+                    s_sf = rp.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
                     append_CS = True 
                     
                 # Case 3   
                 elif (sf[0] < w_seg[prev_seg].percent_span_location) and (sf[1] > w_seg[current_seg].percent_span_location):
-                    s_sf = np.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
+                    s_sf = rp.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
                     append_CS = True                 
                 
                 # Case 4 
                 elif (sf[0] == w_seg[prev_seg].percent_span_location) and (sf[1] < w_seg[current_seg].percent_span_location):
-                    s_sf = np.array([w_seg[prev_seg].percent_span_location,sf[1]])   
+                    s_sf = rp.array([w_seg[prev_seg].percent_span_location,sf[1]])   
                     append_CS = True 
                    
                 # Case 5 
                 elif (sf[0] == w_seg[prev_seg].percent_span_location) and (sf[1] == w_seg[current_seg].percent_span_location): 
-                    s_sf = np.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
+                    s_sf = rp.array([w_seg[prev_seg].percent_span_location,w_seg[current_seg].percent_span_location])       
                     append_CS = True
                     
                 # Case 6 
                 elif (sf[0] > w_seg[prev_seg].percent_span_location) and (sf[1] < w_seg[current_seg].percent_span_location):
-                    s_sf = np.array([sf[0],sf[1]])
+                    s_sf = rp.array([sf[0],sf[1]])
                     append_CS = True
                     
                 # Case 7 
                 elif (sf[0] > w_seg[prev_seg].percent_span_location) and (sf[1] == w_seg[current_seg].percent_span_location) :
-                    s_sf = np.array([sf[0],w_seg[current_seg].percent_span_location]) 
+                    s_sf = rp.array([sf[0],w_seg[current_seg].percent_span_location]) 
                     append_CS = True                    
                     
                 # Case 8
                 elif (sf[0] > w_seg[prev_seg].percent_span_location) and (sf[1] > w_seg[current_seg].percent_span_location) and (sf[0] < w_seg[current_seg].percent_span_location):
-                    s_sf = np.array([sf[0],w_seg[current_seg].percent_span_location]) 
+                    s_sf = rp.array([sf[0],w_seg[current_seg].percent_span_location]) 
                     append_CS = True
                     
                 else: 

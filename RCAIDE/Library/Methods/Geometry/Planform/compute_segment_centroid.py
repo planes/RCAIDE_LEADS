@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute segment centroid 
@@ -41,9 +41,9 @@ def compute_segment_centroid(le_sweep,seg_span,dx,dy,dz,taper,dihedral,root_chor
     
     a = tip_chord
     b = root_chord
-    c = np.tan(le_sweep)*seg_span
+    c = rp.tan(le_sweep)*seg_span
     cx = (2*a*c + a**2 + c*b + a*b + b**2) / (3*(a+b))
     cy = seg_span / 3. * (( 1. + 2. * taper ) / (1. + taper))
-    cz = cy * np.tan(dihedral)    
+    cz = cy * rp.tan(dihedral)    
     
-    return np.array([cx+dx,cy+dy,cz+dz]) 
+    return rp.array([cx+dx,cy+dy,cz+dz]) 

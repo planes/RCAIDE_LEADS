@@ -4,7 +4,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Data, Units  
 from RCAIDE.Library.Plots import *  
 from RCAIDE.Library.Methods.Performance.cruise_drag_buildup_table import cruise_drag_buildup_table
-import numpy as  np 
+import RNUMPY as rp
 import sys
 import os
 
@@ -60,9 +60,9 @@ def main():
 
     Cruise_CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0] 
     Cruise_CL_true   = 0.5115973675981583
-    Cruise_CL_diff   = np.abs(Cruise_CL - Cruise_CL_true)
+    Cruise_CL_diff   = rp.abs(Cruise_CL - Cruise_CL_true)
     print('Error: ',Cruise_CL_diff)
-    assert np.abs((Cruise_CL - Cruise_CL_true)/Cruise_CL_true) < 1e-6 
+    assert rp.abs((Cruise_CL - Cruise_CL_true)/Cruise_CL_true) < 1e-6 
     
     
     # test lopa coordianates
@@ -86,17 +86,17 @@ def main():
     
     # Truth values  
     error = Data()  
-    error.coordinate_1_x   = np.max(np.abs(coordinate_1_x - coordinate_1_x_thruth))   
-    error.coordinate_1_y   = np.max(np.abs(coordinate_1_y - coordinate_1_y_thruth))    
-    error.coordinate_2_x   = np.max(np.abs(coordinate_2_x - coordinate_2_x_thruth))   
-    error.coordinate_2_y   = np.max(np.abs(coordinate_2_y - coordinate_2_y_thruth))    
-    error.coordinate_3_x   = np.max(np.abs(coordinate_3_x - coordinate_3_x_thruth))   
-    error.coordinate_3_y   = np.max(np.abs(coordinate_3_y - coordinate_3_y_thruth))    
+    error.coordinate_1_x   = rp.max(rp.abs(coordinate_1_x - coordinate_1_x_thruth))   
+    error.coordinate_1_y   = rp.max(rp.abs(coordinate_1_y - coordinate_1_y_thruth))    
+    error.coordinate_2_x   = rp.max(rp.abs(coordinate_2_x - coordinate_2_x_thruth))   
+    error.coordinate_2_y   = rp.max(rp.abs(coordinate_2_y - coordinate_2_y_thruth))    
+    error.coordinate_3_x   = rp.max(rp.abs(coordinate_3_x - coordinate_3_x_thruth))   
+    error.coordinate_3_y   = rp.max(rp.abs(coordinate_3_y - coordinate_3_y_thruth))    
     print('Errors:')                               
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-6)        
+        assert(rp.abs(v)<1e-6)        
     
     return 
 

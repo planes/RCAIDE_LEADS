@@ -8,8 +8,10 @@
 from RCAIDE.Framework.Core import  Data 
 
 # package imports 
-from scipy.interpolate   import RegularGridInterpolator
-from scipy import interpolate
+from RNUMPY.scipy.interpolate import RegularGridInterpolator
+from RNUMPY.scipy import interpolate
+# from scipy.interpolate   import RegularGridInterpolator
+# from scipy import interpolate
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vortex_Lattice

@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan   import design_turbo
 from RCAIDE.Library.Plots                 import *     
 
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from copy import deepcopy
 import os
 
@@ -299,7 +299,7 @@ def vehicle_setup():
     fuselage.heights.at_wing_root_quarter_chord = 3.35  
     fuselage.areas.side_projected               = 239.20
     fuselage.areas.wetted                       = 327.01
-    fuselage.areas.front_projected              = np.pi * (fuselage.heights.maximum  / 2) ** 2
+    fuselage.areas.front_projected              = rp.pi * (fuselage.heights.maximum  / 2) ** 2
     fuselage.effective_diameter                 = 3.18 
     fuselage.differential_pressure              = 10**5 * Units.pascal    # Maximum differential pressure  
     
@@ -550,7 +550,7 @@ def vehicle_setup():
     nacelle.inlet_diameter                          = 2.0
     nacelle.origin                                  = [[12.15,4.38, -2.1]] 
     nacelle.mass_properties.center_of_gravity       = [[nacelle.length /2,0,0 ]]
-    nacelle.areas.wetted                            = 1.1*np.pi*nacelle.diameter*nacelle.length
+    nacelle.areas.wetted                            = 1.1*rp.pi*nacelle.diameter*nacelle.length
     nacelle_airfoil                                 = RCAIDE.Library.Components.Airfoils.NACA_4_Series_Airfoil()
     nacelle_airfoil.NACA_4_Series_code              = '2410'
     nacelle.append_airfoil(nacelle_airfoil)

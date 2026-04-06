@@ -6,7 +6,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Net Convected Heat 
@@ -73,7 +73,7 @@ def air_cooled_performance(HAS,battery,bus,coolant_line, Q_heat_gen,T_cell,state
         S_T             = battery.geometrtic_configuration.normal_spacing          
         S_L             = battery.geometrtic_configuration.parallel_spacing
 
-        S_D = np.sqrt(S_T**2+S_L**2)
+        S_D = rp.sqrt(S_T**2+S_L**2)
         if 2*(S_D-D_cell) < (S_T-D_cell):
             V_max = V_coolant*(S_T/(2*(S_D-D_cell)))
         else:
@@ -92,9 +92,9 @@ def air_cooled_performance(HAS,battery,bus,coolant_line, Q_heat_gen,T_cell,state
         Nu                    = C*(Re_max**m)*(Pr_coolant**0.36)*((Pr_coolant/Pr_w_coolant)**0.25)           
         h                     = Nu*K_coolant/D_cell
         Tw_Ti                 = (T - T_ambient)
-        Tw_To                 = Tw_Ti * np.exp((-np.pi*D_cell*n_total_module*h)/(rho_coolant*V_coolant*Nn*S_T*Cp_coolant))
-        dT_lm                 = (Tw_Ti - Tw_To)/np.log(Tw_Ti/Tw_To)
-        Q_convec              = heat_transfer_efficiency*h*np.pi*D_cell*H_cell*n_total_module*dT_lm 
+        Tw_To                 = Tw_Ti * rp.exp((-rp.pi*D_cell*n_total_module*h)/(rho_coolant*V_coolant*Nn*S_T*Cp_coolant))
+        dT_lm                 = (Tw_Ti - Tw_To)/rp.log(Tw_Ti/Tw_To)
+        Q_convec              = heat_transfer_efficiency*h*rp.pi*D_cell*H_cell*n_total_module*dT_lm 
         Q_convec[Tw_Ti == 0.] = 0.
         Q_heat_gen_tot        = Q_heat_gen*n_total_module  
     Q_net                     = Q_heat_gen_tot - Q_convec  

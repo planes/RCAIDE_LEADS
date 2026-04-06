@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # imports 
-import numpy as np
+import RNUMPY as rp
 
  
 # ----------------------------------------------------------------------------------------------------------------------
@@ -95,7 +95,7 @@ def compute_bus_conditions(bus, state, t_idx, delta_t):
         
     if t_idx != state.numerics.number_of_control_points-1:  
         # Handle fully charged state
-        if state.conditions.energy.recharging and np.float16(bus_conditions.state_of_charge[t_idx+1]) == 1:
+        if state.conditions.energy.recharging and rp.float16(bus_conditions.state_of_charge[t_idx+1]) == 1:
             bus_conditions.charging_current[t_idx+1] = 0
             bus_conditions.power_draw[t_idx+1]       = 0
             bus_conditions.current_draw[t_idx+1]     = 0

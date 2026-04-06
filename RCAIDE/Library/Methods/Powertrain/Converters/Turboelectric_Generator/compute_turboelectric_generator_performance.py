@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Generator          import comp
  
 # python imports 
 from copy import deepcopy 
-import numpy as np
+import RNUMPY as rp
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_turboelectric_generator_performance
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -90,7 +90,7 @@ def compute_turboelectric_generator_performance(turboelectric_generator, state, 
         generator_conditions.inputs.omega  = compressor_conditions.omega         
         
         # assign voltage across bus 
-        generator_conditions.outputs.voltage = bus.voltage*np.ones_like(generator_conditions.inputs.power)
+        generator_conditions.outputs.voltage = bus.voltage*rp.ones_like(generator_conditions.inputs.power)
         
          # run the generator 
         compute_generator_performance(generator,conditions)   
@@ -100,7 +100,7 @@ def compute_turboelectric_generator_performance(turboelectric_generator, state, 
         # here , we know the electric power produced by the generator and we want to determine how much fuel was used to produce said power
         
         # assign voltage across bus 
-        generator_conditions.outputs.voltage = bus.voltage*np.ones_like(generator_conditions.outputs.power)
+        generator_conditions.outputs.voltage = bus.voltage*rp.ones_like(generator_conditions.outputs.power)
         generator_conditions.outputs.current = generator_conditions.outputs.power / generator_conditions.outputs.voltage
         
         generator.inverse_calculation = True

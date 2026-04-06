@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Imports 
 # ---------------------------------------------------------------------------------------------------------------------- 
-import numpy as np
+import RNUMPY as rp
 from copy import  deepcopy
 
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -127,7 +127,7 @@ def compute_compressor_performance(compressor, conditions):
     ht_out    = Tt_out*Cp
     T_out     = Tt_out/(1.+(gamma-1.)/2.*M0*M0)
     P_out     = Pt_out/((1.+(gamma-1.)/2.*M0*M0)**(gamma/(gamma-1.))) 
-    M_out     = np.sqrt( (((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.) )
+    M_out     = rp.sqrt( (((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.) )
     
     # Compute the work done by the compressor (normalized by mass flow i.e. J/(kg/s)
     work_done = ht_out - ht_in

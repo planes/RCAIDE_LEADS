@@ -8,7 +8,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 from RCAIDE.Framework.Core                       import Units 
-import numpy as np
+import RNUMPY as rp
 from copy import  deepcopy
  
 # ----------------------------------------------------------------------------------------------------------------------
@@ -260,7 +260,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
     V_oc_cell[t_idx]      = V_ul_cell[t_idx] + (abs(I_cell[t_idx]) * R_0_cell[t_idx])              
 
     # Effective Power flowing through battery_module 
-    P_module[t_idx]       = P_bus[t_idx] /no_modules  + np.abs(Q_heat_module[t_idx]) 
+    P_module[t_idx]       = P_bus[t_idx] /no_modules  + rp.abs(Q_heat_module[t_idx]) 
 
     # store remaining variables 
     V_oc_module[t_idx]     = V_oc_cell[t_idx]*n_series 
@@ -285,7 +285,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
             
         # Compute state of charge and depth of discarge of the battery_module
         E_module[t_idx+1]                                     = (E_module[t_idx]) -P_module[t_idx]*delta_t[t_idx]
-        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = np.float32(E_module_max)
+        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = E_module_max
         SOC_cell[t_idx+1]                                     = E_module[t_idx+1]/E_module_max 
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]>1]                = 1.
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]<0]                = 0. 
@@ -373,14 +373,14 @@ def compute_nmc_cell_state(battery_module_data, SOC, T, I):
     SOC[SOC > 1.]   = 1.    
     DOD             = 1 - SOC 
     
-    T[np.isnan(T)] = 302.65
+    T[rp.isnan(T)] = 302.65
     T[T<272.65]    = 272.65 # model does not fit for below 0  degrees
     T[T>322.65]    = 322.65 # model does not fit for above 50 degrees
      
     I[I<0.0]       = 0.0
     I[I>8.0]       = 8.0   
      
-    pts            = np.hstack((np.hstack((I, T)),DOD  )) # amps, temp, SOC   
-    V_ul           = np.atleast_2d(battery_module_data.Voltage(pts)[:,1]).T  
+    pts            = rp.hstack((rp.hstack((I, T)),DOD  )) # amps, temp, SOC   
+    V_ul           = rp.atleast_2d(battery_module_data.Voltage(pts)[:,1]).T  
     
     return V_ul

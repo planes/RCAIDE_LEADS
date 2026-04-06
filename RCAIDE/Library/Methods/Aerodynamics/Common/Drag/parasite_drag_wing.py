@@ -11,7 +11,7 @@ from RCAIDE.Library.Methods.Aerodynamics.Common.Drag.compressible_mixed_flat_pla
 from RCAIDE.Library.Methods.Utilities         import Cubic_Spline_Blender  
  
 # package imports
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #   Parasite Drag Wing 
@@ -320,13 +320,13 @@ def compute_parasite_drag(re,mac_w,Mc,Tc,xtu,xtl,sweep_w,t_c_w,Sref,Swet,C):
     cf_w_l, k_comp_l, k_reyn_l = compressible_mixed_flat_plate(Re_w,Mc,Tc,xtl) 
     
     # correction for airfoils
-    cos_sweep = np.cos(sweep_w)
+    cos_sweep = rp.cos(sweep_w)
     cos2      = cos_sweep*cos_sweep
     
     ind = Mc <= 1.
     
-    k_w = np.ones_like(Mc)
-    beta   =  ( np.sqrt(1.-(Mc[ind]*cos_sweep)**2.) )
+    k_w = rp.ones_like(Mc)
+    beta   =  ( rp.sqrt(1.-(Mc[ind]*cos_sweep)**2.) )
     k_w[ind] = 1. + ( 2.* C * (t_c_w * cos2) ) /beta \
                   + (( C**2) * cos2 * (t_c_w** 2) * (1. + 5.*(cos2)) ) / (2.* beta ** 2)             
     

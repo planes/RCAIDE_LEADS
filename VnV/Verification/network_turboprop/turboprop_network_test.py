@@ -14,7 +14,7 @@ from   RCAIDE.Library.Methods.Performance.estimate_stall_speed import estimate_s
 from RCAIDE.Library            import Components
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import matplotlib.pyplot as plt 
 from   copy  import deepcopy
@@ -74,14 +74,14 @@ def main():
     
     # Store errors 
     error = Data()
-    error.thrust    = np.max(np.abs(thrust - thrust_truth )/thrust_truth) 
-    error.throttle  = np.max(np.abs(throttle  - throttle_truth  )/throttle_truth)  
+    error.thrust    = rp.max(rp.abs(thrust - thrust_truth )/thrust_truth) 
+    error.throttle  = rp.max(rp.abs(throttle  - throttle_truth  )/throttle_truth)  
      
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
     
     # plt the old results
     plot_mission(results)   

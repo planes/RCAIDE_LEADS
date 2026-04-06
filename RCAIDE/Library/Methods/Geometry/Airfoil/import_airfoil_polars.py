@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------    
 
 from RCAIDE.Framework.Core import Data , Units   
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  import_airfoil_polars
@@ -37,13 +37,13 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
     
     # create empty data structures 
     airfoil_data = Data() 
-    AoA          = np.zeros((num_polars,angel_of_attack_discretization))
-    CL           = np.zeros((num_polars,angel_of_attack_discretization))
-    CD           = np.zeros((num_polars,angel_of_attack_discretization)) 
-    Re           = np.zeros(num_polars)
-    Ma           = np.zeros(num_polars)
+    AoA          = rp.zeros((num_polars,angel_of_attack_discretization))
+    CL           = rp.zeros((num_polars,angel_of_attack_discretization))
+    CD           = rp.zeros((num_polars,angel_of_attack_discretization)) 
+    Re           = rp.zeros(num_polars)
+    Ma           = rp.zeros(num_polars)
     
-    AoA_interp = np.linspace(-6,16,angel_of_attack_discretization)  
+    AoA_interp = rp.linspace(-6,16,angel_of_attack_discretization)  
     
     for j in range(len(airfoil_polar_files)):   
         # Open file and read column names and data block
@@ -71,9 +71,9 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
                 last_line = True
         
         data_len = len(data_block)
-        airfoil_aoa= np.zeros(data_len)
-        airfoil_cl = np.zeros(data_len)
-        airfoil_cd = np.zeros(data_len)     
+        airfoil_aoa= rp.zeros(data_len)
+        airfoil_cl = rp.zeros(data_len)
+        airfoil_cd = rp.zeros(data_len)     
     
         # Loop through each value: append to each column
         for line_count , line in enumerate(data_block):
@@ -82,8 +82,8 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
             airfoil_cd[line_count]  = float(data_block[line_count][20:27].strip())   
       
         AoA[j,:] = AoA_interp
-        CL[j,:]  = np.interp(AoA_interp,airfoil_aoa,airfoil_cl)
-        CD[j,:]  = np.interp(AoA_interp,airfoil_aoa,airfoil_cd)  
+        CL[j,:]  = rp.interp(AoA_interp,airfoil_aoa,airfoil_cl)
+        CD[j,:]  = rp.interp(AoA_interp,airfoil_aoa,airfoil_cd)  
     
     airfoil_data.aoa_from_polar               = AoA*Units.degrees
     airfoil_data.re_from_polar                = Re   

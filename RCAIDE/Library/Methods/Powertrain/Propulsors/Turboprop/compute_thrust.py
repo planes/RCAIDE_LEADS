@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core      import Units 
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_thrust
@@ -211,14 +211,14 @@ def compute_thrust(turboprop, conditions):
     mdhc                                           = turboprop.compressor_nondimensional_massflow    
     total_temperature_reference                    = turboprop_conditions.total_temperature_reference
     total_pressure_reference                       = turboprop_conditions.total_pressure_reference     
-    mdot_core                                      = mdhc*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
+    mdot_core                                      = mdhc*rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
 
     # computing the dimensional thrust
     FD2                                            = Fsp*mdot_core*turboprop_conditions.throttle
 
     # fuel flow rate
-    a                                              = np.array([0.]) 
-    m_dot_fuel                                     = np.fmax(FD2*TSFC/g,a)*1./Units.hour    
+    a                                              = rp.array([0.]) 
+    m_dot_fuel                                     = rp.fmax(FD2*TSFC/g,a)*1./Units.hour    
 
     # computing the power 
     power                                          = FD2*V0 

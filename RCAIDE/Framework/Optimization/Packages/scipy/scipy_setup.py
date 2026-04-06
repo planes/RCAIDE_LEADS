@@ -11,8 +11,7 @@
 # ----------------------------------------------------------------------
 
 # rcaide imports
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
 from RCAIDE.Framework.Optimization.Packages.particle_swarm import particle_swarm_optimization 
 from scipy.optimize import NonlinearConstraint
 from RCAIDE.Framework.Optimization.Common import helper_functions as help_fun
@@ -50,29 +49,29 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
     wrapper = lambda x:SciPy_Problem(problem,x)    
     
     # Set inputsq
-    nam  = inp[:,0] # Names
-    ini  = inp[:,1] # Initials
-    bndl = inp[:,2] # Bounds
-    bndu = inp[:,3] # Bounds
-    scl  = inp[:,4] # Scale
+    nam  = inp.name[:] # Names
+    ini  = rp.array(inp.value[:,0],dtype=rp.float32) # Initials
+    bndl = rp.array(inp.value[:,1],dtype=rp.float32) # Bounds
+    bndu = rp.array(inp.value[:,2],dtype=rp.float32) # Bounds
+    scl  = rp.array(inp.value[:,3],dtype=rp.float32) # Scale
     
     x   = ini/scl
-    bnds = np.zeros((len(inp),2))
-    lb   = np.zeros(len(inp))
-    ub   = np.zeros(len(inp))
+    bnds = rp.zeros((len(inp.name),2))
+    lb   = rp.zeros(len(inp.name))
+    ub   = rp.zeros(len(inp.name))
     de_bnds = []    
     
-    for ii in range(0,len(inp)):
+    for ii in range(0,len(inp.name)):
         # Scaled bounds
-        bnds[ii] = (bndl[ii]/scl[ii]),(bndu[ii]/scl[ii])  
+        bnds[ii] = rp.array([bndl[ii]/scl[ii],bndu[ii]/scl[ii]])  
         lb[ii]   = bndl[ii]/scl[ii]
         ub[ii]   = bndu[ii]/scl[ii]
         de_bnds.append((bndl[ii]/scl[ii],bndu[ii]/scl[ii]))  
      
     # Finalize problem statement and run
     if solver=='SLSQP':
-        outputs = sp.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,\
-                                         iter=iter, epsilon = sense_step, acc  = tolerance, full_output=True,  iprint=0)
+        outputs = rp.scipy.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,\
+                                        iter=iter, epsilon = sense_step, acc  = tolerance, full_output=True,  iprint=0)
     elif solver == 'differential_evolution':
         # Define constraints as a tuple of nonlinear constraints 
         scaled_constraints = []
@@ -82,25 +81,25 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
             def fun(x):
                 problem.evaluate(x)
                 constraint_val = help_fun.get_values(problem,de_constraint,aliases)
-                return np.atleast_1d(constraint_val)
+                return rp.atleast_1d(constraint_val)
             
             bound  = help_fun.scale_const_bnds(con)
-            if con[ii][1]=='=':
+            if con.name_signs[ii][1]=='=':
                 print('Nonlinear constraints for scipy differential evoultion optimization has '
                       'the general inequality form. Consider rewriting equality constraint as two '
                       'separate inequality constraints')
             
-            if con[ii][1]=='>':
-                nlc = NonlinearConstraint(fun,bound[ii], np.inf) 
+            if con.name_signs[ii][1]=='>':
+                nlc = NonlinearConstraint(fun,bound[ii], rp.inf) 
                 
-            elif con[ii][1]=='<':
-                nlc = NonlinearConstraint(fun, -np.inf,bound[ii])
+            elif con.name_signs[ii][1]=='<':
+                nlc = NonlinearConstraint(fun, -rp.inf,bound[ii])
                 
             scaled_constraints.append(nlc) 
             
         diff_evo_cons = tuple(scaled_constraints)    
         
-        outputs = sp.optimize.differential_evolution(wrapper, bounds= de_bnds, strategy='best1bin', maxiter=1000, popsize = pop_size, \
+        outputs = rp.scipy.optimize.differential_evolution(wrapper, bounds= de_bnds, strategy='best1bin', maxiter=1000, popsize = pop_size, \
                                                      tol=0.01, mutation=(0.5, 1), recombination=0.7, seed=prob_seed, callback=None,\
                                                      disp=False, polish=True, init='latinhypercube', atol=0, updating='immediate',\
                                                      workers=1,constraints=diff_evo_cons)
@@ -109,7 +108,7 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
         outputs = particle_swarm_optimization(wrapper, lb, ub, f_ieqcons=problem.inequality_constraint, kwargs={}, swarmsize=pop_size ,\
                                               omega=0.5, phip=0.5, phig=0.5, maxiter=1000, minstep=1e-4, minfunc=1e-4, debug=False)    
     else:
-        outputs = sp.optimize.minimize(wrapper,x,method=solver)
+        outputs = rp.scipy.optimize.minimize(wrapper,x,method=solver)
     
     return outputs
  

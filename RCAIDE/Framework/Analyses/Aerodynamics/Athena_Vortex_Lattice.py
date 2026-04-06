@@ -16,7 +16,7 @@ from RCAIDE.Library.Methods.Aerodynamics.Athena_Vortex_Lattice  import *
 from RCAIDE.Library.Methods.Aerodynamics.Athena_Vortex_Lattice.AVL_Objects.Run_Case     import Run_Case
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Vortex_Lattice_Method
@@ -103,8 +103,8 @@ class Athena_Vortex_Lattice(Aerodynamics):
     
         # conditions table, used for surrogate model training
         self.training                               = Data()
-        self.training.angle_of_attack               = np.array([-2.,0., 2.,5., 7., 10.])*Units.degrees
-        self.training.Mach                          = np.array([0.05,0.15,0.25, 0.45,0.65,0.85]) 
+        self.training.angle_of_attack               = rp.array([-2.,0., 2.,5., 7., 10.])*Units.degrees
+        self.training.Mach                          = rp.array([0.05,0.15,0.25, 0.45,0.65,0.85]) 
         self.training.lift_coefficient              = None
         self.training.drag_coefficient              = None
         self.training.span_efficiency_factor        = None

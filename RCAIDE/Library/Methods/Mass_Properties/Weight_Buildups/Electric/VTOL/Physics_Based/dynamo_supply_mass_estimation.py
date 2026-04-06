@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------
 
 # import math
-import numpy as np
+import RNUMPY as rp
 import scipy.integrate as integrate
 
 # ----------------------------------------------------------------------

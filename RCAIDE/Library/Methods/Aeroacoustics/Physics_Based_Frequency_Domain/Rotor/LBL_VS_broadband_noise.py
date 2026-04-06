@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Python Package imports  
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute LBL-VS Broadband Noise 
@@ -55,7 +55,7 @@ def LBL_VS_broadband_noise(R_c,alpha_star,delta_p,r_e,L,M,Dbar_h,f,U):
     G_2   = compute_G_2(R_c/R_c_0)
     G_3   = compute_G_3(alpha_star)
     
-    SPL_LBL_VS =  10*np.log10((delta_p*(M**5)*L*Dbar_h)/(r_e**2) ) + G_1  + G_2 + G_3 # eqn 53
+    SPL_LBL_VS =  10*rp.log10((delta_p*(M**5)*L*Dbar_h)/(r_e**2) ) + G_1  + G_2 + G_3 # eqn 53
 
     return  SPL_LBL_VS
 
@@ -83,11 +83,11 @@ def compute_G_1(e):
     num_1 = 39.8 *0.5 
     num_2 = 98.409 *0.5  
     
-    G_1           = -num_1*np.log10(e) - 11.2   # eqn 57
-    G_1[e<1.64]   = -num_2*np.log10(e[e<1.64]) + 2  # eqn 57
-    G_1[e<1.17]   = -5.076 + np.sqrt( 2.484 - 506.25*(np.log10(e[e<1.17]))**2)  # eqn 57
-    G_1[e<0.8545] = num_2*np.log10(e[e<0.8545]) + 2      # eqn 57
-    G_1[e<0.5974] = num_1*np.log10(e[e<0.5974]) - 11.2    # eqn 57
+    G_1           = -num_1*rp.log10(e) - 11.2   # eqn 57
+    G_1[e<1.64]   = -num_2*rp.log10(e[e<1.64]) + 2  # eqn 57
+    G_1[e<1.17]   = -5.076 + rp.sqrt( 2.484 - 506.25*(rp.log10(e[e<1.17]))**2)  # eqn 57
+    G_1[e<0.8545] = num_2*rp.log10(e[e<0.8545]) + 2      # eqn 57
+    G_1[e<0.5974] = num_1*rp.log10(e[e<0.5974]) - 11.2    # eqn 57
     
     return G_1
 
@@ -111,11 +111,11 @@ def compute_G_2(d):
         N/A   
     '''     
  
-    G_2           = -77.852*np.log10(d) + 15.328           # eqn 58 
-    G_2[d<3.0889] = -65.188*np.log10(d[d<3.0889]) + 9.125  # eqn 58 
-    G_2[d<1.7579] = -114.052*((np.log10(d[d<1.7579]))**2 ) # eqn 58
-    G_2[d<0.5689] = 65.188*np.log10(d[d<0.5689]) + 9.125   # eqn 58
-    G_2[d<0.3237] = 77.852*np.log10(d[d<0.3237]) + 15.328  # eqn 58    
+    G_2           = -77.852*rp.log10(d) + 15.328           # eqn 58 
+    G_2[d<3.0889] = -65.188*rp.log10(d[d<3.0889]) + 9.125  # eqn 58 
+    G_2[d<1.7579] = -114.052*((rp.log10(d[d<1.7579]))**2 ) # eqn 58
+    G_2[d<0.5689] = 65.188*rp.log10(d[d<0.5689]) + 9.125   # eqn 58
+    G_2[d<0.3237] = 77.852*rp.log10(d[d<0.3237]) + 15.328  # eqn 58    
     
     return G_2
 

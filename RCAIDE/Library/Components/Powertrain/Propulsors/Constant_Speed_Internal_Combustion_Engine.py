@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Constant_Speed_Internal_Combus
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Constant_Speed_Internal_Combustion_Engine.compute_constant_speed_internal_combustion_engine_performance  import compute_constant_speed_internal_combustion_engine_performance, reuse_stored_constant_speed_internal_combustion_engine_data 
  
 # python imports 
-import numpy as np 
+import RNUMPY as rp 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Constant_Speed_ICE_Propeller
 # ---------------------------------------------------------------------------------------------------------------------- 

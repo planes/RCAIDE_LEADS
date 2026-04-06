@@ -10,7 +10,7 @@ from RCAIDE.Framework.Core                                     import Units,  Da
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia  import compute_vehicle_moment_of_inertia
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity  import compute_vehicle_center_of_gravity
 from RCAIDE.Library.Methods.Geometry.Planform                  import wing_planform
-import numpy as  np
+import RNUMPY as rp
 import RCAIDE
 import pandas as pd
 import sys   
@@ -94,7 +94,7 @@ def Transport_Aircraft_Test():
     
     print(vehicle.tag + ' Moment of Inertia')
     print(MOI) 
-    accepted  = np.array([[16156802.54978671,        0.        , -7824233.96896249],
+    accepted  = rp.array([[16156802.54978671,        0.        , -7824233.96896249],
                           [       0.        , 58633557.83917309,        0.        ],
                           [-7824233.96896249,        0.        , 54526483.54615998]])
                           
@@ -112,7 +112,7 @@ def Transport_Aircraft_Test():
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-6) 
+        assert(rp.abs(v)<1e-6) 
 
     return  
 
@@ -166,11 +166,11 @@ def General_Aviation_Test():
     print(vehicle.tag + ' Moment of Inertia')
     print(MOI)
 
-    accepted  = np.array([[3092.49011892,    0.        , -278.99230136],
+    accepted  = rp.array([[3092.49011892,    0.        , -278.99230136],
                           [   0.        , 5921.80746984,    0.        ],
                           [-278.99230136,    0.        , 4782.27699572]])
 
-    MOI_error     =  np.nan_to_num((MOI - accepted) / accepted)
+    MOI_error     =  rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error       = Data()
@@ -184,7 +184,7 @@ def General_Aviation_Test():
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-5)   
+        assert(rp.abs(v)<1e-5)   
 
     return
 
@@ -243,10 +243,10 @@ def EVTOL_Aircraft_Test(update_regression_values):
 
     print(vehicle.tag + ' Moment of Inertia')
     print(MOI) 
-    accepted  = np.array([[ 9463.1492284 ,  -431.31503284,  -323.65112921],
+    accepted  = rp.array([[ 9463.1492284 ,  -431.31503284,  -323.65112921],
        [ -431.31503284,  9992.41102398,  -101.09543924],
        [ -323.65112921,  -101.09543924, 17665.06668109]])
-    MOI_error     = np.nan_to_num((MOI - accepted) / accepted)
+    MOI_error     = rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error = Data()
@@ -260,7 +260,7 @@ def EVTOL_Aircraft_Test(update_regression_values):
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<5e-2) # Note that EVTOL weight is an iterative process, therefore the error can be larger than expected. 
+        assert(rp.abs(v)<5e-2) # Note that EVTOL weight is an iterative process, therefore the error can be larger than expected. 
 
     return  
 

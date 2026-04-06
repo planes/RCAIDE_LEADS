@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------  
 import RCAIDE
 from RCAIDE.Framework.Core import Units
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt
 
 
@@ -26,7 +26,7 @@ def main():
     atm = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     
     # test elevations -3 km <= z <= 90 km
-    z = np.linspace(-3,90,100) * Units.km
+    z = rp.linspace(-3,90,100) * Units.km
 
     # compute values from each model
     conditions = atm.compute_values(z)
@@ -39,10 +39,10 @@ def main():
     p_truth, T_truth, rho_truth, a_truth = get_truth()
     
     # difference
-    p_err   = np.max( p_truth   - p   )
-    T_err   = np.max( T_truth   - T   )
-    rho_err = np.max( rho_truth - rho )
-    a_err   = np.max( a_truth   - a   )
+    p_err   = rp.max( p_truth   - p   )
+    T_err   = rp.max( T_truth   - T   )
+    rho_err = rp.max( rho_truth - rho )
+    a_err   = rp.max( a_truth   - a   )
     
     print('Max Pressure Difference       = %.4e' % p_err)
     print('Max Temperature Difference    = %.4e' % T_err)
@@ -96,7 +96,7 @@ def main():
 # ---------------------------------------------------------------------- 
 
 def get_truth():
-    p_truth = np.array([  1.27774000e+05,   1.27774000e+05,   1.15542264e+05,
+    p_truth = rp.array([  1.27774000e+05,   1.27774000e+05,   1.15542264e+05,
              1.03528639e+05,   9.25500085e+04,   8.25367165e+04,
              7.34218760e+04,   6.51421228e+04,   5.76372994e+04,
              5.08503581e+04,   4.47272657e+04,   3.92169091e+04,
@@ -131,7 +131,7 @@ def get_truth():
              3.73400000e-01,   3.73400000e-01,   3.73400000e-01,
              3.73400000e-01])
 
-    T_truth = np.array([ 301.15      ,  301.15      ,  295.43916158,  289.33185191,
+    T_truth = rp.array([ 301.15      ,  301.15      ,  295.43916158,  289.33185191,
         283.22634305,  277.1226342 ,  271.02072458,  264.92061337,
         258.8222998 ,  252.72578307,  246.63106237,  240.53813692,
         234.44700593,  228.3576686 ,  222.27012413,  216.65      ,
@@ -157,7 +157,7 @@ def get_truth():
         191.96132908,  190.13132511,  188.30185367,  186.95      ,
         186.95      ,  186.95      ,  186.95      ,  186.95      ])
     
-    rho_truth = np.array([  1.47808000e+00,   1.47808000e+00,   1.36241969e+00,
+    rho_truth = rp.array([  1.47808000e+00,   1.47808000e+00,   1.36241969e+00,
          1.24652891e+00,   1.13836338e+00,   1.03756016e+00,
          9.43758932e-01,   8.56612200e-01,   7.75782596e-01,
          7.00942778e-01,   6.31775349e-01,   5.67972775e-01,
@@ -192,7 +192,7 @@ def get_truth():
          6.95792000e-06,   6.95792000e-06,   6.95792000e-06,
          6.95792000e-06])
     
-    a_truth = np.array([ 347.88555919,  347.88555919,  344.57121859,  340.99113708,
+    a_truth = rp.array([ 347.88555919,  347.88555919,  344.57121859,  340.99113708,
         337.37413972,  333.7190257 ,  330.02452809,  326.2893086 ,
         322.51195186,  318.69095905,  314.82474085,  310.9116096 ,
         306.94977058,  302.93731227,  298.87219538,  295.06949567,

@@ -7,7 +7,7 @@
 # RCAIDE imports     
 
 # package imports
-import numpy   as np 
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  update_center_of_gravity
@@ -79,8 +79,8 @@ def update_center_of_gravity(state, vehicle):
     # --------------------------------------------------------------------------       
     # update center of gravity
     # -------------------------------------------------------------------------- 
-    Mom_tot   = np.zeros((N,3))
-    Mass_tot  = np.zeros((N,1))
+    Mom_tot   = rp.zeros((N,3))
+    Mass_tot  = rp.zeros((N,1))
     for item in conditions.weights.components.mass.keys():
         mass = conditions.weights.components.mass[item]
         CG   = conditions.weights.components.global_center_of_gravity[item]

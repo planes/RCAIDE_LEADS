@@ -18,7 +18,7 @@ except ImportError:
     except ImportError:
         # This allows RCAIDE to build without OpenVSP
         pass
-import numpy as np
+import RNUMPY as rp
 import time
 import fileinput
 
@@ -88,7 +88,7 @@ def write_vsp_mesh(geometry,tag,half_mesh_flag,growth_ratio,growth_limiting_flag
     zlen = vsp.GetParmVal(vsp.FindParm(vehicle_id,"Z_Len","BBox"))
     
     # Max length
-    max_len = np.max([xlen,ylen,zlen])
+    max_len = rp.max([xlen,ylen,zlen])
     far_length = 10.*max_len
         
     vsp.SetCFDMeshVal(vsp.CFD_FAR_SIZE_ABS_FLAG,1)

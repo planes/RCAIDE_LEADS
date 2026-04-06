@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core    import Units, Data
 from RCAIDE.Library.Components import Component
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Systems Weight 

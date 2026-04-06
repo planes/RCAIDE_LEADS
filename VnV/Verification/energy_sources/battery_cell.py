@@ -15,7 +15,7 @@ from RCAIDE.Framework.Mission.Common                                  import Con
 from RCAIDE.Library.Plots                                             import * 
 
 # package imports  
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 
@@ -83,13 +83,13 @@ def lithium_ion_battery_test():
     curr                  = [1.5,3]  
     C_rat                 = [0.5,1]  
     marker_size           = 5 
-    mAh                   = np.array([3800,2600]) 
-    V_ul_true             = np.array([[3.1746312064954223, 3.14117403134389],[3.1746312064954223,3.14117403134389]])
-    bat_temp_true         =  np.array([[309.51908573114554,304.75340976482204], [309.51908573114554,304.75240451615923]])  
+    mAh                   = rp.array([3800,2600]) 
+    V_ul_true             = rp.array([[3.1746312064954223, 3.14117403134389],[3.1746312064954223,3.14117403134389]])
+    bat_temp_true         =  rp.array([[309.51908573114554,304.75340976482204], [309.51908573114554,304.75240451615923]])  
     # PLot parameters 
     marker                = ['s' ,'o' ,'P']
     linestyles            = ['-','--',':']
-    linecolors            = cm.inferno(np.linspace(0.2,0.8,3))     
+    linecolors            = cm.inferno(rp.linspace(0.2,0.8,3))     
     plt.rcParams.update({'font.size': 12})
     fig1 = plt.figure('Cell Test') 
     fig1.set_size_inches(12,7)   
@@ -125,18 +125,18 @@ def lithium_ion_battery_test():
             # Voltage Cell Regression
             V_ul        = results.segments[0].conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.voltage_under_load[2][0]   
             print('Under load voltage: ' + str(V_ul))
-            V_ul_diff   = np.abs(V_ul - V_ul_true[j,i])
+            V_ul_diff   = rp.abs(V_ul - V_ul_true[j,i])
             print('Under load voltage difference')
             print(V_ul_diff) 
-            assert np.abs((V_ul_diff)/V_ul_true[j,i]) < 1e-6  
+            assert rp.abs((V_ul_diff)/V_ul_true[j,i]) < 1e-6  
            
             # Temperature Regression
             bat_temp        = results.segments[1].conditions.energy.busses['bus'].battery_modules[battery_chemistry[i]].cell.temperature[2][0]  
             print('Cell temperature: ' + str(bat_temp))
-            bat_temp_diff   = np.abs(bat_temp  - bat_temp_true[j,i]) 
+            bat_temp_diff   = rp.abs(bat_temp  - bat_temp_true[j,i]) 
             print('cell temperature difference')
             print(bat_temp_diff)
-            assert np.abs((bat_temp_diff)/bat_temp_true[j,i]) < 1e-6
+            assert rp.abs((bat_temp_diff)/bat_temp_true[j,i]) < 1e-6
        
             for segment in results.segments.values(): 
                 volts         = segment.conditions.energy.busses['bus'].voltage_under_load[:,0] 

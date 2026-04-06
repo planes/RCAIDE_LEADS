@@ -2,7 +2,7 @@
 # ----------------------------------------------------------------------
 #  Imports
 # ----------------------------------------------------------------------
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  convert_sweep
@@ -63,11 +63,11 @@ def convert_sweep(wing,old_ref_chord_fraction = 0.0,new_ref_chord_fraction = 0.2
     if old_ref_chord_fraction == 0.0:
         sweep_LE = wing.sweeps.leading_edge
     else:
-        sweep_LE  = np.arctan(np.tan(sweep)+4*old_ref_chord_fraction*
+        sweep_LE  = rp.arctan(rp.tan(sweep)+4*old_ref_chord_fraction*
                               (1-taper)/(ar*(1+taper)))  #Compute leading-edge sweep
 
     #Convert from leading edge sweep to the desired sweep reference
-    new_sweep = np.arctan(np.tan(sweep_LE)-4*new_ref_chord_fraction*
+    new_sweep = rp.arctan(rp.tan(sweep_LE)-4*new_ref_chord_fraction*
                           (1-taper)/(ar*(1+taper)))  #Compute sweep referenced 
                                                      #to new chord-fraction
 
@@ -140,11 +140,11 @@ def convert_sweep_segments(old_sweep, seg_a, seg_b, wing, old_ref_chord_fraction
     if old_ref_chord_fraction == 0.0:
         sweep_LE = old_sweep
     else:
-        sweep_LE  = np.arctan(np.tan(sweep)+4*old_ref_chord_fraction*
+        sweep_LE  = rp.arctan(rp.tan(sweep)+4*old_ref_chord_fraction*
                               (1-taper)/(ar*(1+taper)))  #Compute leading-edge sweep
 
     #Convert from leading edge sweep to the desired sweep reference
-    new_sweep = np.arctan(np.tan(sweep_LE)-4*new_ref_chord_fraction*
+    new_sweep = rp.arctan(rp.tan(sweep_LE)-4*new_ref_chord_fraction*
                           (1-taper)/(ar*(1+taper)))  #Compute sweep referenced 
                                                      #to new chord-fraction
 

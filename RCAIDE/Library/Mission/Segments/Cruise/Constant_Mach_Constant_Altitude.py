@@ -10,7 +10,7 @@
 import RCAIDE  
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -108,8 +108,8 @@ def initialize_conditions(segment):
     t_final   = xf / air_speed + t_initial
     t_nondim  = segment.state.numerics.dimensionless.control_points
     time      =  t_nondim * (t_final-t_initial) + t_initial
-    v_x       = np.cos(beta)*air_speed 
-    v_y       = np.sin(beta)*air_speed 
+    v_x       = rp.cos(beta)*air_speed 
+    v_y       = rp.sin(beta)*air_speed 
     
     # pack
     segment.state.conditions.freestream.altitude[:,0]             = alt

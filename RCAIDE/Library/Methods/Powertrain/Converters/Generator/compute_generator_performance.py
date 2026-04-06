@@ -9,7 +9,7 @@
 import RCAIDE
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_omega_and_Q_from_Cp_and_V
@@ -106,8 +106,8 @@ def compute_generator_performance(generator,conditions):
             mu_0   = generator.mu_0                            
             mu_r   = generator.mu_r   
             Q      = power/omega                               
-            i      = np.sqrt((2*(Q/G)*l)/(D_in*mu_0*mu_r*L*kw))           
-            v      = (omega * G)/((2 * np.pi / 60)*Kv) + i*Res        
+            i      = rp.sqrt((2*(Q/G)*l)/(D_in*mu_0*mu_r*L*kw))           
+            v      = (omega * G)/((2 * rp.pi / 60)*Kv) + i*Res        
             etam   = (1-io/i)*(1-i*Res/v) 
         
             generator_conditions.outputs.current    = i 
@@ -120,15 +120,15 @@ def compute_generator_performance(generator,conditions):
             V              = generator_conditions.outputs.voltage
             I_turn         = I/generator.number_of_turns                                                             # [A]            current in each turn
             omega          = (generator.speed_constant*(V - I*Res)) /G                                     # [RPM -> rad/s] rotor angular velocity
-            A              = np.pi * ((generator.stator_outer_diameter**2 - generator.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
+            A              = rp.pi * ((generator.stator_outer_diameter**2 - generator.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
             MMF_coil       = generator.number_of_turns*I_turn                                                        # [A*turns]      magnetomotive force applied to the reluctance path for a coil (Eq.14)  
             R              = generator.length_of_path/(A*generator.mu_0*generator.mu_r)                                      # [A*turn/Wb]    reluctance of a given path or given reluctant element (Eq.16) 
             phi            = MMF_coil/R                                                                          # [Wb]           magnetic flux through the reluctance path (Eq.12)
             B_sign         = phi/A                                                                               # [V*s/m**2]     ranges from 0.5 to 1.2, average magnitude of the radial flux density produced by the rotor
-            A_sign         = (generator.winding_factor*I)/(np.pi*generator.stator_inner_diameter)                        # [-]            stator electrical loading (Eq.2)        
-            TQ             = (np.pi/2)*(B_sign*A_sign)*(generator.inner_diameter**2)*generator.stack_length # [Nm]           torque (Eq.1)
+            A_sign         = (generator.winding_factor*I)/(rp.pi*generator.stator_inner_diameter)                        # [-]            stator electrical loading (Eq.2)        
+            TQ             = (rp.pi/2)*(B_sign*A_sign)*(generator.inner_diameter**2)*generator.stack_length # [Nm]           torque (Eq.1)
             P              = omega*TQ                                                                            # [W]            power (Eq.1)        
-            A              = np.pi * ((generator.stator_outer_diameter**2 - generator.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
+            A              = rp.pi * ((generator.stator_outer_diameter**2 - generator.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
             
             generator_conditions.inputs.torque           = TQ 
             generator_conditions.inputs.omega            = omega 

@@ -10,7 +10,7 @@ from RCAIDE.load    import load as load_rotor
 from RCAIDE.save    import save as save_rotor  
  
 import os
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy    
 
 # design rotor  
@@ -28,10 +28,10 @@ def Test_Rotor(new_regression=True):
     lift_rotor.number_of_blades                            = 3     
     lift_rotor.hover.design_altitude                       = 40 * Units.feet  
     lift_rotor.hover.design_thrust                         = Hover_Load/8
-    lift_rotor.hover.design_freestream_velocity            = np.sqrt(lift_rotor.hover.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))  
+    lift_rotor.hover.design_freestream_velocity            = rp.sqrt(lift_rotor.hover.design_thrust/(2*1.2*rp.pi*(lift_rotor.tip_radius**2)))  
     lift_rotor.oei.design_altitude                         = 40 * Units.feet  
     lift_rotor.oei.design_thrust                           = Hover_Load/7  
-    lift_rotor.oei.design_freestream_velocity              = np.sqrt(lift_rotor.oei.design_thrust/(2*1.2*np.pi*(lift_rotor.tip_radius**2)))   
+    lift_rotor.oei.design_freestream_velocity              = rp.sqrt(lift_rotor.oei.design_thrust/(2*1.2*rp.pi*(lift_rotor.tip_radius**2)))   
 
     ospath                                                 = os.path.abspath(__file__)
     separator                                              = os.path.sep

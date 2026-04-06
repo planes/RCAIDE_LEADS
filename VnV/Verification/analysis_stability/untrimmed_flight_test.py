@@ -11,7 +11,7 @@ from RCAIDE.Library.Plots       import *
 
 # python imports  
 import pylab as plt
-import numpy as np 
+import RNUMPY as rp 
 
 
 # local imports 
@@ -53,9 +53,9 @@ def main():
 
     CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[0][0]
     CL_true   = 0.5809553607569893
-    CL_diff   = np.abs(CL - CL_true)
+    CL_diff   = rp.abs(CL - CL_true)
     print('Error: ',CL_diff)
-    assert np.abs(CL_diff/CL_true) < 1e-6
+    assert rp.abs(CL_diff/CL_true) < 1e-6
      
     return  
 # ----------------------------------------------------------------------

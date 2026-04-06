@@ -15,7 +15,7 @@ from RCAIDE.Library.Plots       import *
 
 # python imports 
 import os 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------
 #   Define the Vehicle

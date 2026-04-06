@@ -4,8 +4,8 @@
 #  Imports
 # ---------------------------------------------------------------------- 
 from RCAIDE.Framework.Core import  Data 
-import numpy as np
-from scipy import interpolate
+import RNUMPY as rp
+from RNUMPY.scipy import interpolate
 
 # ----------------------------------------------------------------------------------------------------------------------
 # import_airfoil_geometry
@@ -149,29 +149,29 @@ def import_airfoil_geometry(airfoil_geometry_file, npoints = 201,surface_interpo
         x_up_surf = x_up_surf_rev
         y_up_surf = y_up_surf_rev 
 
-    x_up_surf = np.array(x_up_surf)
-    x_lo_surf = np.array(x_lo_surf)
-    y_up_surf = np.array(y_up_surf)
-    y_lo_surf = np.array(y_lo_surf)  
+    x_up_surf = rp.array(x_up_surf)
+    x_lo_surf = rp.array(x_lo_surf)
+    y_up_surf = rp.array(y_up_surf)
+    y_lo_surf = rp.array(y_lo_surf)  
     
     # Check for extra zeros (OpenVSP exports extra zeros)
-    if len(np.unique(x_up_surf))!=len(x_up_surf):
+    if len(rp.unique(x_up_surf))!=len(x_up_surf):
         x_up_surf = x_up_surf[1:]
         x_lo_surf = x_lo_surf[1:]
         y_up_surf = y_up_surf[1:]
         y_lo_surf = y_lo_surf[1:]
 
     # create custom spacing for more points and leading and trailing edge
-    t            = np.linspace(0,4,npoints-1)
+    t            = rp.linspace(0,4,npoints-1)
     delta        = 0.25 
     A            = 5
     f            = 0.25
-    smoothsq     = 5 + (2*A/np.pi) *np.arctan(np.sin(2*np.pi*t*f + np.pi/2)/delta) 
-    dim_spacing  = np.append(0,np.cumsum(smoothsq)/sum(smoothsq))
+    smoothsq     = 5 + (2*A/rp.pi) *rp.arctan(rp.sin(2*rp.pi*t*f + rp.pi/2)/delta) 
+    dim_spacing  = rp.append(0,rp.cumsum(smoothsq)/sum(smoothsq))
     
     # compute thickness, camber and concatenate coodinates 
-    x_data        = np.hstack((x_lo_surf[::-1], x_up_surf[1:])) 
-    y_data        = np.hstack((y_lo_surf[::-1], y_up_surf[1:]))   
+    x_data        = rp.hstack((x_lo_surf[::-1], x_up_surf[1:])) 
+    y_data        = rp.hstack((y_lo_surf[::-1], y_up_surf[1:]))   
     tck,u         = interpolate.splprep([x_data,y_data],k=3,s=0) 
     out           = interpolate.splev(dim_spacing,tck) 
     x_data        = out[0]   
@@ -181,7 +181,7 @@ def import_airfoil_geometry(airfoil_geometry_file, npoints = 201,surface_interpo
     x_delta  = min(x_data)
     x_data   = x_data - x_delta 
     
-    arg_min  = np.argmin(x_data) 
+    arg_min  = rp.argmin(x_data) 
     y_delta  = y_data[arg_min]
     y_data   = y_data - y_delta
     
@@ -199,27 +199,27 @@ def import_airfoil_geometry(airfoil_geometry_file, npoints = 201,surface_interpo
         y_data[-1]         = y_data[-1] + 1E-4
         
     # thicknes and camber distributions require equal points     
-    x_up_surf_old  = np.array(x_up_surf)   
-    arrx_up_interp = interpolate.interp1d(np.arange(x_up_surf_old.size),x_up_surf_old, kind=surface_interpolation)
-    x_up_surf_new  = arrx_up_interp(np.linspace(0,x_up_surf_old.size-1,half_npoints))    
+    x_up_surf_old  = rp.array(x_up_surf)   
+    arrx_up_interp = interpolate.interp1d(rp.arange(x_up_surf_old.size,dtype=rp.float),x_up_surf_old, kind=surface_interpolation)
+    x_up_surf_new  = arrx_up_interp(rp.linspace(0,x_up_surf_old.size-1,half_npoints))    
  
-    x_lo_surf_old  = np.array(x_lo_surf) 
-    arrx_lo_interp = interpolate.interp1d(np.arange(x_lo_surf_old.size),x_lo_surf_old, kind=surface_interpolation )
-    x_lo_surf_new  = arrx_lo_interp(np.linspace(0,x_lo_surf_old.size-1,half_npoints)) 
+    x_lo_surf_old  = rp.array(x_lo_surf) 
+    arrx_lo_interp = interpolate.interp1d(rp.arange(x_lo_surf_old.size,dtype=rp.float),x_lo_surf_old, kind=surface_interpolation )
+    x_lo_surf_new  = arrx_lo_interp(rp.linspace(0,x_lo_surf_old.size-1,half_npoints)) 
  
     # y coordinate s 
-    y_up_surf_old  = np.array(y_up_surf)   
-    arry_up_interp = interpolate.interp1d(np.arange(y_up_surf_old.size),y_up_surf_old, kind=surface_interpolation)
-    y_up_surf_new  = arry_up_interp(np.linspace(0,y_up_surf_old.size-1,half_npoints))    
+    y_up_surf_old  = rp.array(y_up_surf)   
+    arry_up_interp = interpolate.interp1d(rp.arange(y_up_surf_old.size,dtype=rp.float),y_up_surf_old, kind=surface_interpolation)
+    y_up_surf_new  = arry_up_interp(rp.linspace(0,y_up_surf_old.size-1,half_npoints))    
  
-    y_lo_surf_old  = np.array(y_lo_surf) 
-    arry_lo_interp = interpolate.interp1d(np.arange(y_lo_surf_old.size),y_lo_surf_old, kind=surface_interpolation)
-    y_lo_surf_new  = arry_lo_interp(np.linspace(0,y_lo_surf_old.size-1,half_npoints)) 
+    y_lo_surf_old  = rp.array(y_lo_surf) 
+    arry_lo_interp = interpolate.interp1d(rp.arange(y_lo_surf_old.size,dtype=rp.float),y_lo_surf_old, kind=surface_interpolation)
+    y_lo_surf_new  = arry_lo_interp(rp.linspace(0,y_lo_surf_old.size-1,half_npoints)) 
 
     # compute thickness, camber and concatenate coodinates 
     thickness      = y_up_surf_new - y_lo_surf_new
     camber         = y_lo_surf_new + thickness/2  
-    max_t          = np.max(thickness)
+    max_t          = rp.max(thickness)
     max_c          = max(x_data) - min(x_data)
     t_c            = max_t/max_c 
     

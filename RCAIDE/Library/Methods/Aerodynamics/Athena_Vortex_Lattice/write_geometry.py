@@ -289,7 +289,7 @@ SECTION
     airfoil_coord = avl_section.airfoil_coord_file
     naca_airfoil  = avl_section.naca_airfoil 
      
-    wing_section_text = section_base.format(round(x_le,4),round(y_le,4), round(z_le,4),round(chord,4),round(ainc,4))
+    wing_section_text = section_base.format(round(float(x_le),4),round(float(y_le),4), round(float(z_le),4),round(float(chord),4),round(float(ainc),4))
     if airfoil_coord:
         wing_section_text = wing_section_text + airfoil_base.format(airfoil_coord)
     if naca_airfoil:

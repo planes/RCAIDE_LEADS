@@ -10,7 +10,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
+import RNUMPY as rp
 import RCAIDE
 try:
     import pyOpt
@@ -96,8 +96,8 @@ class Additive_Solver():
         x_samples = latin_hypercube_sampling(len(x),num_samples,bounds=(x_low_bound,x_up_bound),criterion='center')
         
         # Initialize objective and constraint variables
-        f = np.zeros([num_fidelity_levels,num_samples])
-        g = np.zeros([num_fidelity_levels,num_samples,len(scaled_constraints)])
+        f = rp.zeros([num_fidelity_levels,num_samples])
+        g = rp.zeros([num_fidelity_levels,num_samples,len(scaled_constraints)])
         
         for level in range(1,num_fidelity_levels+1):
             problem.fidelity_level = level
@@ -152,7 +152,7 @@ class Additive_Solver():
                     raise NotImplementedError
     
             elif opt_type == 'MEI': # Next point determined by maximum expected improvement
-                fstar = np.min(f[1,:])
+                fstar = rp.min(f[1,:])
                 problem.fidelity_level = 1
                 
                 if self.global_optimizer == 'ALPSO':
@@ -169,7 +169,7 @@ class Additive_Solver():
                     
                     outputs = opt(opt_prob,problem=problem, \
                                   obj_surrogate=f_additive_surrogate,cons_surrogate=g_additive_surrogate,fstar=fstar,cons=con)#, sens_step = sense_step)
-                    fOpt  = np.nan 
+                    fOpt  = rp.nan 
                     imOpt = outputs[0]
                     xOpt  = outputs[1]
                     
@@ -182,7 +182,7 @@ class Additive_Solver():
                     res = shgo(self.evaluate_expected_improvement, xb, iters=2, args=(problem,f_additive_surrogate,g_additive_surrogate,fstar),constraints=shgo_cons,options=options)
                    
                     
-                    fOpt  = np.nan 
+                    fOpt  = rp.nan 
                     imOpt = res['fun']
                     xOpt  = res['x']    
                     
@@ -192,14 +192,14 @@ class Additive_Solver():
             # ---------------------------------
             
             complete_flag = False
-            if np.any(np.isnan(xOpt)):
+            if rp.any(rp.isnan(xOpt)):
                 complete_flag = True
             else:
             
                 # Add new samples and check objective and constraint values
-                f = np.hstack((f,np.zeros((num_fidelity_levels,1))))
-                g = np.hstack((g,np.zeros((num_fidelity_levels,1,len(con)))))
-                x_samples = np.vstack((x_samples,xOpt))
+                f = rp.hstack((f,rp.zeros((num_fidelity_levels,1))))
+                g = rp.hstack((g,rp.zeros((num_fidelity_levels,1,len(con)))))
+                x_samples = rp.vstack((x_samples,xOpt))
                 for level in range(1,num_fidelity_levels+1):
                     problem.fidelity_level = level
                     res = self.evaluate_model(problem,xOpt,scaled_constraints)
@@ -223,7 +223,7 @@ class Additive_Solver():
                     fOpt = self.evaluate_model(problem,xOpt,scaled_constraints)[0][0]
                 elif opt_type == 'MEI': # If MEI, find the optimum of the final surrogate
                 
-                    min_ind = np.argmin(f[1])
+                    min_ind = rp.argmin(f[1])
                     x_eval = x_samples[min_ind]
                 
                     if self.local_optimizer == 'SNOPT':
@@ -254,7 +254,7 @@ class Additive_Solver():
                 break        
                 
             
-            if np.abs(fOpt-f[1][-1]) < tolerance: # Converged within a tolerance
+            if rp.abs(fOpt-f[1][-1]) < tolerance: # Converged within a tolerance
                 print('Convergence reached')      
                 f_out.write('Convergence reached')
                 f_diff = f[1,:] - f[0,:]
@@ -262,7 +262,7 @@ class Additive_Solver():
                 if opt_type == 'MEI':
                     
                     problem.fidelity_level = 1
-                    min_ind = np.argmin(f[1])
+                    min_ind = rp.argmin(f[1])
                     x_eval = x_samples[min_ind]
                     
                     if self.local_optimizer == 'SNOPT':
@@ -306,18 +306,18 @@ class Additive_Solver():
             f_out.write('Maximum iteration limit reached')
         
         # Save sample data
-        np.save('x_samples.npy',x_samples)
-        np.save('f_data.npy',f)
+        rp.save('x_samples.npy',x_samples)
+        rp.save('f_data.npy',f)
         f_out.close()
         print(fOpt,xOpt)
         if print_output == False:
             sys.stdout = sys.__stdout__
         
         # Format objective function to array, ensure output consistency
-        if np.isscalar(fOpt):
-            FOpt = np.array([fOpt])
+        if rp.isscalar(fOpt):
+            FOpt = rp.array([fOpt])
         else:
-            FOpt = fOpt.astype(np.double)
+            FOpt = fOpt.astype(rp.double)
         
         return (FOpt,xOpt)
         
@@ -343,8 +343,8 @@ class Additive_Solver():
         Properties Used:
         N/A    
         """
-        f  = np.array(0.)
-        g  = np.zeros(np.shape(cons))
+        f  = rp.array(0.)
+        g  = rp.zeros(rp.shape(cons))
         
         f  = problem.objective(x)
         g  = problem.all_constraints(x)
@@ -379,10 +379,10 @@ class Additive_Solver():
         
         obj   = problem.objective(x)
         const = problem.all_constraints(x).tolist()
-        fail  = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+        fail  = rp.array(rp.isnan(obj.tolist()) or rp.isnan(rp.array(const).any())).astype(int)
         
-        obj_addition  = obj_surrogate.predict(np.atleast_2d(x))
-        cons_addition = cons_surrogate.predict(np.atleast_2d(x))
+        obj_addition  = obj_surrogate.predict(rp.atleast_2d(x))
+        cons_addition = cons_surrogate.predict(rp.atleast_2d(x))
         
         obj   = obj + obj_addition
         const = const + cons_addition
@@ -405,7 +405,7 @@ class Additive_Solver():
             raise NotImplementedError('Selected local optimizer is not implemented.')
     
     
-    def evaluate_expected_improvement(self,x,problem=None,obj_surrogate=None,cons_surrogate=None,fstar=np.inf,cons=None):
+    def evaluate_expected_improvement(self,x,problem=None,obj_surrogate=None,cons_surrogate=None,fstar=rp.inf,cons=None):
         """Evaluates the expected improvement of the point x
     
         Assumptions:
@@ -432,31 +432,31 @@ class Additive_Solver():
         
         """    
     
-        if np.any(np.isnan(x)):
+        if rp.any(rp.isnan(x)):
             if self.global_optimizer == 'ALPSO':
                 raise ValueError('Unknown error in ALPSO optimizer created NaN values.')
-            return np.inf
+            return rp.inf
     
         obj   = problem.objective(x)
         const = problem.all_constraints(x).tolist()
-        fail  = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+        fail  = rp.array(rp.isnan(obj.tolist()) or rp.isnan(rp.array(const).any())).astype(int)
         
         # Get uncertainty information
-        obj_addition, obj_sigma   = obj_surrogate.predict(np.atleast_2d(x),return_std=True)
-        cons_addition, cons_sigma = cons_surrogate.predict(np.atleast_2d(x),return_std=True)
+        obj_addition, obj_sigma   = obj_surrogate.predict(rp.atleast_2d(x),return_std=True)
+        cons_addition, cons_sigma = cons_surrogate.predict(rp.atleast_2d(x),return_std=True)
         
         fhat  = obj[0] + obj_addition
         # Calculate expected improvement (based on Schonlau, Computer Experiments and Global Optimization, 1997)
         EI    = (fstar-fhat)*norm.cdf((fstar-fhat)/obj_sigma) + obj_sigma*norm.pdf((fstar-fhat)/obj_sigma)
         const = const + cons_addition
-        EI    = np.log(EI)
-        if EI == -np.inf:
+        EI    = rp.log(EI)
+        if EI == -rp.inf:
             EI = -1000
         
         if self.global_optimizer == 'ALPSO':
             # Adjust signs for optimizer (this is specific to ALPSO)
-            signs  = np.ones([1,len(cons)])
-            offset = np.zeros([1,len(cons)])
+            signs  = rp.ones([1,len(cons)])
+            offset = rp.zeros([1,len(cons)])
             for ii,con in enumerate(cons):
                 if cons[ii][1] == '>':
                     signs[0,ii] = -1
@@ -527,18 +527,18 @@ class Additive_Solver():
             edge.append(scaled_constraints[ii])
             if con[ii][1]=='<':
                 con_up_edge.append(edge[ii])
-                con_low_edge.append(-np.inf)
+                con_low_edge.append(-rp.inf)
             elif con[ii][1]=='>':
-                con_up_edge.append(np.inf)
+                con_up_edge.append(rp.inf)
                 con_low_edge.append(edge[ii])
             elif con[ii][1]=='=':
                 con_up_edge.append(edge[ii])
                 con_low_edge.append(edge[ii])
     
-        x_low_bound  = np.array(x_low_bound)
-        x_up_bound   = np.array(x_up_bound)
-        con_up_edge  = np.array(con_up_edge)         
-        con_low_edge = np.array(con_low_edge)        
+        x_low_bound  = rp.array(x_low_bound)
+        x_up_bound   = rp.array(x_up_bound)
+        con_up_edge  = rp.array(con_up_edge)         
+        con_low_edge = rp.array(con_low_edge)        
     
         return (x,scaled_constraints,x_low_bound,x_up_bound,con_up_edge,con_low_edge)    
     
@@ -584,7 +584,7 @@ class Additive_Solver():
             if con[ii][1]=='<':
                 opt_prob.addCon(nam[ii], type='i', upper=con_up_edge[ii])
             elif con[ii][1]=='>':
-                opt_prob.addCon(nam[ii], type='i', lower=con_low_edge[ii],upper=np.inf)
+                opt_prob.addCon(nam[ii], type='i', lower=con_low_edge[ii],upper=rp.inf)
             elif con[ii][1]=='=':
                 opt_prob.addCon(nam[ii], type='e', equal=con_up_edge[ii])        
                 
@@ -592,12 +592,12 @@ class Additive_Solver():
     
     def unpack_constraints_slsqp(self,x,con_ind,sign,edge,problem,cons_surrogate):
         
-        if np.any(np.isnan(x)):
-            return np.inf        
+        if rp.any(rp.isnan(x)):
+            return rp.inf        
         
         const = problem.all_constraints(x).tolist()
         
-        cons_addition = cons_surrogate.predict(np.atleast_2d(x))
+        cons_addition = cons_surrogate.predict(rp.atleast_2d(x))
         
         const = const + cons_addition
         const_list = const.tolist()[0]        

@@ -11,7 +11,7 @@ from RCAIDE.Library.Plots       import *
 
 # python imports  
 import pylab as plt
-import numpy as np 
+import RNUMPY as rp 
 
 
 # local imports 
@@ -53,21 +53,21 @@ def main():
 
     elevator_deflection        = results.segments.cruise.conditions.control_surfaces.elevator.deflection[0,0] / Units.deg
     elevator_deflection_true   = 0.8685681588348885
-    elevator_deflection_diff   = np.abs(elevator_deflection - elevator_deflection_true)
+    elevator_deflection_diff   = rp.abs(elevator_deflection - elevator_deflection_true)
     print('Error1: ',elevator_deflection_diff)
-    assert np.abs(elevator_deflection_diff/elevator_deflection_true) < 5e-3
+    assert rp.abs(elevator_deflection_diff/elevator_deflection_true) < 5e-3
 
     aileron_deflection        = results.segments.cruise.conditions.control_surfaces.aileron.deflection[0,0] / Units.deg
     aileron_deflection_true   = 9.650951256840065
-    aileron_deflection_diff   = np.abs(aileron_deflection - aileron_deflection_true)
+    aileron_deflection_diff   = rp.abs(aileron_deflection - aileron_deflection_true)
     print('Error2: ',aileron_deflection_diff)
-    assert np.abs(aileron_deflection_diff/aileron_deflection_true) < 5e-3
+    assert rp.abs(aileron_deflection_diff/aileron_deflection_true) < 5e-3
 
     rudder_deflection        = results.segments.cruise.conditions.control_surfaces.rudder.deflection[0,0] / Units.deg
     rudder_deflection_true   = -12.217841671123846
-    rudder_deflection_diff   = np.abs(rudder_deflection - rudder_deflection_true)
+    rudder_deflection_diff   = rp.abs(rudder_deflection - rudder_deflection_true)
     print('Error3: ',rudder_deflection_diff)
-    assert np.abs(rudder_deflection_diff/rudder_deflection_true) < 5e-3    
+    assert rp.abs(rudder_deflection_diff/rudder_deflection_true) < 5e-3    
     
     return  
 # ----------------------------------------------------------------------
@@ -115,14 +115,14 @@ def base_analysis(vehicle, configs):
     aerodynamics.stability_derivatives.CN_beta      = 0.074425
     aerodynamics.stability_derivatives.CN_p         = 0.0001
     aerodynamics.stability_derivatives.CN_r         = 0.0001
-    aerodynamics.stability_derivatives.CY_delta_a   = 0.000623 * 180/np.pi
-    aerodynamics.stability_derivatives.CL_delta_a   = 0.001974 * 180/np.pi
-    aerodynamics.stability_derivatives.CLift_delta_e= 0.009275 * 180/np.pi
-    aerodynamics.stability_derivatives.CN_delta_a   = -0.000021 * 180/np.pi
-    aerodynamics.stability_derivatives.CM_delta_e   = -0.024291 * 180/np.pi
-    aerodynamics.stability_derivatives.CY_delta_r   = -0.001918 * 180/np.pi
-    aerodynamics.stability_derivatives.CL_delta_r   = -0.000195 * 180/np.pi
-    aerodynamics.stability_derivatives.CN_delta_r   = 0.001046 * 180/np.pi
+    aerodynamics.stability_derivatives.CY_delta_a   = 0.000623 * 180/rp.pi
+    aerodynamics.stability_derivatives.CL_delta_a   = 0.001974 * 180/rp.pi
+    aerodynamics.stability_derivatives.CLift_delta_e= 0.009275 * 180/rp.pi
+    aerodynamics.stability_derivatives.CN_delta_a   = -0.000021 * 180/rp.pi
+    aerodynamics.stability_derivatives.CM_delta_e   = -0.024291 * 180/rp.pi
+    aerodynamics.stability_derivatives.CY_delta_r   = -0.001918 * 180/rp.pi
+    aerodynamics.stability_derivatives.CL_delta_r   = -0.000195 * 180/rp.pi
+    aerodynamics.stability_derivatives.CN_delta_r   = 0.001046 * 180/rp.pi
     aerodynamics.stability_derivatives.CM_delta_f   =  0.0001  
     analyses.append(aerodynamics) 
      

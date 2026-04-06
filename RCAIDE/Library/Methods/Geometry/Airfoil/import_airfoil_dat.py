@@ -7,7 +7,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
+import RNUMPY as rp
 
 # ------------------------------------------------------------
 #  import airfoil dat
@@ -63,6 +63,6 @@ def import_airfoil_dat(filename):
         data[section].append(point)
         
     for k,v in data.items():
-        data[k] = np.array(v)
+        data[k] = rp.array(v)
         
     return data

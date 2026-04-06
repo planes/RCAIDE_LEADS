@@ -14,7 +14,7 @@ from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_E
 from RCAIDE.Library.Methods.Thermal_Management.Batteries.Liquid_Cooled_Wavy_Channel       import design_wavy_channel
 
 # python imports 
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 import os
 # ----------------------------------------------------------------------------------------------------------------------
@@ -220,8 +220,8 @@ def vehicle_setup(cell_chemistry, btms_type):
     fuselage.heights.at_three_quarters_length   = 1.50  
     fuselage.heights.at_wing_root_quarter_chord = 1.50  
     fuselage.areas.side_projected               = fuselage.lengths.total *fuselage.heights.maximum  # estimate    
-    fuselage.areas.wetted                       = 2 * np.pi * fuselage.width *  fuselage.lengths.total +  2 * np.pi * fuselage.width ** 2
-    fuselage.areas.front_projected              =  np.pi * fuselage.width ** 2 
+    fuselage.areas.wetted                       = 2 * rp.pi * fuselage.width *  fuselage.lengths.total +  2 * rp.pi * fuselage.width ** 2
+    fuselage.areas.front_projected              =  rp.pi * fuselage.width ** 2 
     fuselage.effective_diameter                 = 1.75 
 
     # Segment
@@ -496,7 +496,7 @@ def vehicle_setup(cell_chemistry, btms_type):
     nacelle.tag                = 'nacelle_1'
     nacelle.length             = 4
     nacelle.diameter           = 0.73480616 
-    nacelle.areas.wetted       = 0.01*(2*np.pi*0.01/2)
+    nacelle.areas.wetted       = 0.01*(2*rp.pi*0.01/2)
     nacelle.origin             = [[2.81, 2.8129 ,1.22]]
     nacelle.flow_through       = False  
     

@@ -15,7 +15,7 @@ from RCAIDE.Framework.Analyses.Common.Process_Geometry         import Process_Ge
 from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method import *   
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 import os,pickle
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -40,7 +40,7 @@ class Vortex_Lattice_Method(Aerodynamics):
      N/A 
     """      
     
-    def __defaults__(self):
+    def __init__(self):
         """This sets the default values and methods for the analysis.
 
         Assumptions:
@@ -76,13 +76,14 @@ class Vortex_Lattice_Method(Aerodynamics):
         self.settings.vortex_distribution                           = Data()
         self.settings.leading_edge_suction_multiplier               = 1.0  
         self.settings.use_VORLAX_matrix_calculation                 = False
-        self.settings.floating_point_precision                      = np.float32     
+        self.settings.floating_point_precision                      = rp.float32     
     
         # conditions table, used for surrogate model training
         self.training                                               = Data()
-        self.training.angle_of_attack                               = np.array([-5., -2. , 1E-20 , 2.0, 5.0, 8.0, 12., 45., 75.]) * Units.deg 
-        self.training.Mach                                          = np.array([0.1  ,0.3,  0.5,  0.65 , 0.85 , 0.9, 1.3, 1.35 , 1.5 , 2.0, 2.25 , 2.5  , 3.5])  
-                      
+        self.training.angle_of_attack                               = rp.array([-5., -2. , 1E-20 , 2.0, 5.0, 8.0, 12., 45., 75.]) * Units.deg 
+        # self.training.Mach                                          = rp.array([0.1  ,0.3,  0.5,  0.65 , 0.85 , 0.9, 1.3, 1.35 , 1.5 , 2.0, 2.25 , 2.5  , 3.5])             
+        self.training.Mach                                          = rp.array([0.1  ,0.3,  0.5,  0.65 , 0.85 , 0.9])     
+
         self.training.subsonic                                      = None
         self.training.supersonic                                    = None
         self.training.transonic                                     = None
@@ -93,18 +94,18 @@ class Vortex_Lattice_Method(Aerodynamics):
         self.training.speed_purtubation                             = 5  
         self.training.rate_purtubation                              = 10 * Units.deg / Units.sec   
         self.training.control_surface_purtubation                   = 10 * Units.deg          
-        self.training.sideslip_angle                                = np.array([10  , 5.0 ]) * Units.deg
-        self.training.aileron_deflection                            = np.array([10  , 5.0 ]) * Units.deg
-        self.training.elevator_deflection                           = np.array([10  , 5.0 ]) * Units.deg   
-        self.training.rudder_deflection                             = np.array([10  , 1E-3 ]) * Units.deg
-        self.training.flap_deflection                               = np.array([10  , 1E-3 ]) * Units.deg 
-        self.training.slat_deflection                               = np.array([10  , 1E-3 ]) * Units.deg                      
-        self.training.u                                             = np.array([10 , 5 ])  
-        self.training.v                                             = np.array([10 , 5 ])  
-        self.training.w                                             = np.array([10 , 5 ])    
-        self.training.pitch_rate                                    = np.array([3 ,1.5 ])  * Units.deg / Units.sec
-        self.training.roll_rate                                     = np.array([3 ,1.5 ])  * Units.deg / Units.sec
-        self.training.yaw_rate                                      = np.array([3 ,1.5 ])  * Units.deg / Units.sec 
+        self.training.sideslip_angle                                = rp.array([10  , 5.0 ]) * Units.deg
+        self.training.aileron_deflection                            = rp.array([10  , 5.0 ]) * Units.deg
+        self.training.elevator_deflection                           = rp.array([10  , 5.0 ]) * Units.deg   
+        self.training.rudder_deflection                             = rp.array([10  , 1E-3 ]) * Units.deg
+        self.training.flap_deflection                               = rp.array([10  , 1E-3 ]) * Units.deg 
+        self.training.slat_deflection                               = rp.array([10  , 1E-3 ]) * Units.deg                      
+        self.training.u                                             = rp.array([10 , 5 ])  
+        self.training.v                                             = rp.array([10 , 5 ])  
+        self.training.w                                             = rp.array([10 , 5 ])    
+        self.training.pitch_rate                                    = rp.array([3 ,1.5 ])  * Units.deg / Units.sec
+        self.training.roll_rate                                     = rp.array([3 ,1.5 ])  * Units.deg / Units.sec
+        self.training.yaw_rate                                      = rp.array([3 ,1.5 ])  * Units.deg / Units.sec 
         
         # control surface flags                  
         self.aileron_flag                                           = False 

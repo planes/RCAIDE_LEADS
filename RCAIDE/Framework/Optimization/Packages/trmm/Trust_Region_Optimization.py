@@ -8,7 +8,7 @@
 #  Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
+import RNUMPY as rp
 try:
     import RCAIDE.Framework.Optimization.Packages.pyopt.pyopt_setup
 except:
@@ -139,7 +139,7 @@ class Trust_Region_Optimization(Data):
         
         iterations = 0
         max_iterations = self.trust_region_max_iterations
-        x = np.array(x,dtype='float')
+        x = rp.array(x,dtype='float')
         tr.center = x
         tr_center = x # trust region center
         x_initial = x*1.      
@@ -179,8 +179,8 @@ class Trust_Region_Optimization(Data):
             
             # Subproblem
             tr_size = tr.size
-            tr.lower_bound = np.max(np.vstack([x_low_bound,x-tr_size]),axis=0)
-            tr.upper_bound = np.min(np.vstack([x_up_bound,x+tr_size]),axis=0)      
+            tr.lower_bound = rp.max(rp.vstack([x_low_bound,x-tr_size]),axis=0)
+            tr.upper_bound = rp.min(rp.vstack([x_up_bound,x+tr_size]),axis=0)      
             
             # Set to base fidelity level for optimizing the corrected model
             problem.fidelity_level = 1
@@ -197,7 +197,7 @@ class Trust_Region_Optimization(Data):
                     if con[ii][1]=='<':
                         opt_prob.addCon(name[ii], type='i', upper=con_up_edge[ii])  
                     elif con[ii][1]=='>':
-                        opt_prob.addCon(name[ii], type='i', lower=con_low_edge[ii],upper=np.inf)
+                        opt_prob.addCon(name[ii], type='i', lower=con_low_edge[ii],upper=rp.inf)
                     elif con[ii][1]=='=':
                         opt_prob.addCon(name[ii], type='e', equal=con_up_edge[ii])      
                         
@@ -219,7 +219,7 @@ class Trust_Region_Optimization(Data):
                     feasible_flag = True
                 fOpt_corr = outputs[0][0]
                 xOpt_corr = outputs[1]
-                gOpt_corr = np.zeros([1,len(con)])[0]  
+                gOpt_corr = rp.zeros([1,len(con)])[0]  
                 for ii in range(len(con)):
                     gOpt_corr[ii] = opt_prob._solutions[0]._constraints[ii].value  
                     
@@ -279,7 +279,7 @@ class Trust_Region_Optimization(Data):
                     new_outputs = self.evaluate_corrected_model(x, problem=problem,corrections=corrections,tr=tr)
         
                     fOpt_corr = new_outputs[0][0]
-                    gOpt_corr = np.zeros([1,len(con)])[0]   
+                    gOpt_corr = rp.zeros([1,len(con)])[0]   
                     for ii in range(len(con)):
                         gOpt_corr[ii] = new_outputs[1][ii]
                 elif self.optimizer == 'SLSQP':
@@ -295,7 +295,7 @@ class Trust_Region_Optimization(Data):
                                                                 return_cons=True)
                     
                     fOpt_corr = new_outputs[0][0]
-                    gOpt_corr = np.zeros([1,len(con)])[0]   
+                    gOpt_corr = rp.zeros([1,len(con)])[0]   
                     for ii in range(len(con)):
                         gOpt_corr[ii] = new_outputs[1][ii]               
                         
@@ -310,7 +310,7 @@ class Trust_Region_Optimization(Data):
             print('gOpt_corr = ', gOpt_corr)
             
             # Evaluate high-fidelity at optimum
-            problem.fidelity_level = np.max(self.fidelity_levels)
+            problem.fidelity_level = rp.max(self.fidelity_levels)
             fOpt_hi, gOpt_hi = self.evaluate_model(problem,xOpt_corr,der_flag=False)
             fOpt_hi = fOpt_hi[0]
         
@@ -347,7 +347,7 @@ class Trust_Region_Optimization(Data):
             
             # Terminate if solution is infeasible, no change is detected, and trust region does not expand
             if( success_flag == False and tr_action < 3 and\
-                np.sum(np.isclose(xOpt_corr,x,rtol=1e-15,atol=1e-14)) == len(x) ):
+                rp.sum(rp.isclose(xOpt_corr,x,rtol=1e-15,atol=1e-14)) == len(x) ):
                 print('Solution infeasible, no improvement can be made')
                 f_out.write('Solution infeasible, no improvement can be made')
                 f_out.close()
@@ -361,7 +361,7 @@ class Trust_Region_Optimization(Data):
             f_out.write('hi  obj  : ' + str(fOpt_hi)            + '\n')
             
             # Convergence check
-            if (accepted==1 and (np.abs(f_center-fOpt_hi) < self.convergence_tolerance)):
+            if (accepted==1 and (rp.abs(f_center-fOpt_hi) < self.convergence_tolerance)):
                 print('Hard convergence reached')
                 f_out.write('Hard convergence reached')
                 f_out.close()
@@ -452,13 +452,13 @@ class Trust_Region_Optimization(Data):
         """              
         obj   = problem.objective(x)
         const = problem.all_constraints(x).tolist()
-        fail  = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+        fail  = rp.array(rp.isnan(obj.tolist()) or rp.isnan(rp.array(const).any())).astype(int)
         
         A, b = corrections
         x0   = tr.center
         
-        obj   = obj + np.dot(A[0,:],(x-x0))+b[0]
-        const = const + np.matmul(A[1:,:],(x-x0))+b[1:]
+        obj   = obj + rp.dot(A[0,:],(x-x0))+b[0]
+        const = const + rp.matmul(A[1:,:],(x-x0))+b[1:]
         const = const.tolist()
     
         print('Inputs')
@@ -505,12 +505,12 @@ class Trust_Region_Optimization(Data):
         """            
         obj      = problem.objective(x) # evaluate the problem
         const    = problem.all_constraints(x).tolist()
-        fail     = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+        fail     = rp.array(rp.isnan(obj.tolist()) or rp.isnan(rp.array(const).any())).astype(int)
         
         A, b = corrections
         x0   = tr.center
         
-        const = const + np.matmul(A[1:,:],(x-x0))+b[1:]
+        const = const + rp.matmul(A[1:,:],(x-x0))+b[1:]
         const = const.tolist()
         
         # get the objective that matters here
@@ -557,7 +557,7 @@ class Trust_Region_Optimization(Data):
                 if( gval[i] > ub[i] ):
                     gdiff.append(gval[i] - ub[i])
     
-        return np.linalg.norm(gdiff) # 2-norm of violation  
+        return rp.linalg.norm(gdiff) # 2-norm of violation  
     
     def calculate_correction(self,f,df,g,dg,tr):
         """Calculates additive correction factors.
@@ -583,8 +583,8 @@ class Trust_Region_Optimization(Data):
         nr = 1 + g[0].size
         nc = df[0].size
             
-        A = np.empty((nr,nc))
-        b = np.empty(nr)
+        A = rp.empty((nr,nc))
+        b = rp.empty(nr)
             
         # objective correction
         A[0,:] = df[1] - df[0]
@@ -650,18 +650,18 @@ class Trust_Region_Optimization(Data):
             edge.append(scaled_constraints[ii])
             if con[ii][1]=='<':
                 con_up_edge.append(edge[ii])
-                con_low_edge.append(-np.inf)
+                con_low_edge.append(-rp.inf)
             elif con[ii][1]=='>':
-                con_up_edge.append(np.inf)
+                con_up_edge.append(rp.inf)
                 con_low_edge.append(edge[ii])
             elif con[ii][1]=='=':
                 con_up_edge.append(edge[ii])
                 con_low_edge.append(edge[ii])
             
-        x_low_bound  = np.array(x_low_bound)
-        x_up_bound   = np.array(x_up_bound)
-        con_up_edge  = np.array(con_up_edge)         
-        con_low_edge = np.array(con_low_edge)        
+        x_low_bound  = rp.array(x_low_bound)
+        x_up_bound   = rp.array(x_up_bound)
+        con_up_edge  = rp.array(con_up_edge)         
+        con_low_edge = rp.array(con_low_edge)        
         
         return (x,scaled_constraints,x_low_bound,x_up_bound,con_up_edge,con_low_edge,name)
     
@@ -695,7 +695,7 @@ class Trust_Region_Optimization(Data):
         high_fidelity_optimum = tr.evaluate_function(f_hi,g_viol_hi)
         low_fidelity_center   = tr.evaluate_function(f_center,g_viol_center)
         low_fidelity_optimum  = tr.evaluate_function(f_corr,g_viol_corr)
-        if ( np.abs(low_fidelity_center-low_fidelity_optimum) < self.trust_region_function_precision):
+        if ( rp.abs(low_fidelity_center-low_fidelity_optimum) < self.trust_region_function_precision):
             rho = 1.
         else:
             rho = (high_fidelity_center-high_fidelity_optimum)/(low_fidelity_center-low_fidelity_optimum) 
@@ -782,7 +782,7 @@ class Trust_Region_Optimization(Data):
         
         const = problem.all_constraints(x).tolist()
         
-        const = const + np.matmul(A[1:,:],(x-x0))+b[1:]
+        const = const + rp.matmul(A[1:,:],(x-x0))+b[1:]
         const = const.tolist()   
         
         con = (const[con_ind]-edge)*sign

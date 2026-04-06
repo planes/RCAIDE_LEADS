@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Library.Components   import Component    
 
 # python imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Recursive C.G.
@@ -49,7 +49,7 @@ def compute_component_center_of_gravity(centre_of_gravity_df,component,vehicle,t
     return total_mass,total_moment 
 
 def update_mass_and_moment(total_mass,total_moment,C,segment,verbose,include_payload,include_fuel,centre_of_gravity_df):
-    global_cg_loc = np.array(C.mass_properties.center_of_gravity) + np.array(C.origin) 
+    global_cg_loc = rp.array(C.mass_properties.center_of_gravity) + rp.array(C.origin) 
     include_component = True
     if isinstance(C,RCAIDE.Library.Components.Fuselages.Cabins.Cabin) or isinstance(C,RCAIDE.Library.Components.Cargo_Bays.Cargo_Bay):
         if include_payload  != True:

@@ -9,7 +9,7 @@
 import RCAIDE
 
 # python imports  
-from scipy.optimize import minimize 
+from RNUMPY.scipy.optimize import minimize 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  design motor 

@@ -12,7 +12,7 @@ from .Mass_Properties      import Mass_Properties
 from .Volume_Properties    import Volume_Properties
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Component
@@ -68,7 +68,7 @@ class Component(Data):
         self.tag                = 'Component' 
         self.mass_properties    = Mass_Properties()
         self.volume_properties  = Volume_Properties()
-        self.origin             = np.array([[0.0,0.0,0.0]])
+        self.origin             = rp.array([[0.0,0.0,0.0]])
         self.xz_plane_symmetric = False
         self.xy_plane_symmetric = False
         self.yz_plane_symmetric = False

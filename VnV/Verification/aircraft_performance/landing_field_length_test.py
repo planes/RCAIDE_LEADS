@@ -14,11 +14,11 @@ from RCAIDE.Framework.Core   import Data , Units
 from RCAIDE.Library.Methods.Performance.estimate_landing_field_length import estimate_landing_field_length
 from RCAIDE.Library.Methods.Geometry.Planform import wing_planform
 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt
 import sys
 import os
-import numpy as np
+import RNUMPY as rp
 
 # import vehicle file
 base_dir = os.path.dirname(os.path.abspath(__file__))
@@ -65,16 +65,16 @@ def main():
     # =====================================
     # Landing field length evaluation
     # =====================================
-    w_vec = np.linspace(20000.,44000.,10)
-    landing_field_length = np.zeros_like(w_vec)
+    w_vec = rp.linspace(20000.,44000.,10)
+    landing_field_length = rp.zeros_like(w_vec)
     for id_w,weight in enumerate(w_vec):
         landing_config.mass_properties.landing = weight
         landing_field_length[id_w] = estimate_landing_field_length(landing_config,analyses)
 
-    truth_LFL = np.array([ 839.55613409,  918.16361864,  996.77110318, 1075.37858773,
+    truth_LFL = rp.array([ 839.55613409,  918.16361864,  996.77110318, 1075.37858773,
                            1153.98607228, 1232.59355682, 1311.20104137, 1389.80852591,
        1468.41601046, 1547.023495  ])
-    LFL_error = np.max(np.abs(landing_field_length-truth_LFL))
+    LFL_error = rp.max(rp.abs(landing_field_length-truth_LFL))
     assert(LFL_error<1e-6)
 
     print('Maximum Landing Field Length Error= %.4e' % LFL_error)

@@ -10,7 +10,7 @@
 import RCAIDE
 
 # Package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Integrate Position
@@ -43,10 +43,10 @@ def linear_inertial_horizontal_position(segment):
     R0         = conditions.frames.inertial.aircraft_range[0,None,0:1+1]
     vx         = conditions.frames.inertial.velocity_vector[:,0:1+1]
     I          = segment.state.numerics.time.integrate  
-    trajectory = np.repeat( np.atleast_2d(np.array([np.cos(psi),np.sin(psi)])),cpts , axis = 0) 
+    trajectory = rp.repeat( rp.atleast_2d(rp.array([rp.cos(psi),rp.sin(psi)])),cpts , axis = 0) 
 
     # integrate to compute position credit 
-    x = np.dot(I,vx)
+    x = rp.dot(I,vx)
     x[:,1] = x[:,0] 
     conditions.frames.inertial.position_vector[:,0:1+1] = x0 + x[:,:]*trajectory        
 

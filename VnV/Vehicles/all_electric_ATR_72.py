@@ -11,7 +11,7 @@ from   RCAIDE.Framework.Core import Units
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Electric_Rotor                          import design_electric_rotor
 
 # python imports 
-import numpy as np  
+import RNUMPY as rp  
 from   copy import deepcopy 
 import os
 
@@ -255,7 +255,7 @@ def vehicle_setup():
     landing_gear_pod.heights.at_three_quarters_length   = 1.05
     landing_gear_pod.effective_diameter                 = 3.5
     landing_gear_pod.areas.wetted                       = 8.6715
-    landing_gear_pod.areas.front_projected              = np.pi *( 1.30 / 2)*( 3.5   / 2) 
+    landing_gear_pod.areas.front_projected              = rp.pi *( 1.30 / 2)*( 3.5   / 2) 
     landing_gear_pod.differential_pressure              = 0.   
     
     # Segment  
@@ -326,8 +326,8 @@ def vehicle_setup():
     fuselage.width                              = 2.985093814  
     fuselage.heights.maximum                    = 2.755708426  
     fuselage.areas.side_projected               = fuselage.heights.maximum * fuselage.lengths.total * Units['meters**2'] 
-    fuselage.areas.wetted                       = np.pi * fuselage.width   * fuselage.lengths.total * Units['meters**2'] 
-    fuselage.areas.front_projected              = np.pi * (fuselage.width/2) **2   
+    fuselage.areas.wetted                       = rp.pi * fuselage.width   * fuselage.lengths.total * Units['meters**2'] 
+    fuselage.areas.front_projected              = rp.pi * (fuselage.width/2) **2   
     fuselage.differential_pressure              = 5.0e4 * Units.pascal
     fuselage.heights.at_quarter_length          = fuselage.heights.maximum * Units.meter
     fuselage.heights.at_three_quarters_length   = fuselage.heights.maximum * Units.meter

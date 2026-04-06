@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil                import  compute_naca
 from RCAIDE.Library.Methods.Geometry.Planform.compute_segment_centroid import compute_segment_centroid
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Wing Segmented Planform
@@ -110,10 +110,10 @@ def wing_planform(wing):
             dihedrals.append(seg.dihedral_outboard)
             
         # Convert to arrays
-        chords    = np.array(chords)
-        span_locs = np.array(span_locs)
-        sweeps    = np.array(sweeps)
-        t_cs      = np.array(t_cs)
+        chords    = rp.array(chords)
+        span_locs = rp.array(span_locs)
+        sweeps    = rp.array(sweeps)
+        t_cs      = rp.array(t_cs)
         
         # Basic calcs:
         semispan     = span/(1+sym)
@@ -126,14 +126,14 @@ def wing_planform(wing):
         As = (lengths_dim*chords_dim[:-1]-(chords_dim[:-1]-chords_dim[1:])*(lengths_dim/2)) 
         
         # Calculate the wing area
-        ref_area = np.sum(As)*(1+sym)
+        ref_area = rp.sum(As)*(1+sym)
         
         # Calculate the Aspect Ratio
         AR = (span**2)/ref_area
         
         # Calculate the total span
-        lens = lengths_dim/np.cos(dihedrals[:-1])
-        total_len = np.sum(np.array(lens))*(1+sym)
+        lens = lengths_dim/rp.cos(dihedrals[:-1])
+        total_len = rp.sum(rp.array(lens))*(1+sym)
         
         # Calculate the mean geometric chord
         mgc = ref_area/span
@@ -144,8 +144,8 @@ def wing_planform(wing):
         C = span_locs[:-1]
         integral = ((A+B*(span_locs[1:]-C))**3-(A+B*(span_locs[:-1]-C))**3)/(3*B)
         # For the cases when the wing doesn't taper in a spot
-        integral[np.isnan(integral)] = (A[np.isnan(integral)]**2)*((lengths_ndim)[np.isnan(integral)])
-        MAC = (semispan*(1+sym)/(ref_area))*np.sum(integral)
+        integral[rp.isnan(integral)] = (A[rp.isnan(integral)]**2)*((lengths_ndim)[rp.isnan(integral)])
+        MAC = (semispan*(1+sym)/(ref_area))*rp.sum(integral)
         
         # Calculate the taper ratio
         lamda = chords[-1]/chords[0]
@@ -154,32 +154,32 @@ def wing_planform(wing):
         ct = chords_dim[-1]
         
         # Calculate an average t/c weighted by area
-        t_c = np.sum(As*t_cs[:-1])/(ref_area/2)
+        t_c = rp.sum(As*t_cs[:-1])/(ref_area/2)
         
         # Calculate the segment leading edge sweeps
         r_offsets = chords_dim[:-1]/4
         t_offsets = chords_dim[1:]/4
-        le_sweeps = np.arctan((r_offsets+np.tan(sweeps[:-1])*(lengths_dim)-t_offsets)/(lengths_dim)) 
-        le_sweeps = np.append(le_sweeps, 0)
+        le_sweeps = rp.arctan((r_offsets+rp.tan(sweeps[:-1])*(lengths_dim)-t_offsets)/(lengths_dim)) 
+        le_sweeps = rp.append(le_sweeps, 0)
         
         # Calculate the effective sweeps
-        c_4_sweep     = np.arctan(np.sum(lengths_ndim*np.tan(sweeps[:-1])))
-        le_sweep_total= np.arctan(np.sum(lengths_ndim*np.tan(le_sweeps[:-1])))
+        c_4_sweep     = rp.arctan(rp.sum(lengths_ndim*rp.tan(sweeps[:-1])))
+        le_sweep_total= rp.arctan(rp.sum(lengths_ndim*rp.tan(le_sweeps[:-1])))
     
         # Calculate the aerodynamic center, but first the centroid
-        dxs = np.cumsum(np.concatenate([np.array([0]),np.tan(le_sweeps[:-1])*lengths_dim]))
-        dys = np.cumsum(np.concatenate([np.array([0]),lengths_dim]))
-        dzs = np.cumsum(np.concatenate([np.array([0]),np.tan(dihedrals[:-1])*lengths_dim]))
+        dxs = rp.cumsum(rp.concatenate([rp.array([0]),rp.tan(le_sweeps[:-1])*lengths_dim]))
+        dys = rp.cumsum(rp.concatenate([rp.array([0]),lengths_dim]))
+        dzs = rp.cumsum(rp.concatenate([rp.array([0]),rp.tan(dihedrals[:-1])*lengths_dim]))
         
         Cxys = []
         for i in range(len(lengths_dim)):
             Cxys.append(compute_segment_centroid(le_sweeps[i],lengths_dim[i],dxs[i],dys[i],dzs[i], tapers[i], 
                                          dihedrals[i], chords_dim[i], chords_dim[i+1]))
     
-        aerodynamic_center = (np.dot(np.transpose(Cxys),As)/(ref_area/(1+sym)))
+        aerodynamic_center = (rp.dot(rp.transpose(rp.array(Cxys)),As)/(ref_area/(1+sym)))
         
         
-        single_side_aerodynamic_center = (np.array(aerodynamic_center)*1.)
+        single_side_aerodynamic_center = (rp.array(aerodynamic_center)*1.)
         single_side_aerodynamic_center[0] = single_side_aerodynamic_center[0] - MAC*.25    
         if sym== True:
             aerodynamic_center[1] = 0 
@@ -187,7 +187,7 @@ def wing_planform(wing):
         aerodynamic_center[0] = single_side_aerodynamic_center[0]
         
         # Total length for supersonics
-        total_length = np.tan(le_sweep_total)*semispan + chords[-1]*RC
+        total_length = rp.tan(le_sweep_total)*semispan + chords[-1]*RC
         
         if vertical: 
             for i in range(len(wing.segments)):
@@ -252,7 +252,7 @@ def wing_planform(wing):
         # calculate
         span       = (ar*sref)**.5
         semispan   = span/(1+sym)
-        span_total = span/np.cos(dihedral)
+        span_total = span/rp.cos(dihedral)
         chord_root = 2*sref/span/(1+taper)
         chord_tip  = taper * chord_root
         mgc        = (chord_root+chord_tip)/2 
@@ -261,15 +261,15 @@ def wing_planform(wing):
         
         # calculate leading edge sweep
         if wing.sweeps.leading_edge == None:
-            le_sweep = np.arctan( np.tan(sweep) - (4./ar)*(0.-0.25)*(1.-taper)/(1.+taper) )
+            le_sweep = rp.arctan( rp.tan(sweep) - (4./ar)*(0.-0.25)*(1.-taper)/(1.+taper) )
         else:
             le_sweep = wing.sweeps.leading_edge
             wing.sweeps.quarter_chord = convert_sweep(wing,old_ref_chord_fraction = 0.0,new_ref_chord_fraction = 0.25)
         
         # estimating aerodynamic center coordinates
         y_coord = span / 6. * (( 1. + 2. * taper ) / (1. + taper))
-        x_coord = mac * 0.25 + y_coord * np.tan(le_sweep)
-        z_coord = y_coord * np.tan(dihedral)
+        x_coord = mac * 0.25 + y_coord * rp.tan(le_sweep)
+        z_coord = y_coord * rp.tan(dihedral)
             
         if vertical:
             temp    = y_coord * 1.
@@ -280,7 +280,7 @@ def wing_planform(wing):
             y_coord = 0    
         
         # Total length calculation
-        total_length = np.tan(le_sweep)*span/2. + chord_tip
+        total_length = rp.tan(le_sweep)*span/2. + chord_tip
             
         # update
         wing.chords.root                = chord_root
@@ -296,7 +296,7 @@ def wing_planform(wing):
         wing.total_length               = total_length 
 
         # estimate LEMAC
-        wing.LEMAC =  wing.origin[0][0] + np.tan(wing.sweeps.leading_edge) * y_coord  
+        wing.LEMAC =  wing.origin[0][0] + rp.tan(wing.sweeps.leading_edge) * y_coord  
       
     # control surface  
     taper = wing.taper 
@@ -330,7 +330,7 @@ def wing_planform(wing):
             trailing_edge_sweep = convert_sweep_segments(segment.sweeps.quarter_chord, segment, next_seg, wing, old_ref_chord_fraction=0.25, new_ref_chord_fraction=1.0) 
             leading_edge_sweep  = convert_sweep_segments(segment.sweeps.quarter_chord, segment, next_seg, wing, old_ref_chord_fraction=0.25, new_ref_chord_fraction=0.0) 
 
-            projected_root_chord = segment_root_chord + segnent_start_span/2 * (np.tan(leading_edge_sweep) - np.tan(trailing_edge_sweep))
+            projected_root_chord = segment_root_chord + segnent_start_span/2 * (rp.tan(leading_edge_sweep) - rp.tan(trailing_edge_sweep))
             wing.areas.reference = (projected_root_chord + segment_tip_chord)/2 * reference_wing_span
             wing.chords.mean_aerodynamic =   2./3.*( projected_root_chord+segment_tip_chord - projected_root_chord*segment_tip_chord/(projected_root_chord+segment_tip_chord) )
             
@@ -449,7 +449,7 @@ def segment_properties(wing):
             if (MAC < chord_root) and   (MAC > chord_tip):
                 x_0        = segments[segment_names[seg_idx]].origin[0][0]  +  wing.origin[0][0]
                 dy         = ( MAC -  chord_root) / ( (chord_tip - chord_root) / span_seg)
-                LEMAC      =  x_0 + np.tan(segments[segment_names[seg_idx]].sweeps.leading_edge) *dy
+                LEMAC      =  x_0 + rp.tan(segments[segment_names[seg_idx]].sweeps.leading_edge) *dy
                 wing.LEMAC = LEMAC  
             
             if isinstance(outboard_segment, RCAIDE.Library.Components.Wings.Segments.Blended_Wing_Body_Fuselage_Segment):

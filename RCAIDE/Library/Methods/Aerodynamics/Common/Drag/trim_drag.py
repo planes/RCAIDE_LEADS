@@ -8,7 +8,7 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core import Units
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Spolier Drag 
@@ -116,7 +116,7 @@ def trim_drag(state,settings,geometry):
     CD_0  =  parasite_total + induced_total  + compressibility_total + form_drag
     
     # control surface drag 
-    control_surface_drag = np.zeros_like(CD_0)
+    control_surface_drag = rp.zeros_like(CD_0)
     for wing in geometry.wings: 
         for cs in wing.control_surfaces:
             if type(cs) == RCAIDE.Library.Components.Wings.Control_Surfaces.Spoiler:

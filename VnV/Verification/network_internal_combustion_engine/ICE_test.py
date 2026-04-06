@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units ,Data 
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys 
 import os
 
@@ -59,14 +59,14 @@ def main():
 
     # Check the errors
     error = Data()
-    error.P      = np.max(np.abs((P     - P_truth)/P_truth))
-    error.mdot   = np.max(np.abs((mdot - mdot_truth)/mdot_truth)) 
+    error.P      = rp.max(rp.abs((P     - P_truth)/P_truth))
+    error.mdot   = rp.max(rp.abs((mdot - mdot_truth)/mdot_truth)) 
 
     print('Errors:')
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
 
     return    
 

@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 import  RCAIDE
-import numpy as np
+import RNUMPY as rp
 from scipy.optimize import fsolve
 
 
@@ -114,6 +114,6 @@ def energy_balance(T_final, T_current, delta_t, mass_coolant, Cp_RES, Cp_HAS, Cp
 
     return (T_final - T_current
             - (delta_t / (mass_coolant * Cp_RES)) *
-            (sum(mass_flow_HAS) * np.average(Cp_HAS) * (np.average(T_outlet_HAS) - T_final) +
-             sum(mass_flow_HEX) * np.average(Cp_HEX) * (np.average(T_outlet_HEX) - T_final) -
+            (sum(mass_flow_HAS) * rp.average(Cp_HAS) * (rp.average(T_outlet_HAS) - T_final) +
+             sum(mass_flow_HEX) * rp.average(Cp_HEX) * (rp.average(T_outlet_HEX) - T_final) -
              dQ_dt_env))

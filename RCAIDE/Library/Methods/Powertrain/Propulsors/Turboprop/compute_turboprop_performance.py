@@ -19,7 +19,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turboprop            import co
  
 # python imports 
 from   copy import deepcopy
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_turboprop_performance
@@ -278,7 +278,7 @@ def compute_turboprop_performance(turboprop, state, center_of_gravity=[[0.0, 0.0
     moment_vector[:,0] = turboprop.origin[0][0] -   center_of_gravity[0][0] 
     moment_vector[:,1] = turboprop.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2] = turboprop.origin[0][2]  -  center_of_gravity[0][2]
-    turboprop_conditions.moment = np.cross(moment_vector, turboprop_conditions.thrust)   
+    turboprop_conditions.moment = rp.cross(moment_vector, turboprop_conditions.thrust)   
   
     # compute efficiencies 
     mdot_air_core                                  = turboprop_conditions.core_mass_flow_rate 
@@ -380,7 +380,7 @@ def reuse_stored_turboprop_data(turboprop,state,network,stored_propulsor_tag,cen
     moment_vector[:,0] = turboprop.origin[0][0] -   center_of_gravity[0][0] 
     moment_vector[:,1] = turboprop.origin[0][1]  -  center_of_gravity[0][1] 
     moment_vector[:,2] = turboprop.origin[0][2]  -  center_of_gravity[0][2]
-    moment             = np.cross(moment_vector,thrust_vector)    
+    moment             = rp.cross(moment_vector,thrust_vector)    
 
     power                                              = conditions.energy.propulsors[turboprop.tag].power 
     conditions.energy.propulsors[turboprop.tag].moment = moment

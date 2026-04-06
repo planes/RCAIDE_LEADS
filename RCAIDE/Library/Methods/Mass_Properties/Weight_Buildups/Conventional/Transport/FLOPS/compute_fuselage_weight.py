@@ -12,7 +12,7 @@ import RCAIDE
 from RCAIDE.Framework.Core    import Units
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Fuselage Weight 

@@ -12,7 +12,7 @@ from RCAIDE.Framework.Analyses.Geodesics.Geodesics import Calculate_Distance
 
 # package imports 
 from scipy.interpolate import griddata
-import numpy as np 
+import RNUMPY as rp 
  
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  generate_terrain_microphone_locations
@@ -57,33 +57,33 @@ def generate_terrain_microphone_locations(settings):
     x_res = settings.microphone_x_resolution 
     
     # extract data from file 
-    data  = np.loadtxt(settings.topography_file) # settings.topography_file) CHANGED 10-15-2024
+    data  = rp.loadtxt(settings.topography_file) # settings.topography_file) CHANGED 10-15-2024
     Long  = data[:,0]
     Lat   = data[:,1]
     Elev  = data[:,2] 
     
-    x_min_coord = np.min(Lat)
-    x_max_coord = np.max(Lat)
-    y_min_coord = np.min(Long)
-    y_max_coord = np.max(Long) 
+    x_min_coord = rp.min(Lat)
+    x_max_coord = rp.max(Lat)
+    y_min_coord = rp.min(Long)
+    y_max_coord = rp.max(Long) 
 
     if y_min_coord < 0: 
         y_min_coord = 360 + y_min_coord
     if y_max_coord< 0:
         y_max_coord=360 + y_max_coord 
     
-    top_left_map_coords      = np.array([x_max_coord,y_min_coord])
-    bottom_left_map_coords   = np.array([x_min_coord,y_min_coord])  
-    bottom_right_map_coords  = np.array([x_min_coord,y_max_coord]) 
+    top_left_map_coords      = rp.array([x_max_coord,y_min_coord])
+    bottom_left_map_coords   = rp.array([x_min_coord,y_min_coord])  
+    bottom_right_map_coords  = rp.array([x_min_coord,y_max_coord]) 
     
     x_dist_max = Calculate_Distance(top_left_map_coords,bottom_left_map_coords) * Units.kilometers
     y_dist_max = Calculate_Distance(bottom_right_map_coords,bottom_left_map_coords) * Units.kilometers
     
-    [y_pts,x_pts]      = np.meshgrid(np.linspace(0,y_dist_max,y_res),np.linspace(0,x_dist_max,x_res))
-    [long_deg,lat_deg] = np.meshgrid(np.linspace(np.min(Long),np.max(Long),y_res),np.linspace(np.min(Lat),np.max(Lat),x_res)) 
+    [y_pts,x_pts]      = rp.meshgrid(rp.linspace(0,y_dist_max,y_res),rp.linspace(0,x_dist_max,x_res))
+    [long_deg,lat_deg] = rp.meshgrid(rp.linspace(rp.min(Long),rp.max(Long),y_res),rp.linspace(rp.min(Lat),rp.max(Lat),x_res)) 
     z_deg              = griddata((Lat,Long), Elev, (lat_deg, long_deg), method='linear')        
-    cartesian_pts      = np.dstack((np.dstack((x_pts[:,:,None],y_pts[:,:,None] )),z_deg[:,:,None])).reshape(x_res*y_res,3)
-    lat_long_pts       = np.dstack((np.dstack((lat_deg[:,:,None],long_deg[:,:,None] )),z_deg[:,:,None])).reshape(x_res*y_res,3)  
+    cartesian_pts      = rp.dstack((rp.dstack((x_pts[:,:,None],y_pts[:,:,None] )),z_deg[:,:,None])).reshape(x_res*y_res,3)
+    lat_long_pts       = rp.dstack((rp.dstack((lat_deg[:,:,None],long_deg[:,:,None] )),z_deg[:,:,None])).reshape(x_res*y_res,3)  
     return cartesian_pts , lat_long_pts
 
 

@@ -15,7 +15,7 @@ from .Residuals            import Residuals
 from .Numerics             import Numerics   
 
 # python imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  State
@@ -96,7 +96,7 @@ class State(Conditions):
                 v.expand_rows(rows,override=override)
             # need arrays here
             elif rank == 2:
-                self[k] = np.resize(v,[rows,v.shape[1]])    
+                self[k] = rp.resize(v,[rows,v.shape[1]])    
         
 # ----------------------------------------------------------------------------------------------------------------------
 # Container
@@ -178,7 +178,7 @@ def append_array(A,B=None):
         Properties Used:
         None
     """       
-    if isinstance(A,np.ndarray) and isinstance(B,np.ndarray):
-        return np.vstack([A,B])
+    if isinstance(A,rp.ndarray) and isinstance(B,rp.ndarray):
+        return rp.vstack([A,B])
     else:
         return None

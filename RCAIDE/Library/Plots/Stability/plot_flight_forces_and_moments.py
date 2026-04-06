@@ -158,7 +158,7 @@ def plot_flight_forces_and_moments(results,
     fig.subplots_adjust(top=0.8) 
     
     # set title of plot 
-    title_text    = 'Intertial Forces and Moments'      
+    title_text    = 'inertial Forces and Moments'      
     fig.suptitle(title_text)
     
     if save_figure:

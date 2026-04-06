@@ -11,7 +11,7 @@
 from RCAIDE.Library.Attributes.Materials import Bidirectional_Carbon_Fiber, Carbon_Fiber_Honeycomb, Paint, Unidirectional_Carbon_Fiber, Aluminum_Alloy, Epoxy 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 import copy as cp
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -96,7 +96,7 @@ def compute_wing_weight(wing,
                 if motor.origin[0][1] >= 0: 
                     motor_locs.append(motor.origin[0][1]) 
 
-    motor_spanwise_locations = np.array(motor_locs)
+    motor_spanwise_locations = rp.array(motor_locs)
     N       = num_analysis_points                   # Number of spanwise points
     SF      = safety_factor                         # Safety Factor
     G_max   = max_g_load                            # Maximum G's experienced during climb
@@ -168,49 +168,49 @@ def compute_wing_weight(wing,
     #-------------------------------------------------------------------------------
     # Airfoil
     #------------------------------------------------------------------------------- 
-    NACA        = np.multiply(5 * thicknessToChord, [0.2969, -0.1260, -0.3516, 0.2843, -0.1015])
-    coord       = np.unique(fwdWeb+aftWeb+np.linspace(0, 1, N).tolist())[:, np.newaxis]
-    coordMAT    = np.concatenate((coord**0.5, coord, coord**2, coord**3, coord**4), axis=1)
-    nacaMAT     = coordMAT.dot(NACA)[:, np.newaxis]
-    coord       = np.concatenate((coord, nacaMAT), axis=1)
-    coord       = np.concatenate((coord[-1:0:-1], coord.dot(np.array([[1., 0.], [0., -1.]]))), axis=0)
+    NACA        = rp.multiply(5 * thicknessToChord, [0.2969, -0.1260, -0.3516, 0.2843, -0.1015])
+    coord       = rp.unique(fwdWeb+aftWeb+rp.linspace(0, 1, N).tolist())[:, rp.newaxis]
+    coordMAT    = rp.concatenate((coord**0.5, coord, coord**2, coord**3, coord**4), axis=1)
+    nacaMAT     = coordMAT.dot(NACA)[:, rp.newaxis]
+    coord       = rp.concatenate((coord, nacaMAT), axis=1)
+    coord       = rp.concatenate((coord[-1:0:-1], coord.dot(rp.array([[1., 0.], [0., -1.]]))), axis=0)
     coord[:, 0] = coord[:, 0] - xShear
 
     #-------------------------------------------------------------------------------
     # Beam Geometry
     #------------------------------------------------------------------------------- 
-    x         = np.concatenate((np.linspace(0, 1, N), np.linspace(1, 1+wingletFraction, N)), axis=0)
+    x         = rp.concatenate((rp.linspace(0, 1, N), rp.linspace(1, 1+wingletFraction, N)), axis=0)
     x         = x * wingspan/2
-    x         = np.sort(np.concatenate((x,motor_spanwise_locations), axis=0))
+    x         = rp.sort(rp.concatenate((x,motor_spanwise_locations), axis=0))
     dx        = x[1] - x[0]
-    N         = np.size(x)
+    N         = rp.size(x)
     fwdWeb[:] = [round(locFwd - xShear, 2) for locFwd in fwdWeb]
     aftWeb[:] = [round(locAft - xShear, 2) for locAft in aftWeb]
 
     #-------------------------------------------------------------------------------
     # Loads
     #------------------------------------------------------------------------------- 
-    L  = (1-(x/np.max(x))**2)**0.5           # Assumes Elliptic Lift Distribution
+    L  = (1-(x/rp.max(x))**2)**0.5           # Assumes Elliptic Lift Distribution
     L0 = 0.5*G_max*MTOW*9.8*liftFraction*SF  # Total Design Lift Force
-    L  = L0/np.sum(L[0:-1]*np.diff(x))*L     # Net Lift Distribution 
+    L  = L0/rp.sum(L[0:-1]*rp.diff(x))*L     # Net Lift Distribution 
     T  = L * chord * cmocl                   # Torsion Distribution
     D  = L/LoD                               # Drag Distribution
 
     #-------------------------------------------------------------------------------
     # Shear/Moments
     #------------------------------------------------------------------------------- 
-    Vx = np.append(np.cumsum((D[0:-1]*np.diff(x))[::-1])[::-1], 0)   # Drag Shear
-    Vz = np.append(np.cumsum((L[0:-1]*np.diff(x))[::-1])[::-1], 0)   # Lift Shear
+    Vx = rp.append(rp.cumsum((D[0:-1]*rp.diff(x))[::-1])[::-1], 0)   # Drag Shear
+    Vz = rp.append(rp.cumsum((L[0:-1]*rp.diff(x))[::-1])[::-1], 0)   # Lift Shear
     Vt = 0 * Vz                                                      # Initialize Thrust Shear 
 
-    for i in range(np.size(motor_spanwise_locations)):
+    for i in range(rp.size(motor_spanwise_locations)):
         Vt[x<=motor_spanwise_locations[i]] = Vt[x<=motor_spanwise_locations[i]] + max_thrust
 
-    Mx = np.append(np.cumsum((Vz[0:-1]*np.diff(x))[::-1])[::-1],0)  # Bending Moment
-    My = np.append(np.cumsum(( T[0:-1]*np.diff(x))[::-1])[::-1],0)  # Torsion Moment
-    Mz = np.append(np.cumsum((Vx[0:-1]*np.diff(x))[::-1])[::-1],0)  # Drag Moment
-    Mt = np.append(np.cumsum((Vt[0:-1]*np.diff(x))[::-1])[::-1],0)  # Thrust Moment
-    Mz = np.max((Mz, Mt))                                           # Worst Case of Drag vs. Thrust Moment
+    Mx = rp.append(rp.cumsum((Vz[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Bending Moment
+    My = rp.append(rp.cumsum(( T[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Torsion Moment
+    Mz = rp.append(rp.cumsum((Vx[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Drag Moment
+    Mt = rp.append(rp.cumsum((Vt[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Thrust Moment
+    Mz = rp.max((Mz, Mt))                                           # Worst Case of Drag vs. Thrust Moment
 
     #-------------------------------------------------------------------------------
     # General Structural Properties
@@ -224,24 +224,24 @@ def compute_wing_weight(wing,
     box = box * chord                  # Scale by Chord Length
 
     # Use Shoelace Formula to calculate box area 
-    torsionArea = 0.5*np.abs(np.dot(box[:, 0], np.roll(box[:, 1], 1)) -
-        np.dot(box[:, 1], np.roll(box[:, 0], 1)))
+    torsionArea = 0.5*rp.abs(rp.dot(box[:, 0], rp.roll(box[:, 1], 1)) -
+        rp.dot(box[:, 1], rp.roll(box[:, 0], 1)))
 
-    torsionLength = np.sum(np.sqrt(np.sum(np.diff(box, axis=0)**2, axis=1)))
+    torsionLength = rp.sum(rp.sqrt(rp.sum(rp.diff(box, axis=0)**2, axis=1)))
 
     # Bending 
     box = coord                                             # Box Initially Matches Airfoil
     box = box[box[:, 0] <= fwdWeb[1]]                       # Include Only Parts Fwd of Aft Fwd Spar
     box = box[box[:, 0] >= fwdWeb[0]]                       # Include Only Parts Aft of Fwdmost Spar
-    seg.append(box[box[:, 1] > np.mean(box[:, 1])]*chord)   # Upper Fwd Segment
-    seg.append(box[box[:, 1] < np.mean(box[:, 1])]*chord)   # Lower Fwd Segment
+    seg.append(box[box[:, 1] > rp.mean(box[:, 1])]*chord)   # Upper Fwd Segment
+    seg.append(box[box[:, 1] < rp.mean(box[:, 1])]*chord)   # Lower Fwd Segment
 
     # Drag 
     box = coord                                             # Box Initially Matches Airfoil
     box = box[box[:, 0] <= aftWeb[1]]                       # Include Only Parts Fwd of Aftmost Spar
     box = box[box[:, 0] >= aftWeb[0]]                       # Include Only Parts Aft of Fwd Aft Spar
-    seg.append(box[box[:, 1] > np.mean(box[:, 1])]*chord)   # Upper Aft Segment
-    seg.append(box[box[:, 1] < np.mean(box[:, 1])]*chord)   # Lower Aft Segment
+    seg.append(box[box[:, 1] > rp.mean(box[:, 1])]*chord)   # Upper Aft Segment
+    seg.append(box[box[:, 1] < rp.mean(box[:, 1])]*chord)   # Lower Aft Segment
 
     # Bending/Drag Inertia 
     flapInertia = 0
@@ -250,30 +250,30 @@ def compute_wing_weight(wing,
     dragLength  = 0
 
     for i in range(0, 4):
-        l = np.sqrt(np.sum(np.diff(seg[i], axis=0)**2, axis=1))    # Segment lengths
+        l = rp.sqrt(rp.sum(rp.diff(seg[i], axis=0)**2, axis=1))    # Segment lengths
         c = (seg[i][1::]+seg[i][0:-1])/2                         # Segment centroids
 
         if i<2:
-            flapInertia += np.abs(np.sum(l*c[:,1]**2))   # Bending Inertia per Unit Thickness
-            flapLength  += np.sum(l)
+            flapInertia += rp.abs(rp.sum(l*c[:,1]**2))   # Bending Inertia per Unit Thickness
+            flapLength  += rp.sum(l)
         else:
-            dragInertia += np.abs(np.sum(l*c[:,0]**2))   # Drag Inertia per Unit Thickness
-            dragLength  += np.sum(l)
+            dragInertia += rp.abs(rp.sum(l*c[:,0]**2))   # Drag Inertia per Unit Thickness
+            dragLength  += rp.sum(l)
 
 
     # Shear 
     box        = coord                                                                 # Box Initially Matches Airfoil
     box        = box[box[:,0]<=fwdWeb[1]]                                              # Include Only Parts Fwd of Aft Fwd Spar
-    z          = np.zeros(2)
-    z[0]       = np.interp(fwdWeb[0], box[box[:, 1] > 0,0],box[box[:,1] > 0,1])*chord  # Upper Surf of Box at Fwdmost Spar
-    z[1]       = np.interp(fwdWeb[0], box[box[:, 1] < 0,0],box[box[:,1] < 0,1])*chord  # Lower Surf of Box at Fwdmost Spar
-    h          = np.abs(z[0] - z[1])                                                   # Height of Box at Fwdmost Spar
+    z          = rp.zeros(2)
+    z[0]       = rp.interp(fwdWeb[0], box[box[:, 1] > 0,0],box[box[:,1] > 0,1])*chord  # Upper Surf of Box at Fwdmost Spar
+    z[1]       = rp.interp(fwdWeb[0], box[box[:, 1] < 0,0],box[box[:,1] < 0,1])*chord  # Lower Surf of Box at Fwdmost Spar
+    h          = rp.abs(z[0] - z[1])                                                   # Height of Box at Fwdmost Spar
 
     # Skin 
     box        = coord * chord                                                   # Box Initially is Airfoil Scaled by Chord
-    skinLength = np.sum(np.sqrt(np.sum(np.diff(box, axis=0)**2, axis=1)))
-    A          = 0.5*np.abs(np.dot(box[:,0],np.roll(box[:, 1], 1)) -
-                 np.dot(box[:, 1], np.roll(box[:, 0], 1)))                       # Box Area via Shoelace Formula
+    skinLength = rp.sum(rp.sqrt(rp.sum(rp.diff(box, axis=0)**2, axis=1)))
+    A          = 0.5*rp.abs(rp.dot(box[:,0],rp.roll(box[:, 1], 1)) -
+                 rp.dot(box[:, 1], rp.roll(box[:, 0], 1)))                       # Box Area via Shoelace Formula
 
     #---------------------------------------------------------------------------
     # Structural Calculations
@@ -281,28 +281,28 @@ def compute_wing_weight(wing,
 
     # Calculate Skin Weight Based on Torsion 
     tTorsion = My*dx/(2*torsUSS*torsionArea)                # Torsion Skin Thickness
-    tTorsion = np.maximum(tTorsion,torsMGT*np.ones(N))      # Gage Constraint
+    tTorsion = rp.maximum(tTorsion,torsMGT*rp.ones(N))      # Gage Constraint
     mTorsion = tTorsion * torsionLength * torsDen           # Torsion Mass
-    mCore    = coreMGT*torsionLength*coreDen*np.ones(N)     # Core Mass
-    mGlue    = glueMGT*glueDen*torsionLength*np.ones(N)     # Epoxy Mass
+    mCore    = coreMGT*torsionLength*coreDen*rp.ones(N)     # Core Mass
+    mGlue    = glueMGT*glueDen*torsionLength*rp.ones(N)     # Epoxy Mass
 
     # Calculate Flap Mass Based on Bending 
-    tFlap    = Mx*np.max(seg[0][:,1])/(flapInertia*bendUTS)    # Bending Flap Thickness
+    tFlap    = Mx*rp.max(seg[0][:,1])/(flapInertia*bendUTS)    # Bending Flap Thickness
     mFlap    = tFlap*flapLength*bendDen                        # Bending Flap Mass
-    mGlue    += glueMGT*glueDen*flapLength*np.ones(N)          # Updated Epoxy Mass
+    mGlue    += glueMGT*glueDen*flapLength*rp.ones(N)          # Updated Epoxy Mass
 
     # Calculate Drag Flap Mass 
-    tDrag    = Mz*np.max(seg[2][:,0])/(dragInertia*bendUTS)    # Drag Flap Thickness
+    tDrag    = Mz*rp.max(seg[2][:,0])/(dragInertia*bendUTS)    # Drag Flap Thickness
     mDrag    = tDrag*dragLength*bendDen                        # Drag Flap Mass
-    mGlue    += glueMGT*glueDen*dragLength*np.ones(N)          # Updated Epoxy Mass
+    mGlue    += glueMGT*glueDen*dragLength*rp.ones(N)          # Updated Epoxy Mass
 
     # Calculate Shear Spar Mass 
     tShear   = 1.5*Vz/(shearUSS*h)                            # Shear Spar Thickness
-    tShear   = np.maximum(tShear, shearMGT*np.ones(N))        # Gage constraint
+    tShear   = rp.maximum(tShear, shearMGT*rp.ones(N))        # Gage constraint
     mShear   = tShear*h*shearDen                              # Shear Spar Mass
 
     # Paint 
-    mPaint   = skinLength*coverMGT*coverDen*np.ones(N)        # Paint Mass
+    mPaint   = skinLength*coverMGT*coverDen*rp.ones(N)        # Paint Mass
 
     # Section Mass Total 
     m    = mTorsion + mCore + mFlap + mDrag + mShear + mGlue + mPaint
@@ -311,6 +311,6 @@ def compute_wing_weight(wing,
     mRib = (A+skinLength*ribWid)*ribMGT*ribDen
 
     # Total Mass 
-    mass = 2*(sum(m[0:-1]*np.diff(x))+nRibs*mRib)*grace
+    mass = 2*(sum(m[0:-1]*rp.diff(x))+nRibs*mRib)*grace
 
     return mass

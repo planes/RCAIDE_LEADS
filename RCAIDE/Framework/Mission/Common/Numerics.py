@@ -9,7 +9,7 @@
 from RCAIDE.Framework.Core import Data
 from .Conditions import Conditions 
 from RCAIDE.Library.Methods.Utilities.Chebyshev  import chebyshev_data 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Numerics
@@ -59,14 +59,14 @@ class Numerics(Conditions):
         self.solver.upper_bounds              = Conditions()
         
         self.dimensionless                    = Conditions()
-        self.dimensionless.control_points     = np.empty([0,0])
-        self.dimensionless.differentiate      = np.empty([0,0])
-        self.dimensionless.integrate          = np.empty([0,0]) 
+        self.dimensionless.control_points     = rp.empty([0,0])
+        self.dimensionless.differentiate      = rp.empty([0,0])
+        self.dimensionless.integrate          = rp.empty([0,0]) 
             
         self.time                             = Conditions()
-        self.time.control_points              = np.empty([0,0])
-        self.time.differentiate               = np.empty([0,0])
-        self.time.integrate                   = np.empty([0,0]) 
+        self.time.control_points              = rp.empty([0,0])
+        self.time.differentiate               = rp.empty([0,0])
+        self.time.integrate                   = rp.empty([0,0]) 
         
         
         

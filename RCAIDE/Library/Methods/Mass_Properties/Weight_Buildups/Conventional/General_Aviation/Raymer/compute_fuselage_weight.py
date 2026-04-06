@@ -9,7 +9,7 @@
 
 # RCAIDE 
 from RCAIDE.Framework.Core import  Units
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Fuselage Weight 
@@ -57,7 +57,7 @@ def compute_fuselage_weight(fuselage, vehicle, l_ht):
     d_str    = .025*d_fus+1.*Units.inches
     
     diff_p   = diff_p_fus / (Units.force_pound / Units.ft**2.) # Convert Pascals to lbs/ square ft 
-    tail_arm = np.abs(l_ht)/Units.ft 
+    tail_arm = rp.abs(l_ht)/Units.ft 
     weight   = TOW / Units.lb    # Convert kg to lbs
     area     = S_fus / (Units.ft**2.) # Convert square meters to square ft 
     q        = q_c /(Units.force_pound / Units.ft**2.)
