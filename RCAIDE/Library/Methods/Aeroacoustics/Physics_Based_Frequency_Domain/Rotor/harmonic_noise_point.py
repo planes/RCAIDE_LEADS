@@ -13,7 +13,7 @@ from RCAIDE.Library.Methods.Aeroacoustics.Common  import convert_to_third_octave
 # Python Package imports  
 import RNUMPY as rp
 import RNUMPY.scipy as sp
-from sp.special import jv 
+from RNUMPY.scipy.special import jv 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute Harmonic Noise 

@@ -227,7 +227,7 @@ def wing_planform(wing):
                 trailing_edge_sweep = convert_sweep_segments(segment.sweeps.quarter_chord, segment, next_seg, wing, old_ref_chord_fraction=0.25, new_ref_chord_fraction=1.0) 
                 leading_edge_sweep  = convert_sweep_segments(segment.sweeps.quarter_chord, segment, next_seg, wing, old_ref_chord_fraction=0.25, new_ref_chord_fraction=0.0) 
     
-                projected_root_chord = segment_root_chord + segnent_start_span * (np.tan(leading_edge_sweep) - np.tan(trailing_edge_sweep))
+                projected_root_chord = segment_root_chord + segnent_start_span * (rp.tan(leading_edge_sweep) - rp.tan(trailing_edge_sweep))
                 wing.areas.reference = (projected_root_chord + segment_tip_chord)/2 * reference_wing_span        
         
     else: 
@@ -339,8 +339,8 @@ def wing_planform(wing):
             span = wing.spans.projected
             taper = segment_tip_chord/projected_root_chord
             y_coord = span / 6. * (( 1. + 2. * taper ) / (1. + taper))
-            x_coord = wing.chords.mean_aerodynamic * 0.25 + y_coord * np.tan(leading_edge_sweep) 
-            LEMAC = outboard_segment_origin[0][0] + np.tan(leading_edge_sweep)*(y_coord - wing.segments[seg_keys[tag+1]].percent_span_location * wing.spans.projected/2)
+            x_coord = wing.chords.mean_aerodynamic * 0.25 + y_coord * rp.tan(leading_edge_sweep) 
+            LEMAC = outboard_segment_origin[0][0] + rp.tan(leading_edge_sweep)*(y_coord - wing.segments[seg_keys[tag+1]].percent_span_location * wing.spans.projected/2)
             # estimate LEMAC
             wing.LEMAC =  LEMAC
 

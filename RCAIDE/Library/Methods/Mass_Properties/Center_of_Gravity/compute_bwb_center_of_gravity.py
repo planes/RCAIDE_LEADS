@@ -10,7 +10,6 @@ import RCAIDE
 # package imports 
 import numpy as np  
 from   copy import deepcopy
-import shapely.geometry as geom
 from shapely import Polygon, box 
 import trimesh
 
@@ -65,10 +64,10 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
         outer_segment = bwb_wing.segments[seg_keys[i+1]]
 
 
-        x_in = np.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-        y_in = np.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
-        x_out = np.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
-        y_out = np.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
+        x_in = rp.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
+        y_in = rp.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
+        x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
+        y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
 
         points_out = list(zip(x_out, y_out))
@@ -83,29 +82,29 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
         x1, y1 = poly_in.exterior.xy
         x2, y2 = poly_out.exterior.xy
 
-        pts1 = np.column_stack((x1[:-1], y1[:-1], np.zeros(len(x1)-1)))   # z = 0
-        pts2 = np.column_stack((x2[:-1], y2[:-1], np.full(len(x2)-1, L))) # z = L
+        pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
 
         # STEP 2: Combine all points
-        all_pts = np.vstack([pts1, pts2])
+        all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
         solid_segment = trimesh.convex.convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
-        T = np.eye(4)
+        T = rp.eye(4)
         T[0, 3] = 0.0
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(np.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
     combinde_mesh = trimesh.util.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = np.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag([1, -1, 1])   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
@@ -120,7 +119,7 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
     combined_mesh_full = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I        = combined_mesh_full.moment_inertia
-    centroid = np.array(combined_mesh_full.centroid)
+    centroid = rp.array(combined_mesh_full.centroid)
     centroid[1] = 0 
       
     # store values 
@@ -140,10 +139,10 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
         outer_segment = bwb_wing.segments[seg_keys[i+1]]
 
 
-        x_in = np.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-        y_in = np.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
-        x_out = np.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
-        y_out = np.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
+        x_in = rp.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
+        y_in = rp.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
+        x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
+        y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
         cabin_seperation = box(cabin_length, -1e9, 1e9, 1e9)
         points_out = list(zip(x_out, y_out))
@@ -160,29 +159,29 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
         x1, y1 = poly_in.exterior.xy
         x2, y2 = poly_out.exterior.xy
 
-        pts1 = np.column_stack((x1[:-1], y1[:-1], np.zeros(len(x1)-1)))   # z = 0
-        pts2 = np.column_stack((x2[:-1], y2[:-1], np.full(len(x2)-1, L))) # z = L
+        pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
 
         # STEP 2: Combine all points
-        all_pts = np.vstack([pts1, pts2])
+        all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
         solid_segment = trimesh.convex.convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
-        T = np.eye(4)
+        T = rp.eye(4)
         T[0, 3] = 0.0
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(np.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
     combinde_mesh = trimesh.util.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = np.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag([1, -1, 1])   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
@@ -197,7 +196,7 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
     combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I                          = combined_mesh_full.moment_inertia
-    centroid                   = np.array(combined_mesh_full.centroid)
+    centroid                   = rp.array(combined_mesh_full.centroid)
     centroid[1] = 0
 
     # store values 
@@ -218,10 +217,10 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
         outer_segment = bwb_wing.segments[seg_keys[i+1]]
 
 
-        x_in = np.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
-        y_in = np.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
-        x_out = np.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
-        y_out = np.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
+        x_in = rp.array(inner_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][0]
+        y_in = rp.array(inner_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *inner_segment.root_chord_percent + inner_segment.origin[0][2]
+        x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
+        y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
         cabin_seperation = box(-1e9, -1e9, cabin_length, 1e9)
         points_out = list(zip(x_out, y_out))
@@ -241,29 +240,29 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
         x1, y1 = poly_in.exterior.xy
         x2, y2 = poly_out.exterior.xy
 
-        pts1 = np.column_stack((x1[:-1], y1[:-1], np.zeros(len(x1)-1)))   # z = 0
-        pts2 = np.column_stack((x2[:-1], y2[:-1], np.full(len(x2)-1, L))) # z = L
+        pts1 = rp.column_stack((x1[:-1], y1[:-1], rp.zeros(len(x1)-1)))   # z = 0
+        pts2 = rp.column_stack((x2[:-1], y2[:-1], rp.full(len(x2)-1, L))) # z = L
 
         # STEP 2: Combine all points
-        all_pts = np.vstack([pts1, pts2])
+        all_pts = rp.vstack([pts1, pts2])
 
         # STEP 3: Convex hull → watertight volume mesh
         solid_segment = trimesh.convex.convex_hull(all_pts)
 
         # Apply spanwise translation AFTER orientation fix
-        T = np.eye(4)
+        T = rp.eye(4)
         T[0, 3] = 0.0
         T[1, 3] = 0.0
         T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
         solid_segment.apply_transform(T)
-        R = trimesh.transformations.rotation_matrix(np.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
     
     combinde_mesh = trimesh.util.concatenate(segment_meshes)
     # Reflect across the YZ plane (mirror X)
-    Ry = np.diag([1, -1, 1])   # reflection matrix
+    Ry = rp.diag([1, -1, 1])   # reflection matrix
 
     # 1. copy the mesh
     combined_mesh_sym = deepcopy(combinde_mesh)
@@ -278,7 +277,7 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
     combined_mesh_full         = trimesh.util.concatenate([combinde_mesh, combined_mesh_sym])
     combined_mesh_full.density = mass / combined_mesh_full.volume
     I                          = combined_mesh_full.moment_inertia
-    centroid                   = np.array(combined_mesh_full.centroid)
+    centroid                   = rp.array(combined_mesh_full.centroid)
     centroid[1] = 0
     # store values 
     bwb_wing.center_body.mass_properties.center_of_gravity         =  [centroid.tolist()]

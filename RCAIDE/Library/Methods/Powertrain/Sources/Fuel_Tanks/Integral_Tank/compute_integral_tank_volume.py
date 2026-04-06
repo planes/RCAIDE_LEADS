@@ -15,7 +15,7 @@ from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
 
 # Python Imports 
 import RNUMPY as rp
-from rp.scipy.interpolate import interp1d
+from RNUMPY.scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
@@ -139,9 +139,9 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
     fuel           = fuel_tank.fuel
     tank_mass      = fuel_tank.mass_properties.mass
     fuel_mass      = fuel.mass_properties.mass
-    I_local_fuel   = np.zeros((3, 3)) 
-    I_global_fuel  = np.zeros((3, 3)) 
-    I_local_tank   = np.zeros((3, 3))    
+    I_local_fuel   = rp.zeros((3, 3)) 
+    I_global_fuel  = rp.zeros((3, 3)) 
+    I_local_tank   = rp.zeros((3, 3))    
     
     # Collect all segment tags between start and end (inclusive)
     if len(fuselage.segments) > 1:
@@ -161,7 +161,7 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
             
         tessellation = 20
         num_fus_segs = len(seg_tags)
-        fuselage_points = np.zeros((num_fus_segs*tessellation ,3))
+        fuselage_points = rp.zeros((num_fus_segs*tessellation ,3))
           
         for i_seg, segment in enumerate(seg_tags):
             segment   = fuselage.segments[segment]
@@ -169,9 +169,9 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
             a         = segment.width/2
             b         = segment.height/2
             n         = segment.curvature
-            theta     = np.linspace(0,2*np.pi,tessellation) 
-            fus_ypts  =  (abs((np.cos(theta)))**(2/n))*a * ((np.cos(theta)>0)*1 - (np.cos(theta)<0)*1) 
-            fus_zpts  =  (abs((np.sin(theta)))**(2/n))*b * ((np.sin(theta)>0)*1 - (np.sin(theta)<0)*1)
+            theta     = rp.linspace(0,2*rp.pi,tessellation) 
+            fus_ypts  =  (abs((rp.cos(theta)))**(2/n))*a * ((rp.cos(theta)>0)*1 - (rp.cos(theta)<0)*1) 
+            fus_zpts  =  (abs((rp.sin(theta)))**(2/n))*b * ((rp.sin(theta)>0)*1 - (rp.sin(theta)<0)*1)
             
             
             start_idx  = i_seg * tessellation
@@ -184,7 +184,7 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
         solid_segment = trimesh.convex.convex_hull(fuselage_points) 
     
         # Rotate to match the RCAIDE aircraft axes convention
-        R = trimesh.transformations.rotation_matrix(np.deg2rad(90), [1, 0, 0], [0, 0, 0])
+        R = trimesh.transformations.rotation_matrix(rp.deg2rad(90), [1, 0, 0], [0, 0, 0])
         solid_segment.apply_transform(R)
     
         # Calculate MOI of the fuel within the fuel tank 
@@ -257,18 +257,20 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
     fuel_tank.fuel.xz_plane_symmetric = wing.xz_plane_symmetric
     fuel_tank.fuel.xy_plane_symmetric = wing.xy_plane_symmetric
     fuel_tank.fuel.yz_plane_symmetric = wing.yz_plane_symmetric 
+    total_fuel_mass = 0.
+    total_fuel_volume = 0.
     
     if len(wing.segments) > 1: 
-        segment_tank_moment = np.array([0.0, 0.0, 0.0])
+        segment_tank_moment = rp.array([0.0, 0.0, 0.0])
         seg_bounds =  fuel_tank.segments_bounding_tank  
         # Collect all segment tags between start and end (inclusive)
         collect = False
-        seg_keys = []
+        seg_tags = []
         for segment in wing.segments:
             if segment.tag == seg_bounds[0]:
                 collect = True
             if collect:
-                seg_keys.append(segment.tag)
+                seg_tags.append(segment.tag)
             if segment.tag == seg_bounds[1]:
                 break
         
@@ -281,7 +283,7 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
             inner_segment.volume_properties.fuel = volume
     
             total_fuel_mass      += volume * fuel_tank.fuel.density
-            segment_tank_moment  += np.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
+            segment_tank_moment  += rp.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
             total_fuel_volume    += volume
      
         inner_segment_x_start = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_start[0])
@@ -306,7 +308,7 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
                 (p3x + p4x)*(p3x*p4y - p4x*p3y) +  (p4x + p1x)*(p4x*p1y - p1x*p4y))
         
         
-        fuel_tank.fuel.mass_properties.center_of_gravity  = np.array([x_cg, 0, 0])
+        fuel_tank.fuel.mass_properties.center_of_gravity  = rp.array([x_cg, 0, 0])
         fuel_tank.volume_properties.net_volume            = total_fuel_volume
 
          
@@ -614,7 +616,7 @@ def compute_wing_integral_prismatic_tank_volume(fuel_tank,wing,fuel_tanks):
     fuel_tank.fuel.yz_plane_symmetric = wing.yz_plane_symmetric 
     
     if len(wing.segments) > 1: 
-        segment_tank_moment = np.array([0.0, 0.0, 0.0])
+        segment_tank_moment = rp.array([0.0, 0.0, 0.0])
         seg_bounds =  fuel_tank.segments_bounding_tank  
 
         # Collect all segment tags between start and end (inclusive)
@@ -637,7 +639,7 @@ def compute_wing_integral_prismatic_tank_volume(fuel_tank,wing,fuel_tanks):
             inner_segment.volume_properties.fuel = volume
     
             total_fuel_mass      += volume * fuel_tank.fuel.density
-            segment_tank_moment  += np.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
+            segment_tank_moment  += rp.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
             total_fuel_volume    += volume
      
         inner_segment_x_start = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_start[0])
@@ -735,7 +737,7 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     # loop through wing segments to get cooridates
     # ------------------------------------------------------
     num_tank_sections    = 0
-    wing_segment_origins = np.empty((0, 3))
+    wing_segment_origins = rp.empty((0, 3))
     segments             = wing.segments
         
     seg_tags = list(wing.segments.keys())
@@ -745,14 +747,14 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     for _,tag in enumerate(seg_names):
         segment = wing.segments[tag]
         num_tank_sections += 1
-        wing_segment_origins =  np.concatenate((wing_segment_origins, np.array(segment.origin)), axis=0)
+        wing_segment_origins =  rp.concatenate((wing_segment_origins, rp.array(segment.origin)), axis=0)
 
     tank_end_percent_current = tank_end_percent
 
     # dimensionalized location of tank bounds
     tank_start_dimensional = tank_start_percent * root_chord
     tank_end_dimensional   = tank_end_percent_current * root_chord
-    x_tank_bounds = np.linspace(tank_start_dimensional, tank_end_dimensional, n)
+    x_tank_bounds = rp.linspace(tank_start_dimensional, tank_end_dimensional, n)
     # ------------------------------------------------------
     # loop through wing segments to get cooridates
     # ------------------------------------------------------
@@ -814,8 +816,8 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     # ------------------------------------------------------
     # Compute prismatic volumes from intersections
     # ------------------------------------------------------
-    tank_volumes = np.zeros(num_tank_sections - 1)
-    tank_lengths = np.zeros(num_tank_sections - 1)
+    tank_volumes = rp.zeros(num_tank_sections - 1)
+    tank_lengths = rp.zeros(num_tank_sections - 1)
     intersection_polygons = []
 
     for seg_i in range(1, num_tank_sections):
@@ -856,8 +858,8 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     # ------------------------------------------------------
     # Get maximum volume section
     # ------------------------------------------------------
-    max_volume = np.max(tank_volumes)
-    max_idx = np.argmax(tank_volumes)
+    max_volume = rp.max(tank_volumes)
+    max_idx = rp.argmax(tank_volumes)
 
     fuel_tank.volume_external = max_volume
     fuel_tank.length_external = tank_lengths[max_idx]
@@ -877,7 +879,7 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     coords = list(polygon_for_calc.exterior.coords)
 
     # Remove duplicate last point (Shapely closes polygon automatically)
-    if np.allclose(coords[0], coords[-1]):
+    if rp.allclose(coords[0], coords[-1]):
         coords = coords[:-1]
 
     # Ensure it's 4-sided
@@ -889,10 +891,10 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     for i in range(len(coords)):
         x1, y1 = coords[i]
         x2, y2 = coords[(i + 1) % len(coords)]
-        length = np.sqrt((x2 - x1)**2 + (y2 - y1)**2)
+        length = rp.sqrt((x2 - x1)**2 + (y2 - y1)**2)
         edge_lengths.append(length)
 
-    fuel_tank.max_volume_intersection_edge_lengths = np.array(edge_lengths)
+    fuel_tank.max_volume_intersection_edge_lengths = rp.array(edge_lengths)
     fuel_tank.max_volume_intersection_num_edges    = int(len(edge_lengths)) 
     fuel_tank.average_outer_width                  = (edge_lengths[0]+edge_lengths[2])/2
     fuel_tank.average_outer_length                 = fuel_tank.length_external
@@ -916,7 +918,7 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
         polygon=polygon_for_calc,
         height=float(fuel_tank.length_external),
     )
-    R = trimesh.transformations.rotation_matrix(-np.pi / 2.0, [1.0, 0.0, 0.0])
+    R = trimesh.transformations.rotation_matrix(-rp.pi / 2.0, [1.0, 0.0, 0.0])
     T = trimesh.transformations.translation_matrix(
         [0.0, -0.5 * float(fuel_tank.length_external), 0.0]
     )
@@ -924,7 +926,7 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     tank_mesh.apply_transform(R)
     tank_mesh.apply_transform(T)
 
-    centroid = np.asarray(tank_mesh.center_mass, dtype=float)
+    centroid = rp.asarray(tank_mesh.center_mass, dtype=float)
     I        = tank_mesh.moment_inertia 
     cg_x     = centroid[0]
     cg_y     = 0

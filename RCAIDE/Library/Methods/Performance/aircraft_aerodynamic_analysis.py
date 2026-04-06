@@ -161,25 +161,25 @@ def aircraft_aerodynamic_analysis(analyses                         = None,
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron:
                 analyses.aerodynamics.aileron_flag  = True 
                 state.conditions.control_surfaces.aileron = Data()
-                state.conditions.control_surfaces.aileron.deflection = control_surface.deflection * np.ones_like(angle_of_attacks)
+                state.conditions.control_surfaces.aileron.deflection = control_surface.deflection * rp.ones_like(angle_of_attacks)
                 state.conditions.control_surfaces.aileron.static_stability = Data()
                 state.conditions.control_surfaces.aileron.static_stability.coefficients = Data()
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Elevator:
                 analyses.aerodynamics.elevator_flag = True 
                 state.conditions.control_surfaces.elevator = Data()
-                state.conditions.control_surfaces.elevator.deflection = control_surface.deflection * np.ones_like(angle_of_attacks)
+                state.conditions.control_surfaces.elevator.deflection = control_surface.deflection * rp.ones_like(angle_of_attacks)
                 state.conditions.control_surfaces.elevator.static_stability = Data()
                 state.conditions.control_surfaces.elevator.static_stability.coefficients = Data()
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder:
                 analyses.aerodynamics.rudder_flag   = True
                 state.conditions.control_surfaces.rudder = Data()
-                state.conditions.control_surfaces.rudder.deflection = control_surface.deflection * np.ones_like(angle_of_attacks)
+                state.conditions.control_surfaces.rudder.deflection = control_surface.deflection * rp.ones_like(angle_of_attacks)
                 state.conditions.control_surfaces.rudder.static_stability = Data()
                 state.conditions.control_surfaces.rudder.static_stability.coefficients = Data()
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Flap:
                 analyses.aerodynamics.flap_flag      = True
                 state.conditions.control_surfaces.flap = Data()
-                state.conditions.control_surfaces.flap.deflection = control_surface.deflection * np.ones_like(angle_of_attacks)
+                state.conditions.control_surfaces.flap.deflection = control_surface.deflection * rp.ones_like(angle_of_attacks)
                 state.conditions.control_surfaces.flap.static_stability = Data()
                 state.conditions.control_surfaces.flap.static_stability.coefficients = Data() 
   

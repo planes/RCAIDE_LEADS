@@ -10,12 +10,12 @@ import RCAIDE
 from RCAIDE.Library.Components   import Component
 
 # # package imports 
-import numpy as np 
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Cuboid Moment of Inertia
 # ----------------------------------------------------------------------------------------------------------------------   
-def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity = np.array([[0,0,0]])):  
+def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity = rp.array([[0,0,0]])):  
     ''' computes the moment of inertia tensor for a hollow cuboid
 
     Assumptions:
@@ -48,7 +48,7 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
     # ----------------------------------------------------------------------------------------------------------------------    
     # Setup
     # ----------------------------------------------------------------------------------------------------------------------
-    I = np.zeros((3, 3))
+    I = rp.zeros((3, 3))
 
     insulation_rm_density = component.insulation.rigid_material.density
     insulation_fm_density = component.insulation.flexible_material.density
@@ -57,35 +57,35 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
     pipe_fm_density       = component.pipe.flexible_material.density   
     pipe_fm_ratio         = component.pipe.flexible_material_ratio  
     
-    insulation_cross_sectional_area = (np.pi / 4) *  (component.insulation.diameters.external ** 2 -   component.insulation.diameters.internal** 2)
-    pipe_cross_sectional_area       = (np.pi / 4) *  (component.pipe.diameters.external ** 2 -   component.pipe.diameters.internal** 2)
+    insulation_cross_sectional_area = (rp.pi / 4) *  (component.insulation.diameters.external ** 2 -   component.insulation.diameters.internal** 2)
+    pipe_cross_sectional_area       = (rp.pi / 4) *  (component.pipe.diameters.external ** 2 -   component.pipe.diameters.internal** 2)
     
     c_list  =  []
     c_symm  =  []
-    c_locs  = np.empty((0,3))  
+    c_locs  = rp.empty((0,3))  
     
     for network in  vehicle.networks: 
         for propulsor in network.propulsors:
             c_list.append(propulsor.tag)
             c_symm.append(propulsor.xz_plane_symmetric) 
-            c_loc  = np.array(propulsor.origin) + np.array(propulsor.mass_properties.center_of_gravity)
-            c_locs =  np.concatenate((c_locs,c_loc), axis=0)
+            c_loc  = rp.array(propulsor.origin) + rp.array(propulsor.mass_properties.center_of_gravity)
+            c_locs =  rp.concatenate((c_locs,c_loc), axis=0)
         
         for fuel_line in network.fuel_lines: 
             for tag, item in fuel_line.items():
                 if isinstance(item,RCAIDE.Library.Components.Component): 
                     c_list.append(item.tag)
                     c_symm.append(item.xz_plane_symmetric)
-                    c_loc  = np.array(item.origin) + np.array(item.mass_properties.center_of_gravity)
-                    c_locs =  np.concatenate((c_locs,c_loc), axis=0) 
+                    c_loc  = rp.array(item.origin) + rp.array(item.mass_properties.center_of_gravity)
+                    c_locs =  rp.concatenate((c_locs,c_loc), axis=0) 
                 if isinstance(item,Component.Container): 
                     for key in item.keys():
                         sub_item = item[key] 
                         if isinstance(sub_item,RCAIDE.Library.Components.Component): 
                             c_list.append(sub_item.tag)
                             c_symm.append(sub_item.xz_plane_symmetric)
-                            c_loc  = np.array(sub_item.origin) + np.array(sub_item.mass_properties.center_of_gravity)
-                            c_locs = np.concatenate((c_locs,c_loc), axis=0)                         
+                            c_loc  = rp.array(sub_item.origin) + rp.array(sub_item.mass_properties.center_of_gravity)
+                            c_locs = rp.concatenate((c_locs,c_loc), axis=0)                         
     
     num_c= len(c_list) 
     for i in range (num_c):
@@ -111,7 +111,7 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
                     line_3_insulation_mass    = insulation_fm_ratio * (insulation_rm_density * line_3_insulation_volume) +  (1 - insulation_fm_ratio) * (insulation_fm_density * line_3_insulation_volume)
                     
                     # line 1
-                    I_local      = np.zeros((3, 3))
+                    I_local      = rp.zeros((3, 3))
                     I_local[0,0] += (1 / 12) * line_1_insulation_mass * (line_1_length ** 2)
                     I_local[1,1] += 0 
                     I_local[2,2] += (1 / 12) * line_1_insulation_mass * (line_1_length ** 2)
@@ -141,7 +141,7 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
                     line_3_pipe_mass          = pipe_fm_ratio * (pipe_rm_density * line_3_pipe_volume) +  (1 - pipe_fm_ratio) * (pipe_fm_density * line_3_pipe_volume) 
 
                     # line 1
-                    I_local      = np.zeros((3, 3))
+                    I_local      = rp.zeros((3, 3))
                     I_local[0,0] += (1 / 12) * line_1_pipe_mass * (line_1_length ** 2)
                     I_local[1,1] += 0 
                     I_local[2,2] += (1 / 12) * line_1_pipe_mass * (line_1_length ** 2)

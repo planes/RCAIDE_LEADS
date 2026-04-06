@@ -12,7 +12,7 @@ import  RCAIDE
 from RCAIDE.Framework.Core    import Units ,  Data
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Landing Gear Weight 
@@ -68,9 +68,9 @@ def compute_landing_gear_weight(vehicle):
                 nacelle =  propulsor.nacelle 
                 FNAC    = nacelle.diameter / Units.ft
                 DIH     = main_wing.dihedral
-                YEE     = np.max(np.abs(np.array(network.origin)[:, 1])) / Units.inches
+                YEE     = rp.max(rp.abs(rp.array(network.origin)[:, 1])) / Units.inches
                 WF      = w_f / Units.ft
-                XMLG    = 12 * FNAC + (0.26 - np.tan(DIH)) * (YEE - 6 * WF)  # length of extended main landing gear
+                XMLG    = 12 * FNAC + (0.26 - rp.tan(DIH)) * (YEE - 6 * WF)  # length of extended main landing gear
             else:
                 XMLG    = 0.75 * l_f / Units.ft  # length of extended nose landing gear
     XNLG = 0.7 * XMLG

@@ -12,7 +12,7 @@ import RCAIDE
 from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia  import compute_vehicle_moment_of_inertia
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity  import compute_vehicle_center_of_gravity 
 
-import numpy as np
+import RNUMPY as rp
 import pandas as pd
 import os
 import sys
@@ -480,7 +480,7 @@ def mass_properties_preprocess_routine(segment, i = 0):
         ])
         overwrite_MOI = False
         tensor = analyses.vehicle.mass_properties.moments_of_inertia.tensor
-        if np.all(tensor == 0):
+        if rp.all(tensor == 0):
             overwrite_MOI = True
         if i != 0:
             verbose_flag = False
@@ -625,7 +625,7 @@ def iterate_for_mtow(old_mtow, oew, max_payload, max_fuel,vehicle):
 
     # Proportional correction in weight-space (not absolute +0.1 kg), with damping.
     gain = 0.05
-    correction_ratio = np.clip(gain * diff, -0.05, 0.05)
+    correction_ratio = rp.clip(gain * diff, -0.05, 0.05)
     new_mtow = old_mtow * (1.0 - correction_ratio)
 
     # Keep MTOW physically meaningful.

@@ -99,7 +99,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
     for cargo_bay in vehicle_0.cargo_bays:  
         W_CARGO += cargo_bay.mass_properties.mass
         m_c.append(cargo_bay.mass_properties.mass) 
-    cargo_bay_ratio = np.array(m_c) / sum(np.array(m_c)) 
+    cargo_bay_ratio = rp.array(m_c) / sum(rp.array(m_c)) 
     W_CARGO += PLD-W_PAX
      
 
@@ -108,7 +108,7 @@ def compute_load_and_trim_diagram(mission = None, cruise_segment_tag = "cruise",
         for fuel_line in  network.fuel_lines:
             for fuel_tank in fuel_line.fuel_tanks: 
                 m_f.append(fuel_tank.fuel.mass_properties.mass)
-    fuel_tank_ratio = np.array(m_f) / sum(np.array(m_f)) 
+    fuel_tank_ratio = rp.array(m_f) / sum(rp.array(m_f)) 
 
     #------------------------------------------------------------------------  
     # Compute Loading Points 

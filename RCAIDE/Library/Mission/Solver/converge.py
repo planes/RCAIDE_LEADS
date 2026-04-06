@@ -202,12 +202,12 @@ def add_mission_variables(segment):
 
     # Step 2.2: Construct nexus format  : [Variable_###, initial, -rp.inf, rp.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
-    input_len_strings = rp.tile('Variable_', len_inputs)
+    input_len_strings = np.tile('Variable_', len_inputs)
     input_numbers     = rp.linspace(1,len_inputs,len_inputs,dtype=rp.int16)
-    input_names       = np.core.defchararray.add(input_len_strings,rp.array(input_numbers+input_count).astype(str))
+    input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
     lower_bounds      = full_lower_bound_vals.pack_array()
     upper_bounds      = full_upper_bound_vals.pack_array()     
-    units             = rp.broadcast_to(Units.less,(len_inputs,))
+    units             = rp.broadcast_to(rp.array(Units.less),(len_inputs,))
     # scaling factor for optimizer 
     factor = rp.ceil(rp.log10(abs(initial_values)))
     factor[rp.isinf(factor)] = 0
@@ -228,16 +228,16 @@ def add_mission_variables(segment):
     # Step 3: Constraints 
     # Step 3.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
     con_count       = 0
-    con_len_strings = rp.tile('Residual_', len_residuals)
+    con_len_strings = np.tile('Residual_', len_residuals)
     con_numbers     = rp.linspace(1,len_residuals,len_residuals,dtype=rp.int16)
-    con_names       = np.core.defchararray.add(con_len_strings,rp.array(con_numbers+con_count).astype(str))
-    equals          = rp.broadcast_to('=',(len_residuals,))
+    con_names       = np.core.defchararray.add(con_len_strings,np.array(con_numbers+con_count).astype(str))
+    equals          = np.broadcast_to('=',(len_residuals,))
     zeros           = rp.zeros(len_residuals)
     ones            = rp.ones(len_residuals)
     
     # Step 3.2 Add in the new constraints
     optimization_problem.constraints = Data()
-    new_con_name_signs = rp.empty((len_residuals, 2), dtype=object)
+    new_con_name_signs = np.empty((len_residuals, 2), dtype=object)
     new_con_name_signs[:,0] = con_names
     new_con_name_signs[:,1] = equals
     optimization_problem.constraints.name_signs = new_con_name_signs
@@ -255,11 +255,11 @@ def add_mission_variables(segment):
 
     if ground_seg_flag:       
         output_numbers = rp.linspace(0,n_points-2,n_points-1,dtype=rp.int16)
-        basic_string_con[unknown_keys[1]] = rp.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
-        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],rp.array(output_numbers).astype(str)))
-        input_string        = rp.array(input_string[0])
+        basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
+        input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str)))
+        input_string        = np.array(input_string[0])
         input_string        = np.core.defchararray.add(input_string, rp.tile(']',len_inputs-1))
-        input_aliases       = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
+        input_aliases       = np.reshape(rp.tile(rp.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
         input_aliases[0,1]  = 'segment.state.unknowns.'+unknown_keys[0] 
         input_aliases[1:,1] = input_string 
@@ -267,28 +267,28 @@ def add_mission_variables(segment):
     elif single_pt_seg:  
         for unkn in unknown_keys:
             basic_string_con[unkn] = rp.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],rp.array([0]).astype(str)))
-        input_string       = rp.ravel(input_string)
-        input_string       = np.core.defchararray.add(input_string, rp.tile(']',len_inputs))
-        input_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
+        input_string       = np.ravel(input_string)
+        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
+        input_aliases      = np.reshape(rp.tile(rp.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string    
     else:  
         output_numbers = rp.linspace(0,n_points-1,n_points,dtype=rp.int16) 
         for unkn in unknown_keys:
-            basic_string_con[unkn] = rp.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],rp.array(output_numbers).astype(str)))
-        input_string       = rp.ravel(input_string)
-        input_string       = np.core.defchararray.add(input_string, rp.tile(']',len_inputs))
-        input_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_inputs), (-1, 2)) 
+            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
+        input_string       = np.ravel(input_string)
+        input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
+        input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string
     
     # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = rp.tile('segment.state.residuals.pack_array()[', len_residuals)
-    residual_string       = np.core.defchararray.add(basic_string_res,rp.array(con_numbers-1).astype(str))
-    residual_string       = np.core.defchararray.add(residual_string, rp.tile(']',len_residuals))
-    residual_aliases      = rp.reshape(rp.tile(rp.atleast_2d(rp.array((None,None))),len_residuals), (-1, 2)) 
+    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_residuals)
+    residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
+    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
+    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
     residual_aliases[:,0] = con_names
     residual_aliases[:,1] = residual_string
         
@@ -303,17 +303,17 @@ def add_mission_variables(segment):
     if segment.state.numerics.solver.objective == None:     
         aliases.append([ 'nothing'                   , 'postprocess.nothing']) 
         optimization_problem.objective = Data()
-        optimization_problem.objective.name = rp.array([['nothing']], dtype=object)
+        optimization_problem.objective.name = np.array([['nothing']], dtype=object)
         optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
         optimization_problem.objective = Data()
-        optimization_problem.objective.name = rp.array(['energy_consumed'], dtype=object)
+        optimization_problem.objective.name = np.array(['energy_consumed'], dtype=object)
         optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
         optimization_problem.objective = Data()
-        optimization_problem.objective.name = rp.array(['maximum_power'], dtype=object)
+        optimization_problem.objective.name = np.array(['maximum_power'], dtype=object)
         optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     else:
         raise Exception('undefined objective function')

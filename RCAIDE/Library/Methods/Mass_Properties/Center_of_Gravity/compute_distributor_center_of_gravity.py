@@ -9,7 +9,7 @@
 import RCAIDE 
 
 # # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Distributor Center of Gravity
@@ -47,12 +47,12 @@ def compute_distributor_center_of_gravity(component,vehicle, length=0):
     pipe_fm_density       = component.pipe.flexible_material.density   
     pipe_fm_ratio         = component.pipe.flexible_material_ratio  
     
-    insulation_cross_sectional_area = (np.pi / 4) *  (component.insulation.diameters.external ** 2 -   component.insulation.diameters.internal** 2)
-    pipe_cross_sectional_area       = (np.pi / 4) *  (component.pipe.diameters.external ** 2 -   component.pipe.diameters.internal** 2)
+    insulation_cross_sectional_area = (rp.pi / 4) *  (component.insulation.diameters.external ** 2 -   component.insulation.diameters.internal** 2)
+    pipe_cross_sectional_area       = (rp.pi / 4) *  (component.pipe.diameters.external ** 2 -   component.pipe.diameters.internal** 2)
     
     c_list  =  []
     c_symm  =  []
-    c_locs  = np.empty((0,3)) 
+    c_locs  = rp.empty((0,3)) 
 
     total_lat_line_length= 0
     total_line_mass      = 0
@@ -63,15 +63,15 @@ def compute_distributor_center_of_gravity(component,vehicle, length=0):
         for propulsor in network.propulsors:
             c_list.append(propulsor.tag)
             c_symm.append(propulsor.xz_plane_symmetric) 
-            c_loc  = np.array(propulsor.origin) + np.array(propulsor.mass_properties.center_of_gravity)
-            c_locs =  np.concatenate((c_locs,c_loc), axis=0)
+            c_loc  = rp.array(propulsor.origin) + rp.array(propulsor.mass_properties.center_of_gravity)
+            c_locs =  rp.concatenate((c_locs,c_loc), axis=0)
          
         for fuel_line in network.fuel_lines:
             for fuel_tank in fuel_line.fuel_tanks: 
                     c_list.append(fuel_tank.tag)
                     c_symm.append(fuel_tank.xz_plane_symmetric)
-                    c_loc  = np.array(fuel_tank.origin) + np.array(fuel_tank.mass_properties.center_of_gravity)
-                    c_locs =  np.concatenate((c_locs,c_loc), axis=0)  
+                    c_loc  = rp.array(fuel_tank.origin) + rp.array(fuel_tank.mass_properties.center_of_gravity)
+                    c_locs =  rp.concatenate((c_locs,c_loc), axis=0)  
     
     # lateral lines running from center of aircraft to sources (fuel tanks. batteries etc) t
     for i in range(len(c_list)):   

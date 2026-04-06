@@ -12,8 +12,8 @@ from RCAIDE.Framework.Core import Units, Data
 
 # Python imports
 from copy import deepcopy
-import numpy as np
-from scipy.optimize import minimize_scalar
+import RNUMPY as rp
+from RNUMPY.scipy.optimize import minimize_scalar
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Structural Solver
@@ -45,7 +45,7 @@ def compute_liquid_hydrogen_tank_conformal_volume(fuel_tank,fuel_tanks):
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     atmo_data  = atmosphere.compute_values(fuel_tank.design_altitude,
                                            fuel_tank.design_isa_deviation)
-    Ta = float(np.asarray(atmo_data.temperature).reshape(-1)[0])
+    Ta = float(rp.asarray(atmo_data.temperature).reshape(-1)[0])
 
     
     # Initial fuel volume guess
@@ -142,7 +142,7 @@ def compute_liquid_hydrogen_tank_conformal_volume(fuel_tank,fuel_tanks):
 
 
 def tank_width(th, li,hi,wi,P_internal, P_external, safety_factor, fuel_tank ):
-        th = float(np.asarray(th).reshape(-1)[0])
+        th = float(rp.asarray(th).reshape(-1)[0])
         a = wi/hi #width-to-height ratio
         h=li
         H=wi
@@ -217,7 +217,7 @@ def tank_width(th, li,hi,wi,P_internal, P_external, safety_factor, fuel_tank ):
         sv = max(N_totali, N_totalo, M_totali, M_totalo, Q_totali, Q_totalo, Qs_totali, Qs_totalo) #maximum stress
         # sv = max(N_totali, N_totalo, M_totali, M_totalo)  # maximum stress
         # print("sv", sv)
-        return np.abs(sv - fuel_tank.material.yield_tensile_strength/safety_factor) #von Mises criteria
+        return rp.abs(sv - fuel_tank.material.yield_tensile_strength/safety_factor) #von Mises criteria
     
 def thermal_solver_basic_rectangular(Ta, fuel_tank,lo,wo,ho):
     #Reads properties, tank material (mt), insulation material (mi), tank geometry - 

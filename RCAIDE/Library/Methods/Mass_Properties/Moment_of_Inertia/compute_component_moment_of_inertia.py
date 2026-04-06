@@ -7,11 +7,10 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # RCAIDE imports  
-import RCAIDE
 from RCAIDE.Library.Components                                 import Component
 
 # python import
-import numpy as np
+import RNUMPY as rp
 # ----------------------------------------------------------------------------------------------------------------------
 #  Recursive MOI
 # ----------------------------------------------------------------------------------------------------------------------   
@@ -54,9 +53,9 @@ def update_total_moment_of_inertia(total_MOI,vehicle_CG,C,segment,verbose,moment
     component_mass  = C.mass_properties.mass
     
     # MOI due to parallel axis theorm
-    component_CG    = np.array(C.mass_properties.center_of_gravity) + np.array(C.origin)   
-    s               = np.array(vehicle_CG) -  np.array(component_CG)
-    I_parallel_axis = component_mass * (np.array(np.dot(s[0], s[0])) * np.array(np.identity(3)) - np.outer(s,s))
+    component_CG    = rp.array(C.mass_properties.center_of_gravity) + rp.array(C.origin)   
+    s               = rp.array(vehicle_CG) -  rp.array(component_CG)
+    I_parallel_axis = component_mass * (rp.array(rp.dot(s[0], s[0])) * rp.array(rp.identity(3)) - rp.outer(s,s))
     
     # total moment of inertia 
     I_global        = I_component + I_parallel_axis

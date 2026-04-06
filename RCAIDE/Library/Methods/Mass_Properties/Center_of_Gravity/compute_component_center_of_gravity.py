@@ -58,7 +58,7 @@ def update_mass_and_moment(total_mass,total_moment,C,segment,verbose,include_pay
         if  include_fuel != True:
             include_component = False
                               
-    symmetry = np.array([[1, 1, 1]])
+    symmetry = rp.array([[1, 1, 1]])
     if C.yz_plane_symmetric:
         symmetry[0][0] = 0
     if C.xz_plane_symmetric:
@@ -80,10 +80,10 @@ def update_mass_and_moment(total_mass,total_moment,C,segment,verbose,include_pay
         if verbose:
             name_column_width = 20
             num_column_width  = 6
-            print(f"{C.tag.ljust(name_column_width)}",'\t \t', f"{str(round(C.mass_properties.mass,2)).ljust(num_column_width)}", '\t',  global_cg_loc  ) 
+            print(f"{C.tag.ljust(name_column_width)}",'\t \t', f"{str(round(float(C.mass_properties.mass),2)).ljust(num_column_width)}", '\t',  global_cg_loc  ) 
         centre_of_gravity_df.loc[len(centre_of_gravity_df)] = [
             C.tag,
-            round(C.mass_properties.mass, 2),
+            round(float(C.mass_properties.mass), 2),
             global_cg_loc[0][0],
             global_cg_loc[0][1],
             global_cg_loc[0][2],

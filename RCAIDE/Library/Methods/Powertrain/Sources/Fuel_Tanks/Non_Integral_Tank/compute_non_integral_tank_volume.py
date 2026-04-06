@@ -13,11 +13,10 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  co
 
 #Python Imports 
 import RNUMPY as rp
-from rp.scipy.interpolate import interp1d
+from RNUMPY.scipy.interpolate import interp1d
 from shapely.geometry import Polygon, Point
 from copy import  deepcopy
 import shapely
-import os
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Methods to compute volume of non integrak tanks
@@ -134,7 +133,7 @@ def compute_bwb_aft_tank_volume(fuel_tank, wing,fuel_tanks):
             # dimensionalized location of tank bounds
             tank_start_dimensional = tank_start_percent * root_chord
             tank_end_dimensional   = tank_end_percent_current * root_chord
-            x_tank_bounds = np.linspace(tank_start_dimensional, tank_end_dimensional, n)
+            x_tank_bounds = rp.linspace(tank_start_dimensional, tank_end_dimensional, n)
             # ------------------------------------------------------
             # loop through wing segments to get cooridates
             # ------------------------------------------------------

@@ -75,6 +75,6 @@ def curvilinear_inertial_horizontal_position(segment):
         conditions.frames.inertial.aircraft_range[:,0]  = R0 + arc_length
     
     # compute climb rate 
-    conditions.frames.inertial.climb_rate[:,0] = np.gradient(conditions.frames.inertial.position_vector[:,2],conditions.frames.inertial.time[:,0] )
+    conditions.frames.inertial.climb_rate[:,0] = rp.gradient(conditions.frames.inertial.position_vector[:,2],conditions.frames.inertial.time[:,0] )
                 
     return

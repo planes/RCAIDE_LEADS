@@ -177,7 +177,7 @@ def compute_thrust(turbojet,conditions):
     power            = FD2*u0
 
     # pack outputs 
-    thrust_vector              = np.zeros((len(FD2), 3))
+    thrust_vector              = rp.zeros((len(FD2), 3))
     thrust_vector[:,0]         = FD2[:,0]
     
     # Pack turbofan outouts  

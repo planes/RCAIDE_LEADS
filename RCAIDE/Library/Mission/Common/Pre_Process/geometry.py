@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Geometry.LOPA      import  compute_layout_of_passeng
 from RCAIDE.Library.Methods.Geometry.Planform  import  fuselage_planform, wing_planform , compute_fuel_volume 
 
 # python imports 
-importRNUMPY as rp 
+import RNUMPY as rp 
 import os, sys
 import pandas as pd
 from copy import deepcopy 

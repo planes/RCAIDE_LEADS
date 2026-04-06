@@ -12,10 +12,10 @@ from RCAIDE.Library.Plots.Common import set_axes, plot_style
 from RCAIDE.Library.Plots import *
  
 # Pacakge imports 
-import numpy as np
+import RNUMPY as rp
 from matplotlib import pyplot as plt
 from matplotlib.patches import Patch
-import os,sys
+import os
 import pandas as pd
  
 # ----------------------------------------------------------------------
@@ -57,7 +57,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
         for propulsor in network.propulsors:
             if propulsor.nacelle != None:
                 nacelle = propulsor.nacelle
-                front_area = np.pi * (nacelle.diameter ** 2) / 4
+                front_area = rp.pi * (nacelle.diameter ** 2) / 4
                 component_reference_areas[nacelle.tag] = front_area
                 component_reference_areas[nacelle.tag + "_pylon"] = front_area
 
@@ -67,18 +67,18 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
         if key == "total":
             continue
         item = drag.parasite[key]
-        arr = np.asarray(item)
+        arr = rp.asarray(item)
         if arr.ndim == 2:
-            val = float(np.mean(arr[:, 0]))
+            val = float(rp.mean(arr[:, 0]))
         elif arr.ndim == 1:
-            val = float(np.mean(arr))
+            val = float(rp.mean(arr))
         elif hasattr(item, "total"):
-            arr = np.asarray(item.total)
+            arr = rp.asarray(item.total)
             if arr.ndim == 2:
                 arr = arr[:, 0]
-            val = float(np.mean(arr))
+            val = float(rp.mean(arr))
         else:
-            val = float(np.mean(arr))
+            val = float(rp.mean(arr))
 
         component_ref_area = component_reference_areas[key] if key in component_reference_areas else vehicle_reference_area
         val = val * component_ref_area / vehicle_reference_area
@@ -92,40 +92,40 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
         cd_parasite_total += val
 
     # --- totals (mean over cruise nodes)
-    cd_total          = float(np.mean(drag.total[:, 0]))
-    cd_induced_total  = float(np.mean(drag.induced.total[:, 0]))
-    cd_comp_total     = float(np.mean(drag.compressible.total[:, 0]))
-    cd_misc_total     = float(np.mean(drag.miscellaneous.total[:, 0])) 
-    cd_form_total     = float(np.mean(drag.form.total[:, 0]))
-    cd_cool_total     = float(np.mean(drag.cooling.total[:, 0]))
+    cd_total          = float(rp.mean(drag.total[:, 0]))
+    cd_induced_total  = float(rp.mean(drag.induced.total[:, 0]))
+    cd_comp_total     = float(rp.mean(drag.compressible.total[:, 0]))
+    cd_misc_total     = float(rp.mean(drag.miscellaneous.total[:, 0])) 
+    cd_form_total     = float(rp.mean(drag.form.total[:, 0]))
+    cd_cool_total     = float(rp.mean(drag.cooling.total[:, 0]))
 
     item_vis = drag.induced["viscous"]
-    arr_vis = np.asarray(item_vis)
+    arr_vis = rp.asarray(item_vis)
     if arr_vis.ndim == 2:
-        val_vis = float(np.mean(arr_vis[:, 0]))
+        val_vis = float(rp.mean(arr_vis[:, 0]))
     elif arr_vis.ndim == 1:
-        val_vis = float(np.mean(arr_vis))
+        val_vis = float(rp.mean(arr_vis))
     elif hasattr(item_vis, "total"):
-        arr_vis = np.asarray(item_vis.total)
+        arr_vis = rp.asarray(item_vis.total)
         if arr_vis.ndim == 2:
             arr_vis = arr_vis[:, 0]
-        val_vis = float(np.mean(arr_vis))
+        val_vis = float(rp.mean(arr_vis))
     else:
-        val_vis = float(np.mean(arr_vis))
+        val_vis = float(rp.mean(arr_vis))
 
     item_inv = drag.induced["inviscid"]
-    arr_inv = np.asarray(item_inv)
+    arr_inv = rp.asarray(item_inv)
     if arr_inv.ndim == 2:
-        val_inv = float(np.mean(arr_inv[:, 0]))
+        val_inv = float(rp.mean(arr_inv[:, 0]))
     elif arr_inv.ndim == 1:
-        val_inv = float(np.mean(arr_inv))
+        val_inv = float(rp.mean(arr_inv))
     elif hasattr(item_inv, "total"):
-        arr_inv = np.asarray(item_inv.total)
+        arr_inv = rp.asarray(item_inv.total)
         if arr_inv.ndim == 2:
             arr_inv = arr_inv[:, 0]
-        val_inv = float(np.mean(arr_inv))
+        val_inv = float(rp.mean(arr_inv))
     else:
-        val_inv = float(np.mean(arr_inv))
+        val_inv = float(rp.mean(arr_inv))
 
     induced_sub = [
         ("viscous", val_vis),
@@ -185,7 +185,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
     fig, ax = plt.subplots(figsize=(10, 8))
 
     hatch_list = ["///", "\\\\\\", "xx", "..", "++", "--", "oo", "**", "||", "//"]
-    cat_colors = plt.cm.tab10(np.linspace(0, 1, max(len(categories), 1)))
+    cat_colors = plt.cm.tab10(rp.linspace(0, 1, max(len(categories), 1)))
     cat_to_idx = {cat: i for i, (cat, _, _) in enumerate(categories)}
 
     for i, (cat, subs, tot) in enumerate(categories):
@@ -207,7 +207,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
         # outline to the category total
         ax.barh(i, tot, height=0.7, fill=False, edgecolor=base_color, linewidth=2.0)
 
-    ax.set_yticks(np.arange(len(categories)))
+    ax.set_yticks(rp.arange(len(categories)))
     ax.set_yticklabels([c[0].capitalize() for c in categories])
     ax.set_xlabel(r"c$_D$")
     ax.set_title("Cruise Drag Buildup")
@@ -270,7 +270,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
     pie_values = [x[1] for x in pie_entries]
     pie_colors = [cat_colors[cat_to_idx[label.lower()]] for label in pie_labels if label.lower() in cat_to_idx]
     if len(pie_colors) != len(pie_labels):
-        pie_colors = plt.cm.tab10(np.linspace(0, 1, len(pie_labels)))
+        pie_colors = plt.cm.tab10(rp.linspace(0, 1, len(pie_labels)))
     fig_pie, ax_pie = plt.subplots(figsize=(7, 6))
     ax_pie.pie(
         pie_values,
@@ -297,7 +297,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
         if len(parasite_zoom_data) == 0:
             parasite_zoom_data = parasite_sub
 
-        x_pz = np.arange(len(parasite_zoom_data))
+        x_pz = rp.arange(len(parasite_zoom_data))
         for i, (name, val) in enumerate(parasite_zoom_data):
             ax_pz.barh(
                 i, val,
