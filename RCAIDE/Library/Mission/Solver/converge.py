@@ -308,7 +308,7 @@ def add_mission_variables(segment):
     elif segment.state.numerics.solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
         optimization_problem.objective = Data()
-        optimization_problem.objective.name = np.array(['energy_consumed'], dtype=object)
+        optimization_problem.objective.name = np.array([['energy_consumed']], dtype=object)
         optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
