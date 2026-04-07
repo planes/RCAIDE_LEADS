@@ -342,7 +342,7 @@ def scale_const_bnds(inputs):
     N/A
     """     
     
-    provided_bounds = inputs.value[:,2]
+    provided_bounds = inputs.value[:,0]
     
     # Avoid in-place update for autograd
     provided_units  = inputs.value[:,-1]*1.0

@@ -85,7 +85,7 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
             
             bound  = help_fun.scale_const_bnds(con)
             if con.name_signs[ii][1]=='=':
-                print('Nonlinear constraints for scipy differential evoultion optimization has '
+                print('Nonlinear constraints for scipy differential evolution optimization has '
                       'the general inequality form. Consider rewriting equality constraint as two '
                       'separate inequality constraints')
             
