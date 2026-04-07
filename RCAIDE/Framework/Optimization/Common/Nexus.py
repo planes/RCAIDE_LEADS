@@ -193,7 +193,7 @@ class Nexus(Data):
         iqconstraints.name_signs = constraints.name_signs[mask]
         iqconstraints.value      = constraints.value[mask]
     
-        if len(iqconstraints) == 0:
+        if len(iqconstraints.value) == 0:
             constraint_evaluations = []
         else:
 
