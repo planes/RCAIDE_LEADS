@@ -134,7 +134,7 @@ def VLM(conditions,settings,geometry):
     # Generate Panelization and Vortex Distribution
     # ------------------ -------------------------------------------------------------------- 
     VD                                                    = generate_vortex_distribution(conditions,settings,geometry) 
-    settings.vortex_distribution.chord_lengths            = VD.chord_lengths[VD.leading_edge_indices].reshape(len(VD.n_sw),rp.sum(VD.n_sw[0]))
+    settings.vortex_distribution.chord_lengths            = VD.chord_lengths[VD.leading_edge_indices != 0].reshape(len(VD.n_sw),rp.sum(VD.n_sw[0]))
     settings.vortex_distribution.n_sw                     = VD.n_sw 
     settings.vortex_distribution.n_cw                     = VD.n_cw 
     settings.vortex_distribution.n_w                      = VD.n_w 
@@ -190,7 +190,7 @@ def VLM(conditions,settings,geometry):
     chord_breaks = VD.chordwise_breaks
     span_breaks  = VD.spanwise_breaks
     RNMAX        = VD.panels_per_strip    
-    LE_ind       = VD.leading_edge_indices
+    LE_ind       = VD.leading_edge_indices != 0
     ZETA         = VD.tangent_incidence_angle
     RK           = VD.chordwise_panel_number
     
@@ -511,7 +511,7 @@ def compute_rotation_effects(VD, settings, EW_large, GAMMA, X, CHORD, XLE, XBAR,
     chordwise spacing (the if statement below). However, since the trends are correct, 
     albeit underestimated, this calculation is being forced here.    
     """
-    LE_ind   = VD.leading_edge_indices
+    LE_ind   = VD.leading_edge_indices != 0
     RNMAX    = VD.panels_per_strip
     dim_1    = len(rp.sum(LE_ind, axis=1))
     dim_2    = rp.sum(LE_ind, axis=1)[0]

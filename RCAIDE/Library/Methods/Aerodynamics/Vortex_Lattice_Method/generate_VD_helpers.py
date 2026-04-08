@@ -37,8 +37,8 @@ def postprocess_VD(VD, settings):
     """     
     #unpack
     precision  = settings.floating_point_precision   
-    LE_ind     = VD.leading_edge_indices
-    TE_ind     = VD.trailing_edge_indices
+    LE_ind     = VD.leading_edge_indices != 0
+    TE_ind     = VD.trailing_edge_indices != 0
     strip_n_cw = VD.panels_per_strip[LE_ind]
     
     last_wing_ID = list(VD.VLM_wings.values())[-1].surface_ID # assumes last VLM_wing in its container is last to get discretized

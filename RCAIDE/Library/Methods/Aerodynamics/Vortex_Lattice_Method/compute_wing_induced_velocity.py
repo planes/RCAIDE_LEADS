@@ -42,8 +42,8 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     N/A
     """
     # unpack  
-    LE_ind       = VD.leading_edge_indices
-    TE_ind       = VD.trailing_edge_indices
+    LE_ind       = VD.leading_edge_indices != 0
+    TE_ind       = VD.trailing_edge_indices != 0
     n_cp         = VD.n_cp
     n_mach       = len(mach)
     mach         = rp.array(mach,dtype=rp.float32)

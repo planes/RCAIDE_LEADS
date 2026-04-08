@@ -140,7 +140,7 @@ def build_RHS(VD, conditions, settings, aoa_distribution, delta, phi, PSI_distri
     Properties Used:
     N/A
     """
-    LE_ind  = VD.leading_edge_indices
+    LE_ind  = VD.leading_edge_indices != 0
     RNMAX   = VD.panels_per_strip 
     dim_1   = len(rp.sum(LE_ind, axis=1))
     dim_2   = rp.sum(LE_ind, axis=1)[0]
