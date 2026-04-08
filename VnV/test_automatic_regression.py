@@ -11,7 +11,6 @@ sys.path.append(os.path.join(sys.path[0], 'Vehicles'))
 sys.path.append(os.path.join(sys.path[0], 'Vehicles', 'Rotors'))
 
 import RNUMPY as rp
-# rp.use_torch = True
 
 
 modules = [ 
@@ -106,6 +105,11 @@ def run_module_test(module_path):
             os.chdir(test_dir)
 
         name = os.path.splitext(module_name)[0]
+
+        # Reset RNUMPY backend state so tests don't contaminate each other
+        rp.use_torch = False
+        rp.use_jax   = False
+
         module = __import__(name)
         module.main()  # The test module must define a main()
 

@@ -45,7 +45,7 @@ def evaluate_AVL_surrogate(state,settings,vehicle):
     Cm_alpha_model      = aerodynamics.surrogates.Cm_alpha_moment_coefficient 
     Cn_beta_model       = aerodynamics.surrogates.Cn_beta_moment_coefficient       
     neutral_point_model = aerodynamics.surrogates.neutral_point               
-    cg                  = vehicle.mass_properties.center_of_gravity[0]
+    cg                  = rp.array(vehicle.mass_properties.center_of_gravity[0])
     MAC                 = vehicle.wings.main_wing.chords.mean_aerodynamic
   
     pts   = rp.hstack((AoA,Mach))     

@@ -4,6 +4,11 @@
 # Created:  Jul 2023, M. Clarke 
 
 # ----------------------------------------------------------------------------------------------------------------------
+#  Imports
+# ---------------------------------------------------------------------------------------------------------------------- 
+import RNUMPY as rp
+
+# ----------------------------------------------------------------------------------------------------------------------
 #  Update Aerodynamics
 # ---------------------------------------------------------------------------------------------------------------------- 
 def aerodynamics(segment):
@@ -47,10 +52,9 @@ def aerodynamics(segment):
     CD = conditions.aerodynamics.coefficients.drag.total
     CY = conditions.static_stability.coefficients.Y
 
-    CL[q<=0.0] = 0.0
-    CD[q<=0.0] = 0.0
-    CL[CL>CLmax] = CLmax
-    CL[CL< -CLmax] = -CLmax
+    CL = rp.where(q <= 0.0, 0.0, CL)
+    CD = rp.where(q <= 0.0, 0.0, CD)
+    CL = rp.clip(CL, -CLmax, CLmax)
 
     # dimensionalize
     F      = segment.state.ones_row(3) * 0.0
@@ -61,7 +65,7 @@ def aerodynamics(segment):
     # rewrite aerodynamic CL and CD
     conditions.aerodynamics.coefficients.lift.total  = CL
     conditions.aerodynamics.coefficients.drag.total  = CD
-    conditions.frames.wind.force_vector[:,:]         = F[:,:]
+    conditions.frames.wind.force_vector              = F
 
     # -----------------------------------------------------------------
     # Moments
@@ -70,7 +74,7 @@ def aerodynamics(segment):
     C_M = conditions.static_stability.coefficients.M
     C_N = conditions.static_stability.coefficients.N
 
-    C_M[q<=0.0] = 0.0
+    C_M = rp.where(q <= 0.0, 0.0, C_M)
 
     # dimensionalize
     M      = segment.state.ones_row(3) * 0.0
@@ -79,6 +83,6 @@ def aerodynamics(segment):
     M[:,2] = (C_N[:,0] * q[:,0] * Sref * span)
 
     # pack conditions
-    conditions.frames.wind.moment_vector[:,:] = M[:,:] 
+    conditions.frames.wind.moment_vector = M
 
     return

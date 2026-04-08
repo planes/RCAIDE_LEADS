@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 # package imports 
-from scipy.interpolate                                           import RegularGridInterpolator 
+from RNUMPY.scipy.interpolate import RegularGridInterpolator 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  build_AVL_surrogates

@@ -12,7 +12,6 @@ from RCAIDE.Framework.Core import Units , Data
 from RCAIDE.Library.Methods.Performance                            import aircraft_aerodynamic_analysis 
 from RCAIDE.Library.Plots                                          import *   
 import RNUMPY as rp
-rp.use_torch = True
 import matplotlib.pyplot  as plt
 import os
 import  sys

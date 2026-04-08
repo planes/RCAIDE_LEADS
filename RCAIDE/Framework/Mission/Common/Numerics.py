@@ -54,7 +54,7 @@ class Numerics(Conditions):
         self.solver.converged                 = None
         self.solver.print_output              = True
         self.solver.max_evaluations           = 200
-        self.solver.step_size                 = 1E-8   
+        self.solver.step_size                 = 1E-6 
         self.solver.lower_bounds              = Conditions()
         self.solver.upper_bounds              = Conditions()
         

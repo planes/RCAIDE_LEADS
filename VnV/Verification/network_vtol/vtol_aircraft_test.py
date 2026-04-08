@@ -15,7 +15,6 @@ from RCAIDE.Library.Methods.Performance.estimate_stall_speed    import estimate_
   
 # python imports     
 import RNUMPY as rp  
-rp.use_torch = True
 import sys
 import matplotlib.pyplot as plt    
 import os

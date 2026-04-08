@@ -689,20 +689,20 @@ class Data(dict):
                 elif rank == 1:
                     n = len(v)
                     if vector:
-                        D[k][:] = M[index:(index+n)]
+                        D[k] = M[index:(index+n)].reshape(v.shape)
                         index += n
                     else:#array
-                        D[k][:] = M[:,index]
+                        D[k] = M[:,index].reshape(v.shape)
                         index += 1
                     
                 # 2d arrays
                 elif rank == 2:
                     n,m = v.shape
                     if vector:
-                        D[k][:,:] = rp.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
+                        D[k] = rp.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
                         index += n*m 
                     else:#array
-                        D[k][:,:] = M[:,index:(index+m)]
+                        D[k] = M[:,index:(index+m)].reshape(v.shape)
                         index += m
                 
                 #: switch rank

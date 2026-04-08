@@ -60,19 +60,21 @@ def forces(segment):
         type(segment) ==  RCAIDE.Framework.Mission.Segments.Vertical_Flight.Descent:        
         F_aero_i =  rp.zeros_like(F_thrust_i)
         F_aero_w =  rp.zeros_like(F_thrust_i)
-        F_weight_wind[:, [0, 2]] = F_weight_wind[:, [2, 0]]
-        F_thrust_wind[:, [0, 2]] = F_thrust_wind[:, [2, 0]]
+        # Swap indices functionally
+        F_weight_wind = F_weight_wind[:, [2, 1, 0]] # X and Z swapped
+        F_thrust_wind = F_thrust_wind[:, [2, 1, 0]]
     
-    F_weight_i[:,1] *= -1        
-    F_weight_wind[:,1] *= -1
+    # Flip Y component functionally
+    F_weight_i = F_weight_i * rp.array([1, -1, 1], dtype=F_weight_i.dtype)
+    F_weight_wind = F_weight_wind * rp.array([1, -1, 1], dtype=F_weight_wind.dtype)
         
     # sum of the forces
     F_tot_i = F_aero_i +  F_thrust_i  + F_weight_i
     F_tot_w = F_aero_w +  F_thrust_wind  + F_weight_wind
 
     # pack
-    conditions.frames.inertial.total_force_vector[:,:] = F_tot_i[:,:]
-    conditions.frames.wind.total_force_vector[:,:]     = F_tot_w[:,:]
+    conditions.frames.inertial.total_force_vector = F_tot_i
+    conditions.frames.wind.total_force_vector     = F_tot_w
 
     return
  

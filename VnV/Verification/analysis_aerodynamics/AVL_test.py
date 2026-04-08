@@ -106,11 +106,11 @@ def AVL_Single_Point_Trim_Mission(use_surrogate,trim_aircraft,keep_regression_fi
  
     # Extract sample values from computation   
     cruise_CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[0][0]
-    cruise_CL_thruth = 0.48
+    cruise_CL_truth = 0.48
     
     # Truth values  
     error = Data()  
-    error.cruise_CL   = rp.max(rp.abs(cruise_CL     - cruise_CL_thruth))   
+    error.cruise_CL   = rp.max(rp.abs(cruise_CL     - cruise_CL_truth))   
     print('Errors:')
     print(error)
      

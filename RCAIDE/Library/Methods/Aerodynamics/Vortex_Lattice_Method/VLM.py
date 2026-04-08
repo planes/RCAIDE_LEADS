@@ -616,7 +616,7 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
         TP_y_control_points = y_control_points
         TP_z_control_points = rp.cos(alpha) * z_control_points - rp.sin(alpha) * x_control_points
 
-        V_induced = rp.zeros_like(y_control_points)
+        V_induced_list = []
         for j in range(len(y_control_points[0])): # Loop through each control point
             # Distance from segment to control point
             A = ( rp.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)**2
@@ -625,8 +625,7 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
             
             # Calculate normal vector to the wake trace
             if len(TP_y_control_points[0]) < 2 or len(TP_z_control_points[0]) < 2 : 
-                slope =  rp.zeros((n_cases,1)) 
-                V_induced[:,j] = 0                
+                v_ind_j = rp.zeros((n_cases,)) 
             else:
                 # TODO: this slope should be calculated in relative to the spanwise direction
                 # slope = rp.gradient(TP_z_control_points, TP_y_control_points[0],axis=1)
@@ -641,18 +640,22 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
                 slope = rp.concatenate([slope[:, :1], slope], axis=1)
             
                 # Normal vector to the wake trace
-                n_hat      = rp.zeros((n_cases,2 ))
-                n_hat[:,0] = rp.cos(rp.arctan2(-1, slope[:,j]))
-                n_hat[:,1] = rp.sin(rp.arctan2(-1, slope[:,j]))
+                phi_n = rp.arctan2(-1, slope[:,j])
+                n_hat = rp.stack([rp.cos(phi_n), rp.sin(phi_n)], axis=1)
                 
                 # Calculate induced velocity vector
-                v_hat         =  rp.zeros((n_cases ,2, len(TP_z_centerpoints[0]) ))
-                v_hat[:,0,:]  = -1*( rp.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)/r
-                v_hat[:,1,:]  =    ( rp.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)/r 
-                v = v_hat * rp.tile(shed_vortex_segments[:,None,:],(1, 2,1)) / (2*rp.pi*rp.tile(r[:,None, :],(1, 2, 1)))
+                v_hat_y = -1*( rp.tile(TP_z_control_points[:,j][:, None],(1,len(TP_z_centerpoints[0]))) - TP_z_centerpoints)/r
+                v_hat_z =    ( rp.tile(TP_y_control_points[:,j][:, None],(1,len(TP_y_centerpoints[0]) ))  - TP_y_centerpoints)/r 
                 
+                v_y = v_hat_y * shed_vortex_segments / (2*rp.pi*r)
+                v_z = v_hat_z * shed_vortex_segments / (2*rp.pi*r)
+
                 # Downwash. Dot product of normal vector and induced velocity vector.
-                V_induced[:,j] = rp.sum( rp.tile(n_hat[:,0][:, None], (1,len(TP_z_centerpoints[0]) )) *v[:,0,:] +  rp.tile(n_hat[:,1][:, None], (1,len(TP_z_centerpoints[0]) ))*v[:,1,:], axis=1) 
+                v_ind_j = rp.sum(n_hat[:, 0][:, None] * v_y + n_hat[:, 1][:, None] * v_z, axis=1)
+            
+            V_induced_list.append(v_ind_j)
+            
+        V_induced = rp.stack(V_induced_list, axis=1)
 
         drag_sum = rp.sqrt(rp.square(y_control_points[:, 0]) + rp.square(z_control_points[:, 0]))
         s_wake   = rp.atleast_2d(deepcopy(drag_sum)).T
