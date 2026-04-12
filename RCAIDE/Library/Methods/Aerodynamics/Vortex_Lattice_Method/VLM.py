@@ -561,7 +561,7 @@ def strip_cumsum(arr, chord_breaks, strip_lengths):
     """    
     cumsum  = rp.cumsum(arr, axis=1)
     offsets = cumsum[:,chord_breaks-1]
-    offsets[:,0]  = 0
+    offsets = offsets.at[:,0].set(0)
     offsets = rp.repeat(offsets, strip_lengths, axis=1)
     return cumsum - offsets
     
@@ -662,15 +662,15 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
         for j in range(1,len(y_control_points[0])): 
             drag_sum +=  rp.sqrt(rp.square(y_control_points[:,j] - y_control_points[:,j-1]) + rp.square(z_control_points[:,j] - z_control_points[:,j-1]))
             s_wake    =  rp.hstack((s_wake, rp.atleast_2d(drag_sum).T))
-        D_induced[:,wing_index] = -0.5 * rho * trapezoid(V_induced * circulation_segments, s_wake, axis=1)
+        D_induced = D_induced.at[:,wing_index].set(-0.5 * rho * trapezoid(V_induced * circulation_segments, s_wake, axis=1))
 
         # Per-wing CDi (using wing's reference area)
-        CDi_wing[:,wing_index] = D_induced[:,wing_index] / (0.5 * rho * v_inf**2 * VD.wing_areas[:,wing_index])
+        CDi_wing = CDi_wing.at[:,wing_index].set(D_induced[:,wing_index] / (0.5 * rho * v_inf**2 * VD.wing_areas[:,wing_index]))
 
         # Store results for this case
         alpha_i_case = rp.arctan(V_induced/ v_inf)
-        Cd_i_distribution[:,ws_prev:ws] = cl_segments * rp.sin(-alpha_i_case)
-        alpha_i[:,ws_prev:ws] = alpha_i_case
+        Cd_i_distribution = Cd_i_distribution.at[:,ws_prev:ws].set(cl_segments * rp.sin(-alpha_i_case))
+        alpha_i = alpha_i.at[:,ws_prev:ws].set(alpha_i_case)
 
     CDi_total = rp.sum(D_induced, axis=1) / (0.5 * rho * v_inf**2 * SREF) 
  

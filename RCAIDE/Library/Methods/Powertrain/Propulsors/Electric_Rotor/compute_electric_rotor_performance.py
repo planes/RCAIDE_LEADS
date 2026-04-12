@@ -125,9 +125,9 @@ def compute_electric_rotor_performance(propulsor, state, center_of_gravity=[[0.0
  
     # Compute moment 
     moment_vector           = 0*state.ones_row(3)
-    moment_vector[:,0]      = rotor.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = rotor.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = rotor.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(rotor.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(rotor.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(rotor.origin[0][2]  -  center_of_gravity[0][2])
     moment                  =  rp.cross(moment_vector, conditions.energy.converters[rotor.tag].thrust)     
     
     # Detemine esc current 
@@ -187,9 +187,9 @@ def reuse_stored_electric_rotor_data(propulsor,state,network,stored_propulsor_ta
     P_elec                  = conditions.energy.modulators[esc.tag].inputs.power    
     
     moment_vector           = 0*state.ones_row(3) 
-    moment_vector[:,0]      = rotor.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = rotor.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = rotor.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(rotor.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(rotor.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(rotor.origin[0][2]  -  center_of_gravity[0][2])
     moment                  =  rp.cross(moment_vector, thrust_vector)
      
     conditions.energy.propulsors[propulsor.tag].power             = P_mech  

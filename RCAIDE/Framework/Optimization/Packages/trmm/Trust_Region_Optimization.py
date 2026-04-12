@@ -587,12 +587,12 @@ class Trust_Region_Optimization(Data):
         b = rp.empty(nr)
             
         # objective correction
-        A[0,:] = df[1] - df[0]
+        A = A.at[0,:].set(df[1] - df[0])
         b[0] = f[1][0] - f[0][0]
             
         # constraint corrections
-        A[1:,:] = dg[1] - dg[0]
-        b[1:] = g[1] - g[0]
+        A = A.at[1:,:].set(dg[1] - dg[0])
+        b = b.at[1:].set(g[1] - g[0])
             
         corr = (A,b)
         

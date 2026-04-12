@@ -129,11 +129,11 @@ def initialize_conditions(segment):
         body_angle = T0 + time*(Tf-T0)/(t_final-t_initial)
     else:
         body_angle = T0 - time*(T0-Tf)/(t_final-t_initial)
-    segment.state.conditions.frames.body.inertial_rotations[:,1] = body_angle[:,0]     
+    segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,1].set(body_angle[:,0])
     
     # pack
-    segment.state.conditions.freestream.altitude[:,0] = alt
-    segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
-    segment.state.conditions.frames.inertial.velocity_vector[:,0] = v_x[:,0]
-    segment.state.conditions.frames.inertial.velocity_vector[:,1] = v_y[:,0]
-    segment.state.conditions.frames.inertial.time[:,0] = time[:,0]
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
+    segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,2].set(-alt) # z points down
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(time[:,0])

@@ -220,7 +220,7 @@ def clean_data(raw_data,mach,tip_mach,altitude,convergence_matrix):
         # mask invalid values
         array = rp.ma.masked_invalid(raw_data[i])
         if rp.all(array.mask ==False):
-            cleaned_data[i, :, :] =  array.data
+            cleaned_data = cleaned_data.at[i, :, :].set(array.data)
         else: 
             yy,xx   = rp.meshgrid(y, x)
             x1      = xx[~array.mask]
@@ -228,7 +228,7 @@ def clean_data(raw_data,mach,tip_mach,altitude,convergence_matrix):
             newarr  = array[~array.mask] 
             points  = rp.vstack((x1, y1)).T
             values1 = newarr.data
-            cleaned_data[i, :, :]  = interpolate.griddata(points, values1, (xx, yy), method='cubic',  fill_value = -1E5)
+            cleaned_data = cleaned_data.at[i, :, :].set(interpolate.griddata(points, values1, (xx, yy), method='cubic',  fill_value = -1E5))
              
     return cleaned_data
 

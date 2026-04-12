@@ -133,10 +133,10 @@ def train_CRN_EI_surrogates(emissions, vehicle):
                     # Call cantera 
                     results = evaluate_cantera(combustor,T[t_i],P[p_i],mdot[mdot_i],FAR[far_i]) 
                     
-                    EI_CO2[p_i, t_i, mdot_i, far_i]  = results.final.EI.CO2
-                    EI_CO [p_i, t_i, mdot_i, far_i]  = results.final.EI.CO 
-                    EI_H2O[p_i, t_i, mdot_i, far_i]  = results.final.EI.H2O
-                    EI_NOx [p_i, t_i, mdot_i, far_i] = results.final.EI.NOx 
+                    EI_CO2 = EI_CO2.at[p_i, t_i, mdot_i, far_i].set(results.final.EI.CO2)
+                    EI_CO  = EI_CO .at[p_i, t_i, mdot_i, far_i].set(results.final.EI.CO)
+                    EI_H2O = EI_H2O.at[p_i, t_i, mdot_i, far_i].set(results.final.EI.H2O)
+                    EI_NOx  = EI_NOx .at[p_i, t_i, mdot_i, far_i].set(results.final.EI.NOx)
     
     emissions.training.EI_CO2 = EI_CO2
     emissions.training.EI_CO =  EI_CO

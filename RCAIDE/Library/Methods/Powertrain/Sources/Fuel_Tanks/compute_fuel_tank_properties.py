@@ -56,6 +56,6 @@ def compute_fuel_tank_properties(tank,state,distributor):
     tank_conditions.mass_flow_rate                 = mass_flow_rate
     if len(mass_flow_rate) > 1:
         # update mass 
-        state.conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten()
+        state.conditions.weights.components.mass[fuel.tag] = state.conditions.weights.components.mass[fuel.tag].at[:,0].set(m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten())
         
     return 

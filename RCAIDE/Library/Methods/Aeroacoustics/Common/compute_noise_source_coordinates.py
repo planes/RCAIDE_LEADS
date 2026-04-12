@@ -63,8 +63,8 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     # ----------------------------------------------------------------------------------------------------------------------------- 
     I                                           = rp.atleast_3d(rp.eye(4)).T 
     Tranlation_blade_trailing_edge              = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
-    Tranlation_blade_trailing_edge[:,:,:,:,0,3] = MCA + 0.5*c  
-    Tranlation_blade_trailing_edge[:,:,:,:,1,3] = r 
+    Tranlation_blade_trailing_edge = Tranlation_blade_trailing_edge.at[:,:,:,:,0,3].set(MCA + 0.5*c)
+    Tranlation_blade_trailing_edge = Tranlation_blade_trailing_edge.at[:,:,:,:,1,3].set(r)
     rev_Tranlation_blade_trailing_edge          = rp.linalg.inv(Tranlation_blade_trailing_edge)       
     
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -72,8 +72,8 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     # -----------------------------------------------------------------------------------------------------------------------------
     I                               = rp.atleast_3d(rp.eye(4)).T 
     Tranlation_blade_quarter_chord  = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
-    Tranlation_blade_quarter_chord[:,:,:,:,0,3] = MCA - 0.25*c  
-    Tranlation_blade_quarter_chord[:,:,:,:,1,3] = r 
+    Tranlation_blade_quarter_chord = Tranlation_blade_quarter_chord.at[:,:,:,:,0,3].set(MCA - 0.25*c)
+    Tranlation_blade_quarter_chord = Tranlation_blade_quarter_chord.at[:,:,:,:,1,3].set(r)
     rev_Tranlation_blade_quarter_chord          = rp.linalg.inv(Tranlation_blade_quarter_chord)         
      
 
@@ -83,10 +83,10 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     theta_tot             = theta + rp.atleast_2d(theta_0) 
     theta_total           = rp.tile(theta_tot[:,None,None,:],(1,num_mic,num_blades,1)) 
     Rotation_blade_twist  = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))     
-    Rotation_blade_twist[:,:,:,:,0,0] = rp.cos(theta_total)
-    Rotation_blade_twist[:,:,:,:,0,2] = rp.sin(theta_total)
-    Rotation_blade_twist[:,:,:,:,2,0] = -rp.sin(theta_total)
-    Rotation_blade_twist[:,:,:,:,2,2] = rp.cos(theta_total) 
+    Rotation_blade_twist = Rotation_blade_twist.at[:,:,:,:,0,0].set(rp.cos(theta_total))
+    Rotation_blade_twist = Rotation_blade_twist.at[:,:,:,:,0,2].set(rp.sin(theta_total))
+    Rotation_blade_twist = Rotation_blade_twist.at[:,:,:,:,2,0].set(-rp.sin(theta_total))
+    Rotation_blade_twist = Rotation_blade_twist.at[:,:,:,:,2,2].set(rp.cos(theta_total))
     rev_Rotation_blade_twist          =  rp.linalg.inv(Rotation_blade_twist) 
 
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -94,10 +94,10 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     # -----------------------------------------------------------------------------------------------------------------------------    
     # mine 
     Rotation_blade_flap  = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))     
-    Rotation_blade_flap[:,:,:,:,1,1] = rp.cos(beta)
-    Rotation_blade_flap[:,:,:,:,1,2] = -rp.sin(beta)
-    Rotation_blade_flap[:,:,:,:,2,1] = rp.sin(beta)
-    Rotation_blade_flap[:,:,:,:,2,2] = rp.cos(beta) 
+    Rotation_blade_flap = Rotation_blade_flap.at[:,:,:,:,1,1].set(rp.cos(beta))
+    Rotation_blade_flap = Rotation_blade_flap.at[:,:,:,:,1,2].set(-rp.sin(beta))
+    Rotation_blade_flap = Rotation_blade_flap.at[:,:,:,:,2,1].set(rp.sin(beta))
+    Rotation_blade_flap = Rotation_blade_flap.at[:,:,:,:,2,2].set(rp.cos(beta))
     rev_Rotation_blade_flap          = rp.linalg.inv(Rotation_blade_flap)    
     
     # -----------------------------------------------------------------------------------------------------------------------------
@@ -105,10 +105,10 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     # -----------------------------------------------------------------------------------------------------------------------------    
     # mine 
     Rotation_blade_azi  = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))     
-    Rotation_blade_azi[:,:,:,:,0,0] = rp.tile(rp.cos(phi)[:,None],(1,num_sec))  
-    Rotation_blade_azi[:,:,:,:,0,1] = -rp.tile(rp.sin(phi)[:,None],(1,num_sec)) 
-    Rotation_blade_azi[:,:,:,:,1,0] = rp.tile(rp.sin(phi)[:,None],(1,num_sec))  
-    Rotation_blade_azi[:,:,:,:,1,1] = rp.tile(rp.cos(phi)[:,None],(1,num_sec))  
+    Rotation_blade_azi = Rotation_blade_azi.at[:,:,:,:,0,0].set(rp.tile(rp.cos(phi)[:,None],(1,num_sec)))
+    Rotation_blade_azi = Rotation_blade_azi.at[:,:,:,:,0,1].set(-rp.tile(rp.sin(phi)[:,None],(1,num_sec)))
+    Rotation_blade_azi = Rotation_blade_azi.at[:,:,:,:,1,0].set(rp.tile(rp.sin(phi)[:,None],(1,num_sec)))
+    Rotation_blade_azi = Rotation_blade_azi.at[:,:,:,:,1,1].set(rp.tile(rp.cos(phi)[:,None],(1,num_sec)))
     rev_Rotation_blade_azi          = rp.linalg.inv(Rotation_blade_azi)   
     
     
@@ -117,56 +117,56 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     # -----------------------------------------------------------------------------------------------------------------------------
     Rotation_thrust_vector_angle                  = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))
     prop2body,orientation                         = rotor.prop_vel_to_body(commanded_thrust_vector)
-    Rotation_thrust_vector_angle[:,:,:,:,0,0]     = prop2body[0][0][0]
-    Rotation_thrust_vector_angle[:,:,:,:,0,2]     = prop2body[0][0][2] 
-    Rotation_thrust_vector_angle[:,:,:,:,1,1]     = prop2body[0][1][1] 
-    Rotation_thrust_vector_angle[:,:,:,:,2,0]     = prop2body[0][2][0]
-    Rotation_thrust_vector_angle[:,:,:,:,2,2]     = prop2body[0][2][2]
+    Rotation_thrust_vector_angle = Rotation_thrust_vector_angle.at[:,:,:,:,0,0].set(prop2body[0][0][0])
+    Rotation_thrust_vector_angle = Rotation_thrust_vector_angle.at[:,:,:,:,0,2].set(prop2body[0][0][2])
+    Rotation_thrust_vector_angle = Rotation_thrust_vector_angle.at[:,:,:,:,1,1].set(prop2body[0][1][1])
+    Rotation_thrust_vector_angle = Rotation_thrust_vector_angle.at[:,:,:,:,2,0].set(prop2body[0][2][0])
+    Rotation_thrust_vector_angle = Rotation_thrust_vector_angle.at[:,:,:,:,2,2].set(prop2body[0][2][2])
     rev_Rotation_thrust_vector_angle              = rp.linalg.inv(Rotation_thrust_vector_angle)   
 
     # -----------------------------------------------------------------------------------------------------------------------------    
     # translation matrix of rotor to the relative location on the vehicle
     # -----------------------------------------------------------------------------------------------------------------------------
     Translation_origin_to_rel_loc               = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
-    Translation_origin_to_rel_loc[:,:,:,:,0,3]  = rp.tile(rot_origins[:,0][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec))
-    Translation_origin_to_rel_loc[:,:,:,:,1,3]  = rp.tile(rot_origins[:,1][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec))     
-    Translation_origin_to_rel_loc[:,:,:,:,2,3]  = rp.tile(rot_origins[:,2][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec))  
+    Translation_origin_to_rel_loc = Translation_origin_to_rel_loc.at[:,:,:,:,0,3].set(rp.tile(rot_origins[:,0][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec)))
+    Translation_origin_to_rel_loc = Translation_origin_to_rel_loc.at[:,:,:,:,1,3].set(rp.tile(rot_origins[:,1][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec)))
+    Translation_origin_to_rel_loc = Translation_origin_to_rel_loc.at[:,:,:,:,2,3].set(rp.tile(rot_origins[:,2][None,None,None,None],(num_cpt,num_mic,num_blades,num_sec)))
     rev_Translation_origin_to_rel_loc           = rp.linalg.inv(Translation_origin_to_rel_loc) 
     
     # -----------------------------------------------------------------------------------------------------------------------------
     # rotation of vehicle about y axis by AoA 
     # -----------------------------------------------------------------------------------------------------------------------------
     Rotation_AoA                        = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))
-    Rotation_AoA[:,:,:,:,0:3,0:3]       = rp.tile(conditions.frames.body.transform_to_inertial[:,None,None,None,:,:],(1,num_mic,num_blades,num_sec,1,1)) 
+    Rotation_AoA = Rotation_AoA.at[:,:,:,:,0:3,0:3].set(rp.tile(conditions.frames.body.transform_to_inertial[:,None,None,None,:,:],(1,num_mic,num_blades,num_sec,1,1)))
     rev_Rotation_AoA                    = rp.linalg.inv(Rotation_AoA) 
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # translation of vehicle to air  
     # -----------------------------------------------------------------------------------------------------------------------------
     Translation_XYZ                    = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
-    Translation_XYZ[:,:,:,:,0,3]       = rp.tile(mls[None,:,0][:,:,None,None],(num_cpt,1,num_blades,num_sec)) 
-    Translation_XYZ[:,:,:,:,1,3]       = rp.tile(mls[None,:,1][:,:,None,None],(num_cpt,1,num_blades,num_sec)) 
-    Translation_XYZ[:,:,:,:,2,3]       = rp.tile(mls[None,:,2][:,:,None,None],(num_cpt,1,num_blades,num_sec))    
+    Translation_XYZ = Translation_XYZ.at[:,:,:,:,0,3].set(rp.tile(mls[None,:,0][:,:,None,None],(num_cpt,1,num_blades,num_sec)))
+    Translation_XYZ = Translation_XYZ.at[:,:,:,:,1,3].set(rp.tile(mls[None,:,1][:,:,None,None],(num_cpt,1,num_blades,num_sec)))
+    Translation_XYZ = Translation_XYZ.at[:,:,:,:,2,3].set(rp.tile(mls[None,:,2][:,:,None,None],(num_cpt,1,num_blades,num_sec)))
     
     Rotation_RPY                       = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
     V_vec_pitch                        = conditions.frames.wind.transform_to_inertial[:,rp.newaxis,rp.newaxis,rp.newaxis,:,:] 
     V_vec_true_course                  = rp.linalg.inv(conditions.frames.planet.true_course[:,rp.newaxis,rp.newaxis,rp.newaxis,:,:]) 
-    Rotation_RPY[:,:,:,:,0:3,0:3]      = V_vec_pitch # rp.matmul(V_vec_true_course,V_vec_pitch)  
+    Rotation_RPY = Rotation_RPY.at[:,:,:,:,0:3,0:3].set(V_vec_pitch) # rp.matmul(V_vec_true_course,V_vec_pitch)  
  
     Rotated_Translation                = rp.matmul(Rotation_RPY,Translation_XYZ) 
     Translation_mic_loc                = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1)) 
-    Translation_mic_loc[:,:,:,:,0,3]   = Rotated_Translation[:,:,:,:,0,3]
-    Translation_mic_loc[:,:,:,:,1,3]   = Rotated_Translation[:,:,:,:,1,3]
-    Translation_mic_loc[:,:,:,:,2,3]   = Rotated_Translation[:,:,:,:,2,3]  
+    Translation_mic_loc = Translation_mic_loc.at[:,:,:,:,0,3].set(Rotated_Translation[:,:,:,:,0,3])
+    Translation_mic_loc = Translation_mic_loc.at[:,:,:,:,1,3].set(Rotated_Translation[:,:,:,:,1,3])
+    Translation_mic_loc = Translation_mic_loc.at[:,:,:,:,2,3].set(Rotated_Translation[:,:,:,:,2,3])
     rev_Translation_mic_loc            = rp.linalg.inv(Translation_mic_loc)    
 
     # -----------------------------------------------------------------------------------------------------------------------------
     # vehicle velocity vector 
     # -----------------------------------------------------------------------------------------------------------------------------    
     M_vec                      = rp.tile(I[None,None,None,:,:,:],(num_cpt,num_mic,num_blades,num_sec,1,1))     
-    M_vec[:,:,:,:,0,3]         = rp.tile( (conditions.frames.inertial.velocity_vector[:,0]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec)) 
-    M_vec[:,:,:,:,1,3]         = rp.tile( (conditions.frames.inertial.velocity_vector[:,1]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec))   
-    M_vec[:,:,:,:,2,3]         = rp.tile( (conditions.frames.inertial.velocity_vector[:,2]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec))     
+    M_vec = M_vec.at[:,:,:,:,0,3].set(rp.tile( (conditions.frames.inertial.velocity_vector[:,0]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec)))
+    M_vec = M_vec.at[:,:,:,:,1,3].set(rp.tile( (conditions.frames.inertial.velocity_vector[:,1]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec)))
+    M_vec = M_vec.at[:,:,:,:,2,3].set(rp.tile( (conditions.frames.inertial.velocity_vector[:,2]/conditions.freestream.speed_of_sound[:,0]) [:,None,None,None],(1,num_mic,num_blades,num_sec)))
     
     # -----------------------------------------------------------------------------------------------------------------------------
     # identity transformation 
@@ -258,18 +258,18 @@ def compute_rotor_point_source_coordinates(rotor,conditions,mls,settings):
     X_hub_r        = rp.zeros_like(X_hub)
      
     # update x coordiates of matrics 
-    X_prime_r[:,:,:,:,0]  = x_prime_r 
-    X_prime_r[:,:,:,:,1]  = X_prime[:,:,:,:,1] 
-    X_prime_r[:,:,:,:,2]  = X_prime[:,:,:,:,2] 
-    X_e_r[:,:,:,:,0]      = x_e_r  
-    X_e_r[:,:,:,:,1]      = X_e[:,:,:,:,1]
-    X_e_r[:,:,:,:,2]      = X_e[:,:,:,:,2]
-    X_r[:,:,:,:,0]        = x_r 
-    X_r[:,:,:,:,1]        = X[:,:,:,:,1]  
-    X_r[:,:,:,:,2]        = X[:,:,:,:,2]  
-    X_hub_r[:,:,:,:,0]    = x_hub_r   
-    X_hub_r[:,:,:,:,1]    = X_hub[:,:,:,:,1] 
-    X_hub_r[:,:,:,:,2]    = X_hub[:,:,:,:,2]
+    X_prime_r = X_prime_r.at[:,:,:,:,0].set(x_prime_r)
+    X_prime_r = X_prime_r.at[:,:,:,:,1].set(X_prime[:,:,:,:,1])
+    X_prime_r = X_prime_r.at[:,:,:,:,2].set(X_prime[:,:,:,:,2])
+    X_e_r = X_e_r.at[:,:,:,:,0].set(x_e_r)
+    X_e_r = X_e_r.at[:,:,:,:,1].set(X_e[:,:,:,:,1])
+    X_e_r = X_e_r.at[:,:,:,:,2].set(X_e[:,:,:,:,2])
+    X_r = X_r.at[:,:,:,:,0].set(x_r)
+    X_r = X_r.at[:,:,:,:,1].set(X[:,:,:,:,1])
+    X_r = X_r.at[:,:,:,:,2].set(X[:,:,:,:,2])
+    X_hub_r = X_hub_r.at[:,:,:,:,0].set(x_hub_r)
+    X_hub_r = X_hub_r.at[:,:,:,:,1].set(X_hub[:,:,:,:,1])
+    X_hub_r = X_hub_r.at[:,:,:,:,2].set(X_hub[:,:,:,:,2])
     
     if settings.noise_hemisphere: 
         coordinates       = Data(

@@ -175,9 +175,9 @@ def compute_fuselage_integral_tank_fuel_volume(fuel_tank,fuselage):
             
             start_idx  = i_seg * tessellation
             end_idx    = (i_seg + 1 )* tessellation
-            fuselage_points[start_idx:end_idx,0] = (segment.percent_x_location - segment_0.percent_x_location) *fuselage.lengths.total  
-            fuselage_points[start_idx:end_idx,1] = fus_ypts + segment.percent_y_location*fuselage.lengths.total + fuselage.origin[0][1]
-            fuselage_points[start_idx:end_idx,2] = fus_zpts + segment.percent_z_location*fuselage.lengths.total + fuselage.origin[0][2]
+            fuselage_points = fuselage_points.at[start_idx:end_idx,0].set((segment.percent_x_location - segment_0.percent_x_location) *fuselage.lengths.total)
+            fuselage_points = fuselage_points.at[start_idx:end_idx,1].set(fus_ypts + segment.percent_y_location*fuselage.lengths.total + fuselage.origin[0][1])
+            fuselage_points = fuselage_points.at[start_idx:end_idx,2].set(fus_zpts + segment.percent_z_location*fuselage.lengths.total + fuselage.origin[0][2])
    
         # Convex hull → watertight volume mesh
         solid_segment = get_convex_hull(fuselage_points) 

@@ -91,7 +91,7 @@ def append_fuel_line_conditions(fuel_line,segment):
 
     # Validation: if every tank was user-defined, their ratios must total ~1.0.
     if not auto_assigned_tanks:
-        if round(user_defined_ratio, 4) != 1.0:
+        if round(float(user_defined_ratio), 4) != 1.0:
             raise ValueError(
                 f"User-defined flow_split_ratio values sum to {user_defined_ratio:.3f}, must equal 1.0"
             )
@@ -122,5 +122,5 @@ def append_fuel_line_segment_conditions(fuel_line,segment):
     --------
     RCAIDE.Library.Methods.Powertrain.Distributors.Fuel_Line.append_fuel_line_conditions 
     """     
-    segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate[:,0]    = 0
+    segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate = segment.state.conditions.energy.fuel_lines[fuel_line.tag].fuel_mass_flow_rate.at[:,0].set(0)
     return

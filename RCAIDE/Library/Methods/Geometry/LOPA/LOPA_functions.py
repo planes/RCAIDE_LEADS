@@ -130,7 +130,7 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
     normalized_s_x_coord = s_x_coord / s_x_coord[-1]
     # create vector of object types (seat,emergency exit,galley/lav,type-A exit)
     object_type = rp.zeros((len(s_x_coord),4))
-    object_type[:,0] =  1 # assign all seats
+    object_type = object_type.at[:,0].set(1) # assign all seats
     # shift for galley and lavatories
     for i in range(len(gl_loc)):
         var =  normalized_s_x_coord -gl_loc[i]
@@ -141,10 +141,10 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
             object_type = rp.vstack((object_type, rp.array([0, 0, 1, 0])   ))
         else:
             object_type = rp.insert(object_type,loc, rp.array([0, 0, 1, 0]) , axis=0)
-            s_x_coord[loc:] +=  gl_l
+            s_x_coord = s_x_coord.at[loc:].add(gl_l)
             s_x_coord   = rp.insert(s_x_coord, loc, s_x_coord[loc] - gl_l)
             if object_type[loc+1, 0] == 1:
-                s_x_coord[loc+1:] +=  s_p / 2
+                s_x_coord = s_x_coord.at[loc+1:].add(s_p / 2)
     # shift for type A exit
     for i in range(len(A_loc)):
         var = normalized_s_x_coord -A_loc[i]
@@ -155,7 +155,7 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
             object_type = rp.vstack((object_type, rp.array([0, 0, 0, 1])   ))
         else:
             object_type = rp.insert(object_type,loc, rp.array([0, 0, 0, 1]) , axis=0)
-            s_x_coord[loc:] += A_l
+            s_x_coord = s_x_coord.at[loc:].add(A_l)
             s_x_coord   = rp.insert(s_x_coord, loc, s_x_coord[loc] - A_l)
     # shift for emergency rows
     for i in range(len(ex_loc)):
@@ -163,16 +163,16 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
         loc =  rp.argmin(abs(var))
         if loc == (n_r-1):
             if object_type[-1,1] == 1:
-                object_type[-2,1] = 1
+                object_type = object_type.at[-2,1].set(1)
             else:
-                object_type[-1,1] = 1
+                object_type = object_type.at[-1,1].set(1)
         else:
             if object_type[loc,1] == 1:
-                object_type[loc+1,1] = 1
-                s_x_coord[loc+1:] += (ex_p - s_p)
+                object_type = object_type.at[loc+1,1].set(1)
+                s_x_coord = s_x_coord.at[loc+1:].add((ex_p - s_p))
             else:
-                object_type[loc,1] = 1
-                s_x_coord[loc:] += (ex_p - s_p)
+                object_type = object_type.at[loc,1].set(1)
+                s_x_coord = s_x_coord.at[loc:].add((ex_p - s_p))
     if object_type[0, 0] == 1:
         offset = s_p / 2
     if object_type[0, 2] == 1:

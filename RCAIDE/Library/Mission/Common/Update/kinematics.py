@@ -40,4 +40,4 @@ def kinematics(segment):
     acc = rp.dot(D,v)
     
     # pack conditions
-    segment.state.conditions.frames.inertial.acceleration_vector[:,:] = acc[:,:]   
+    segment.state.conditions.frames.inertial.acceleration_vector = segment.state.conditions.frames.inertial.acceleration_vector.at[:,:].set(acc[:,:])

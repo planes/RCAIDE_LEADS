@@ -153,7 +153,7 @@ class Mesh:
     @staticmethod
     def translation_matrix(vector):
         T = rp.eye(4)
-        T[0:3, 3] = vector
+        T = T.at[0:3, 3].set(vector)
         return T
 
     @staticmethod
@@ -161,7 +161,7 @@ class Mesh:
         axis = rp.array(axis) / rp.linalg.norm(axis)
         v = rp.scipy.spatial.transform.Rotation.from_rotvec(angle * axis)
         R = rp.eye(4)
-        R[0:3, 0:3] = v.as_matrix()
+        R = R.at[0:3, 0:3].set(v.as_matrix())
         if point is not None:
             point = rp.array(point)
             # T(p) @ R @ T(-p)

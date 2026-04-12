@@ -70,7 +70,7 @@ def compute_noise_certification_data(approach_mission  = None, takeoff_mission  
     
     # append approach noise                                
     approach_pos         = approach_noise_data.aircraft_position
-    approach_pos[:,0]   -= 2000 
+    approach_pos = approach_pos.at[:,0].subtract(2000)
     
     # append takeoff noise  
     cert_SPL_dBA_max  = rp.max(rp.concatenate((approach_noise_data.SPL_dBA,takeoff_noise_data.SPL_dBA), axis = 0) ,axis = 0)     

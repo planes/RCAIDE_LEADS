@@ -92,7 +92,7 @@ def initialize_conditions(segment):
         alt0 = -1.0 * segment.state.initials.conditions.frames.inertial.position_vector[-1,2]
     
     # pack conditions   
-    conditions.freestream.altitude[:,0]   = -alts 
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(-alts)
 
     # check for initial velocity
     if mach_number is None: 
@@ -111,9 +111,9 @@ def initialize_conditions(segment):
     v_y   = rp.sin(beta)*v_xy
     
     # pack conditions    
-    conditions.frames.inertial.velocity_vector[:,0]              = v_x[:,0]
-    conditions.frames.inertial.velocity_vector[:,1]              = v_y[:,0]
-    conditions.frames.inertial.velocity_vector[:,2]              = v_z[:,0]   
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z[:,0])
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Residual Total Forces
@@ -124,7 +124,7 @@ def residual_altitude(segment):
     alt_in  = segment.state.unknowns.altitude[:,0] 
     alt_out = segment.state.conditions.freestream.altitude[:,0]
     
-    segment.state.residuals.altitude[:,0] = (alt_in - alt_out)/alt_out[-1]
+    segment.state.residuals.altitude = segment.state.residuals.altitude.at[:,0].set((alt_in - alt_out)/alt_out[-1])
 
     return    
 
@@ -187,8 +187,8 @@ def update_differentials(segment):
     numerics.time.control_points                    = x
     numerics.time.differentiate                     = D
     numerics.time.integrate                         = I
-    conditions.frames.inertial.time[1:,0]           = t_initial + x[1:,0]
-    conditions.frames.inertial.position_vector[:,2] = -alt[:,0]  
-    conditions.freestream.altitude[:,0]             =  alt[:,0]  
+    conditions.frames.inertial.time = conditions.frames.inertial.time.at[1:,0].set(t_initial + x[1:,0])
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0])
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0])
 
     return

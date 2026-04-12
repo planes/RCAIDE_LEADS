@@ -210,8 +210,8 @@ def make_VLM_wings(geometry, settings):
                     if ID_j == ID_i: #found control surface end
                         break
                     elif ID_j == -1: #found a span_break within control surface. copy values
-                        span_breaks[j].cs_IDs[edge,:] = rp.array([ID_i, ID_i])
-                        span_breaks[j].cuts[edge,:]   = rp.array([cut, cut])
+                        span_breaks[j].cs_IDs = span_breaks[j].cs_IDs.at[edge,:].set(rp.array([ID_i, ID_i]))
+                        span_breaks[j].cuts = span_breaks[j].cuts.at[edge,:].set(rp.array([cut, cut]))
                     else:
                         raise ValueError('VLM does not support multiple control surfaces on the same edge at this time')
                 
@@ -458,9 +458,9 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     #adjust origin - may need to be adjusted later
     wing_halfspan                 = wing.spans.projected * 0.5 if wing.xz_plane_symmetric else wing.spans.projected
     LE_TE_cs_offset               = 0. if cs_wing.is_slat else (1 - cs.chord_fraction)*wing_chord_local_at_cs_root
-    cs_wing.origin[0,0]          += rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.x_offset, seg_b.x_offset])) + LE_TE_cs_offset
-    cs_wing.origin[0,1]          += cs.span_fraction_start * wing_halfspan if not wing.vertical else rp.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset])
-    cs_wing.origin[0,2]          += rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.dih_offset, seg_b.dih_offset])) if not wing.vertical else cs.span_fraction_start * wing_halfspan
+    cs_wing.origin = cs_wing.origin.at[0,0].add(rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.x_offset, seg_b.x_offset])) + LE_TE_cs_offset)
+    cs_wing.origin = cs_wing.origin.at[0,1].add(cs.span_fraction_start * wing_halfspan if not wing.vertical else rp.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset]))
+    cs_wing.origin = cs_wing.origin.at[0,2].add(rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.dih_offset, seg_b.dih_offset])) if not wing.vertical else cs.span_fraction_start * wing_halfspan)
     
     # holds all required y-coords. Will be added to during discretization to ensure y-coords match up between wing and control surface.
     rel_offset                    = cs_wing.origin[0,1] - wing.origin[0][1] if not cs_wing.vertical else cs_wing.origin[0,2] - wing.origin[0][2]
@@ -756,7 +756,7 @@ cut from a non-slat control surface     |           |           .       fraction
     span_break = Data()
     span_break.cs_IDs               = rp.array([[-1,-1],  #  [[inboard LE cs, outboard LE cs],
                                                 [-1,-1]]) #   [inboard TE cs, outboard TE cs]]
-    span_break.cs_IDs[LE_TE,ib_ob]  = cs_ID
+    span_break.cs_IDs = span_break.cs_IDs.at[LE_TE,ib_ob].set(cs_ID)
     span_break.span_fraction        = span_frac
     # The following 'cut' attributes are in terms of the local total chord and represent positions. 
     #    (an aileron with chord fraction 0.2 would have a cut value of 0.8)
@@ -765,7 +765,7 @@ cut from a non-slat control surface     |           |           .       fraction
     # If no break directly touching this one, cut becomes 0 (LE) or 1 (TE).
     span_break.cuts                 = rp.array([[0.,0.],   #  [[inboard LE cut, outboard LE cut],
                                                 [1.,1.]])  #   [inboard TE cut, outboard TE cut]]
-    span_break.cuts[LE_TE,ib_ob]    = chord_cut
+    span_break.cuts = span_break.cuts.at[LE_TE,ib_ob].set(chord_cut)
     span_break.airfoil              = airfoil
     span_break.dihedral_outboard    = dihedral_ob
     span_break.sweep_outboard_QC    = sweep_ob_QC

@@ -83,6 +83,6 @@ def differentials_altitude(segment):
 
     # pack
     t_initial = segment.state.conditions.frames.inertial.time[0,0]
-    segment.state.conditions.frames.inertial.time[:,0] = t_initial + t[:,0]
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(t_initial + t[:,0])
 
     return

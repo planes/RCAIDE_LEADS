@@ -79,9 +79,9 @@ def energy(segment):
             for fuel_tank in bus.fuel_tanks:
                 fuel = fuel_tank.fuel 
                 if segment.state.initials: 
-                    conditions.weights.components.mass[fuel.tag][:,0] = segment.state.initials.conditions.weights.components.mass[fuel.tag][-1,0]
+                    conditions.weights.components.mass[fuel.tag] = conditions.weights.components.mass[fuel.tag].at[:,0].set(segment.state.initials.conditions.weights.components.mass[fuel.tag][-1,0])
                 elif vehicle.networks[network.tag].busses[bus.tag].fuel_tanks[fuel_tank.tag].fuel != None:
-                    conditions.weights.components.mass[fuel.tag][:,0]  = vehicle.networks[network.tag].busses[bus.tag].fuel_tanks[fuel_tank.tag].fuel.mass_properties.mass
+                    conditions.weights.components.mass[fuel.tag] = conditions.weights.components.mass[fuel.tag].at[:,0].set(vehicle.networks[network.tag].busses[bus.tag].fuel_tanks[fuel_tank.tag].fuel.mass_properties.mass)
             bus.append_segment_conditions(segment)
             for battery_module in  bus.battery_modules:
                 battery_module.append_battery_segment_conditions(segment, bus)

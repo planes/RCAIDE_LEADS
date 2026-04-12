@@ -107,17 +107,17 @@ def initialize_conditions(segment):
                     end_of_flight_soc =  segment.initial_battery_state_of_charge
                 
                 t           =  max(((segment.cutoff_SOC-end_of_flight_soc) / bus.charging_c_rate )*Units.hrs  , t) 
-                t           += segment.cooling_time
+                t           = t + segment.cooling_time
                 time.append(t)
             t_initial = segment.state.conditions.frames.inertial.time[0,0]
             t_nondim  = segment.state.numerics.dimensionless.control_points
             time      = rp.max(time)
             charging_time      = t_nondim * ( time ) + t_initial 
-            segment.state.conditions.frames.inertial.time[:,0] = charging_time[:,0]
+            segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(charging_time[:,0])
 
     else:
 
         t_initial = segment.state.conditions.frames.inertial.time[0,0]
         t_nondim  = segment.state.numerics.dimensionless.control_points
         time      = t_nondim * ( segment.time ) + t_initial
-        segment.state.conditions.frames.inertial.time[:,0] = time[:,0]
+        segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(time[:,0])

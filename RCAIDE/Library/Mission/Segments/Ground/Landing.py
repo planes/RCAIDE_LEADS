@@ -109,7 +109,7 @@ def initialize_conditions(segment):
 
     # pack conditions 
     conditions = segment.state.conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = initialized_velocity[:,0] 
-    conditions.ground.friction_coefficient[:,0]     = segment.friction_coefficient 
-    conditions.freestream.altitude[:,0]             = alt
-    conditions.frames.inertial.position_vector[:,2] = -alt 
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(initialized_velocity[:,0])
+    conditions.ground.friction_coefficient = conditions.ground.friction_coefficient.at[:,0].set(segment.friction_coefficient)
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt)

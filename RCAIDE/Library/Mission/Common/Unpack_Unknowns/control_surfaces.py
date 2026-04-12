@@ -81,27 +81,27 @@ def control_surfaces(segment):
                 if assigned_control_variables.elevator_deflection.active:                                
                     control_surfaces.elevator.deflection  = segment.state.unknowns["elevator"]
                 else:
-                    control_surfaces.elevator.deflection[:,0]  = control_surface.deflection 
+                    control_surfaces.elevator.deflection = control_surfaces.elevator.deflection.at[:,0].set(control_surface.deflection)
 
             # Rudder Control 
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Rudder: 
                 if assigned_control_variables.rudder_deflection.active:                                
                     control_surfaces.rudder.deflection  = segment.state.unknowns["rudder"]
                 else:
-                    control_surfaces.rudder.deflection[:,0]  = control_surface.deflection 
+                    control_surfaces.rudder.deflection = control_surfaces.rudder.deflection.at[:,0].set(control_surface.deflection)
 
             # Aileron Control 
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Aileron: 
                 if assigned_control_variables.aileron_deflection.active:
                     control_surfaces.aileron.deflection  = segment.state.unknowns["aileron"]
                 else:
-                    control_surfaces.aileron.deflection[:,0]  = control_surface.deflection
+                    control_surfaces.aileron.deflection = control_surfaces.aileron.deflection.at[:,0].set(control_surface.deflection)
                     
             # Flap Control 
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Flap:  
-                control_surfaces.flap.deflection[:,0]  = control_surface.deflection
+                control_surfaces.flap.deflection = control_surfaces.flap.deflection.at[:,0].set(control_surface.deflection)
         
             # Slat Control 
             if type(control_surface) == RCAIDE.Library.Components.Wings.Control_Surfaces.Slat:  
-                control_surfaces.slat.deflection[:,0]  = control_surface.deflection                           
+                control_surfaces.slat.deflection = control_surfaces.slat.deflection.at[:,0].set(control_surface.deflection)
     return

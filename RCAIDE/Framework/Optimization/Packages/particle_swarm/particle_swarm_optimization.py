@@ -119,10 +119,10 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
     
     for i in range(S):
         # Initialize the particle's position
-        x[i, :] = lb + x[i, :]*(ub - lb)
+        x = x.at[i, :].set(lb + x[i, :]*(ub - lb))
    
         # Initialize the particle's best known position
-        p[i, :] = x[i, :]
+        p = p.at[i, :].set(x[i, :])
        
         # Calculate the objective's value at the current particle's
         fp[i] = obj(p[i, :])[0]
@@ -139,7 +139,7 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
             g = p[i, :].copy()
        
         # Initialize the particle's velocity
-        v[i, :] = vlow + rp.random.rand(D)*(vhigh - vlow)
+        v = v.at[i, :].set(vlow + rp.random.rand(D)*(vhigh - vlow))
        
     # Iterate until termination criterion met ##################################
     it = 1
@@ -149,21 +149,21 @@ def particle_swarm_optimization(func, lb, ub, ieqcons=[], f_ieqcons=None, args=(
         for i in range(S):
 
             # Update the particle's velocity
-            v[i, :] = omega*v[i, :] + phip*rpv[i, :]*(p[i, :] - x[i, :]) + \
-                      phig*rg[i, :]*(g - x[i, :])
+            v = v.at[i, :].set(omega*v[i, :] + phip*rpv[i, :]*(p[i, :] - x[i, :]) + \
+                      phig*rg[i, :]*(g - x[i, :]))
                       
             # Update the particle's position, correcting lower and upper bound 
             # violations, then update the objective function value
-            x[i, :] = x[i, :] + v[i, :]
+            x = x.at[i, :].set(x[i, :] + v[i, :])
             mark1 = x[i, :]<lb
             mark2 = x[i, :]>ub
-            x[i, mark1] = lb[mark1]
-            x[i, mark2] = ub[mark2]
+            x = x.at[i, mark1].set(lb[mark1])
+            x = x.at[i, mark2].set(ub[mark2])
             fx = obj(x[i, :])[0]
             
             # Compare particle's best position (if constraints are satisfied)
             if fx<fp[i] and is_feasible(x[i, :]):
-                p[i, :] = x[i, :].copy()
+                p = p.at[i, :].set(x[i, :].copy())
                 fp[i] = fx
 
                 # Compare swarm's best position to current particle's position

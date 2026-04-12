@@ -141,7 +141,7 @@ def miscellaneous_drag(state,settings,geometry):
                 cd_lg = 0.15
             else:
                 cd_lg = 0.30
-            landing_gear_drag[:,0] +=  landing_gear.wheels *  cd_lg * (landing_gear.tire_diameter * landing_gear.tire_width) /S_ref 
+            landing_gear_drag = landing_gear_drag.at[:,0].add(landing_gear.wheels *  cd_lg * (landing_gear.tire_diameter * landing_gear.tire_width) /S_ref)
          
     # subsonic 
     miscellaneous_drag =  rp.zeros_like(Mach) 
@@ -156,7 +156,7 @@ def miscellaneous_drag(state,settings,geometry):
         for propulsor in network.propulsors:   
             if propulsor.nacelle !=  None:                    
                 swet_tot += propulsor.nacelle.areas.wetted 
-    miscellaneous_drag[:,0] =  (0.40* (0.0184 + 0.000469 * swet_tot - 1.13*10**-7 * swet_tot ** 2)) / S_ref
+    miscellaneous_drag = miscellaneous_drag.at[:,0].set((0.40* (0.0184 + 0.000469 * swet_tot - 1.13*10**-7 * swet_tot ** 2)) / S_ref)
     
     # supersonic 
     fuselage_upsweep_drag   = 0.006 /S_ref  

@@ -226,7 +226,7 @@ def compute_thrust(turboprop, conditions):
 
     # pack outputs 
     thrust_vector              = rp.zeros((len(FD2), 3))
-    thrust_vector[:,0]         = FD2[:,0]
+    thrust_vector = thrust_vector.at[:,0].set(FD2[:,0])
     
     # Pack turbofan outouts  
     turboprop_conditions.thrust                            = thrust_vector       

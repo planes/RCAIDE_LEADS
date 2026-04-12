@@ -309,9 +309,9 @@ def create_discharge_performance_map(raw_data):
             x        = rp.linspace(min_x,max_x,15)
             y        = rp.interp(x,Deg[:,0],Deg[:,1])
             vec      = rp.zeros((15,2))
-            vec[:,0] = x/max_x
-            vec[:,1] = y
-            processed_data.Voltage[i,j,:,:]= vec   
+            vec = vec.at[:,0].set(x/max_x)
+            vec = vec.at[:,1].set(y)
+            processed_data.Voltage = processed_data.Voltage.at[i,j,:,:].set(vec)
 
     for i, Amps in enumerate(raw_data.Temperature):
         for j , Deg in enumerate(Amps):
@@ -320,9 +320,9 @@ def create_discharge_performance_map(raw_data):
             x        = rp.linspace(min_x,max_x,15)
             y        = rp.interp(x,Deg[:,0],Deg[:,1])
             vec      = rp.zeros((15,2))
-            vec[:,0] = x/max_x
-            vec[:,1] = y
-            processed_data.Temperature[i,j,:,:]= vec  
+            vec = vec.at[:,0].set(x/max_x)
+            vec = vec.at[:,1].set(y)
+            processed_data.Temperature = processed_data.Temperature.at[i,j,:,:].set(vec)
     
     # Create performance maps  
     battery_data             = Data() 

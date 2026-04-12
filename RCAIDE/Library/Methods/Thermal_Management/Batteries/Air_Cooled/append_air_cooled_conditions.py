@@ -62,7 +62,7 @@ def append_air_cooled_segment_conditions(air_cooled, segment,coolant_line):
     air_cooled_conditions = segment.state.conditions.energy.coolant_lines[coolant_line.tag][air_cooled.tag]
     if segment.state.initials:  
         air_cooled_initials                            = segment.state.initials.conditions.energy.coolant_lines[coolant_line.tag][air_cooled.tag]
-        air_cooled_conditions.effectiveness[:,0]       = air_cooled_initials.effectiveness[-1,0]     
-        air_cooled_conditions.total_heat_removed[:,0]  = air_cooled_initials.total_heat_removed[-1,0]   
+        air_cooled_conditions.effectiveness = air_cooled_conditions.effectiveness.at[:,0].set(air_cooled_initials.effectiveness[-1,0])
+        air_cooled_conditions.total_heat_removed = air_cooled_conditions.total_heat_removed.at[:,0].set(air_cooled_initials.total_heat_removed[-1,0])
     
     return

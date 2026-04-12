@@ -334,9 +334,9 @@ def compute_turbojet_performance(turbojet, state, center_of_gravity=[[0.0, 0.0, 
     
     # Compute forces and moments
     moment_vector              = 0*state.ones_row(3)  
-    moment_vector[:,0]         = turbojet.origin[0][0] -   center_of_gravity[0][0] 
-    moment_vector[:,1]         = turbojet.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]         = turbojet.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(turbojet.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turbojet.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turbojet.origin[0][2]  -  center_of_gravity[0][2])
     M                          = rp.cross(moment_vector, turbojet_conditions.thrust)   
     moment                     = M 
     power                      = turbojet_conditions.power 
@@ -455,9 +455,9 @@ def reuse_stored_turbojet_data(turbojet,state,network,stored_propulsor_tag,cente
     # compute moment  
     moment_vector      = 0*state.ones_row(3)
     thrust_vector      = conditions.energy.propulsors[turbojet.tag].thrust
-    moment_vector[:,0] = turbojet.origin[0][0] -   center_of_gravity[0][0] 
-    moment_vector[:,1] = turbojet.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2] = turbojet.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(turbojet.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turbojet.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turbojet.origin[0][2]  -  center_of_gravity[0][2])
     moment             = rp.cross(moment_vector,thrust_vector)    
   
     power                                             = conditions.energy.propulsors[turbojet.tag].power 

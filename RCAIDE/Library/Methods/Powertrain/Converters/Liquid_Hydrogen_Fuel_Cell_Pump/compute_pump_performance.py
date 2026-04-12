@@ -50,6 +50,6 @@ def compute_pump_performance(pump,state,fuel_line,bus):
 
     fuel_cellpower = shaft_power / fuel_efficiency
     fuel_cell_mass_flow = fuel_cellpower * pump.fuel_cell_flow_rate_multipier
-    pump_conditions.fuel_mass_flow_rate[:] = fuel_cell_mass_flow
+    pump_conditions.fuel_mass_flow_rate = pump_conditions.fuel_mass_flow_rate.at[:].set(fuel_cell_mass_flow)
     
     return 0,shaft_power,None,None

@@ -201,7 +201,7 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     chi           = r_1d/R
     diff_r        = rp.diff(r_1d)
     deltar        = rp.zeros(len(r_1d))
-    deltar[1:-1]  = diff_r[0:-1]/2 + diff_r[1:]/2
+    deltar = deltar.at[1:-1].set(diff_r[0:-1]/2 + diff_r[1:]/2)
     deltar[0]     = diff_r[0]/2
     deltar[-1]    = diff_r[-1]/2
 

@@ -379,7 +379,7 @@ class Rotor(Component):
         cpts       = len(rp.atleast_1d(commanded_thrust_vector))
         rots       = rp.array(self.orientation_euler_angles) * 1.
         rots       = rp.repeat(rots[None,:], cpts, axis=0) 
-        rots[:,1] += commanded_thrust_vector[:,0]
+        rots = rots.at[:,1].add(commanded_thrust_vector[:,0])
         
         vehicle_2_prop_vec = sp.spatial.transform.Rotation.from_rotvec(rots).as_matrix()
 

@@ -98,6 +98,6 @@ def PNL_noise_metric(SPL_1_3_spectrum):
                 #------------------------------------------------------------------    
                 if Perceived_noisinees==0:
                     Perceived_noisinees = 0.0625
-                PNL[j,n_x, n_y] = 40+(10/rp.log10(2))*rp.log10(Perceived_noisinees)
+                PNL = PNL.at[j,n_x, n_y].set(40+(10/rp.log10(2))*rp.log10(Perceived_noisinees))
      
     return PNL

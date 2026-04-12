@@ -103,8 +103,8 @@ class Additive_Solver():
             problem.fidelity_level = level
             for ii,x in enumerate(x_samples):
                 res = self.evaluate_model(problem,x,scaled_constraints)
-                f[level-1,ii]    = res[0][0]  # objective value
-                g[level-1,ii,:]  = res[1]     # constraints vector
+                f = f.at[level-1,ii].set(res[0][0]) # objective value
+                g = g.at[level-1,ii,:].set(res[1]) # constraints vector
         
         converged = False
         
@@ -459,8 +459,8 @@ class Additive_Solver():
             offset = rp.zeros([1,len(cons)])
             for ii,con in enumerate(cons):
                 if cons[ii][1] == '>':
-                    signs[0,ii] = -1
-                offset[0,ii] = cons[ii][2]
+                    signs = signs.at[0,ii].set(-1)
+                offset = offset.at[0,ii].set(cons[ii][2])
             
             
             const = const*signs - offset*signs

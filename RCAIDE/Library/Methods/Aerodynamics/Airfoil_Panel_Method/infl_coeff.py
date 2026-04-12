@@ -44,13 +44,13 @@ def infl_coeff(x,y,xbar,ybar,st,ct,npanel,ncases,ncpts):
     beta_ij              = rp.zeros((ncases,ncpts,npanel,npanel)) 
     st_i_j               = rp.zeros((ncases,ncpts,npanel,npanel))   # sin(TH_i - TH_j)
     ct_i_j               = rp.zeros((ncases,ncpts,npanel,npanel))   # cos(TH_i - TH_j) 
-    ainfl[:,:,:-1,:-1] = pi2inv*((st_i_j*rp.log(r_ij[:,:,:,1:]/r_ij[:,:,:,:-1])) +  (ct_i_j*beta_ij)) 
+    ainfl = ainfl.at[:,:,:-1,:-1].set(pi2inv*((st_i_j*rp.log(r_ij[:,:,:,1:]/r_ij[:,:,:,:-1])) +  (ct_i_j*beta_ij)))
     mat2               = ((ct_i_j*rp.log(r_ij[:,:,:,1:]/r_ij[:,:,:,:-1])) - (st_i_j*beta_ij))
-    ainfl[:,:,:-1,-1]  = pi2inv*rp.sum(mat2, axis=3) 
+    ainfl = ainfl.at[:,:,:-1,-1].set(pi2inv*rp.sum(mat2, axis=3))
     mat3               = (st_i_j*beta_ij) - (ct_i_j*rp.log(r_ij[:,:,:,1:]/r_ij[:,:,:,:-1]))
-    ainfl[:,:,-1,:-1]  = pi2inv*rp.sum(mat3, axis=2) 
+    ainfl = ainfl.at[:,:,-1,:-1].set(pi2inv*rp.sum(mat3, axis=2))
     mat4               = (st_i_j*rp.log(r_ij[:,:,:,1:]/r_ij[:,:,:,:-1])) + (ct_i_j*beta_ij)
-    ainfl[:,:,-1,-1]   = rp.sum(rp.sum(mat4, axis=3), axis=2)
+    ainfl = ainfl.at[:,:,-1,-1].set(rp.sum(rp.sum(mat4, axis=3), axis=2))
         
     #convert 1d matrices to 4d 
     x_2d                 = rp.repeat(rp.swapaxes(rp.swapaxes(x,0, 2),0,1)[:,:,rp.newaxis,:],npanel, axis = 2)
@@ -75,15 +75,15 @@ def infl_coeff(x,y,xbar,ybar,st,ct,npanel,ncases,ncpts):
     diag_indices         = rp.array(rp.tile(rp.repeat(rp.arange(npanel),ncases),ncpts))
     aoas                 = rp.array(rp.tile(rp.arange(ncases),ncpts*npanel))
     res                  = rp.array(rp.repeat(rp.arange(ncpts),ncases*npanel))   
-    betaij[aoas,res,diag_indices,diag_indices] = rp.pi 
+    betaij = betaij.at[aoas,res,diag_indices,diag_indices].set(rp.pi)
     
-    ainfl[:,:,:-1,:-1]   = pi2inv*(sti_minus_j*rp.log(rij_plus_1/rij) + cti_minus_j*betaij)
+    ainfl = ainfl.at[:,:,:-1,:-1].set(pi2inv*(sti_minus_j*rp.log(rij_plus_1/rij) + cti_minus_j*betaij))
     mat_1                = rp.sum(pi2inv*(cti_minus_j*rp.log(rij_plus_1/rij)-sti_minus_j*betaij), axis = 3)
-    ainfl[:,:,:-1,-1]    = mat_1  
+    ainfl = ainfl.at[:,:,:-1,-1].set(mat_1)
     
     mat_2                = pi2inv*(sti_minus_j*betaij - cti_minus_j*rp.log(rij_plus_1/rij))
     mat_3                = pi2inv*(sti_minus_j*rp.log(rij_plus_1/rij) + cti_minus_j*betaij)
-    ainfl[:,:,-1,:-1]    = mat_2[:,:,0] + mat_2[:,:,-1]
-    ainfl[:,:,-1,-1]     = rp.sum(mat_3,axis = 3)[:,:,0] + rp.sum(mat_3,axis = 3)[:,:,-1]   
+    ainfl = ainfl.at[:,:,-1,:-1].set(mat_2[:,:,0] + mat_2[:,:,-1])
+    ainfl = ainfl.at[:,:,-1,-1].set(rp.sum(mat_3,axis = 3)[:,:,0] + rp.sum(mat_3,axis = 3)[:,:,-1])
     
     return  ainfl  

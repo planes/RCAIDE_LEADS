@@ -362,9 +362,9 @@ def compute_turbofan_performance(turbofan, state, center_of_gravity=[[0.0, 0.0, 
     # Compute forces and moments
     moment_vector              = 0*state.ones_row(3)
     center_of_gravity = [[0.0, 0.0,0.0]] 
-    moment_vector[:,0]         =  turbofan.origin[0][0] -   center_of_gravity[0][0]
-    moment_vector[:,1]         =  turbofan.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]         =  turbofan.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(turbofan.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turbofan.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turbofan.origin[0][2]  -  center_of_gravity[0][2])
     M                          =  rp.cross(moment_vector, turbofan_conditions.thrust)   
     moment                     = M 
     power                      = turbofan_conditions.power 
@@ -502,10 +502,10 @@ def reuse_stored_turbofan_data(turbofan,state,network,stored_propulsor_tag,cente
     # compute moment  
     moment_vector      = 0*state.ones_row(3)
     thrust_vector      = 0*state.ones_row(3)
-    thrust_vector[:,0] = conditions.energy.propulsors[turbofan.tag].thrust[:,0] 
-    moment_vector[:,0] = turbofan.origin[0][0] -   center_of_gravity[0][0] 
-    moment_vector[:,1] = turbofan.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2] = turbofan.origin[0][2]  -  center_of_gravity[0][2]
+    thrust_vector = thrust_vector.at[:,0].set(conditions.energy.propulsors[turbofan.tag].thrust[:,0])
+    moment_vector = moment_vector.at[:,0].set(turbofan.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turbofan.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turbofan.origin[0][2]  -  center_of_gravity[0][2])
     moment             = rp.cross(moment_vector,thrust_vector)    
   
     power                                             = conditions.energy.propulsors[turbofan.tag].power 

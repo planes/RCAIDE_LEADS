@@ -83,16 +83,16 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
-        T[0, 3] = 0.0
-        T[1, 3] = 0.0
-        T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
+        T = T.at[0, 3].set(0.0)
+        T = T.at[1, 3].set(0.0)
+        T = T.at[2, 3].set(inner_segment.percent_span_location * bwb_wing.spans.projected/2)
         solid_segment.apply_transform(T)
         # Rotate 90 degrees around X axis to match RCAIDE convention
         R = rp.eye(4)
-        R[1, 1] = 0.0
-        R[1, 2] = -1.0
-        R[2, 1] = 1.0
-        R[2, 2] = 0.0
+        R = R.at[1, 1].set(0.0)
+        R = R.at[1, 2].set(-1.0)
+        R = R.at[2, 1].set(1.0)
+        R = R.at[2, 2].set(0.0)
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
@@ -160,16 +160,16 @@ def compute_aft_center_body_center_of_gravity(bwb_wing,seg_keys):
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
-        T[0, 3] = 0.0
-        T[1, 3] = 0.0
-        T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
+        T = T.at[0, 3].set(0.0)
+        T = T.at[1, 3].set(0.0)
+        T = T.at[2, 3].set(inner_segment.percent_span_location * bwb_wing.spans.projected/2)
         solid_segment.apply_transform(T)
         # Rotate 90 degrees around X axis to match RCAIDE convention
         R = rp.eye(4)
-        R[1, 1] = 0.0
-        R[1, 2] = -1.0
-        R[2, 1] = 1.0
-        R[2, 2] = 0.0
+        R = R.at[1, 1].set(0.0)
+        R = R.at[1, 2].set(-1.0)
+        R = R.at[2, 1].set(1.0)
+        R = R.at[2, 2].set(0.0)
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)
@@ -241,16 +241,16 @@ def compute_center_body_center_of_gravity(bwb_wing,seg_keys):
 
         # Apply spanwise translation AFTER orientation fix
         T = rp.eye(4)
-        T[0, 3] = 0.0
-        T[1, 3] = 0.0
-        T[2, 3] = inner_segment.percent_span_location * bwb_wing.spans.projected/2
+        T = T.at[0, 3].set(0.0)
+        T = T.at[1, 3].set(0.0)
+        T = T.at[2, 3].set(inner_segment.percent_span_location * bwb_wing.spans.projected/2)
         solid_segment.apply_transform(T)
         # Rotate 90 degrees around X axis to match RCAIDE convention
         R = rp.eye(4)
-        R[1, 1] = 0.0
-        R[1, 2] = -1.0
-        R[2, 1] = 1.0
-        R[2, 2] = 0.0
+        R = R.at[1, 1].set(0.0)
+        R = R.at[1, 2].set(-1.0)
+        R = R.at[2, 1].set(1.0)
+        R = R.at[2, 2].set(0.0)
         solid_segment.apply_transform(R)
 
         segment_meshes.append(solid_segment)

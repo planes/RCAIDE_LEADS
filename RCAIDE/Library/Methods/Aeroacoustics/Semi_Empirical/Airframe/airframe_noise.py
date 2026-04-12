@@ -214,10 +214,10 @@ def airframe_noise(microphone_locations, segment, config, settings):
             # Total Airframe Noise
             SPL_total = 10.*rp.log10( 10.0**(0.1*SPL_wing)+ 10.0**(0.1*SPLht) + 10.0**(0.1*SPLvt) + 10.0**(0.1*SPL_flap) + 10.0**(0.1*SPL_main_landing_gear)+ 10.0**(0.1*SPL_nose_landing_gear))      
                 
-            SPL_total_history[i,j,:]             = SPL_total  
+            SPL_total_history = SPL_total_history.at[i,j,:].set(SPL_total)
             
             # Calculation of dBA based on the sound pressure time history 
-            SPLt_dBA_history[i,j,:] = A_weighting_metric(SPL_total,frequency) 
+            SPLt_dBA_history = SPLt_dBA_history.at[i,j,:].set(A_weighting_metric(SPL_total,frequency))
     
     # Pack Airframe Noise 
     airframe_noise                        = Data()  

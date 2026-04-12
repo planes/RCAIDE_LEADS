@@ -127,48 +127,40 @@ def compute_wake_induced_velocity(rotor, rotor_conditions, evaluation_points, ct
     bool_outboard = (evaluation_points.YC > outboard_r[0]) & (evaluation_points.YC < outboard_r[-1])
     bool_in_range = bool_inboard | bool_outboard
 
-    # Count how many points per control station fall inside the wake
-    new_dim = rp.sum(bool_in_range, axis=1)[0]
+    # 1. Compute 's' and 'kd' over the ENTIRE array (no reshaping or slicing needed)
+    s_full  = evaluation_points.XC - rotor.origin[0][0]
+    kd_full = 1.0 + s_full / rp.sqrt(s_full**2 + R**2)
 
-    # Extract YC values for those points
-    YC_in_range = evaluation_points.YC[bool_in_range].reshape(ctrl_pts, new_dim)
-
-    # Compute streamwise distance s for those same points
-    s = evaluation_points.XC[bool_in_range].reshape(ctrl_pts, new_dim) - rotor.origin[0][0]
-
-    # Induction factor kd
-    kd = 1.0 + s / rp.sqrt(s**2 + R**2)
-
-    # Extract radial and azimuthal induced velocities
+    # 2. Extract velocities and setup interpolators (Unchanged)
     va = rotor_conditions.blade_axial_induced_velocity[0]
     vt = rotor_conditions.blade_tangential_induced_velocity[0]
 
-    
-    if rotor.clockwise_rotation:
-        rotation = 1
-    else:
-        rotation =  -1
+    rotation = 1 if rotor.clockwise_rotation else -1
 
     va_y_range  = rp.append(rp.flipud(va), va)
-    vt_y_range  = rp.append(rp.flipud(vt), vt)*rotation
+    vt_y_range  = rp.append(rp.flipud(vt), vt) * rotation
     va_interp   = interp1d(rotor_y_range, va_y_range)
     vt_interp   = interp1d(rotor_y_range, vt_y_range)
-    
-    # preallocate va_new and vt_new
-    va_new = kd*va_interp((y_vals))
-    vt_new = rp.zeros((ctrl_pts,new_dim))
 
-    # invert inboard vt values
-    inboard_bools                = (y_vals < hub_y_center)
-    vt_new[inboard_bools]        = -kd[inboard_bools]*vt_interp((y_vals[inboard_bools]))
-    vt_new[inboard_bools==False] = kd[inboard_bools==False]*vt_interp((y_vals[inboard_bools==False]))
- 
-    val_ids_x = val_ids + ([0] *ctrl_pts*new_dim,)
-    val_ids_y = val_ids + ([1] *ctrl_pts*new_dim,)
-    val_ids_z = val_ids + ([2] *ctrl_pts*new_dim,) 
-        
-    rotor_V_wake_ind[val_ids_x] = va_new.flatten()  # axial induced velocity
-    rotor_V_wake_ind[val_ids_y] = 0       # spanwise induced velocity; in line with rotor, so 0
-    rotor_V_wake_ind[val_ids_z] = vt_new.flatten()  # vertical induced velocity     
+    # 3. Clamp YC coordinates so the interpolator doesn't throw out-of-bounds errors 
+    # for points outside the wake (we will zero them out in step 5 anyway).
+    y_safe = rp.clip(evaluation_points.YC, rotor_y_range[0], rotor_y_range[-1])
+
+    # 4. Compute induced velocities for the ENTIRE array
+    va_new_full = kd_full * va_interp(y_safe)
+    
+    # Use rp.where to conditionally flip the tangential velocity out-of-place!
+    inboard_bools  = (evaluation_points.YC < hub_y_center)
+    vt_interp_full = vt_interp(y_safe)
+    vt_new_full    = kd_full * rp.where(inboard_bools, -vt_interp_full, vt_interp_full)
+
+    # 5. Apply the bool_in_range mask to zero out the points we ignored
+    # (Multiplying by a boolean mask is Autograd safe!)
+    va_final = va_new_full * bool_in_range
+    vt_final = vt_new_full * bool_in_range
+    vy_final = rp.zeros_like(va_final)
+
+    # 6. Stack the arrays out-of-place to build the final (ctrl_pts, n_cp, 3) tensor
+    rotor_V_wake_ind = rp.stack((va_final, vy_final, vt_final), axis=-1)
 
     return rotor_V_wake_ind

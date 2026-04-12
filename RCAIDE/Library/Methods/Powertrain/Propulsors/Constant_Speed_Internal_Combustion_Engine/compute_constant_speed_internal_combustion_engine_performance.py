@@ -113,9 +113,9 @@ def compute_constant_speed_internal_combustion_engine_performance(propulsor, sta
 
     # Compute moment 
     moment_vector            = 0*state.ones_row(3)
-    moment_vector[:,0]       = propeller.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]       = propeller.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]       = propeller.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(propeller.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(propeller.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(propeller.origin[0][2]  -  center_of_gravity[0][2])
     moment                   =  rp.cross(moment_vector,ice_cs_conditions.thrust)
     ice_cs_conditions.moment = moment   
 
@@ -170,9 +170,9 @@ def reuse_stored_constant_speed_internal_combustion_engine_data(propulsor,state,
 
     # compute moment    
     moment_vector           = 0*state.ones_row(3) 
-    moment_vector[:,0]      = propeller.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = propeller.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = propeller.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(propeller.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(propeller.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(propeller.origin[0][2]  -  center_of_gravity[0][2])
     moment                  = rp.cross(moment_vector,conditions.energy.propulsors[propulsor.tag].thrust)
     conditions.energy.converters[propeller.tag].moment = moment   
     conditions.energy.propulsors[propulsor.tag].moment = moment 

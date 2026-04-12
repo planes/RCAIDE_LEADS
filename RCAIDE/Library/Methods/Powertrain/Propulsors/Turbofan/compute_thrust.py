@@ -206,7 +206,7 @@ def compute_thrust(turbofan,conditions):
     m_dot_fuel   = rp.fmax(FD2*TSFC/g,rp.array([0.]))*1./Units.hour
 
     thrust_vector              = rp.zeros((len(FD2), 3))
-    thrust_vector[:,0]         = FD2[:,0]
+    thrust_vector = thrust_vector.at[:,0].set(FD2[:,0])
     
     # Pack turbofan outouts  
     turbofan_conditions.thrust                            = thrust_vector 

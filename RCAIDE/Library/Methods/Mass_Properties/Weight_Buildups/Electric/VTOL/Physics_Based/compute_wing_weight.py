@@ -174,7 +174,7 @@ def compute_wing_weight(wing,
     nacaMAT     = coordMAT.dot(NACA)[:, rp.newaxis]
     coord       = rp.concatenate((coord, nacaMAT), axis=1)
     coord       = rp.concatenate((coord[-1:0:-1], coord.dot(rp.array([[1., 0.], [0., -1.]]))), axis=0)
-    coord[:, 0] = coord[:, 0] - xShear
+    coord = coord.at[:, 0].set(coord[:, 0] - xShear)
 
     #-------------------------------------------------------------------------------
     # Beam Geometry
@@ -184,8 +184,8 @@ def compute_wing_weight(wing,
     x         = rp.sort(rp.concatenate((x,motor_spanwise_locations), axis=0))
     dx        = x[1] - x[0]
     N         = rp.size(x)
-    fwdWeb[:] = [round(locFwd - xShear, 2) for locFwd in fwdWeb]
-    aftWeb[:] = [round(locAft - xShear, 2) for locAft in aftWeb]
+    fwdWeb = fwdWeb.at[:].set([round(locFwd - xShear, 2) for locFwd in fwdWeb])
+    aftWeb = aftWeb.at[:].set([round(locAft - xShear, 2) for locAft in aftWeb])
 
     #-------------------------------------------------------------------------------
     # Loads

@@ -61,20 +61,20 @@ def curvilinear_inertial_horizontal_position(segment):
     y_position  = y0 + delta_y
     
     # pack
-    conditions.frames.inertial.position_vector[:,0] = x_position[:,0]
-    conditions.frames.inertial.position_vector[:,1] = y_position[:,0]     
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,0].set(x_position[:,0])
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,1].set(y_position[:,0])
 
     # do not apply apply range credit for loiter  
     if type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Dynamic_Pressure_Constant_Altitude_Loiter or  \
        type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Mach_Constant_Altitude_Loiter or \
        type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter:
         
-        conditions.frames.inertial.aircraft_range[:,0]  = R0[0]  
+        conditions.frames.inertial.aircraft_range = conditions.frames.inertial.aircraft_range.at[:,0].set(R0[0])
     else:
 
-        conditions.frames.inertial.aircraft_range[:,0]  = R0 + arc_length
+        conditions.frames.inertial.aircraft_range = conditions.frames.inertial.aircraft_range.at[:,0].set(R0 + arc_length)
     
     # compute climb rate 
-    conditions.frames.inertial.climb_rate[:,0] = rp.gradient(conditions.frames.inertial.position_vector[:,2],conditions.frames.inertial.time[:,0] )
+    conditions.frames.inertial.climb_rate = conditions.frames.inertial.climb_rate.at[:,0].set(rp.gradient(conditions.frames.inertial.position_vector[:,2],conditions.frames.inertial.time[:,0] ))
                 
     return

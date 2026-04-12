@@ -54,7 +54,7 @@ def weights(segment):
                     (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle):
  
         W = m_0_vehicle*g 
-        conditions.frames.inertial.gravity_force_vector[:,2] = W[:,0] 
+        conditions.frames.inertial.gravity_force_vector = conditions.frames.inertial.gravity_force_vector.at[:,2].set(W[:,0])
     else:
     
         # --------------------------------------------------------------------------  
@@ -68,7 +68,7 @@ def weights(segment):
                         fuel =  fuel_tank.fuel
                         mass_flow_rate = conditions.energy.fuel_lines[fuel_line.tag].fuel_tanks[fuel_tank.tag].mass_flow_rate              
                         m_0_fuel       = conditions.weights.components.mass[fuel.tag][0,0]     
-                        conditions.weights.components.mass[fuel.tag][:,0]  = m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten() 
+                        conditions.weights.components.mass[fuel.tag] = conditions.weights.components.mass[fuel.tag].at[:,0].set(m_0_fuel +  rp.dot(I, -mass_flow_rate).flatten())
                 
             update_center_of_gravity(segment.state, vehicle)
             
@@ -83,8 +83,8 @@ def weights(segment):
         # --------------------------------------------------------------------------  
         m = m_0_vehicle + rp.dot(I, -m_dot_vehicle) 
         W = m*g 
-        conditions.weights.vehicle.mass[1:,0]                = m[1:,0]  
-        conditions.frames.inertial.gravity_force_vector[:,2] = W[:,0]
+        conditions.weights.vehicle.mass = conditions.weights.vehicle.mass.at[1:,0].set(m[1:,0])
+        conditions.frames.inertial.gravity_force_vector = conditions.frames.inertial.gravity_force_vector.at[:,2].set(W[:,0])
                 
     return
  

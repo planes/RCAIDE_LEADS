@@ -125,29 +125,54 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
                 y_up    = rp.zeros_like(fL)
                 y_low   = rp.zeros_like(fL)
                                   
-                for jj,airfoil in enumerate(airfoils):    
-                    locs                  = rp.where(rp.array(a_loc) == jj ) 
-                    alpha_azi             = rp.atleast_2d(AOA_sec[cpt,locs,:].flatten())
-                    Re_azi                = rp.atleast_2d(Re[cpt,locs,:].flatten())      
-                    pd                    = airfoil.polars 
-                    if settings.use_plane_loading_surrogate: 
-                        fL[cpt,locs,:,:]      = pd.lift_distribution_func((alpha_azi,Re_azi)).reshape(1,len(a_loc), num_az,chord_coord) 
-                        fD[cpt,locs,:,:]      = pd.drag_distribution_func((alpha_azi,Re_azi)).reshape(1,len(a_loc), num_az,chord_coord)  
-                        cl_invisc             = interp2d(Re_azi,alpha_azi,pd.reynolds_numbers, pd.angle_of_attacks, pd.lift_coefficients)
-                        cd_visc               = interp2d(Re_azi,alpha_azi,pd.reynolds_numbers, pd.angle_of_attacks, pd.drag_coefficients)   
-                        CL[cpt,locs,:]        = cl_invisc.reshape(1, len(a_loc), num_az) 
-                        CD[cpt,locs,:]        = cd_visc.reshape(1, len(a_loc), num_az)                             
+                # 1. Determine static dimensions and extract FULL rows (no slicing by locs!)
+                num_locs    = len(a_loc)
+                a_loc_array = rp.array(a_loc)
+                
+                alpha_full  = rp.atleast_2d(AOA_sec[cpt, :, :].flatten())
+                Re_full     = rp.atleast_2d(Re[cpt, :, :].flatten())      
+
+                for jj, airfoil in enumerate(airfoils):    
+                    # 2. Build a static boolean mask for this specific airfoil
+                    mask = (a_loc_array == jj)
                     
-                    else : 
-                        airfoil_geometry      = import_airfoil_geometry(airfoil.coordinate_file,airfoil_points)
-                        airfoil_properties    = airfoil_analysis(airfoil_geometry,alpha_azi,Re_azi)
-                        fL[cpt,locs,:,:]      = airfoil_properties.fL.reshape(chord_coord, len(a_loc), num_az,1).swapaxes(0, 3)
-                        fD[cpt,locs,:,:]      = airfoil_properties.fD.reshape(chord_coord, len(a_loc), num_az,1).swapaxes(0, 3)
-                        CL[cpt,locs,:]        = airfoil_properties.cl_invisc.reshape(1, len(a_loc), num_az) 
-                        CD[cpt,locs,:]        = airfoil_properties.cd_visc.reshape(1, len(a_loc), num_az) 
+                    # Expand the mask to match the 3D and 4D array shapes so it broadcasts safely
+                    mask_3d = mask[None, :, None]       # Shape: (1, num_locs, num_az)
+                    mask_4d = mask[None, :, None, None] # Shape: (1, num_locs, num_az, chord_coord)
+                    
+                    pd = airfoil.polars 
+                    
+                    # 3. Evaluate the physics for the ENTIRE array at once
+                    if settings.use_plane_loading_surrogate: 
+                        fL_full   = pd.lift_distribution_func((alpha_full, Re_full)).reshape(1, num_locs, num_az, chord_coord)
+                        fD_full   = pd.drag_distribution_func((alpha_full, Re_full)).reshape(1, num_locs, num_az, chord_coord)
+                        cl_invisc = interp2d(Re_full, alpha_full, pd.reynolds_numbers, pd.angle_of_attacks, pd.lift_coefficients)
+                        cd_visc   = interp2d(Re_full, alpha_full, pd.reynolds_numbers, pd.angle_of_attacks, pd.drag_coefficients)   
+                        CL_full   = cl_invisc.reshape(1, num_locs, num_az)
+                        CD_full   = cd_visc.reshape(1, num_locs, num_az)
                         
-                    y_up[cpt,locs,:,:]    = airfoil.geometry.y_upper_surface
-                    y_low[cpt,locs,:,:]   = airfoil.geometry.y_lower_surface
+                    else: 
+                        airfoil_geometry   = import_airfoil_geometry(airfoil.coordinate_file, airfoil_points)
+                        airfoil_properties = airfoil_analysis(airfoil_geometry, alpha_full, Re_full)
+                        fL_full = airfoil_properties.fL.reshape(chord_coord, num_locs, num_az, 1).swapaxes(0, 3)
+                        fD_full = airfoil_properties.fD.reshape(chord_coord, num_locs, num_az, 1).swapaxes(0, 3)
+                        CL_full = airfoil_properties.cl_invisc.reshape(1, num_locs, num_az)
+                        CD_full = airfoil_properties.cd_visc.reshape(1, num_locs, num_az)
+                        
+                    # Geometry arrays (assuming they broadcast natively)
+                    y_up_full  = airfoil.geometry.y_upper_surface
+                    y_low_full = airfoil.geometry.y_lower_surface
+
+                    # 4. Use out-of-place assignment (.at[].set) combined with rp.where() to safely merge
+                    # Note: We use cpt:cpt+1 instead of cpt to maintain the 4D/3D shape for the mask to broadcast against
+                    fL = fL.at[cpt:cpt+1, :, :, :].set(rp.where(mask_4d, fL_full, fL[cpt:cpt+1, :, :, :]))
+                    fD = fD.at[cpt:cpt+1, :, :, :].set(rp.where(mask_4d, fD_full, fD[cpt:cpt+1, :, :, :]))
+                    
+                    CL = CL.at[cpt:cpt+1, :, :].set(rp.where(mask_3d, CL_full, CL[cpt:cpt+1, :, :]))
+                    CD = CD.at[cpt:cpt+1, :, :].set(rp.where(mask_3d, CD_full, CD[cpt:cpt+1, :, :]))
+                    
+                    y_up  = y_up.at[cpt:cpt+1, :, :, :].set(rp.where(mask_4d, y_up_full, y_up[cpt:cpt+1, :, :, :]))
+                    y_low = y_low.at[cpt:cpt+1, :, :, :].set(rp.where(mask_4d, y_low_full, y_low[cpt:cpt+1, :, :, :]))
                         
                 aeroacoustic_data.disc_lift_distribution = fL
                 aeroacoustic_data.disc_drag_distribution = fD
@@ -182,22 +207,22 @@ def compute_rotor_noise(microphone_locations,rotor,segment,settings, rotor_index
         # ----------------------------------------------------------------------------------
         # Summation of spectra from propellers into one SPL and store results
         # ----------------------------------------------------------------------------------
-        Results.SPL[cpt,:]                                 = SPL_arithmetic(SPL_total_1_3_spectrum[0], sum_axis=1) 
-        Results.SPL_dBA[cpt,:]                             = SPL_arithmetic(A_weighting_metric(SPL_total_1_3_spectrum[0],settings.center_frequencies), sum_axis=1) 
-        Results.SPL_harmonic[cpt,:]                        = SPL_arithmetic(aeroacoustics.SPL_prop_harmonic_1_3_spectrum[0], sum_axis=1)
-        Results.SPL_broadband[cpt,:]                       = SPL_arithmetic(aeroacoustics.SPL_prop_broadband_1_3_spectrum[0], sum_axis=1) 
+        Results.SPL = Results.SPL.at[cpt,:].set(SPL_arithmetic(SPL_total_1_3_spectrum[0], sum_axis=1))
+        Results.SPL_dBA = Results.SPL_dBA.at[cpt,:].set(SPL_arithmetic(A_weighting_metric(SPL_total_1_3_spectrum[0],settings.center_frequencies), sum_axis=1))
+        Results.SPL_harmonic = Results.SPL_harmonic.at[cpt,:].set(SPL_arithmetic(aeroacoustics.SPL_prop_harmonic_1_3_spectrum[0], sum_axis=1))
+        Results.SPL_broadband = Results.SPL_broadband.at[cpt,:].set(SPL_arithmetic(aeroacoustics.SPL_prop_broadband_1_3_spectrum[0], sum_axis=1))
           
         # blade passing frequency         
-        Results.SPL_harmonic_bpf_spectrum[cpt,:,:]         = aeroacoustics.SPL_prop_harmonic_bpf_spectrum 
-        Results.SPL_harmonic_bpf_spectrum_dBA[cpt,:,:]     = A_weighting_metric(Results.SPL_harmonic_bpf_spectrum[cpt,:,:],aeroacoustics.f) 
+        Results.SPL_harmonic_bpf_spectrum = Results.SPL_harmonic_bpf_spectrum.at[cpt,:,:].set(aeroacoustics.SPL_prop_harmonic_bpf_spectrum)
+        Results.SPL_harmonic_bpf_spectrum_dBA = Results.SPL_harmonic_bpf_spectrum_dBA.at[cpt,:,:].set(A_weighting_metric(Results.SPL_harmonic_bpf_spectrum[cpt,:,:],aeroacoustics.f))
           
         # 1/3 octave band   
-        Results.SPL_1_3_spectrum[cpt,:,:]                  = SPL_total_1_3_spectrum 
-        Results.SPL_1_3_spectrum_dBA[cpt,:,:]              = A_weighting_metric(Results.SPL_1_3_spectrum[cpt,:,:],settings.center_frequencies)      
-        Results.SPL_harmonic_1_3_spectrum[cpt,:,:]         = aeroacoustics.SPL_prop_harmonic_1_3_spectrum 
-        Results.SPL_harmonic_1_3_spectrum_dBA[cpt,:,:]     = A_weighting_metric(Results.SPL_harmonic_1_3_spectrum[cpt,:,:],settings.center_frequencies) 
-        Results.SPL_broadband_1_3_spectrum[cpt,:,:]        = aeroacoustics.SPL_prop_broadband_1_3_spectrum 
-        Results.SPL_broadband_1_3_spectrum_dBA[cpt,:,:]    = A_weighting_metric(Results.SPL_broadband_1_3_spectrum[cpt,:,:],settings.center_frequencies) 
+        Results.SPL_1_3_spectrum = Results.SPL_1_3_spectrum.at[cpt,:,:].set(SPL_total_1_3_spectrum)
+        Results.SPL_1_3_spectrum_dBA = Results.SPL_1_3_spectrum_dBA.at[cpt,:,:].set(A_weighting_metric(Results.SPL_1_3_spectrum[cpt,:,:],settings.center_frequencies))
+        Results.SPL_harmonic_1_3_spectrum = Results.SPL_harmonic_1_3_spectrum.at[cpt,:,:].set(aeroacoustics.SPL_prop_harmonic_1_3_spectrum)
+        Results.SPL_harmonic_1_3_spectrum_dBA = Results.SPL_harmonic_1_3_spectrum_dBA.at[cpt,:,:].set(A_weighting_metric(Results.SPL_harmonic_1_3_spectrum[cpt,:,:],settings.center_frequencies))
+        Results.SPL_broadband_1_3_spectrum = Results.SPL_broadband_1_3_spectrum.at[cpt,:,:].set(aeroacoustics.SPL_prop_broadband_1_3_spectrum)
+        Results.SPL_broadband_1_3_spectrum_dBA = Results.SPL_broadband_1_3_spectrum_dBA.at[cpt,:,:].set(A_weighting_metric(Results.SPL_broadband_1_3_spectrum[cpt,:,:],settings.center_frequencies))
     
     # A-weighted
     conditions.aeroacoustics.converters[rotor.tag] = Results 

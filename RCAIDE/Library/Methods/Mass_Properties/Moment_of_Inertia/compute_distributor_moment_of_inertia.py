@@ -112,19 +112,19 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
                     
                     # line 1
                     I_local      = rp.zeros((3, 3))
-                    I_local[0,0] += (1 / 12) * line_1_insulation_mass * (line_1_length ** 2)
-                    I_local[1,1] += 0 
-                    I_local[2,2] += (1 / 12) * line_1_insulation_mass * (line_1_length ** 2)
+                    I_local = I_local.at[0,0].add((1 / 12) * line_1_insulation_mass * (line_1_length ** 2))
+                    I_local = I_local.at[1,1].add(0)
+                    I_local = I_local.at[2,2].add((1 / 12) * line_1_insulation_mass * (line_1_length ** 2))
 
                     # line 2 
-                    I_local[0,0] += (1 / 12) * line_2_insulation_mass * (line_2_length ** 2)
-                    I_local[1,1] += 0
-                    I_local[2,2] += (1 / 12) * line_2_insulation_mass * (line_2_length ** 2)
+                    I_local = I_local.at[0,0].add((1 / 12) * line_2_insulation_mass * (line_2_length ** 2))
+                    I_local = I_local.at[1,1].add(0)
+                    I_local = I_local.at[2,2].add((1 / 12) * line_2_insulation_mass * (line_2_length ** 2))
                     
                     # line 3
-                    I_local[0,0] += 0
-                    I_local[1,1] += (1 / 12) * line_3_insulation_mass * (line_3_length ** 2)
-                    I_local[2,2] += (1 / 12) * line_3_insulation_mass * (line_3_length ** 2)                   
+                    I_local = I_local.at[0,0].add(0)
+                    I_local = I_local.at[1,1].add((1 / 12) * line_3_insulation_mass * (line_3_length ** 2))
+                    I_local = I_local.at[2,2].add((1 / 12) * line_3_insulation_mass * (line_3_length ** 2))
                      
                     I       += I_local 
                 
@@ -142,19 +142,19 @@ def compute_distributor_moment_of_inertia(component,vehicle, center_of_gravity =
 
                     # line 1
                     I_local      = rp.zeros((3, 3))
-                    I_local[0,0] += (1 / 12) * line_1_pipe_mass * (line_1_length ** 2)
-                    I_local[1,1] += 0 
-                    I_local[2,2] += (1 / 12) * line_1_pipe_mass * (line_1_length ** 2)
+                    I_local = I_local.at[0,0].add((1 / 12) * line_1_pipe_mass * (line_1_length ** 2))
+                    I_local = I_local.at[1,1].add(0)
+                    I_local = I_local.at[2,2].add((1 / 12) * line_1_pipe_mass * (line_1_length ** 2))
 
                     # line 2 
-                    I_local[0,0] += (1 / 12) * line_2_pipe_mass * (line_2_length ** 2)
-                    I_local[1,1] += 0
-                    I_local[2,2] += (1 / 12) * line_2_pipe_mass * (line_2_length ** 2)
+                    I_local = I_local.at[0,0].add((1 / 12) * line_2_pipe_mass * (line_2_length ** 2))
+                    I_local = I_local.at[1,1].add(0)
+                    I_local = I_local.at[2,2].add((1 / 12) * line_2_pipe_mass * (line_2_length ** 2))
                     
                     # line 3
-                    I_local[0,0] += 0
-                    I_local[1,1] += (1 / 12) * line_3_pipe_mass * (line_3_length ** 2)
-                    I_local[2,2] += (1 / 12) * line_3_pipe_mass * (line_3_length ** 2)   
+                    I_local = I_local.at[0,0].add(0)
+                    I_local = I_local.at[1,1].add((1 / 12) * line_3_pipe_mass * (line_3_length ** 2))
+                    I_local = I_local.at[2,2].add((1 / 12) * line_3_pipe_mass * (line_3_length ** 2))
                     I  += I_local  
                       
 

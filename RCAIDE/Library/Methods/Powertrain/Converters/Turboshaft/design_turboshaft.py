@@ -293,7 +293,7 @@ def design_turboshaft(turboshaft):
     atmo_data_sea_level  = atmosphere.compute_values(0.0,0.0)   
     V                    = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
     operating_state      = setup_operating_conditions(turboshaft,velocity_range=rp.array([V]), altitude = 0, angle_of_attack=0,temperature_deviation=0)  
-    operating_state.conditions.energy.converters[turboshaft.tag].throttle[:,0] = 1.0  
+    operating_state.conditions.energy.converters[turboshaft.tag].throttle = operating_state.conditions.energy.converters[turboshaft.tag].throttle.at[:,0].set(1.0)
     sls_P,_,_                                                       = turboshaft.compute_performance(operating_state,fuel_line) 
     turboshaft.sealevel_static_power                                = sls_P[0][0]
      

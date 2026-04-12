@@ -79,7 +79,7 @@ def compute_mixing_temperature(reservoir, state, coolant_line, delta_t, t_idx):
         T_final = fsolve(energy_balance, T_current, args=(T_current, delta_t, mass_coolant, Cp_RES, Cp_HAS, Cp_HEX, mass_flow_HAS, T_outlet_HAS, mass_flow_HEX, T_outlet_HEX, reservoir, state, t_idx))[0]
 
     # Update the reservoir temperature
-    state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature[t_idx + 1, 0] = T_final
+    state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature = state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature.at[t_idx + 1, 0].set(T_final)
     return
 
 def compute_heat_loss_to_environment(T_final, T_ambient, reservoir):

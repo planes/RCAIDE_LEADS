@@ -174,42 +174,42 @@ def deflect_control_surface(VD,wing):
             raw_VD = deflect_control_surface_strip(wing, raw_VD, idx_y==0, sym_sign)
             
             # unpack strip values into surface values
-            xi_prime_a1  [start:stop]  = raw_VD.xi_prime_a1  
-            xi_prime_ac  [start:stop]  = raw_VD.xi_prime_ac  
-            xi_prime_ah  [start:stop]  = raw_VD.xi_prime_ah  
-            xi_prime_a2  [start:stop]  = raw_VD.xi_prime_a2  
-            y_prime_a1   [start:stop]  = raw_VD.y_prime_a1   
-            y_prime_ah   [start:stop]  = raw_VD.y_prime_ah   
-            y_prime_ac   [start:stop]  = raw_VD.y_prime_ac   
-            y_prime_a2   [start:stop]  = raw_VD.y_prime_a2   
-            zeta_prime_a1[start:stop]  = raw_VD.zeta_prime_a1
-            zeta_prime_ah[start:stop]  = raw_VD.zeta_prime_ah
-            zeta_prime_ac[start:stop]  = raw_VD.zeta_prime_ac
-            zeta_prime_a2[start:stop]  = raw_VD.zeta_prime_a2
+            xi_prime_a1   = xi_prime_a1  .at[start:stop].set(raw_VD.xi_prime_a1)
+            xi_prime_ac   = xi_prime_ac  .at[start:stop].set(raw_VD.xi_prime_ac)
+            xi_prime_ah   = xi_prime_ah  .at[start:stop].set(raw_VD.xi_prime_ah)
+            xi_prime_a2   = xi_prime_a2  .at[start:stop].set(raw_VD.xi_prime_a2)
+            y_prime_a1    = y_prime_a1   .at[start:stop].set(raw_VD.y_prime_a1)
+            y_prime_ah    = y_prime_ah   .at[start:stop].set(raw_VD.y_prime_ah)
+            y_prime_ac    = y_prime_ac   .at[start:stop].set(raw_VD.y_prime_ac)
+            y_prime_a2    = y_prime_a2   .at[start:stop].set(raw_VD.y_prime_a2)
+            zeta_prime_a1 = zeta_prime_a1.at[start:stop].set(raw_VD.zeta_prime_a1)
+            zeta_prime_ah = zeta_prime_ah.at[start:stop].set(raw_VD.zeta_prime_ah)
+            zeta_prime_ac = zeta_prime_ac.at[start:stop].set(raw_VD.zeta_prime_ac)
+            zeta_prime_a2 = zeta_prime_a2.at[start:stop].set(raw_VD.zeta_prime_a2)
         
-            xi_prime_b1  [start:stop]  = raw_VD.xi_prime_b1  
-            xi_prime_bh  [start:stop]  = raw_VD.xi_prime_bh  
-            xi_prime_bc  [start:stop]  = raw_VD.xi_prime_bc  
-            xi_prime_b2  [start:stop]  = raw_VD.xi_prime_b2  
-            y_prime_b1   [start:stop]  = raw_VD.y_prime_b1   
-            y_prime_bh   [start:stop]  = raw_VD.y_prime_bh   
-            y_prime_bc   [start:stop]  = raw_VD.y_prime_bc   
-            y_prime_b2   [start:stop]  = raw_VD.y_prime_b2   
-            zeta_prime_b1[start:stop]  = raw_VD.zeta_prime_b1
-            zeta_prime_bh[start:stop]  = raw_VD.zeta_prime_bh
-            zeta_prime_bc[start:stop]  = raw_VD.zeta_prime_bc
-            zeta_prime_b2[start:stop]  = raw_VD.zeta_prime_b2
+            xi_prime_b1   = xi_prime_b1  .at[start:stop].set(raw_VD.xi_prime_b1)
+            xi_prime_bh   = xi_prime_bh  .at[start:stop].set(raw_VD.xi_prime_bh)
+            xi_prime_bc   = xi_prime_bc  .at[start:stop].set(raw_VD.xi_prime_bc)
+            xi_prime_b2   = xi_prime_b2  .at[start:stop].set(raw_VD.xi_prime_b2)
+            y_prime_b1    = y_prime_b1   .at[start:stop].set(raw_VD.y_prime_b1)
+            y_prime_bh    = y_prime_bh   .at[start:stop].set(raw_VD.y_prime_bh)
+            y_prime_bc    = y_prime_bc   .at[start:stop].set(raw_VD.y_prime_bc)
+            y_prime_b2    = y_prime_b2   .at[start:stop].set(raw_VD.y_prime_b2)
+            zeta_prime_b1 = zeta_prime_b1.at[start:stop].set(raw_VD.zeta_prime_b1)
+            zeta_prime_bh = zeta_prime_bh.at[start:stop].set(raw_VD.zeta_prime_bh)
+            zeta_prime_bc = zeta_prime_bc.at[start:stop].set(raw_VD.zeta_prime_bc)
+            zeta_prime_b2 = zeta_prime_b2.at[start:stop].set(raw_VD.zeta_prime_b2)
                
-            xi_prime_ch  [start:stop]  = raw_VD.xi_prime_ch  
-            xi_prime     [start:stop]  = raw_VD.xi_prime     
-            y_prime_ch   [start:stop]  = raw_VD.y_prime_ch   
-            y_prime      [start:stop]  = raw_VD.y_prime      
-            zeta_prime_ch[start:stop]  = raw_VD.zeta_prime_ch
-            zeta_prime   [start:stop]  = raw_VD.zeta_prime   
+            xi_prime_ch   = xi_prime_ch  .at[start:stop].set(raw_VD.xi_prime_ch)
+            xi_prime      = xi_prime     .at[start:stop].set(raw_VD.xi_prime)
+            y_prime_ch    = y_prime_ch   .at[start:stop].set(raw_VD.y_prime_ch)
+            y_prime       = y_prime      .at[start:stop].set(raw_VD.y_prime)
+            zeta_prime_ch = zeta_prime_ch.at[start:stop].set(raw_VD.zeta_prime_ch)
+            zeta_prime    = zeta_prime   .at[start:stop].set(raw_VD.zeta_prime)
             
-            X_as[start_full:stop_full] = rp.append(raw_VD.xi_prime_a1  , raw_VD.xi_prime_a2  [-1])
-            Y_as[start_full:stop_full] = rp.append(raw_VD.y_prime_a1   , raw_VD.y_prime_a2   [-1])
-            Z_as[start_full:stop_full] = rp.append(raw_VD.zeta_prime_a1, raw_VD.zeta_prime_a2[-1])
+            X_as = X_as.at[start_full:stop_full].set(rp.append(raw_VD.xi_prime_a1  , raw_VD.xi_prime_a2  [-1]))
+            Y_as = Y_as.at[start_full:stop_full].set(rp.append(raw_VD.y_prime_a1   , raw_VD.y_prime_a2   [-1]))
+            Z_as = Z_as.at[start_full:stop_full].set(rp.append(raw_VD.zeta_prime_a1, raw_VD.zeta_prime_a2[-1]))
         
         # pack surface VD values into vehicle VD    
         VD.XA1[condition]    = xi_prime_a1    

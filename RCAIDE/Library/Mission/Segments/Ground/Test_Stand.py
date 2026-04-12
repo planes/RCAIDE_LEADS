@@ -45,12 +45,12 @@ def initialize_conditions(segment):
     t_nondim  = segment.state.numerics.dimensionless.control_points
     time      = rp.max(time)
     charging_time      = t_nondim * ( time ) + t_initial 
-    segment.state.conditions.frames.inertial.time[:,0] = charging_time[:,0]
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(charging_time[:,0])
         
     # pack conditions 
     conditions = segment.state.conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = v0  
-    conditions.freestream.altitude[:,0]             = alt
-    conditions.frames.inertial.position_vector[:,2] = -alt   
-    conditions.weights.vehicle.mass[:,0]            = segment.analyses.vehicle.mass_properties.takeoff
-    conditions.frames.inertial.position_vector[:,:] = conditions.frames.inertial.position_vector[0,:][None,:][:,:]
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v0)
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt)
+    conditions.weights.vehicle.mass = conditions.weights.vehicle.mass.at[:,0].set(segment.analyses.vehicle.mass_properties.takeoff)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,:].set(conditions.frames.inertial.position_vector[0,:][None,:][:,:])

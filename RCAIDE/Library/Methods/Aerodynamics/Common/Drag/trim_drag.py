@@ -120,9 +120,9 @@ def trim_drag(state,settings,geometry):
     for wing in geometry.wings: 
         for cs in wing.control_surfaces:
             if type(cs) == RCAIDE.Library.Components.Wings.Control_Surfaces.Spoiler:
-                control_surface_drag += CD_0 * (0.0011 * (cs.deflection / Units.degrees))  
-                state.conditions.aerodynamics.coefficients.lift.total  +=  -0.0075 *(cs.deflection / Units.degrees)  
-                state.conditions.static_stability.coefficients.M       +=  0.0053 *(cs.deflection / Units.degrees)
+                control_surface_drag = control_surface_drag + CD_0 * (0.0011 * (cs.deflection / Units.degrees))  
+                state.conditions.aerodynamics.coefficients.lift.total  = state.conditions.aerodynamics.coefficients.lift.total  -0.0075 *(cs.deflection / Units.degrees)  
+                state.conditions.static_stability.coefficients.M       = state.conditions.static_stability.coefficients.M +  0.0053 *(cs.deflection / Units.degrees)
                 
             if type(cs) == RCAIDE.Library.Components.Wings.Control_Surfaces.Flap:
                 if cs.type ==  'split':
@@ -143,7 +143,7 @@ def trim_drag(state,settings,geometry):
                 else:
                     A = 0.0011
                     B = 1                     
-                control_surface_drag += cs.chord_fraction * A * (state.conditions.control_surfaces.flap.deflection /Units.degree **B )
+                control_surface_drag = control_surface_drag + cs.chord_fraction * A * (state.conditions.control_surfaces.flap.deflection /Units.degree **B )
                      
     state.conditions.aerodynamics.coefficients.drag.trim.total =  control_surface_drag 
     return  

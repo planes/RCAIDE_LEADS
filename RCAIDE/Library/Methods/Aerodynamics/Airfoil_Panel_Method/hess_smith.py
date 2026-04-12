@@ -60,8 +60,8 @@ def hess_smith(x_coord,y_coord,alpha,Re,npanel):
     
     # compute right hand side vector for the specified angle of attack 
     b_2d          = rp.zeros((npanel+1,ncases, ncpts))
-    b_2d[:-1,:,:] = st*rp.cos(alpha_2d) - rp.sin(alpha_2d)*ct
-    b_2d[-1,:,:]  = -(ct[0,:,:]*rp.cos(alpha_2d[-1,:,:]) + st[0,:,:]*rp.sin(alpha_2d[-1,:,:]))-(ct[-1,:,:]*rp.cos(alpha_2d[-1,:,:]) +st[-1,:,:]*rp.sin(alpha_2d[-1,:,:]))
+    b_2d = b_2d.at[:-1,:,:].set(st*rp.cos(alpha_2d) - rp.sin(alpha_2d)*ct)
+    b_2d = b_2d.at[-1,:,:].set(-(ct[0,:,:]*rp.cos(alpha_2d[-1,:,:]) + st[0,:,:]*rp.sin(alpha_2d[-1,:,:]))-(ct[-1,:,:]*rp.cos(alpha_2d[-1,:,:]) +st[-1,:,:]*rp.sin(alpha_2d[-1,:,:])))
     
     qg = rp.zeros((npanel+1, ncases, ncpts))  
     for i in range(ncases):
@@ -70,7 +70,7 @@ def hess_smith(x_coord,y_coord,alpha,Re,npanel):
             B = b_2d[:, i, j]        
             
 
-            qg[:, i, j] = rp.scipy.linalg.solve(A, B)
+            qg = qg.at[:, i, j].set(rp.scipy.linalg.solve(A, B))
     
     # compute the tangential velocity distribution at the midpoint of panels 
     vt            = velocity_distribution(qg,x_coord,y_coord,xbar,ybar,st,ct,alpha_2d,npanel,ncases,ncpts)

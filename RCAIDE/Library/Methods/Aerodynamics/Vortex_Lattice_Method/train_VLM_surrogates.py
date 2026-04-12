@@ -351,9 +351,9 @@ def train_model(aerodynamics,Mach, vehicle):
                     CY_res               = VLM_results.CY
                     CL_res               = VLM_results.CL
                     CN_res               = VLM_results.CN
-                    CY_d_a[a_i,:]        =  -(CY_res[:,0]   - CY_alpha_0[0,:]  ) # Negative sign is due to convention
-                    CL_d_a[a_i,:]        =  -(CL_res[:,0]   - CL_alpha_0[0,:])   # Negative sign is due to convention
-                    CN_d_a[a_i,:]        =  (CN_res[:,0]   - CN_alpha_0[0,:]  ) 
+                    CY_d_a = CY_d_a.at[a_i,:].set(-(CY_res[:,0]   - CY_alpha_0[0,:]  )) # Negative sign is due to convention
+                    CL_d_a = CL_d_a.at[a_i,:].set(-(CL_res[:,0]   - CL_alpha_0[0,:])) # Negative sign is due to convention
+                    CN_d_a = CN_d_a.at[a_i,:].set((CN_res[:,0]   - CN_alpha_0[0,:]  ))
                 training.dCY_ddelta_a    = (CY_d_a[0,:] - CY_d_a[1,:]) / (delta_a[0] - delta_a[1]) 
                 training.dCL_ddelta_a    = ((CL_d_a[0,:] - CL_d_a[1,:]) / (delta_a[0] - delta_a[1]))
                 training.dCN_ddelta_a    = (CN_d_a[0,:] - CN_d_a[1,:]) / (delta_a[0] - delta_a[1]) 
@@ -376,8 +376,8 @@ def train_model(aerodynamics,Mach, vehicle):
                     VLM_results          = VLM(conditions,settings,vehicle)
                     Clift_res            = VLM_results.CLift
                     CM_res               = VLM_results.CM 
-                    Clift_d_e[e_i,:]     = Clift_res[:,0]  - Clift_alpha_0[0,:]
-                    CM_d_e[e_i,:]        = CM_res[:,0]   - CM_alpha_0[0,:]    
+                    Clift_d_e = Clift_d_e.at[e_i,:].set(Clift_res[:,0]  - Clift_alpha_0[0,:])
+                    CM_d_e = CM_d_e.at[e_i,:].set(CM_res[:,0]   - CM_alpha_0[0,:])
                 training.dClift_ddelta_e = ((Clift_d_e[0,:] - Clift_d_e[1,:]) / (delta_e[0] - delta_e[1]))
                 training.dCM_ddelta_e    = (CM_d_e[0,:] - CM_d_e[1,:]) / (delta_e[0] - delta_e[1])  
                 control_surface.deflection = delta_e_0
@@ -400,9 +400,9 @@ def train_model(aerodynamics,Mach, vehicle):
                     CY_res      = VLM_results.CY
                     CL_res      = VLM_results.CL
                     CN_res      = VLM_results.CN
-                    CY_d_r[r_i,:]  =   -(CY_res[:,0]   - CY_alpha_0[0,:]  ) # Negative sign is due to convention
-                    CL_d_r[r_i,:]  =   -(CL_res[:,0]   - CL_alpha_0[0,:]  ) # Negative sign is due to convention
-                    CN_d_r[r_i,:]  =   (CN_res[:,0]   - CN_alpha_0[0,:] )
+                    CY_d_r = CY_d_r.at[r_i,:].set(-(CY_res[:,0]   - CY_alpha_0[0,:]  )) # Negative sign is due to convention
+                    CL_d_r = CL_d_r.at[r_i,:].set(-(CL_res[:,0]   - CL_alpha_0[0,:]  )) # Negative sign is due to convention
+                    CN_d_r = CN_d_r.at[r_i,:].set((CN_res[:,0]   - CN_alpha_0[0,:] ))
                   
                 training.dCY_ddelta_r  = (CY_d_r[0,:] - CY_d_r[1,:]) / (delta_r[0] - delta_r[1]) 
                 training.dCL_ddelta_r  = (CL_d_r[0,:] - CL_d_r[1,:]) / (delta_r[0] - delta_r[1])  
@@ -426,8 +426,8 @@ def train_model(aerodynamics,Mach, vehicle):
                     VLM_results  = VLM(conditions,settings,vehicle)
                     CM_res       = VLM_results.CM
                     Clift_res    = VLM_results.CLift 
-                    Clift_d_f[f_i,:]      = Clift_res[:,0]  - Clift_alpha_0[0,:]  
-                    CM_d_f[f_i,:]         = CM_res[:,0]   - CM_alpha_0[0,:]            
+                    Clift_d_f = Clift_d_f.at[f_i,:].set(Clift_res[:,0]  - Clift_alpha_0[0,:])
+                    CM_d_f = CM_d_f.at[f_i,:].set(CM_res[:,0]   - CM_alpha_0[0,:])
                 training.dClift_ddelta_f  = (Clift_d_f[0,:] - Clift_d_f[1,:]) / (delta_f[0] - delta_f[1]) 
                 training.dCM_ddelta_f     = (CM_d_f[0,:] - CM_d_f[1,:]) / (delta_f[0] - delta_f[1])  
                 control_surface.deflection = delta_f_0

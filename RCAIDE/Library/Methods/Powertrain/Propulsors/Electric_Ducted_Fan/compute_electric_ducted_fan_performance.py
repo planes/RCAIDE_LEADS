@@ -131,9 +131,9 @@ def compute_electric_ducted_fan_performance(propulsor, state, center_of_gravity=
 
     # Compute moment 
     moment_vector      = 0*state.ones_row(3)
-    moment_vector[:,0] = ducted_fan.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1] = ducted_fan.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2] = ducted_fan.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(ducted_fan.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(ducted_fan.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(ducted_fan.origin[0][2]  -  center_of_gravity[0][2])
     moment             =  rp.cross(moment_vector, conditions.energy.converters[ducted_fan.tag].thrust) 
     
     # Detemine esc current 
@@ -194,9 +194,9 @@ def reuse_stored_electric_ducted_fan_data(propulsor,state,network,stored_propuls
     P_mech                  = conditions.energy.converters[ducted_fan.tag].power 
     P_elec                  = conditions.energy.modulators[esc.tag].inputs.power   
     moment_vector           = 0*state.ones_row(3) 
-    moment_vector[:,0]      = ducted_fan.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = ducted_fan.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = ducted_fan.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(ducted_fan.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(ducted_fan.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(ducted_fan.origin[0][2]  -  center_of_gravity[0][2])
     moment                  =  rp.cross(moment_vector, thrust_vector)
     
     # pack results 

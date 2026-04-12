@@ -78,9 +78,9 @@ def compute_airfoil_aerodynamics(beta,c,r,R,B,Wa,Wt,a,nu,airfoils,airfoil_locati
                 pd                   = airfoil.polars
                 Cl_af                = interp2d(Re,alpha,pd.reynolds_numbers, pd.angle_of_attacks, pd.lift_coefficients) 
                 Cdval_af             = interp2d(Re,alpha,pd.reynolds_numbers, pd.angle_of_attacks, pd.drag_coefficients)
-                locs                 = rp.where(rp.array(a_loc) == jj )[0]
-                Cl                   = Cl.at[:,locs,:].set(Cl_af[:,locs,:])
-                Cdval                = Cdval.at[:,locs,:].set(Cdval_af[:,locs,:])
+                mask                 = (rp.array(a_loc) == jj)
+                Cl                   = Cl.at[:,mask,:].set(Cl_af[:,mask,:])
+                Cdval                = Cdval.at[:,mask,:].set(Cdval_af[:,mask,:])
             alpha_disc           = alpha
             Re_disc              = Re
         else:

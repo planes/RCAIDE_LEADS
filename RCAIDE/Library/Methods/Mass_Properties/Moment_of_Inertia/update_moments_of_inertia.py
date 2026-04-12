@@ -131,14 +131,14 @@ def update_fuel_tank_moment_of_inertia(fuel_tank,state):
     I_fuel            = I_fuel_local  + I_fuel_par     
     
     # update data structures  
-    conditions.weights.components.moments_of_inertia_Ixx[fuel_tag][:,0] = I_fuel[:,0,0]
-    conditions.weights.components.moments_of_inertia_Ixy[fuel_tag][:,0] = I_fuel[:,0,1]
-    conditions.weights.components.moments_of_inertia_Ixz[fuel_tag][:,0] = I_fuel[:,0,2]
-    conditions.weights.components.moments_of_inertia_Iyx[fuel_tag][:,0] = I_fuel[:,1,0]
-    conditions.weights.components.moments_of_inertia_Iyy[fuel_tag][:,0] = I_fuel[:,1,1]
-    conditions.weights.components.moments_of_inertia_Iyz[fuel_tag][:,0] = I_fuel[:,1,2]
-    conditions.weights.components.moments_of_inertia_Izx[fuel_tag][:,0] = I_fuel[:,2,0]
-    conditions.weights.components.moments_of_inertia_Izy[fuel_tag][:,0] = I_fuel[:,2,1]
-    conditions.weights.components.moments_of_inertia_Izz[fuel_tag][:,0] = I_fuel[:,2,2]
+    conditions.weights.components.moments_of_inertia_Ixx[fuel_tag] = conditions.weights.components.moments_of_inertia_Ixx[fuel_tag].at[:,0].set(I_fuel[:,0,0])
+    conditions.weights.components.moments_of_inertia_Ixy[fuel_tag] = conditions.weights.components.moments_of_inertia_Ixy[fuel_tag].at[:,0].set(I_fuel[:,0,1])
+    conditions.weights.components.moments_of_inertia_Ixz[fuel_tag] = conditions.weights.components.moments_of_inertia_Ixz[fuel_tag].at[:,0].set(I_fuel[:,0,2])
+    conditions.weights.components.moments_of_inertia_Iyx[fuel_tag] = conditions.weights.components.moments_of_inertia_Iyx[fuel_tag].at[:,0].set(I_fuel[:,1,0])
+    conditions.weights.components.moments_of_inertia_Iyy[fuel_tag] = conditions.weights.components.moments_of_inertia_Iyy[fuel_tag].at[:,0].set(I_fuel[:,1,1])
+    conditions.weights.components.moments_of_inertia_Iyz[fuel_tag] = conditions.weights.components.moments_of_inertia_Iyz[fuel_tag].at[:,0].set(I_fuel[:,1,2])
+    conditions.weights.components.moments_of_inertia_Izx[fuel_tag] = conditions.weights.components.moments_of_inertia_Izx[fuel_tag].at[:,0].set(I_fuel[:,2,0])
+    conditions.weights.components.moments_of_inertia_Izy[fuel_tag] = conditions.weights.components.moments_of_inertia_Izy[fuel_tag].at[:,0].set(I_fuel[:,2,1])
+    conditions.weights.components.moments_of_inertia_Izz[fuel_tag] = conditions.weights.components.moments_of_inertia_Izz[fuel_tag].at[:,0].set(I_fuel[:,2,2])
     
     return 

@@ -49,13 +49,16 @@ def TBL_TE_broadband_noise(f,r_e,L,U,M,R_c,Dbar_h,Dbar_l,R_delta_star_p,delta_st
     '''      
      
     # Strouhal number
-    St_p                  = f*delta_star_p/U    # eqn 31
-    St_s                  = f*delta_star_s/U    # eqn 31
-    St_1                  = 0.02*(M**(-0.6))      # eqn 32
-    St_2                  = St_1*(10**(0.0054*((alpha_star - 1.33)**2)))
-    St_2[alpha_star<1.33] = St_1[alpha_star<1.33]*1
-    St_2[alpha_star>12.5] = St_1[alpha_star>12.5]*4.72 
-    St_bar_1              = (St_1 + St_2)/2     # eqn 33 
+    St_p = f*delta_star_p/U    # eqn 31
+    St_s = f*delta_star_s/U    # eqn 31
+    St_1 = 0.02*(M**(-0.6))    # eqn 32
+    
+    # Out-of-place nested rp.where for St_2
+    St_2_base = St_1*(10**(0.0054*((alpha_star - 1.33)**2)))
+    St_2 = rp.where(alpha_star < 1.33, St_1 * 1.0, St_2_base)
+    St_2 = rp.where(alpha_star > 12.5, St_1 * 4.72, St_2) 
+    
+    St_bar_1 = (St_1 + St_2)/2 # eqn 33 
     
     # Spectral Shape Functions
     St_peak   = St_bar_1 # can be St_1,St_2 or St_bar_1 
@@ -65,27 +68,29 @@ def TBL_TE_broadband_noise(f,r_e,L,U,M,R_c,Dbar_h,Dbar_l,R_delta_star_p,delta_st
     B         = spectral_shape_function_B(St_s,St_2,R_c)       # eqns 31 - 46    
     
     # Amplitude function 
-    K_1                                  = amplitude_function_K_1(R_c)                             # eqn 47
-    delta_K_1                            = amplitude_function_delta_K_1(alpha_star,R_delta_star_p) # eqn 48 
-    K_2                                  = amplitude_function_K_2(alpha_star,M,K_1)                # eqn 49   
-    SPL_alpha                            = 10*rp.log10((delta_star_s*(M**5)*L*Dbar_h)/(r_e**2))  + B   + K_2                    # eqn 27 
-    SPL_s                                = 10*rp.log10((delta_star_s*(M**5)*L*Dbar_h)/(r_e**2))  + A_s + (K_1 - 3)              # eqn 26
-    SPL_p                                = 10*rp.log10((delta_star_p*(M**5)*L*Dbar_h)/(r_e**2))  + A_p + (K_1 - 3) + delta_K_1  # eqn 25   
-   
-    alpha_star_0_bool                    = rp.zeros_like(alpha_star , dtype=bool) # 
-    K_2_peak                             = rp.max(K_2)
-    alpha_switch_1                       = rp.where(K_2 == K_2_peak)[0]
-    alpha_switch_2                       = rp.where(alpha_star>12.5)[0]
-    alpha_star_0_bool[alpha_switch_1]    = True 
-    alpha_star_0_bool[alpha_switch_2]    = True  
+    K_1       = amplitude_function_K_1(R_c)                             # eqn 47
+    delta_K_1 = amplitude_function_delta_K_1(alpha_star,R_delta_star_p) # eqn 48 
+    K_2       = amplitude_function_K_2(alpha_star,M,K_1)                # eqn 49   
     
-    SPL_p[alpha_star_0_bool]             = -rp.inf # eqn 28
-    SPL_s[alpha_star_0_bool]             = -rp.inf # eqn 29 
-    SPL_alpha[alpha_star_0_bool]         = 10*rp.log10((delta_star_s[alpha_star_0_bool]*(M[alpha_star_0_bool]**5)*L[alpha_star_0_bool]*Dbar_l[alpha_star_0_bool])/(r_e[alpha_star_0_bool]**2))  + A_prime[alpha_star_0_bool]+ K_2[alpha_star_0_bool]  
+    SPL_alpha = 10*rp.log10((delta_star_s*(M**5)*L*Dbar_h)/(r_e**2)) + B + K_2                    # eqn 27 
+    SPL_s     = 10*rp.log10((delta_star_s*(M**5)*L*Dbar_h)/(r_e**2)) + A_s + (K_1 - 3)              # eqn 26
+    SPL_p     = 10*rp.log10((delta_star_p*(M**5)*L*Dbar_h)/(r_e**2)) + A_p + (K_1 - 3) + delta_K_1  # eqn 25   
+   
+    # Build the boolean mask directly with bitwise OR (|) 
+    K_2_peak          = rp.max(K_2)
+    alpha_star_0_bool = (K_2 == K_2_peak) | (alpha_star > 12.5)
+    
+    # Out-of-place assignment for SPL_p and SPL_s
+    SPL_p = rp.where(alpha_star_0_bool, -rp.inf, SPL_p)
+    SPL_s = rp.where(alpha_star_0_bool, -rp.inf, SPL_s)
+    
+    # Compute alternative SPL_alpha for the entire array, then merge safely
+    SPL_alpha_alt = 10*rp.log10((delta_star_s*(M**5)*L*Dbar_l)/(r_e**2)) + A_prime + K_2
+    SPL_alpha     = rp.where(alpha_star_0_bool, SPL_alpha_alt, SPL_alpha)
              
-    SPL_TBL_TE                           = 10*rp.log10( 10**(SPL_alpha/10) + 10**(SPL_s/10) + 10**(SPL_p/10) ) # eqn 24 
+    SPL_TBL_TE = 10*rp.log10( 10**(SPL_alpha/10) + 10**(SPL_s/10) + 10**(SPL_p/10) ) # eqn 24 
 
-    return  SPL_TBL_TE
+    return SPL_TBL_TE
 
 def spectral_shape_function_A(St,St_peak,R_c):  
     a                  = abs(rp.log10(St/St_peak))    # 37  

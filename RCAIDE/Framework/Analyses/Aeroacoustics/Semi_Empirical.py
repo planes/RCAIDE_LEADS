@@ -99,7 +99,7 @@ class Semi_Empirical(Aeroacoustics):
           
         airframe_noise_res        = airframe_noise(microphone_locations,segment,vehicle,settings) 
         total_SPL_dBA             = SPL_arithmetic(rp.concatenate((total_SPL_dBA[:,None,:],airframe_noise_res.SPL_dBA[:,None,:]),axis =1),sum_axis=1)
-        total_SPL_spectra[:,:,5:] = SPL_arithmetic(rp.concatenate((total_SPL_spectra[:,None,:,5:],airframe_noise_res.SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1) 
+        total_SPL_spectra = total_SPL_spectra.at[:,:,5:].set(SPL_arithmetic(rp.concatenate((total_SPL_spectra[:,None,:,5:],airframe_noise_res.SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1))
               
           # iterate through sources  
         for network in vehicle.networks:  
@@ -107,7 +107,7 @@ class Semi_Empirical(Aeroacoustics):
                 if type(propulsor) == RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan:
                     engine_noise              = turbofan_engine_noise(microphone_locations,propulsor,conditions.aeroacoustics.propulsors[propulsor.tag],segment,settings)      
                     total_SPL_dBA             = SPL_arithmetic(rp.concatenate((total_SPL_dBA[:,None,:],engine_noise.SPL_dBA[:,None,:]),axis =1),sum_axis=1)
-                    total_SPL_spectra[:,:,5:] = SPL_arithmetic(rp.concatenate((total_SPL_spectra[:,None,:,5:],engine_noise.SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1) 
+                    total_SPL_spectra = total_SPL_spectra.at[:,:,5:].set(SPL_arithmetic(rp.concatenate((total_SPL_spectra[:,None,:,5:],engine_noise.SPL_1_3_spectrum[:,None,:,:]),axis =1),sum_axis=1))
                          
         conditions.aeroacoustics.hemisphere_SPL_dBA              = total_SPL_dBA *  (1 - settings.noise_reduction_factors.SPL_dbA)
         conditions.aeroacoustics.hemisphere_SPL_1_3_spectrum_dBA = total_SPL_spectra   *  (1 - settings.noise_reduction_factors.SPL_dbA)                                                    

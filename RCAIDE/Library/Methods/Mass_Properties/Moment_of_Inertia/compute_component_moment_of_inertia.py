@@ -61,7 +61,7 @@ def update_total_moment_of_inertia(total_MOI,vehicle_CG,C,segment,verbose,moment
     # total moment of inertia 
     I_global        = I_component + I_parallel_axis
     
-    total_MOI      += I_global
+    total_MOI       = total_MOI + I_global
     
     if verbose:
         name_column_width = 20

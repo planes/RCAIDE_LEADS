@@ -10,6 +10,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units 
 from scipy.interpolate import griddata
 import RNUMPY as rp
+import numpy as np
 
 # ----------------------------------------------------------------------
 #  Compute Point to Point Geospacial Data
@@ -43,7 +44,7 @@ def compute_point_to_point_geospacial_data(settings):
     destination_coordinates = rp.asarray(settings.aircraft_destination_coordinates)
     
     # extract data from file 
-    data  = rp.loadtxt(settings.topography_file)
+    data  = np.loadtxt(settings.topography_file)
     Long  = data[:,0]
     Lat   = data[:,1]
     Elev  = data[:,2] 

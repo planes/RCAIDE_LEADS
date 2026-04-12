@@ -46,4 +46,4 @@ def thrust(segment):
         conditions.energy.fuel_consumption        = rp.dot(I,conditions.weights.vehicle.mass_rate)
         conditions.energy.cumulative_fuel_consumption =  conditions.energy.fuel_consumption
         if segment.state.initials:  
-            conditions.energy.cumulative_fuel_consumption += segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1]
+            conditions.energy.cumulative_fuel_consumption = conditions.energy.cumulative_fuel_consumption + segment.state.initials.conditions.energy.cumulative_fuel_consumption[-1]

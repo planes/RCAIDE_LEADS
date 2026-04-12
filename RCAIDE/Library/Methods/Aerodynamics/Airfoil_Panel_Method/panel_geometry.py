@@ -46,7 +46,7 @@ def panel_geometry(x,y,npanel,ncases,ncpts):
     ybar = (y[1:] +y[:-1])/2 
     
     norm  = rp.zeros((npanel,2,ncases,ncpts))
-    norm[:,0,:,:]  =  -st
-    norm[:,1,:,:]  =  ct 
+    norm = norm.at[:,0,:,:].set(-st)
+    norm = norm.at[:,1,:,:].set(ct)
     
     return l,st,ct,xbar,ybar,norm 

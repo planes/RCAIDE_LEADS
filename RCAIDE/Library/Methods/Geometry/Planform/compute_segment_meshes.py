@@ -28,19 +28,19 @@ def compute_segment_meshes(x_in,y_in, x_out, y_out, L, spanwise_shift):
 
     # Apply spanwise translation AFTER orientation fix
     T = rp.eye(4)
-    T[0, 3] = 0.0
-    T[1, 3] = 0.0
-    T[2, 3] = spanwise_shift
+    T = T.at[0, 3].set(0.0)
+    T = T.at[1, 3].set(0.0)
+    T = T.at[2, 3].set(spanwise_shift)
     solid_segment.apply_transform(T)
     
     # Rotate 90 degrees around X axis to match RCAIDE convention
     R = rp.eye(4)
     cos_a = 0.0 # cos(90)
     sin_a = 1.0 # sin(90)
-    R[1, 1] = cos_a
-    R[1, 2] = -sin_a
-    R[2, 1] = sin_a
-    R[2, 2] = cos_a
+    R = R.at[1, 1].set(cos_a)
+    R = R.at[1, 2].set(-sin_a)
+    R = R.at[2, 1].set(sin_a)
+    R = R.at[2, 2].set(cos_a)
     solid_segment.apply_transform(R)
     
     return solid_segment

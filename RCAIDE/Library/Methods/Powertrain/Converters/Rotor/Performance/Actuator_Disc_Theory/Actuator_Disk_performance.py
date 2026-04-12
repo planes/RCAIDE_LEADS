@@ -196,7 +196,7 @@ def Actuator_Disk_performance(rotor, conditions):
     
     ctrl_pts              = len(V) 
     thrust_vector         = rp.zeros((ctrl_pts,3))
-    thrust_vector[:,0]    = thrust[:,0]         
+    thrust_vector = thrust_vector.at[:,0].set(thrust[:,0])
     disc_loading          = thrust/(rp.pi*(R**2))
     power_loading         = thrust/(power)    
     A                     = rp.pi*(R**2 - rotor.hub_radius**2)

@@ -119,9 +119,9 @@ def compute_wake_contraction_matrix(prop, Nr, m, nts, X_pts, prop_outputs):
     r_diff            = rp.ones((m,rdim))*(r[1:]**2 - r[:-1]**2 )
     r_diff            = rp.repeat(rp.atleast_2d(r_diff)[:, :, None], nts, axis = 2) 
     r_prime           = rp.zeros((m,Nr,nts))                
-    r_prime[:,0,:]    = R0   
+    r_prime = r_prime.at[:,0,:].set(R0)
     for j in range(rdim):
-        r_prime[:,1+j,:]   = rp.sqrt(r_prime[:,j,:]**2 + (r_diff*Kv)[:,j,:])                               
+        r_prime = r_prime.at[:,1+j,:].set(rp.sqrt(r_prime[:,j,:]**2 + (r_diff*Kv)[:,j,:]))
     
     wake_contraction  = rp.repeat((r_prime/rp.repeat(rp.atleast_2d(r)[:, :, None], nts, axis = 2))[:,None,:,:], B, axis = 1)            
     

@@ -59,7 +59,7 @@ def chebyshev_data(N = 16, integration = True, **options):
     cinv = 1./c; 
 
     # build operator
-    D = rp.zeros( (N,N) );
+    D = rp.zeros( (N,N) )
     
     # math
     c    = rp.array(c)
@@ -68,7 +68,7 @@ def chebyshev_data(N = 16, integration = True, **options):
     D    = rp.divide(cs.T,dA)
 
     # more math
-    D = D - rp.diag( rp.sum( D.T, axis=0 ) );
+    D = D - rp.diag( rp.sum( D.T, axis=0 ) )
 
     # --- Integration operator
     

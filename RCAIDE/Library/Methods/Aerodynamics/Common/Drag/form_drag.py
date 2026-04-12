@@ -159,7 +159,7 @@ def form_drag(state,settings,geometry):
                             
                 CD_form_wing = CD_sep * wing.areas.reference  
         
-            CD_form += CD_form_wing /geometry.reference_area 
+            CD_form =  CD_form + CD_form_wing /geometry.reference_area 
     
     
     CD_form_total =  CD_form

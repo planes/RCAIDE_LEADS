@@ -82,15 +82,15 @@ def append_cross_flow_hex_segment_conditions(cross_flow_hex,segment,bus,coolant_
     cross_flow_hex_conditions = segment.state.conditions.energy.coolant_lines[coolant_line.tag][cross_flow_hex.tag]
     if segment.state.initials:  
         cross_flow_hex_initials                                   = segment.state.initials.conditions.energy.coolant_lines[coolant_line.tag][cross_flow_hex.tag]
-        cross_flow_hex_conditions.coolant_mass_flow_rate[:,0]     = cross_flow_hex_initials.coolant_mass_flow_rate[-1,0]     
-        cross_flow_hex_conditions.power[:,0]                      = cross_flow_hex_initials.power[-1,0]     
-        cross_flow_hex_conditions.air_inlet_pressure[:,0]         = cross_flow_hex_initials.air_inlet_pressure[-1,0]       
-        cross_flow_hex_conditions.coolant_inlet_pressure[:,0]     = cross_flow_hex_initials.coolant_inlet_pressure[-1,0] 
-        cross_flow_hex_conditions.inlet_air_temperature[:,0]      = cross_flow_hex_initials.inlet_air_temperature[-1,0]   
-        cross_flow_hex_conditions.pressure_diff_air[:,0]          = cross_flow_hex_initials.pressure_diff_air[-1,0]                     
-        cross_flow_hex_conditions.air_mass_flow_rate[:,0]         = cross_flow_hex_initials.air_mass_flow_rate[-1,0]     
-        cross_flow_hex_conditions.outlet_coolant_temperature[:,0] = cross_flow_hex_initials.outlet_coolant_temperature[-1,0]  
-        cross_flow_hex_conditions.effectiveness_HEX[:,0]          = cross_flow_hex_initials.effectiveness_HEX[-1,0]
+        cross_flow_hex_conditions.coolant_mass_flow_rate = cross_flow_hex_conditions.coolant_mass_flow_rate.at[:,0].set(cross_flow_hex_initials.coolant_mass_flow_rate[-1,0])
+        cross_flow_hex_conditions.power = cross_flow_hex_conditions.power.at[:,0].set(cross_flow_hex_initials.power[-1,0])
+        cross_flow_hex_conditions.air_inlet_pressure = cross_flow_hex_conditions.air_inlet_pressure.at[:,0].set(cross_flow_hex_initials.air_inlet_pressure[-1,0])
+        cross_flow_hex_conditions.coolant_inlet_pressure = cross_flow_hex_conditions.coolant_inlet_pressure.at[:,0].set(cross_flow_hex_initials.coolant_inlet_pressure[-1,0])
+        cross_flow_hex_conditions.inlet_air_temperature = cross_flow_hex_conditions.inlet_air_temperature.at[:,0].set(cross_flow_hex_initials.inlet_air_temperature[-1,0])
+        cross_flow_hex_conditions.pressure_diff_air = cross_flow_hex_conditions.pressure_diff_air.at[:,0].set(cross_flow_hex_initials.pressure_diff_air[-1,0])
+        cross_flow_hex_conditions.air_mass_flow_rate = cross_flow_hex_conditions.air_mass_flow_rate.at[:,0].set(cross_flow_hex_initials.air_mass_flow_rate[-1,0])
+        cross_flow_hex_conditions.outlet_coolant_temperature = cross_flow_hex_conditions.outlet_coolant_temperature.at[:,0].set(cross_flow_hex_initials.outlet_coolant_temperature[-1,0])
+        cross_flow_hex_conditions.effectiveness_HEX = cross_flow_hex_conditions.effectiveness_HEX.at[:,0].set(cross_flow_hex_initials.effectiveness_HEX[-1,0])
         
         return
     

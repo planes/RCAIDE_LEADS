@@ -163,16 +163,16 @@ def read_results(avl_object, vehicle):
             
             for i in range(n_wings): 
                 for j in range(n_sw):
-                    wing_local_span[i,j]      = float(aero_lines_2[header + j + line_idx][8:16].strip())
-                    wing_sectional_chord[i,j] = float(aero_lines_2[header + j + line_idx][16:24].strip()) 
-                    wing_cl[i,j]              = float(aero_lines_2[header + j + line_idx][61:69].strip())  
+                    wing_local_span = wing_local_span.at[i,j].set(float(aero_lines_2[header + j + line_idx][8:16].strip()))
+                    wing_sectional_chord = wing_sectional_chord.at[i,j].set(float(aero_lines_2[header + j + line_idx][16:24].strip()))
+                    wing_cl = wing_cl.at[i,j].set(float(aero_lines_2[header + j + line_idx][61:69].strip()))
                     # At high angle of attacks, AVL does not give an answer 
                     try:
-                        alpha_i[i,j]              = float(aero_lines_2[header + j + line_idx][43:51].strip())
-                        wing_cd[i,j]              = float(aero_lines_2[header + j + line_idx][70:78].strip())
+                        alpha_i = alpha_i.at[i,j].set(float(aero_lines_2[header + j + line_idx][43:51].strip()))
+                        wing_cd = wing_cd.at[i,j].set(float(aero_lines_2[header + j + line_idx][70:78].strip()))
                     except:
-                        alpha_i[i,j]              = 0.
-                        wing_cd[i,j]              = 0.
+                        alpha_i = alpha_i.at[i,j].set(0.)
+                        wing_cd = wing_cd.at[i,j].set(0.)
                 line_idx = divider_header +  n_sw + line_idx            
             case_res.aerodynamics.wing_local_spans         = wing_local_span
             case_res.aerodynamics.wing_section_chords      = wing_sectional_chord 

@@ -87,7 +87,7 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
     del_r              = r[1:] - r[:-1]
     L[0]               = del_r[0]
     L[-1]              = del_r[-1]
-    L[1:-1]            = (del_r[:-1]+ del_r[1:])/2
+    L = L.at[1:-1].set((del_r[:-1]+ del_r[1:])/2)
 
     if rp.all(Omega == 0):
         aeroacoustics.p_pref_broadband                          = rp.zeros((num_cpt,num_mic,num_cf)) 
@@ -107,8 +107,8 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
         
         alpha_disk        = rp.tile(alpha[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))
         V                 = rp.zeros((num_cpt,num_mic,num_blades,num_sec,num_cf,num_az,3))
-        V[:,:,:,:,:,:,0]  = -rp.tile(Vt[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)) 
-        V[:,:,:,:,:,:,2]  = rp.tile(Va[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1))  
+        V = V.at[:,:,:,:,:,:,0].set(-rp.tile(Vt[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)))
+        V = V.at[:,:,:,:,:,:,2].set(rp.tile(Va[cpt,None,None,:,None,:],(1,num_mic,num_blades,1,num_cf,1)))
         V_tot             = rp.linalg.norm(V, axis=6)
         alpha_tip         = rp.tile(alpha_tip[cpt,None,None,None,None,:],(1,num_mic,num_blades,num_sec,num_cf,1))  
         c_0               = rp.tile(speed_of_sound[cpt,:,None,None,None,None],(1,num_mic,num_blades,num_sec,num_cf,num_az))
@@ -190,14 +190,14 @@ def broadband_noise(conditions,coordinates,rotor,settings,aeroacoustics,cpt):
         P_TBL_TE_untripped    = 10**(SPL_TBL_TE_untripped/10)
         P_LBL_VS              = 10**(SPL_LBL_VS/10)
         P_TIP                 = 10**(SPL_TIP/10)
-        P_TIP[:,:,:,:-1,:,:]  = 0
+        P_TIP = P_TIP.at[:,:,:,:-1,:,:].set(0)
         
         # Sum broadband Components along blade sections and blades to get self noise per rotor 
         P_b_7                     = rp.zeros((4,num_cpt,num_mic,num_blades,num_sec,num_cf,num_az))
-        P_b_7[0,:,:,:,:,:,:]      = P_BWI
-        P_b_7[1,:,:,:,:,:,:]      = P_TBL_TE_tripped 
-        P_b_7[2,:,:,:,:,:,:]      = P_LBL_VS
-        P_b_7[3,:,:,:,:,:,:]      = P_TIP
+        P_b_7 = P_b_7.at[0,:,:,:,:,:,:].set(P_BWI)
+        P_b_7 = P_b_7.at[1,:,:,:,:,:,:].set(P_TBL_TE_tripped)
+        P_b_7 = P_b_7.at[2,:,:,:,:,:,:].set(P_LBL_VS)
+        P_b_7 = P_b_7.at[3,:,:,:,:,:,:].set(P_TIP)
         
         # Sum all components of broadband noise pressures
         P_b_6            = rp.sum(P_b_7, axis=0)

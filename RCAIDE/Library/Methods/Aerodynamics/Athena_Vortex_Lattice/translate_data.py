@@ -188,20 +188,20 @@ def translate_results_to_conditions(cases,res,results):
         res.static_stability.spiral_criteria[i][0]                          = case_res.stability.spiral_criteria
         
         # aero surface forces file 
-        res.aerodynamics.wing_areas[i][:]                   = case_res.aerodynamics.wing_areas   
-        res.aerodynamics.wing_CLs[i][:]                     = case_res.aerodynamics.wing_CLs    
-        res.aerodynamics.wing_CDs[i][:]                     = case_res.aerodynamics.wing_CDs    
+        res.aerodynamics.wing_areas[i] = res.aerodynamics.wing_areas[i].at[:].set(case_res.aerodynamics.wing_areas)
+        res.aerodynamics.wing_CLs[i] = res.aerodynamics.wing_CLs[i].at[:].set(case_res.aerodynamics.wing_CLs)
+        res.aerodynamics.wing_CDs[i] = res.aerodynamics.wing_CDs[i].at[:].set(case_res.aerodynamics.wing_CDs)
         
         # aero sectional forces file
-        res.aerodynamics.wing_local_spans[i][:]             = case_res.aerodynamics.wing_local_spans
-        res.aerodynamics.wing_section_chords[i][:]          = case_res.aerodynamics.wing_section_chords  
-        res.aerodynamics.wing_section_cls[i][:]             = case_res.aerodynamics.wing_section_cls    
-        res.aerodynamics.wing_section_induced_angle[i][:]   = case_res.aerodynamics.wing_section_aoa_i
-        res.aerodynamics.wing_section_cds[i][:]             = case_res.aerodynamics.wing_section_cds   
+        res.aerodynamics.wing_local_spans[i] = res.aerodynamics.wing_local_spans[i].at[:].set(case_res.aerodynamics.wing_local_spans)
+        res.aerodynamics.wing_section_chords[i] = res.aerodynamics.wing_section_chords[i].at[:].set(case_res.aerodynamics.wing_section_chords)
+        res.aerodynamics.wing_section_cls[i] = res.aerodynamics.wing_section_cls[i].at[:].set(case_res.aerodynamics.wing_section_cls)
+        res.aerodynamics.wing_section_induced_angle[i] = res.aerodynamics.wing_section_induced_angle[i].at[:].set(case_res.aerodynamics.wing_section_aoa_i)
+        res.aerodynamics.wing_section_cds[i] = res.aerodynamics.wing_section_cds[i].at[:].set(case_res.aerodynamics.wing_section_cds)
         
         res.static_stability.control_surfaces_cases[tag]    = case_res.stability.control_surfaces
         
     if len(res.static_stability.coefficients.X) > 1:
-        res.static_stability.derivatives.CX_alpha[:, 0] =  rp.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] )
-        res.static_stability.derivatives.CZ_alpha[:, 0] =  rp.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] )
+        res.static_stability.derivatives.CX_alpha = res.static_stability.derivatives.CX_alpha.at[:, 0].set(rp.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] ))
+        res.static_stability.derivatives.CZ_alpha = res.static_stability.derivatives.CZ_alpha.at[:, 0].set(rp.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] ))
     return  

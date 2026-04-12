@@ -58,9 +58,9 @@ def aerodynamics(segment):
 
     # dimensionalize
     F      = segment.state.ones_row(3) * 0.0
-    F[:,2] = ( -CL * q * Sref )[:,0]
-    F[:,1] = (  CY * q * Sref  )[:,0]  
-    F[:,0] = ( -CD * q * Sref )[:,0]
+    F = F.at[:,2].set(( -CL * q * Sref )[:,0])
+    F = F.at[:,1].set((  CY * q * Sref  )[:,0])
+    F = F.at[:,0].set(( -CD * q * Sref )[:,0])
 
     # rewrite aerodynamic CL and CD
     conditions.aerodynamics.coefficients.lift.total  = CL
@@ -78,9 +78,9 @@ def aerodynamics(segment):
 
     # dimensionalize
     M      = segment.state.ones_row(3) * 0.0
-    M[:,0] = (C_L[:,0] * q[:,0] * Sref * span)
-    M[:,1] = (C_M[:,0] * q[:,0] * Sref * MAC)
-    M[:,2] = (C_N[:,0] * q[:,0] * Sref * span)
+    M = M.at[:,0].set((C_L[:,0] * q[:,0] * Sref * span))
+    M = M.at[:,1].set((C_M[:,0] * q[:,0] * Sref * MAC))
+    M = M.at[:,2].set((C_N[:,0] * q[:,0] * Sref * span))
 
     # pack conditions
     conditions.frames.wind.moment_vector = M

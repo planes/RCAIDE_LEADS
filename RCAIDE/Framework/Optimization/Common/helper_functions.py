@@ -135,11 +135,12 @@ def scale_input_values(inputs,x):
     
     provided_scale = rp.array(inputs.value[:,-2])
     
-    # Avoid in-place update for autograd
-    new_val = inputs.value * 1.0
-    new_val[:,0] = x*provided_scale
-    inputs.value = new_val
+    # Safely reconstruct the arrays using hstack
+    col_0     = (x * provided_scale).reshape(-1, 1)
+    cols_rest = inputs.value[:, 1:]
     
+    inputs.value = rp.hstack((col_0, cols_rest))
+
     return inputs
 
 def limit_input_values(inputs):
@@ -171,7 +172,7 @@ def limit_input_values(inputs):
     provided_values = rp.where(provided_values > upper_bounds, upper_bounds, provided_values)
     
     new_inputs = inputs * 1.0
-    new_inputs[:, 1] = provided_values
+    new_inputs = new_inputs.at[:, 1].set(provided_values)
     
     return new_inputs
     
@@ -203,7 +204,7 @@ def convert_values(inputs):
     
     # Avoid in-place update for autograd
     new_val = inputs.value * 1.0
-    new_val[:,-1] = provided_units
+    new_val = new_val.at[:,-1].set(provided_units)
     inputs.value = new_val
     
     converted_values = provided_values*provided_units
@@ -289,7 +290,7 @@ def scale_obj_values(inputs,x):
     provided_scale = inputs.value[:,0]
     provided_units = inputs.value[:,-1]*1.0
     new_val = inputs.value * 1.0
-    new_val[:,-1] = provided_units
+    new_val = new_val.at[:,-1].set(provided_units)
     inputs.value = new_val
     
     scaled =  x/(provided_scale*provided_units)
@@ -347,7 +348,7 @@ def scale_const_bnds(inputs):
     # Avoid in-place update for autograd
     provided_units  = inputs.value[:,-1]*1.0
     new_val = inputs.value * 1.0
-    new_val[:,-1] = provided_units
+    new_val = new_val.at[:,-1].set(provided_units)
     inputs.value = new_val
     
     converted_values = provided_bounds*provided_units

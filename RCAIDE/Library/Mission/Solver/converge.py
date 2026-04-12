@@ -218,11 +218,11 @@ def add_mission_variables(segment):
     optimization_problem.inputs.name = input_names
     
     new_inputs_value = rp.zeros((len_inputs, 5))
-    new_inputs_value[:,0] = rp.ravel(initial_values)
-    new_inputs_value[:,1] = rp.ravel(lower_bounds)
-    new_inputs_value[:,2] = rp.ravel(upper_bounds)
-    new_inputs_value[:,3] = rp.ravel(scale)
-    new_inputs_value[:,4] = rp.ravel(units)
+    new_inputs_value = new_inputs_value.at[:,0].set(rp.ravel(initial_values))
+    new_inputs_value = new_inputs_value.at[:,1].set(rp.ravel(lower_bounds))
+    new_inputs_value = new_inputs_value.at[:,2].set(rp.ravel(upper_bounds))
+    new_inputs_value = new_inputs_value.at[:,3].set(rp.ravel(scale))
+    new_inputs_value = new_inputs_value.at[:,4].set(rp.ravel(units))
     optimization_problem.inputs.value = rp.array(new_inputs_value, dtype=rp.float32)
     
     # Step 3: Constraints 
@@ -243,9 +243,9 @@ def add_mission_variables(segment):
     optimization_problem.constraints.name_signs = new_con_name_signs
     
     new_con_value = rp.zeros((len_residuals, 3))
-    new_con_value[:,0] = zeros
-    new_con_value[:,1] = ones
-    new_con_value[:,2] = 1*Units.less
+    new_con_value = new_con_value.at[:,0].set(zeros)
+    new_con_value = new_con_value.at[:,1].set(ones)
+    new_con_value = new_con_value.at[:,2].set(1*Units.less)
     optimization_problem.constraints.value = rp.array(new_con_value, dtype=rp.float32)            
     
     # Step 4. Aliases 
@@ -272,7 +272,7 @@ def add_mission_variables(segment):
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(rp.tile(rp.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
-        input_aliases[:,1] = input_string    
+        input_aliases[:,1] = input_string
     else:  
         output_numbers = rp.linspace(0,n_points-1,n_points,dtype=rp.int16) 
         for unkn in unknown_keys:

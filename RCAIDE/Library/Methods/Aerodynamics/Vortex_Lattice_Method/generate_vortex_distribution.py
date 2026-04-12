@@ -837,42 +837,42 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
                 y_prime_bs, zeta_prime_bs = zeta_prime_bs, y_prime_bs
                  
             # store coordinates of panels, horseshoeces vortices and control points relative to wing root----------
-            xa1[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_a1     # top left corner of panel
-            ya1[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_a1
-            za1[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_a1
-            xah[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_ah     # left coord of horseshoe
-            yah[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_ah
-            zah[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_ah                    
-            xac[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_ac     # left coord of control point
-            yac[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_ac
-            zac[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_ac
-            xa2[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_a2     # bottom left corner of panel
-            ya2[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_a2
-            za2[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_a2
+            xa1 = xa1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_a1) # top left corner of panel
+            ya1 = ya1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_a1)
+            za1 = za1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_a1)
+            xah = xah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_ah) # left coord of horseshoe
+            yah = yah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_ah)
+            zah = zah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_ah)
+            xac = xac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_ac) # left coord of control point
+            yac = yac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_ac)
+            zac = zac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_ac)
+            xa2 = xa2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_a2) # bottom left corner of panel
+            ya2 = ya2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_a2)
+            za2 = za2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_a2)
                                              
-            xb1[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_b1     # top right corner of panel
-            yb1[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_b1          
-            zb1[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_b1   
-            xbh[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_bh     # right coord of horseshoe
-            ybh[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_bh          
-            zbh[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_bh                    
-            xbc[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_bc     # right coord of control point
-            ybc[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_bc                           
-            zbc[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_bc   
-            xb2[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_b2     # bottom right corner of panel
-            yb2[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_b2                        
-            zb2[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_b2 
+            xb1 = xb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_b1) # top right corner of panel
+            yb1 = yb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_b1)
+            zb1 = zb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_b1)
+            xbh = xbh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_bh) # right coord of horseshoe
+            ybh = ybh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_bh)
+            zbh = zbh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_bh)
+            xbc = xbc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_bc) # right coord of control point
+            ybc = ybc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_bc)
+            zbc = zbc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_bc)
+            xb2 = xb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_b2) # bottom right corner of panel
+            yb2 = yb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_b2)
+            zb2 = zb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_b2)
                                              
-            xch[idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime_ch     # center coord of horseshoe
-            ych[idx_y*n_cw:(idx_y+1)*n_cw] = y_prime_ch                              
-            zch[idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime_ch
-            xc [idx_y*n_cw:(idx_y+1)*n_cw] = xi_prime        # center (true) coord of control point
-            yc [idx_y*n_cw:(idx_y+1)*n_cw] = y_prime
-            zc [idx_y*n_cw:(idx_y+1)*n_cw] = zeta_prime 
+            xch = xch.at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime_ch) # center coord of horseshoe
+            ych = ych.at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime_ch)
+            zch = zch.at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime_ch)
+            xc  = xc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(xi_prime) # center (true) coord of control point
+            yc  = yc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(y_prime)
+            zc  = zc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(zeta_prime)
            
-            x[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = xi_prime_as     # x, y, z represent all all points of the corners of the panels, LE and TE inclusive
-            y[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = y_prime_as      # the final right corners get appended at last strip in wing, later
-            z[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = zeta_prime_as              
+            x = x.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(xi_prime_as) # x, y, z represent all all points of the corners of the panels, LE and TE inclusive
+            y = y.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(y_prime_as) # the final right corners get appended at last strip in wing, later
+            z = z.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(zeta_prime_as)
 
             cs_w[idx_y] = wing_chord_section       
                    
@@ -901,9 +901,9 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
         #End 'for each strip' loop    
         
         # store outboardmost edge
-        x[-(n_cw+1):] = xi_prime_bs
-        y[-(n_cw+1):] = y_prime_bs
-        z[-(n_cw+1):] = zeta_prime_bs              
+        x = x.at[-(n_cw+1):].set(xi_prime_bs)
+        y = y.at[-(n_cw+1):].set(y_prime_bs)
+        z = z.at[-(n_cw+1):].set(zeta_prime_bs)
         
         # adjusting coordinate axis so reference point is at the nose of the aircraft------------------------------
         xah = xah + wing_origin_x # x coordinate of left corner of bound vortex 
@@ -1115,18 +1115,18 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
             fhs.nose_length   = ((1 - ((abs(h_array[i]/semispan_h))**fus_nose_curvature ))**(1/fus_nose_curvature))*fus.lengths.nose
             fhs.tail_length   = ((1 - ((abs(h_array[i]/semispan_h))**fus_tail_curvature ))**(1/fus_tail_curvature))*fus.lengths.tail
             fhs.nose_origin   = fus.lengths.nose - fhs.nose_length
-            fhs.origin[i][:]  = rp.array([fhs.nose_origin , h_array[i], 0.]) # Local origin
+            fhs.origin[i] = fhs.origin[i].at[:].set(rp.array([fhs.nose_origin , h_array[i], 0.])) # Local origin
             fhs.chord[i]      = fhs_cabin_length + fhs.nose_length + fhs.tail_length
 
             fvs_cabin_length  = fus.lengths.total - (fus.lengths.nose + fus.lengths.tail)
             fvs.nose_length   = ((1 - ((abs(v_array[i]/semispan_v))**fus_nose_curvature ))**(1/fus_nose_curvature))*fus.lengths.nose
             fvs.tail_length   = ((1 - ((abs(v_array[i]/semispan_v))**fus_tail_curvature ))**(1/fus_tail_curvature))*fus.lengths.tail
             fvs.nose_origin   = fus.lengths.nose - fvs.nose_length
-            fvs.origin[i][:]  = rp.array([origin[0] + fvs.nose_origin , origin[1] , origin[2]+  v_array[i]])
+            fvs.origin[i] = fvs.origin[i].at[:].set(rp.array([origin[0] + fvs.nose_origin , origin[1] , origin[2]+  v_array[i]]))
             fvs.chord[i]      = fvs_cabin_length + fvs.nose_length + fvs.tail_length
 
-        fhs.sweep[:] = rp.concatenate([rp.arctan((fhs.origin[:,0][1:] - fhs.origin[:,0][:-1])/(fhs.origin[:,1][1:]  - fhs.origin[:,1][:-1])) ,rp.zeros(1)])
-        fvs.sweep[:] = rp.concatenate([rp.arctan((fvs.origin[:,0][1:] - fvs.origin[:,0][:-1])/(fvs.origin[:,2][1:]  - fvs.origin[:,2][:-1])) ,rp.zeros(1)])
+        fhs.sweep = fhs.sweep.at[:].set(rp.concatenate([rp.arctan((fhs.origin[:,0][1:] - fhs.origin[:,0][:-1])/(fhs.origin[:,1][1:]  - fhs.origin[:,1][:-1])) ,rp.zeros(1)]))
+        fvs.sweep = fvs.sweep.at[:].set(rp.concatenate([rp.arctan((fvs.origin[:,0][1:] - fvs.origin[:,0][:-1])/(fvs.origin[:,2][1:]  - fvs.origin[:,2][:-1])) ,rp.zeros(1)]))
 
     # ---------------------------------------------------------------------------------------
     # STEP 9: Define coordinates of panels horseshoe vortices and control points  
@@ -1168,39 +1168,39 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
         fhs_xi_ch = (fhs.origin[idx_y][0] + fhs.origin[idx_y+1][0])/2  + delta_x*idx_x + delta_x*0.25   # x coordinate center of bound vortex of each panel 
 
 
-        fhs_xa1[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_a1                       + fus.origin[0][0]  
-        fhs_ya1[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1]  
-        fhs_za1[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]
-        fhs_xa2[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_a2                       + fus.origin[0][0]  
-        fhs_ya2[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1] 
-        fhs_za2[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]      
-        fhs_xb1[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_b1                       + fus.origin[0][0]  
-        fhs_yb1[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1] 
-        fhs_zb1[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]
-        fhs_xb2[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_b2                       + fus.origin[0][0] 
-        fhs_yb2[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1] 
-        fhs_zb2[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]       
-        fhs_xah[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_ah                       + fus.origin[0][0]   
-        fhs_yah[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1]  
-        fhs_zah[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]             
-        fhs_xbh[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_bh                       + fus.origin[0][0] 
-        fhs_ybh[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1]  
-        fhs_zbh[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]    
-        fhs_xch[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_ch                       + fus.origin[0][0]  
-        fhs_ych[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta[idx_y]    + fus.origin[0][1]                
-        fhs_zch[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]     
-        fhs_xc [idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_c                        + fus.origin[0][0]  
-        fhs_yc [idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta[idx_y]    + fus.origin[0][1]  
-        fhs_zc [idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]       
-        fhs_xac[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_ac                       + fus.origin[0][0]  
-        fhs_yac[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1]
-        fhs_zac[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]
-        fhs_xbc[idx_y*n_cw:(idx_y+1)*n_cw] = fhs_xi_bc                       + fus.origin[0][0]  
-        fhs_ybc[idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1]                             
-        fhs_zbc[idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                  + fus.origin[0][2]              
-        fhs_x[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.concatenate([fhs_xi_a1,rp.array([fhs_xi_a2[-1]])]) + fus.origin[0][0]  
-        fhs_y[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.ones(n_cw+1)*fhs_eta_a[idx_y]  + fus.origin[0][1]                             
-        fhs_z[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.zeros(n_cw+1)                  + fus.origin[0][2]
+        fhs_xa1 = fhs_xa1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_a1                       + fus.origin[0][0])
+        fhs_ya1 = fhs_ya1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1])
+        fhs_za1 = fhs_za1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xa2 = fhs_xa2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_a2                       + fus.origin[0][0])
+        fhs_ya2 = fhs_ya2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1])
+        fhs_za2 = fhs_za2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xb1 = fhs_xb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_b1                       + fus.origin[0][0])
+        fhs_yb1 = fhs_yb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1])
+        fhs_zb1 = fhs_zb1.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xb2 = fhs_xb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_b2                       + fus.origin[0][0])
+        fhs_yb2 = fhs_yb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1])
+        fhs_zb2 = fhs_zb2.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xah = fhs_xah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_ah                       + fus.origin[0][0])
+        fhs_yah = fhs_yah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1])
+        fhs_zah = fhs_zah.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xbh = fhs_xbh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_bh                       + fus.origin[0][0])
+        fhs_ybh = fhs_ybh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1])
+        fhs_zbh = fhs_zbh.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xch = fhs_xch.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_ch                       + fus.origin[0][0])
+        fhs_ych = fhs_ych.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta[idx_y]    + fus.origin[0][1])
+        fhs_zch = fhs_zch.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xc  = fhs_xc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_c                        + fus.origin[0][0])
+        fhs_yc  = fhs_yc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta[idx_y]    + fus.origin[0][1])
+        fhs_zc  = fhs_zc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xac = fhs_xac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_ac                       + fus.origin[0][0])
+        fhs_yac = fhs_yac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_a[idx_y]  + fus.origin[0][1])
+        fhs_zac = fhs_zac.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_xbc = fhs_xbc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(fhs_xi_bc                       + fus.origin[0][0])
+        fhs_ybc = fhs_ybc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fhs_eta_b[idx_y]  + fus.origin[0][1])
+        fhs_zbc = fhs_zbc.at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                  + fus.origin[0][2])
+        fhs_x = fhs_x.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.concatenate([fhs_xi_a1,rp.array([fhs_xi_a2[-1]])]) + fus.origin[0][0])
+        fhs_y = fhs_y.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.ones(n_cw+1)*fhs_eta_a[idx_y]  + fus.origin[0][1])
+        fhs_z = fhs_z.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.zeros(n_cw+1)                  + fus.origin[0][2])
 
         # fuselage vertical section                      
         delta_x_a = fvs.chord[idx_y]/n_cw      
@@ -1218,12 +1218,12 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
         fvs_xi_c  = (fvs.origin[idx_y][0] + fvs.origin[idx_y+1][0])/2 + delta_x *idx_x + delta_x*0.75     # z coordinate three-quarter chord control point for each panel
         fvs_xi_ch = (fvs.origin[idx_y][0] + fvs.origin[idx_y+1][0])/2 + delta_x *idx_x + delta_x*0.25     # z coordinate center of bound vortex of each panel 
 
-        fvs_xc [idx_y*n_cw:(idx_y+1)*n_cw] = fvs_xi_c                       + fus.origin[0][0]  
-        fvs_zc [idx_y*n_cw:(idx_y+1)*n_cw] = rp.ones(n_cw)*fvs_eta[idx_y]   + fus.origin[0][2]  
-        fvs_yc [idx_y*n_cw:(idx_y+1)*n_cw] = rp.zeros(n_cw)                 + fus.origin[0][1]  
-        fvs_x[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.concatenate([fvs_xi_a1,rp.array([fvs_xi_a2[-1]])]) + fus.origin[0][0]  
-        fvs_z[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.ones(n_cw+1)*fvs_eta_a[idx_y] + fus.origin[0][2]               
-        fvs_y[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)] = rp.zeros(n_cw+1)                 + fus.origin[0][1]
+        fvs_xc  = fvs_xc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(fvs_xi_c                       + fus.origin[0][0])
+        fvs_zc  = fvs_zc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.ones(n_cw)*fvs_eta[idx_y]   + fus.origin[0][2])
+        fvs_yc  = fvs_yc .at[idx_y*n_cw:(idx_y+1)*n_cw].set(rp.zeros(n_cw)                 + fus.origin[0][1])
+        fvs_x = fvs_x.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.concatenate([fvs_xi_a1,rp.array([fvs_xi_a2[-1]])]) + fus.origin[0][0])
+        fvs_z = fvs_z.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.ones(n_cw+1)*fvs_eta_a[idx_y] + fus.origin[0][2])
+        fvs_y = fvs_y.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.zeros(n_cw+1)                 + fus.origin[0][1])
         
         fus_h_area += ((fhs.chord[idx_y]+fhs.chord[idx_y + 1])/2)*(fhs_eta_b[idx_y] - fhs_eta_a[idx_y])
         fus_v_area += ((fvs.chord[idx_y]+fvs.chord[idx_y + 1])/2)*(fvs_eta_b[idx_y] - fvs_eta_a[idx_y])
@@ -1243,12 +1243,12 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
         chordwise_panel_number  = rp.append(chordwise_panel_number , panel_numbers )       
 
     # xyz positions for the right side of this fuselage's outermost panels
-    fhs_x[-(n_cw+1):] = rp.concatenate([fhs_xi_b1,rp.array([fhs_xi_b2[-1]])])+ fus.origin[0][0]  
-    fhs_y[-(n_cw+1):] = rp.ones(n_cw+1)*fhs_eta_b[idx_y]  + fus.origin[0][1]                             
-    fhs_z[-(n_cw+1):] = rp.zeros(n_cw+1)                  + fus.origin[0][2]        
-    fvs_x[-(n_cw+1):] = rp.concatenate([fvs_xi_a1,rp.array([fvs_xi_a2[-1]])]) + fus.origin[0][0]  
-    fvs_z[-(n_cw+1):] = rp.ones(n_cw+1)*fvs_eta_a[idx_y] + fus.origin[0][2]               
-    fvs_y[-(n_cw+1):] = rp.zeros(n_cw+1)                 + fus.origin[0][1]   
+    fhs_x = fhs_x.at[-(n_cw+1):].set(rp.concatenate([fhs_xi_b1,rp.array([fhs_xi_b2[-1]])])+ fus.origin[0][0])
+    fhs_y = fhs_y.at[-(n_cw+1):].set(rp.ones(n_cw+1)*fhs_eta_b[idx_y]  + fus.origin[0][1])
+    fhs_z = fhs_z.at[-(n_cw+1):].set(rp.zeros(n_cw+1)                  + fus.origin[0][2])
+    fvs_x = fvs_x.at[-(n_cw+1):].set(rp.concatenate([fvs_xi_a1,rp.array([fvs_xi_a2[-1]])]) + fus.origin[0][0])
+    fvs_z = fvs_z.at[-(n_cw+1):].set(rp.ones(n_cw+1)*fvs_eta_a[idx_y] + fus.origin[0][2])
+    fvs_y = fvs_y.at[-(n_cw+1):].set(rp.zeros(n_cw+1)                 + fus.origin[0][1])
     fhs_cs =  (fhs.chord[:-1]+fhs.chord[1:])/2
     fvs_cs =  (fvs.chord[:-1]+fvs.chord[1:])/2     
 

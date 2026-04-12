@@ -504,34 +504,34 @@ def apply_correction_factors(analyses):
         if tag == 'empty':
             for subtag, subitem in weights_analysis.settings.weight_correction_factors[tag].items():
                 for subsubtag, subsubitem in weights_analysis.settings.weight_correction_factors[tag][subtag].items():
-                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  -= analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
-                    analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total  -= analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
-                    analyses.vehicle.mass_properties.operating_empty -= analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
+                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total - analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
+                    analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total - analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
+                    analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty - analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
                     analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag] *= subsubitem
                     analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total  += analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
-                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  += analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
-                    analyses.vehicle.mass_properties.operating_empty += analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
+                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total + analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
+                    analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty + analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag]
         elif tag == 'operational_items':
             for subtag, subitem in weights_analysis.settings.weight_correction_factors[tag].items():
-                analyses.vehicle.mass_properties.weight_breakdown[tag].total  -= subitem
-                analyses.vehicle.mass_properties.operating_empty -= subitem
-                analyses.vehicle.mass_properties.weight_breakdown[tag][subtag] *= subitem
-                analyses.vehicle.mass_properties.weight_breakdown[tag].total  += analyses.vehicle.mass_properties.weight_breakdown[tag][subtag]
-                analyses.vehicle.mass_properties.operating_empty += analyses.vehicle.mass_properties.weight_breakdown[tag][subtag]
+                analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total - subitem
+                analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty - subitem
+                analyses.vehicle.mass_properties.weight_breakdown[tag][subtag] = analyses.vehicle.mass_properties.weight_breakdown[tag][subtag] * subitem
+                analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total + analyses.vehicle.mass_properties.weight_breakdown[tag][subtag]
+                analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty + analyses.vehicle.mass_properties.weight_breakdown[tag][subtag]
 
     for tag, _ in weights_analysis.settings.weight_correction_additions.items():
         if tag == 'empty':
             for subtag, subitem in weights_analysis.settings.weight_correction_additions[tag].items():
                 for subsubtag, subsubitem in weights_analysis.settings.weight_correction_additions[tag][subtag].items():
                     analyses.vehicle.mass_properties.weight_breakdown[tag][subtag][subsubtag] = subsubitem
-                    analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total += subsubitem
-                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  += subsubitem
-                    analyses.vehicle.mass_properties.operating_empty += subsubitem
+                    analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total = analyses.vehicle.mass_properties.weight_breakdown[tag][subtag].total + subsubitem
+                    analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total + subsubitem
+                    analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty + subsubitem
         elif tag == 'operational_items':
             for subtag, subitem in weights_analysis.settings.weight_correction_additions[tag].items():
                 analyses.vehicle.mass_properties.weight_breakdown[tag][subtag] = subitem
-                analyses.vehicle.mass_properties.weight_breakdown[tag].total  += subitem
-                analyses.vehicle.mass_properties.operating_empty += subitem
+                analyses.vehicle.mass_properties.weight_breakdown[tag].total  = analyses.vehicle.mass_properties.weight_breakdown[tag].total + subitem
+                analyses.vehicle.mass_properties.operating_empty = analyses.vehicle.mass_properties.operating_empty + subitem
     return
 
 def apply_component_weights(analyses):

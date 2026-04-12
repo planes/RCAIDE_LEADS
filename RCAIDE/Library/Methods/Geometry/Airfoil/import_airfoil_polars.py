@@ -81,9 +81,9 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
             airfoil_cl[line_count]  = float(data_block[line_count][10:17].strip())
             airfoil_cd[line_count]  = float(data_block[line_count][20:27].strip())   
       
-        AoA[j,:] = AoA_interp
-        CL[j,:]  = rp.interp(AoA_interp,airfoil_aoa,airfoil_cl)
-        CD[j,:]  = rp.interp(AoA_interp,airfoil_aoa,airfoil_cd)  
+        AoA = AoA.at[j,:].set(AoA_interp)
+        CL = CL.at[j,:].set(rp.interp(AoA_interp,airfoil_aoa,airfoil_cl))
+        CD = CD.at[j,:].set(rp.interp(AoA_interp,airfoil_aoa,airfoil_cd))
     
     airfoil_data.aoa_from_polar               = AoA*Units.degrees
     airfoil_data.re_from_polar                = Re   

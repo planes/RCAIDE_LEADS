@@ -720,6 +720,6 @@ def concatenate_surfaces(X_BOT, X_TOP,
                               FUNC_BOT_SURF[:, case, cpt],
                               FUNC_TOP_SURF[:, case, cpt])
 
-            FUNC[:, case, cpt] = merged
+            FUNC = FUNC.at[:, case, cpt].set(merged)
 
     return FUNC

@@ -190,7 +190,7 @@ def aircraft_aerodynamic_analysis(analyses                         = None,
     state.conditions.freestream.velocity                    = V
     state.conditions.freestream.reynolds_number             = non_dimensional_reynolds_numbers
     state.conditions.frames.inertial.velocity_vector        = rp.tile(rp.array([[0, 0, 0]]), ( ctrl_pts,  1))
-    state.conditions.frames.inertial.velocity_vector[:,0]   = V[:,0]  
+    state.conditions.frames.inertial.velocity_vector = state.conditions.frames.inertial.velocity_vector.at[:,0].set(V[:,0])
  
     # ---------------------------------------------------------------------------------------
     # Evaluate With Surrogate

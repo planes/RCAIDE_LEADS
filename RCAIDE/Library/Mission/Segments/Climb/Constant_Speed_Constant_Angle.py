@@ -101,8 +101,8 @@ def initialize_conditions(segment):
     v_z   = -v_mag * rp.sin(climb_angle)
     
     # pack conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = v_x
-    conditions.frames.inertial.velocity_vector[:,1] = v_y
-    conditions.frames.inertial.velocity_vector[:,2] = v_z
-    conditions.frames.inertial.position_vector[:,2] = -alt[:,0] # z points down
-    conditions.freestream.altitude[:,0]             =  alt[:,0] # positive altitude in this context
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0]) # z points down
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0]) # positive altitude in this context

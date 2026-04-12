@@ -103,8 +103,8 @@ def append_fuel_cell_segment_conditions(fuel_cell_stack, bus, conditions, segmen
     fuel_cell_conditions = conditions[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag]
     if segment.state.initials:  
         fuel_cell_initials                                   = segment.state.initials.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag]
-        fuel_cell_conditions.temperature[:,0]                = fuel_cell_initials.temperature[-1,0]
-        fuel_cell_conditions.cell.temperature[:,0]           = fuel_cell_initials.cell.temperature[-1,0]     
+        fuel_cell_conditions.temperature = fuel_cell_conditions.temperature.at[:,0].set(fuel_cell_initials.temperature[-1,0])
+        fuel_cell_conditions.cell.temperature = fuel_cell_conditions.cell.temperature.at[:,0].set(fuel_cell_initials.cell.temperature[-1,0])
     return
   
 def reuse_stored_fuel_cell_data(fuel_cell_stack,state,bus,stored_results_flag, stored_fuel_cell_stack_tag):

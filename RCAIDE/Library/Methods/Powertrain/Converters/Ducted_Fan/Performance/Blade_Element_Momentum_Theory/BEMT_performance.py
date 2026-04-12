@@ -114,7 +114,7 @@ def BEMT_performance(ducted_fan,conditions):
     
     # calculate coefficients    
     thrust_prop_frame      = rp.zeros((ctrl_pts,3))
-    thrust_prop_frame[:,0] = thrust[:,0]
+    thrust_prop_frame = thrust_prop_frame.at[:,0].set(thrust[:,0])
     thrust_vector          = orientation_product(orientation_transpose(T_body2thrust),thrust_prop_frame)
     
     conditions.energy.converters[ducted_fan.tag] = Data(

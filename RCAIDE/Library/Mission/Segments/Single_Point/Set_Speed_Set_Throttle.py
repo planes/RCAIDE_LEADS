@@ -104,14 +104,14 @@ def initialize_conditions(segment):
     v_y  = rp.sin(beta)*air_speed
         
     # pack
-    segment.state.conditions.freestream.altitude[:,0]             = alt
-    segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
-    segment.state.conditions.frames.inertial.velocity_vector[:,0] = v_x 
-    segment.state.conditions.frames.inertial.velocity_vector[:,1] = v_y 
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
+    segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,2].set(-alt) # z points down
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,0].set(v_x)
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,1].set(v_y)
     segment.state.conditions.frames.inertial.acceleration_vector  = rp.array([[acceleration,0.0,linear_acceleration_z]])  
-    segment.state.conditions.static_stability.roll_rate[:,0]      = roll_rate         
-    segment.state.conditions.static_stability.pitch_rate[:,0]     = pitch_rate
-    segment.state.conditions.static_stability.yaw_rate[:,0]       = yaw_rate      
+    segment.state.conditions.static_stability.roll_rate = segment.state.conditions.static_stability.roll_rate.at[:,0].set(roll_rate)
+    segment.state.conditions.static_stability.pitch_rate = segment.state.conditions.static_stability.pitch_rate.at[:,0].set(pitch_rate)
+    segment.state.conditions.static_stability.yaw_rate = segment.state.conditions.static_stability.yaw_rate.at[:,0].set(yaw_rate)
 
     
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -140,4 +140,4 @@ def unpack_unknowns(segment):
     
     # unpack unknowns  
     acceleration  = segment.state.unknowns.acceleration 
-    segment.state.conditions.frames.inertial.acceleration_vector[:,0] = acceleration[:,0]     
+    segment.state.conditions.frames.inertial.acceleration_vector = segment.state.conditions.frames.inertial.acceleration_vector.at[:,0].set(acceleration[:,0])

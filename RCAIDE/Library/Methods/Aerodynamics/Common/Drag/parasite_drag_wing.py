@@ -156,14 +156,14 @@ def parasite_drag_wing(state,settings,geometry):
             # compute parasite drag coef., form factor, skin friction coef., compressibility factor and reynolds number for segments
             segment_parasite_drag , segment_k_w, segment_cf_w_u, segment_cf_w_l, segment_k_comp_u, segment_k_comp_l, k_reyn_u ,k_reyn_l = compute_parasite_drag(re,mac_seg,Mc,Tc,xtu,xtl,sweep_seg,avg_t_c_s,Sref_seg,Swet_seg,C)
             
-            total_segment_parasite_drag  += segment_parasite_drag*Sref_seg   
-            total_segment_k_w            += segment_k_w*Sref_seg 
-            total_segment_cf_w_u         += segment_cf_w_u*Sref_seg 
-            total_segment_cf_w_l         += segment_cf_w_l*Sref_seg 
-            total_segment_k_comp_u       += segment_k_comp_u*Sref_seg 
-            total_segment_k_comp_l       += segment_k_comp_l*Sref_seg 
-            total_k_reyn_u               += k_reyn_u*Sref_seg                 
-            total_k_reyn_l               += k_reyn_l*Sref_seg  
+            total_segment_parasite_drag  = total_segment_parasite_drag + segment_parasite_drag*Sref_seg   
+            total_segment_k_w            = total_segment_k_w +  segment_k_w*Sref_seg 
+            total_segment_cf_w_u         = total_segment_cf_w_u + segment_cf_w_u*Sref_seg 
+            total_segment_cf_w_l         = total_segment_cf_w_l + segment_cf_w_l*Sref_seg 
+            total_segment_k_comp_u       = total_segment_k_comp_u + segment_k_comp_u*Sref_seg 
+            total_segment_k_comp_l       = total_segment_k_comp_l + segment_k_comp_l*Sref_seg 
+            total_k_reyn_u               = total_k_reyn_u + k_reyn_u*Sref_seg                 
+            total_k_reyn_l               = total_k_reyn_l + k_reyn_l*Sref_seg  
                 
         wing_parasite_drag = total_segment_parasite_drag  / Sref
         k_w                = total_segment_k_w / Sref

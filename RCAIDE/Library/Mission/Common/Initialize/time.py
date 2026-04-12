@@ -71,7 +71,7 @@ def time(segment):
     if segment.state.initials:
         t_initial = segment.state.initials.conditions.frames.inertial.time
         t_current = segment.state.conditions.frames.inertial.time 
-        segment.state.conditions.frames.inertial.time[:,:] = t_current + (t_initial[-1,0] - t_current[0,0])
+        segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,:].set(t_current + (t_initial[-1,0] - t_current[0,0]))
         
     else:
         t_initial = segment.state.conditions.frames.inertial.time[0,0]

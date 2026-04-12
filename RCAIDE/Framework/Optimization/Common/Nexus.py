@@ -210,7 +210,7 @@ class Nexus(Data):
             constraint_evaluations = scaled_constraints  - scaled_bnd_constraints
             
             # coorect constaints based on sign 
-            constraint_evaluations[iqconstraints.name_signs[:,1]=='<'] = -constraint_evaluations[iqconstraints.name_signs[:,1]=='<']
+            constraint_evaluations = constraint_evaluations.at[iqconstraints.name_signs[:,1]=='<'].set(-constraint_evaluations[iqconstraints.name_signs[:,1]=='<'])
             
         return constraint_evaluations       
     
@@ -379,7 +379,7 @@ class Nexus(Data):
             newx[ii] = newx[ii] + diff_interval
             
             grad_obj[ii]  = self.objective(newx)[0]
-            jac_con[ii,:] = self.all_constraints(newx)
+            jac_con = jac_con.at[ii,:].set(self.all_constraints(newx))
         
         grad_obj = (grad_obj - obj)/diff_interval
         

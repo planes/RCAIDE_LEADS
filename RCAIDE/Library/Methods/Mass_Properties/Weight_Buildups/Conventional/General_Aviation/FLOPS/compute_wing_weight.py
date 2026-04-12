@@ -262,13 +262,13 @@ def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wing
         # Get normalized pressure loading across the wing
         P1     = calculate_load(Y)
         P0     = rp.zeros_like(P1)
-        P0[1:] = P1[0:-1]
+        P0 = P0.at[1:].set(P1[0:-1])
         
         # Get local chord length
         C1     = rp.interp(Y, ETA, C)
         C0     = rp.zeros_like(C1)
         C0[0]  = C[-1]
-        C0[1:] = C1[0:-1]
+        C0 = C0.at[1:].set(C1[0:-1])
         
         # Calculate local pressure load and moments (DELP and DELM)
         T1   = rp.interp(Y, ETA, T)
@@ -278,7 +278,7 @@ def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wing
         
         # Sum loads
         EL     = rp.zeros_like(DELP) 
-        EL[1:] = rp.cumsum(DELP[0:-1])
+        EL = EL.at[1:].set(rp.cumsum(DELP[0:-1]))
         
         # Sum moments
         EM     = rp.cumsum((DELM + DY * EL) * 1 / rp.cos(SWP1))
@@ -287,7 +287,7 @@ def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wing
         BMA1     = EM * 1 / rp.cos(SWP1) * 1 / (C1 * T1)
         
         BMA0     = rp.zeros_like(BMA1)
-        BMA0[1:] = BMA1[0:-1]
+        BMA0 = BMA0.at[1:].set(BMA1[0:-1])
         
         # Compute segment values
         ASW  = rp.cumsum((DY + 2 * Y) * DY * SWP1)
@@ -308,7 +308,7 @@ def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wing
                 distance               = rp.min(distances)
                 loc                    = rp.argmin(distances)
                 DELM2[loc]             = DELM2[loc] + distance
-                EEL[loc+1:]            = EEL[loc+1:] + 1
+                EEL = EEL.at[loc+1:].set(EEL[loc+1:] + 1)
 
             DELM2 = DELM2 + EEL*DY
 
@@ -316,7 +316,7 @@ def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wing
             EA1 = EEM * 1 / rp.cos(SWP1) * 1 / (C1 * T1)
             
             EA0 = rp.zeros_like(Y)
-            EA0[1:] = EA1[0:-1]
+            EA0 = EA0.at[1:].set(EA1[0:-1])
             
             EW  = rp.sum((EA0 + EA1) * DY / 2)
             

@@ -106,11 +106,11 @@ def initialize_conditions(segment):
     # pack
     air_speed_x                                                   = rp.cos(sideslip)*air_speed 
     air_speed_y                                                   = rp.sin(sideslip)*air_speed 
-    segment.state.conditions.freestream.altitude[:,0]             = alt
-    segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
-    segment.state.conditions.frames.inertial.velocity_vector[:,0] = air_speed_x
-    segment.state.conditions.frames.inertial.velocity_vector[:,1] = air_speed_y
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
+    segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,2].set(-alt) # z points down
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,0].set(air_speed_x)
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,1].set(air_speed_y)
     segment.state.conditions.frames.inertial.acceleration_vector  = rp.array([[linear_acceleration_x,linear_acceleration_y,linear_acceleration_z]])  
-    segment.state.conditions.static_stability.roll_rate[:,0]      = roll_rate         
-    segment.state.conditions.static_stability.pitch_rate[:,0]     = pitch_rate
-    segment.state.conditions.static_stability.yaw_rate[:,0]       = yaw_rate      
+    segment.state.conditions.static_stability.roll_rate = segment.state.conditions.static_stability.roll_rate.at[:,0].set(roll_rate)
+    segment.state.conditions.static_stability.pitch_rate = segment.state.conditions.static_stability.pitch_rate.at[:,0].set(pitch_rate)
+    segment.state.conditions.static_stability.yaw_rate = segment.state.conditions.static_stability.yaw_rate.at[:,0].set(yaw_rate)

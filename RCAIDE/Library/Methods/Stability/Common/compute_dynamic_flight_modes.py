@@ -103,30 +103,30 @@ def compute_dynamic_flight_modes(state,settings,vehicle):
         MwDot            = 0.25 * rho * c_ref * S_ref * SSD.CM_alpha_dot  
         
         
-        ALon[:,0,0] = (Xu / m).T[0]
-        ALon[:,0,1] = (Xw / m).T[0] 
-        ALon[:,0,3] = (-g * rp.cos(theta0)).T[0]
-        ALon[:,1,0] = (Zu / (m - ZwDot)).T[0]
-        ALon[:,1,1] = (Zw / (m - ZwDot)).T[0] 
-        ALon[:,1,2] = ((Zq + (m * u0)) / (m - ZwDot) ).T[0]
-        ALon[:,2,0] = ((Mu + MwDot * Zu / (m - ZwDot)) / Iyy).T[0]  
-        ALon[:,2,1] = ((Mw + MwDot * Zw / (m - ZwDot)) / Iyy).T[0] 
-        ALon[:,2,2] = ((Mq + MwDot * (Zq + m * u0) / (m - ZwDot)) / Iyy ).T[0] 
-        ALon[:,2,3] = (-MwDot * m * g * rp.sin(theta0) / (Iyy * (m - ZwDot))).T[0] 
-        ALon[:,3,0] = 0
-        ALon[:,3,1] = 0
-        ALon[:,3,2] = 1
-        ALon[:,3,3] = 0 
+        ALon = ALon.at[:,0,0].set((Xu / m).T[0])
+        ALon = ALon.at[:,0,1].set((Xw / m).T[0])
+        ALon = ALon.at[:,0,3].set((-g * rp.cos(theta0)).T[0])
+        ALon = ALon.at[:,1,0].set((Zu / (m - ZwDot)).T[0])
+        ALon = ALon.at[:,1,1].set((Zw / (m - ZwDot)).T[0])
+        ALon = ALon.at[:,1,2].set(((Zq + (m * u0)) / (m - ZwDot) ).T[0])
+        ALon = ALon.at[:,2,0].set(((Mu + MwDot * Zu / (m - ZwDot)) / Iyy).T[0])
+        ALon = ALon.at[:,2,1].set(((Mw + MwDot * Zw / (m - ZwDot)) / Iyy).T[0])
+        ALon = ALon.at[:,2,2].set(((Mq + MwDot * (Zq + m * u0) / (m - ZwDot)) / Iyy ).T[0])
+        ALon = ALon.at[:,2,3].set((-MwDot * m * g * rp.sin(theta0) / (Iyy * (m - ZwDot))).T[0])
+        ALon = ALon.at[:,3,0].set(0)
+        ALon = ALon.at[:,3,1].set(0)
+        ALon = ALon.at[:,3,2].set(1)
+        ALon = ALon.at[:,3,3].set(0)
  
         ele = conditions.control_surfaces.elevator.static_stability.coefficients 
         Xe  = 0 # Neglect
         Ze  = 0.5 * rho * u0 * u0 * S_ref * ele.lift
         Me  = 0.5 * rho * u0 * u0 * S_ref * c_ref * ele.M
         
-        BLon[:,0,0] = Xe / m[:, 0]
-        BLon[:,1,0] = (Ze / (m - ZwDot)).T[0]
-        BLon[:,2,0] = (Me / Iyy + MwDot / Iyy * Ze / (m - ZwDot)).T[0]
-        BLon[:,3,0] = 0        
+        BLon = BLon.at[:,0,0].set(Xe / m[:, 0])
+        BLon = BLon.at[:,1,0].set((Ze / (m - ZwDot)).T[0])
+        BLon = BLon.at[:,2,0].set((Me / Iyy + MwDot / Iyy * Ze / (m - ZwDot)).T[0])
+        BLon = BLon.at[:,3,0].set(0)
 
         # Look at eigenvalues and eigenvectors
         LonModes                  = rp.zeros((n_cpts,4), dtype = complex)
@@ -160,15 +160,15 @@ def compute_dynamic_flight_modes(state,settings,vehicle):
         R    = rp.zeros((n_cpts,2,2))
         modI = rp.zeros((n_cpts,2,2)) 
 
-        R[:,0, 0]  = rp.cos(AoA[:, 0])
-        R[:,0, 1]  = - rp.sin(AoA[:, 0])
-        R[:,1, 0]  = rp.sin( AoA[:, 0])
-        R[:,1, 1]  = rp.cos(AoA[:, 0])
+        R = R.at[:,0, 0].set(rp.cos(AoA[:, 0]))
+        R = R.at[:,0, 1].set(- rp.sin(AoA[:, 0]))
+        R = R.at[:,1, 0].set(rp.sin( AoA[:, 0]))
+        R = R.at[:,1, 1].set(rp.cos(AoA[:, 0]))
          
-        modI[:,0, 0]    = Ixx[:, 0]
-        modI[:,0, 1]    = Ixz[:, 0]
-        modI[:,1, 0]    = Izx[:, 0]
-        modI[:,1, 1]    = Izz[:, 0]
+        modI = modI.at[:,0, 0].set(Ixx[:, 0])
+        modI = modI.at[:,0, 1].set(Ixz[:, 0])
+        modI = modI.at[:,1, 0].set(Izx[:, 0])
+        modI = modI.at[:,1, 1].set(Izz[:, 0])
                                
         INew      = R * modI * rp.transpose(R, axes = (0,2,1))
         IxxStab   =  INew[:,0,0]
@@ -194,29 +194,29 @@ def compute_dynamic_flight_modes(state,settings,vehicle):
         La = 0.5 * rho * u0 * u0 * S_ref * b_ref * ail.L 
         Na = 0.5 * rho * u0 * u0 * S_ref * b_ref * ail.N 
         
-        BLat[:,0,0] = (Ya / m).T[0]
-        BLat[:,1,0] = (La / Ixp + Ixzp * Na).T[0]
-        BLat[:,2,0] = (Ixzp * La + Na / Izp).T[0]
-        BLat[:,3,0] = 0
+        BLat = BLat.at[:,0,0].set((Ya / m).T[0])
+        BLat = BLat.at[:,1,0].set((La / Ixp + Ixzp * Na).T[0])
+        BLat = BLat.at[:,2,0].set((Ixzp * La + Na / Izp).T[0])
+        BLat = BLat.at[:,3,0].set(0)
      
-        ALat[:,0,0] = (Yv / m).T[0]  
-        ALat[:,0,2] = (Yr/m - u0).T[0] 
-        ALat[:,0,3] = (g * rp.cos(theta0)).T[0]
+        ALat = ALat.at[:,0,0].set((Yv / m).T[0])
+        ALat = ALat.at[:,0,2].set((Yr/m - u0).T[0])
+        ALat = ALat.at[:,0,3].set((g * rp.cos(theta0)).T[0])
         
-        ALat[:,1,0] = (Lv / Ixp + Ixzp * Nv).T[0] 
-        ALat[:,1,1] = (Lp / Ixp + Ixzp * Np).T[0] 
-        ALat[:,1,2] = (Lr / Ixp + Ixzp * Nr).T[0] 
-        ALat[:,1,3] = 0
+        ALat = ALat.at[:,1,0].set((Lv / Ixp + Ixzp * Nv).T[0])
+        ALat = ALat.at[:,1,1].set((Lp / Ixp + Ixzp * Np).T[0])
+        ALat = ALat.at[:,1,2].set((Lr / Ixp + Ixzp * Nr).T[0])
+        ALat = ALat.at[:,1,3].set(0)
         
-        ALat[:,2,0] = (Ixzp * Lv + Nv / Izp).T[0] 
-        ALat[:,2,1] = (Ixzp * Lp + Np / Izp).T[0] 
-        ALat[:,2,2] = (Ixzp * Lr + Nr / Izp).T[0] 
-        ALat[:,2,3] = 0
+        ALat = ALat.at[:,2,0].set((Ixzp * Lv + Nv / Izp).T[0])
+        ALat = ALat.at[:,2,1].set((Ixzp * Lp + Np / Izp).T[0])
+        ALat = ALat.at[:,2,2].set((Ixzp * Lr + Nr / Izp).T[0])
+        ALat = ALat.at[:,2,3].set(0)
         
-        ALat[:,3,0] = 0
-        ALat[:,3,1] = 1
-        ALat[:,3,2] = (rp.tan(theta0)).T[0] 
-        ALat[:,3,3] = 0
+        ALat = ALat.at[:,3,0].set(0)
+        ALat = ALat.at[:,3,1].set(1)
+        ALat = ALat.at[:,3,2].set((rp.tan(theta0)).T[0])
+        ALat = ALat.at[:,3,3].set(0)
                                     
         LatModes                    = rp.zeros((n_cpts,4),dtype=complex)
         dutchRollFreqHz             = rp.zeros((n_cpts,1))

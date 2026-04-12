@@ -189,9 +189,9 @@ def evaluate_surrogate(state,settings,vehicle):
         else:
             conditions.static_stability.derivatives.CN_delta_a     = aerodynamics.stability_derivatives.CN_delta_a* ones_row
         
-        conditions.static_stability.coefficients.Y                                   += conditions.static_stability.derivatives.CY_delta_a * conditions.control_surfaces.aileron.deflection  
-        conditions.static_stability.coefficients.L                                   += conditions.static_stability.derivatives.CL_delta_a * conditions.control_surfaces.aileron.deflection
-        conditions.static_stability.coefficients.N                                   += conditions.static_stability.derivatives.CN_delta_a * conditions.control_surfaces.aileron.deflection
+        conditions.static_stability.coefficients.Y                                   = conditions.static_stability.coefficients.Y + conditions.static_stability.derivatives.CY_delta_a * conditions.control_surfaces.aileron.deflection  
+        conditions.static_stability.coefficients.L                                   = conditions.static_stability.coefficients.L + conditions.static_stability.derivatives.CL_delta_a * conditions.control_surfaces.aileron.deflection
+        conditions.static_stability.coefficients.N                                   = conditions.static_stability.coefficients.N + conditions.static_stability.derivatives.CN_delta_a * conditions.control_surfaces.aileron.deflection
                      
         conditions.control_surfaces.aileron.static_stability.coefficients.Y          = conditions.static_stability.derivatives.CY_delta_a * conditions.control_surfaces.aileron.deflection               
         conditions.control_surfaces.aileron.static_stability.coefficients.L          = conditions.static_stability.derivatives.CL_delta_a * conditions.control_surfaces.aileron.deflection          
@@ -209,7 +209,7 @@ def evaluate_surrogate(state,settings,vehicle):
         else:
             conditions.static_stability.derivatives.Clift_delta_e = aerodynamics.stability_derivatives.Clift_delta_e* ones_row 
         
-        conditions.static_stability.coefficients.M                              += conditions.static_stability.derivatives.CM_delta_e * conditions.control_surfaces.elevator.deflection   
+        conditions.static_stability.coefficients.M                               = conditions.static_stability.coefficients.M  + conditions.static_stability.derivatives.CM_delta_e * conditions.control_surfaces.elevator.deflection   
         conditions.control_surfaces.elevator.static_stability.coefficients.M     = conditions.static_stability.derivatives.CM_delta_e * conditions.control_surfaces.elevator.deflection   
     
     # Rudder  
@@ -229,9 +229,9 @@ def evaluate_surrogate(state,settings,vehicle):
         else:
             conditions.static_stability.derivatives.CN_delta_r = aerodynamics.stability_derivatives.CN_delta_r* ones_row 
         
-        conditions.static_stability.coefficients.Y                               += conditions.static_stability.derivatives.CY_delta_r * conditions.control_surfaces.rudder.deflection  
-        conditions.static_stability.coefficients.L                               += conditions.static_stability.derivatives.CL_delta_r * conditions.control_surfaces.rudder.deflection
-        conditions.static_stability.coefficients.N                               += conditions.static_stability.derivatives.CN_delta_r * conditions.control_surfaces.rudder.deflection
+        conditions.static_stability.coefficients.Y                                = conditions.static_stability.coefficients.Y +  conditions.static_stability.derivatives.CY_delta_r * conditions.control_surfaces.rudder.deflection  
+        conditions.static_stability.coefficients.L                                = conditions.static_stability.coefficients.L + conditions.static_stability.derivatives.CL_delta_r * conditions.control_surfaces.rudder.deflection
+        conditions.static_stability.coefficients.N                                = conditions.static_stability.coefficients.N + conditions.static_stability.derivatives.CN_delta_r * conditions.control_surfaces.rudder.deflection
         conditions.control_surfaces.rudder.static_stability.coefficients.Y        = conditions.static_stability.derivatives.CY_delta_r * conditions.control_surfaces.rudder.deflection          
         conditions.control_surfaces.rudder.static_stability.coefficients.L        = conditions.static_stability.derivatives.CL_delta_r * conditions.control_surfaces.rudder.deflection        
         conditions.control_surfaces.rudder.static_stability.coefficients.N        = conditions.static_stability.derivatives.CN_delta_r * conditions.control_surfaces.rudder.deflection       
@@ -255,10 +255,10 @@ def evaluate_surrogate(state,settings,vehicle):
         else:
             conditions.static_stability.derivatives.Clift_delta_f = aerodynamics.stability_derivatives.Clift_delta_f* ones_row 
 
-        conditions.static_stability.coefficients.M                                   += conditions.static_stability.derivatives.CM_delta_f * conditions.control_surfaces.flap.deflection  
-        conditions.static_stability.coefficients.Z                                   += conditions.static_stability.derivatives.Clift_delta_f * conditions.control_surfaces.flap.deflection  
+        conditions.static_stability.coefficients.M                                   = conditions.static_stability.coefficients.M + conditions.static_stability.derivatives.CM_delta_f * conditions.control_surfaces.flap.deflection  
+        conditions.static_stability.coefficients.Z                                   = conditions.static_stability.coefficients.Z + conditions.static_stability.derivatives.Clift_delta_f * conditions.control_surfaces.flap.deflection  
         conditions.control_surfaces.flap.static_stability.coefficients.M              = conditions.static_stability.derivatives.CM_delta_f * conditions.control_surfaces.flap.deflection      
-        conditions.aerodynamics.coefficients.lift.inviscid.total                     += conditions.static_stability.derivatives.Clift_delta_f * conditions.control_surfaces.flap.deflection  
+        conditions.aerodynamics.coefficients.lift.inviscid.total                     = conditions.aerodynamics.coefficients.lift.inviscid.total + conditions.static_stability.derivatives.Clift_delta_f * conditions.control_surfaces.flap.deflection  
     return
 
 def evaluate_no_surrogate(state,settings,vehicle):
@@ -367,14 +367,14 @@ def evaluate_no_surrogate(state,settings,vehicle):
     equilibrium_conditions                                             = RCAIDE.Framework.Mission.Common.Results()
     equilibrium_conditions.expand_rows(n_cpts,override=False)
     equilibrium_conditions.energy                                      = deepcopy(conditions.energy)
-    equilibrium_conditions.freestream.density[:,0]                     = atmo_data.density[:,0]
-    equilibrium_conditions.freestream.gravity[:,0]                     = conditions.freestream.gravity[:,0]
-    equilibrium_conditions.freestream.speed_of_sound[:,0]              = atmo_data.speed_of_sound[:,0]
-    equilibrium_conditions.freestream.dynamic_viscosity[:,0]           = atmo_data.dynamic_viscosity[:,0]
-    equilibrium_conditions.aerodynamics.angles.alpha[:,0]              = 1E-12
-    equilibrium_conditions.freestream.temperature[:,0]                 = atmo_data.temperature[:,0]
-    equilibrium_conditions.freestream.velocity[:,0]                    = conditions.freestream.velocity[:,0]          
-    equilibrium_conditions.frames.inertial.velocity_vector[:,0]        = conditions.frames.inertial.velocity_vector[:,0]
+    equilibrium_conditions.freestream.density = equilibrium_conditions.freestream.density.at[:,0].set(atmo_data.density[:,0])
+    equilibrium_conditions.freestream.gravity = equilibrium_conditions.freestream.gravity.at[:,0].set(conditions.freestream.gravity[:,0])
+    equilibrium_conditions.freestream.speed_of_sound = equilibrium_conditions.freestream.speed_of_sound.at[:,0].set(atmo_data.speed_of_sound[:,0])
+    equilibrium_conditions.freestream.dynamic_viscosity = equilibrium_conditions.freestream.dynamic_viscosity.at[:,0].set(atmo_data.dynamic_viscosity[:,0])
+    equilibrium_conditions.aerodynamics.angles.alpha = equilibrium_conditions.aerodynamics.angles.alpha.at[:,0].set(1E-12)
+    equilibrium_conditions.freestream.temperature = equilibrium_conditions.freestream.temperature.at[:,0].set(atmo_data.temperature[:,0])
+    equilibrium_conditions.freestream.velocity = equilibrium_conditions.freestream.velocity.at[:,0].set(conditions.freestream.velocity[:,0])
+    equilibrium_conditions.frames.inertial.velocity_vector = equilibrium_conditions.frames.inertial.velocity_vector.at[:,0].set(conditions.frames.inertial.velocity_vector[:,0])
     equilibrium_conditions.freestream.mach_number                      = equilibrium_conditions.freestream.velocity/equilibrium_conditions.freestream.speed_of_sound
     equilibrium_conditions.freestream.dynamic_pressure                 = 0.5 * equilibrium_conditions.freestream.density *  (equilibrium_conditions.freestream.velocity ** 2)
     equilibrium_conditions.freestream.reynolds_number                  = equilibrium_conditions.freestream.density * equilibrium_conditions.freestream.velocity * wing.chords.mean_aerodynamic/ equilibrium_conditions.freestream.dynamic_viscosity  
@@ -436,7 +436,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # --------------------------------------------------------------------------------------------    
     perturbation_state                                 = deepcopy(equilibrium_state)
     pertubation_conditions                             = deepcopy(equilibrium_conditions)   
-    pertubation_conditions.aerodynamics.angles.alpha   += delta_angle
+    pertubation_conditions.aerodynamics.angles.alpha   = pertubation_conditions.aerodynamics.angles.alpha + delta_angle
     
     VLM_results = VLM(pertubation_conditions,settings,vehicle)
     Clift_i_alpha_prime = VLM_results.CLift
@@ -496,7 +496,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # Beta Purtubation  
     # --------------------------------------------------------------------------------------------   
     pertubation_conditions                             = deepcopy(equilibrium_conditions)   
-    pertubation_conditions.aerodynamics.angles.beta    += delta_angle 
+    pertubation_conditions.aerodynamics.angles.beta    = pertubation_conditions.aerodynamics.angles.beta +  delta_angle 
 
     VLM_results = VLM(pertubation_conditions,settings,vehicle)
     Clift_beta_prime = VLM_results.CLift
@@ -522,8 +522,8 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # --------------------------------------------------------------------------------------------
     perturbation_state                                           = deepcopy(equilibrium_state)
     pertubation_conditions                                       = deepcopy(equilibrium_conditions) 
-    pertubation_conditions.frames.inertial.velocity_vector[:,0]  += delta_speed 
-    pertubation_conditions.freestream.velocity            [:,0]  += delta_speed 
+    pertubation_conditions.frames.inertial.velocity_vector = pertubation_conditions.frames.inertial.velocity_vector.at[:,0].add(delta_speed)
+    pertubation_conditions.freestream.velocity             = pertubation_conditions.freestream.velocity            .at[:,0].add(delta_speed)
     pertubation_conditions.freestream.mach_number                = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] /  equilibrium_conditions.freestream.speed_of_sound 
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity * wing.chords.mean_aerodynamic/equilibrium_conditions.freestream.dynamic_viscosity   
     pertubation_conditions.freestream.dynamic_pressure           = 0.5 * pertubation_conditions.freestream.density * rp.sum( pertubation_conditions.freestream.velocity**2, axis=1)[:,None] 
@@ -587,7 +587,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # V-Velocity Pertubation 
     # ------------------------------------------------------------------------------------------- 
     pertubation_conditions                                       = deepcopy(equilibrium_conditions)    
-    pertubation_conditions.frames.inertial.velocity_vector[:,1]  += delta_speed
+    pertubation_conditions.frames.inertial.velocity_vector = pertubation_conditions.frames.inertial.velocity_vector.at[:,1].add(delta_speed)
     pertubation_conditions.freestream.velocity                   = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None] 
     pertubation_conditions.freestream.mach_number                = pertubation_conditions.freestream.velocity/ pertubation_conditions.freestream.speed_of_sound   
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity / pertubation_conditions.freestream.dynamic_viscosity   
@@ -617,7 +617,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # W-Velocity Pertubation 
     # --------------------------------------------------------------------------------------------  
     pertubation_conditions                                       = deepcopy(equilibrium_conditions)     
-    pertubation_conditions.frames.inertial.velocity_vector[:,2]  += delta_speed 
+    pertubation_conditions.frames.inertial.velocity_vector = pertubation_conditions.frames.inertial.velocity_vector.at[:,2].add(delta_speed)
     pertubation_conditions.freestream.velocity                   = rp.linalg.norm(pertubation_conditions.frames.inertial.velocity_vector, axis=1)[:,None]     
     pertubation_conditions.freestream.mach_number                =pertubation_conditions.freestream.velocity / pertubation_conditions.freestream.speed_of_sound   
     pertubation_conditions.freestream.reynolds_number            = pertubation_conditions.freestream.density * pertubation_conditions.freestream.velocity /  pertubation_conditions.freestream.dynamic_viscosity 
@@ -647,7 +647,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # Roll Rate (p) Purtubation
     # --------------------------------------------------------------------------------------------  
     pertubation_conditions                                 = deepcopy(equilibrium_conditions)    
-    pertubation_conditions.static_stability.roll_rate[:,0] += delta_rate
+    pertubation_conditions.static_stability.roll_rate = pertubation_conditions.static_stability.roll_rate.at[:,0].add(delta_rate)
     
     VLM_results   = VLM(pertubation_conditions,settings,vehicle)
     Clift_p_prime = VLM_results.CLift
@@ -673,7 +673,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # ---------------------------------------------------------------------------------------------------    
     perturbation_state                                      = deepcopy(equilibrium_state)
     pertubation_conditions                                  = deepcopy(equilibrium_conditions)   
-    pertubation_conditions.static_stability.pitch_rate[:,0] += delta_rate  
+    pertubation_conditions.static_stability.pitch_rate = pertubation_conditions.static_stability.pitch_rate.at[:,0].add(delta_rate)
      
     VLM_results     = VLM(pertubation_conditions,settings,vehicle)
     Clift_i_q_prime = VLM_results.CLift
@@ -734,7 +734,7 @@ def evaluate_no_surrogate(state,settings,vehicle):
     # Yaw Rate (r) Purtubation
     # ---------------------------------------------------------------------------------------------------     
     pertubation_conditions                                = deepcopy(equilibrium_conditions)   
-    pertubation_conditions.static_stability.yaw_rate[:,0] += delta_rate   
+    pertubation_conditions.static_stability.yaw_rate = pertubation_conditions.static_stability.yaw_rate.at[:,0].add(delta_rate)
     
     VLM_results   = VLM(pertubation_conditions,settings,vehicle)
     Clift_r_prime = VLM_results.CLift

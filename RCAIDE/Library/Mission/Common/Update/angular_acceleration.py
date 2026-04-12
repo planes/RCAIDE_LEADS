@@ -43,5 +43,5 @@ def angular_acceleration(segment):
     ang_acc_w = orientation_product(T_inertia2wind,ang_acc_i )
 
     # pack conditions
-    segment.state.conditions.frames.inertial.angular_acceleration_vector[:,:] = ang_acc_i[:,:] 
-    segment.state.conditions.frames.wind.angular_acceleration_vector[:,:]     = ang_acc_w[:,:]
+    segment.state.conditions.frames.inertial.angular_acceleration_vector = segment.state.conditions.frames.inertial.angular_acceleration_vector.at[:,:].set(ang_acc_i[:,:])
+    segment.state.conditions.frames.wind.angular_acceleration_vector = segment.state.conditions.frames.wind.angular_acceleration_vector.at[:,:].set(ang_acc_w[:,:])

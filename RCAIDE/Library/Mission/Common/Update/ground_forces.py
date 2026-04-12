@@ -52,8 +52,8 @@ def ground_forces(segment):
     Ff = N * friction_coeff
 
     #pack results. Friction acts along x-direction
-    conditions.frames.inertial.ground_force_vector[:,2] = N[:,0]
-    conditions.frames.inertial.ground_force_vector[:,0] = Ff[:,0]  
+    conditions.frames.inertial.ground_force_vector = conditions.frames.inertial.ground_force_vector.at[:,2].set(N[:,0])
+    conditions.frames.inertial.ground_force_vector = conditions.frames.inertial.ground_force_vector.at[:,0].set(Ff[:,0])
 
     forces(segment)
 
@@ -66,4 +66,4 @@ def ground_forces(segment):
     F = total_aero_forces + inertial_ground_force_vector
 
     # pack
-    conditions.frames.inertial.total_force_vector[:,:] = F[:,:]
+    conditions.frames.inertial.total_force_vector = conditions.frames.inertial.total_force_vector.at[:,:].set(F[:,:])

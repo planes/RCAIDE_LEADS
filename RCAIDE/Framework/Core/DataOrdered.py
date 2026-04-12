@@ -679,7 +679,7 @@ class DataOrdered(OrderedDict):
             for node in self._map.values():
                 del node[:]
             root = self._root
-            root[:] = [root, root, None]
+            root = root.at[:].set([root, root, None])
             self._map.clear()
         except AttributeError:
             pass

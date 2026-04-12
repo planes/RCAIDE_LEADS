@@ -355,7 +355,7 @@ def compute_operating_empty_weight(vehicle,settings = None):
         output.total              = output.empty.total + output.payload.total 
         
         diff = MTOW -output.total
-        MTOW -= diff
+        MTOW = MTOW - diff
         iterations     += 1 
     
         if iterations == 100:

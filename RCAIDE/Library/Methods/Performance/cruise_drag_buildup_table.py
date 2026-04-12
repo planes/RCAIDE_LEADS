@@ -198,7 +198,7 @@ def cruise_drag_buildup_table(mission = None, cruise_segment_tag = "cruise", sav
                 ax.barh(i, val, height=0.7, left=bottom,
                         color=base_color, alpha=0.65,
                         hatch=hatch_list[j % len(hatch_list)], edgecolor="k")
-                bottom += val
+                bottom = bottom + val
         else:
             bar_val = subs[0][1] if len(subs) > 0 else tot
             ax.barh(i, bar_val, height=0.7, color=base_color, alpha=0.65,

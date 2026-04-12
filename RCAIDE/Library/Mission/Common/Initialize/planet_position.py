@@ -76,7 +76,7 @@ def planet_position(segment):
         longitude_initial = 0.0
         latitude_initial  = 0.0
 
-    segment.state.conditions.frames.planet.longitude[:,0] = longitude_initial
-    segment.state.conditions.frames.planet.latitude[:,0]  = latitude_initial    
+    segment.state.conditions.frames.planet.longitude = segment.state.conditions.frames.planet.longitude.at[:,0].set(longitude_initial)
+    segment.state.conditions.frames.planet.latitude = segment.state.conditions.frames.planet.latitude.at[:,0].set(latitude_initial)
 
     return 

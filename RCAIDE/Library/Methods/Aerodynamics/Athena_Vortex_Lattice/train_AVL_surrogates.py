@@ -80,13 +80,13 @@ def train_AVL_surrogates(aerodynamics,vehicle):
         # Run Analysis at AoA[i] and Mach[i]
         run_AVL_analysis(aerodynamics,run_conditions, vehicle)
  
-        CL[:,i]       = run_conditions.aerodynamics.coefficients.lift.inviscid.total[:,0]
-        CD[:,i]       = run_conditions.aerodynamics.coefficients.drag.induced.total[:,0]      
-        e [:,i]       = run_conditions.aerodynamics.coefficients.drag.induced.efficiency_factor[:,0]   
-        CM[:,i]       = run_conditions.static_stability.coefficients.pitch[:,0]
-        Cm_alpha[:,i] = run_conditions.static_stability.derivatives.CM_alpha[:,0]
-        Cn_beta[:,i]  = run_conditions.static_stability.derivatives.CN_beta[:,0]
-        NP[:,i]       = run_conditions.static_stability.neutral_point[:,0]     
+        CL = CL.at[:,i].set(run_conditions.aerodynamics.coefficients.lift.inviscid.total[:,0])
+        CD = CD.at[:,i].set(run_conditions.aerodynamics.coefficients.drag.induced.total[:,0])
+        e  = e .at[:,i].set(run_conditions.aerodynamics.coefficients.drag.induced.efficiency_factor[:,0])
+        CM = CM.at[:,i].set(run_conditions.static_stability.coefficients.pitch[:,0])
+        Cm_alpha = Cm_alpha.at[:,i].set(run_conditions.static_stability.derivatives.CM_alpha[:,0])
+        Cn_beta = Cn_beta.at[:,i].set(run_conditions.static_stability.derivatives.CN_beta[:,0])
+        NP = NP.at[:,i].set(run_conditions.static_stability.neutral_point[:,0])
 
     if aerodynamics.training_file:
         # load data 
@@ -125,13 +125,13 @@ def train_AVL_surrogates(aerodynamics,vehicle):
     # Store training data
     # Save the data for regression
     training_data = rp.zeros((7,len_AoA,len_Mach))
-    training_data[0,:,:] = CL 
-    training_data[1,:,:] = CD 
-    training_data[2,:,:] = e  
-    training_data[3,:,:] = CM       
-    training_data[4,:,:] = Cm_alpha 
-    training_data[5,:,:] = Cn_beta  
-    training_data[6,:,:] = NP      
+    training_data = training_data.at[0,:,:].set(CL)
+    training_data = training_data.at[1,:,:].set(CD)
+    training_data = training_data.at[2,:,:].set(e)
+    training_data = training_data.at[3,:,:].set(CM)
+    training_data = training_data.at[4,:,:].set(Cm_alpha)
+    training_data = training_data.at[5,:,:].set(Cn_beta)
+    training_data = training_data.at[6,:,:].set(NP)
 
     # Store training data
     training.coefficients = training_data

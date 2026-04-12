@@ -275,9 +275,9 @@ def compute_turboprop_performance(turboprop, state, center_of_gravity=[[0.0, 0.0
 
     # Compute forces and moments
     moment_vector      = 0*state.ones_row(3)  
-    moment_vector[:,0] = turboprop.origin[0][0] -   center_of_gravity[0][0] 
-    moment_vector[:,1] = turboprop.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2] = turboprop.origin[0][2]  -  center_of_gravity[0][2]
+    moment_vector = moment_vector.at[:,0].set(turboprop.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turboprop.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turboprop.origin[0][2]  -  center_of_gravity[0][2])
     turboprop_conditions.moment = rp.cross(moment_vector, turboprop_conditions.thrust)   
   
     # compute efficiencies 
@@ -376,10 +376,10 @@ def reuse_stored_turboprop_data(turboprop,state,network,stored_propulsor_tag,cen
     # compute moment  
     moment_vector      = 0*state.ones_row(3)
     thrust_vector      = 0*state.ones_row(3)
-    thrust_vector[:,0] = conditions.energy.propulsors[turboprop.tag].thrust[:,0] 
-    moment_vector[:,0] = turboprop.origin[0][0] -   center_of_gravity[0][0] 
-    moment_vector[:,1] = turboprop.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2] = turboprop.origin[0][2]  -  center_of_gravity[0][2]
+    thrust_vector = thrust_vector.at[:,0].set(conditions.energy.propulsors[turboprop.tag].thrust[:,0])
+    moment_vector = moment_vector.at[:,0].set(turboprop.origin[0][0] -   center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(turboprop.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(turboprop.origin[0][2]  -  center_of_gravity[0][2])
     moment             = rp.cross(moment_vector,thrust_vector)    
 
     power                                              = conditions.energy.propulsors[turboprop.tag].power 

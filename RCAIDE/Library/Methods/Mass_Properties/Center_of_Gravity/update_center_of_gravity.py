@@ -85,8 +85,8 @@ def update_center_of_gravity(state, vehicle):
         mass = conditions.weights.components.mass[item]
         CG   = conditions.weights.components.global_center_of_gravity[item]
         sym  = conditions.weights.components.symmetry_flag[item] 
-        Mass_tot += conditions.weights.components.mass[item]
-        Mom_tot  += CG*sym * mass
+        Mass_tot = Mass_tot + conditions.weights.components.mass[item]
+        Mom_tot  = Mom_tot + CG*sym * mass
     
     state.conditions.weights.vehicle.global_center_of_gravity =  Mom_tot / Mass_tot
     

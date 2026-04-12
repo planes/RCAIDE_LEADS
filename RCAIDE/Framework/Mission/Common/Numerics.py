@@ -50,11 +50,11 @@ class Numerics(Conditions):
         self.solver.type                      = "optimize" # options: "optimize", "root_finder"
         self.solver.method                    = "SLSQP"    
         self.solver.objective                 = "energy"   # options: # None, energy , power 
-        self.solver.tolerance_solution        = 1E-6     
+        self.solver.tolerance_solution        = 1E-5     
         self.solver.converged                 = None
         self.solver.print_output              = True
         self.solver.max_evaluations           = 200
-        self.solver.step_size                 = 1E-6 
+        self.solver.step_size                 = 1E-7
         self.solver.lower_bounds              = Conditions()
         self.solver.upper_bounds              = Conditions()
         

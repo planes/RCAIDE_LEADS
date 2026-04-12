@@ -191,8 +191,8 @@ def create_class_seating_map_layout(cabin,cabin_class,cabin_class_origin, side_c
     s_x_coord,object_type, cabin_class_origin,cabin_length = get_seat_x_coords(cabin, cabin_class,cabin_class_origin,cabin_length)
     # concatenate arrays
     length   =  cabin_class.seat_length * rp.ones_like(s_x_coord)
-    length[object_type[:,2] == 1] = cabin.galley_lavatory_length
-    length[object_type[:,3] == 1] = cabin.type_A_door_length
+    length = length.at[object_type[:,2] == 1].set(cabin.galley_lavatory_length)
+    length = length.at[object_type[:,3] == 1].set(cabin.type_A_door_length)
     X_coords   = rp.atleast_2d((rp.tile(s_x_coord[:,None], (1, len(s_y_coord)))).flatten()).T
     Y_coords   = rp.atleast_2d((rp.tile(s_y_coord[None,:], (len(s_x_coord), 1))).flatten()).T
     Z_coords   = rp.atleast_2d((rp.zeros_like(Y_coords)).flatten()).T
@@ -214,12 +214,12 @@ def create_class_seating_map_layout(cabin,cabin_class,cabin_class_origin, side_c
     # [n_rows , n_seats_y, x, y, z , length, width, first-cl flag, business-cl flag, economy-cl flag, [seat, emergency-row flag, galley/lav flag, type-A exit flag]]
     seat_data = rp.hstack((n_rows , n_seats_y, X_coords,Y_coords, Z_coords, length ,width,F_c,B_c,E_c,object_vec))
     if type(cabin) == RCAIDE.Library.Components.Fuselages.Cabins.Side_Cabin:
-        seat_data[:, 3] += cabin.width / 2
+        seat_data = seat_data.at[:, 3].add(cabin.width / 2)
         seat_data  = update_seat_map_layout_using_cabin_taper(seat_data,cabin)
-        seat_data[:, 3] += side_cabin_offset  +  cabin_class.y_offset_distance
+        seat_data = seat_data.at[:, 3].add(side_cabin_offset  +  cabin_class.y_offset_distance)
         # make copy about center
         seat_data_        = deepcopy(seat_data)
-        seat_data_[:, 3] *= -1
+        seat_data_ = seat_data_.at[:, 3].multiply(-1)
         seat_data         = rp.vstack((seat_data,seat_data_))
     cabin_class.number_of_seats = int(rp.sum(seat_data[:,10]))
     cabin_number_of_seats       += int(cabin_class.number_of_seats)

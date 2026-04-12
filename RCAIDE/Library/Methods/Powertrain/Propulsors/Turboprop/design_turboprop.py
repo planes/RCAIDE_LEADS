@@ -255,7 +255,7 @@ def design_turboprop(turboprop):
     atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
     V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
     operating_state       = setup_operating_conditions(turboprop,velocity_range=rp.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
-    operating_state.conditions.energy.propulsors[turboprop.tag].throttle[:,0] = 1.0  
+    operating_state.conditions.energy.propulsors[turboprop.tag].throttle = operating_state.conditions.energy.propulsors[turboprop.tag].throttle.at[:,0].set(1.0)
     sls_T,_,sls_P,_,_,_                           = turboprop.compute_performance(operating_state) 
     turboprop.sealevel_static_thrust              = sls_T[0][0]
     turboprop.sealevel_static_power               = sls_P[0][0]
@@ -272,7 +272,7 @@ def design_turboprop(turboprop):
     if compressor.motor != None: 
         V                     = turboprop.design_freestream_velocity
         operating_state       = setup_operating_conditions(turboprop,velocity_range=rp.array([V]), altitude = turboprop.design_altitude, angle_of_attack=0, temperature_deviation=0)  
-        operating_state.conditions.energy.propulsors[turboprop.tag].throttle[:,0] = 1.0  
+        operating_state.conditions.energy.propulsors[turboprop.tag].throttle = operating_state.conditions.energy.propulsors[turboprop.tag].throttle.at[:,0].set(1.0)
         T,_,P,_,_,_           = turboprop.compute_performance(operating_state)
         
         motor                         = compressor.motor 

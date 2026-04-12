@@ -160,14 +160,14 @@ def compute_rotor_weight(rotor,
     nacaMAT    = coordMAT.dot(NACA)[:, rp.newaxis]
     coord      = rp.concatenate((coord,nacaMAT),axis=1)
     coord      = rp.concatenate((coord[-1:0:-1],coord.dot(rp.array([[1.,0.],[0.,-1.]]))),axis=0)
-    coord[:,0] = coord[:,0] - xShear
+    coord = coord.at[:,0].set(coord[:,0] - xShear)
 
     #-------------------------------------------------------------------------------
     # Beam Geometry
     #-------------------------------------------------------------------------------
     x         = rp.linspace(0,rProp,N)
     dx        = x[1] - x[0]
-    fwdWeb[:] = [round(loc - xShear,2) for loc in fwdWeb]
+    fwdWeb = fwdWeb.at[:].set([round(loc - xShear,2) for loc in fwdWeb])
 
     #-------------------------------------------------------------------------------
     # Loads

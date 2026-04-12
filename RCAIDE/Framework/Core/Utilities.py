@@ -25,7 +25,7 @@ def interp2d(x,y,xp,yp,zp,fill_value= None):
         xp, yp: 1D arrays of points specifying grid points where function values
             are provided.
         zp: 2D array of function values. For a function `f(x, y)` this must
-            satisfy `zp[i, j] = f(xp[i], yp[j])`
+            satisfy `zp = satisfy `zp.at[i, j].set(f(xp[i], yp[j])`)
     Returns:
         1D array `z` satisfying `z[i] = f(x[i], y[i])`.
     """ 

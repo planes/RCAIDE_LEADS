@@ -331,11 +331,11 @@ def compute_aircraft_load_data_point(vehicle,cruise_segment_tag,RES,counter,
                                             verbose=False) 
     
     # store results 
-    RES.loading_results.CG_location[f_o,p_i,c_i,f_i]              = center_of_gravity[0][0]  
-    RES.loading_results.mass[f_o,p_i,c_i,f_i]                     = mass[0]  
-    RES.loading_results.LEMAC_location[f_o,p_i,c_i,f_i]           = vehicle.LEMAC  
-    RES.loading_results.static_margin[f_o,p_i,c_i,f_i]            = (neutral_point  - center_of_gravity[0][0]) /vehicle.reference_chord
-    RES.loading_results.CG_percent_of_LEMAC_location[f_o,p_i,c_i,f_i]   =  (RES.loading_results.CG_location[f_o,p_i,c_i,f_i]  - vehicle.LEMAC) / vehicle.reference_chord
+    RES.loading_results.CG_location = RES.loading_results.CG_location.at[f_o,p_i,c_i,f_i].set(center_of_gravity[0][0])
+    RES.loading_results.mass = RES.loading_results.mass.at[f_o,p_i,c_i,f_i].set(mass[0])
+    RES.loading_results.LEMAC_location = RES.loading_results.LEMAC_location.at[f_o,p_i,c_i,f_i].set(vehicle.LEMAC)
+    RES.loading_results.static_margin = RES.loading_results.static_margin.at[f_o,p_i,c_i,f_i].set((neutral_point  - center_of_gravity[0][0]) /vehicle.reference_chord)
+    RES.loading_results.CG_percent_of_LEMAC_location = RES.loading_results.CG_percent_of_LEMAC_location.at[f_o,p_i,c_i,f_i].set((RES.loading_results.CG_location[f_o,p_i,c_i,f_i]  - vehicle.LEMAC) / vehicle.reference_chord)
      
     print('***************************************')
     print('Loading Diagram Data Point: ' + str(counter+1) + ' of ' +  str(total_sims))
@@ -360,11 +360,11 @@ def compute_aircraft_trim_data_point(vehicle,cruise_segment_tag,RES,
  
 
     # store results  
-    RES.trim_results.neutral_point[w_i,c_g_i]            = neutral_point
-    RES.trim_results.static_margin[w_i,c_g_i]            = (RES.trim_results.neutral_point[w_i,c_g_i]  - vehicle.mass_properties.center_of_gravity[0][0]) /vehicle.reference_chord
-    RES.trim_results.mass[w_i,c_g_i]                     =  vehicle.mass_properties.takeoff 
-    RES.trim_results.LEMAC_location[w_i,c_g_i]           =  vehicle.LEMAC 
-    RES.trim_results.CG_percent_of_LEMAC_location[w_i,c_g_i]   = (vehicle.mass_properties.center_of_gravity[0][0] - vehicle.LEMAC) / vehicle.reference_chord
+    RES.trim_results.neutral_point = RES.trim_results.neutral_point.at[w_i,c_g_i].set(neutral_point)
+    RES.trim_results.static_margin = RES.trim_results.static_margin.at[w_i,c_g_i].set((RES.trim_results.neutral_point[w_i,c_g_i]  - vehicle.mass_properties.center_of_gravity[0][0]) /vehicle.reference_chord)
+    RES.trim_results.mass = RES.trim_results.mass.at[w_i,c_g_i].set(vehicle.mass_properties.takeoff)
+    RES.trim_results.LEMAC_location = RES.trim_results.LEMAC_location.at[w_i,c_g_i].set(vehicle.LEMAC)
+    RES.trim_results.CG_percent_of_LEMAC_location = RES.trim_results.CG_percent_of_LEMAC_location.at[w_i,c_g_i].set((vehicle.mass_properties.center_of_gravity[0][0] - vehicle.LEMAC) / vehicle.reference_chord)
 
     print('***************************************')
     print('Trim Diagram Data Point  : ' + str(counter+1) + ' of ' +  str(total_sims))

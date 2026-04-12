@@ -65,6 +65,6 @@ def append_reservoir_segment_conditions(reservoir,segment,coolant_line):
     reservoir_conditions = segment.state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag]
     if segment.state.initials:  
         reservoir_initials                                   = segment.state.initials.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag]
-        reservoir_conditions.coolant_temperature[:,0]        = reservoir_initials.coolant_temperature[-1,0] 
+        reservoir_conditions.coolant_temperature = reservoir_conditions.coolant_temperature.at[:,0].set(reservoir_initials.coolant_temperature[-1,0])
     
     return

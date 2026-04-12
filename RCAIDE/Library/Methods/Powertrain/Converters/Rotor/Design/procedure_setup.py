@@ -250,7 +250,7 @@ def run_rotor_hover(nexus):
     
     rotor_conditions                            = segment.state.conditions.energy.converters[rotor.tag]     
     rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.hover.design_tip_mach)/rotor.tip_radius 
-    rotor_conditions.blade_pitch_command[:,0]   = rotor.hover.design_blade_pitch_command
+    rotor_conditions.blade_pitch_command = rotor_conditions.blade_pitch_command.at[:,0].set(rotor.hover.design_blade_pitch_command)
     
     compute_rotor_performance(rotor,conditions)   
      
@@ -322,7 +322,7 @@ def run_rotor_OEI(nexus):
                 
     rotor_conditions                            =  segment.state.conditions.energy.converters[rotor.tag]     
     rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.oei.design_tip_mach)/rotor.tip_radius 
-    rotor_conditions.blade_pitch_command[:,0]   = rotor.oei.design_blade_pitch_command
+    rotor_conditions.blade_pitch_command = rotor_conditions.blade_pitch_command.at[:,0].set(rotor.oei.design_blade_pitch_command)
     
     compute_rotor_performance(rotor,conditions)    
             
@@ -368,7 +368,7 @@ def run_rotor_cruise(nexus):
             
         rotor_conditions                            =  segment.state.conditions.energy.converters[rotor.tag]     
         rotor_conditions.omega                      = (atmosphere_conditions.speed_of_sound*rotor.cruise.design_tip_mach)/rotor.tip_radius 
-        rotor_conditions.blade_pitch_command[:,0]   = rotor.cruise.design_blade_pitch_command
+        rotor_conditions.blade_pitch_command = rotor_conditions.blade_pitch_command.at[:,0].set(rotor.cruise.design_blade_pitch_command)
         
         compute_rotor_performance(rotor,conditions)   
         
