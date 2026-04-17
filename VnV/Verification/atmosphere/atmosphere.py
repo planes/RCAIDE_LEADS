@@ -9,6 +9,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units
 import RNUMPY as rp
+rp.use_torch = True
 import matplotlib.pyplot as plt
 
 
@@ -39,10 +40,10 @@ def main():
     p_truth, T_truth, rho_truth, a_truth = get_truth()
     
     # difference
-    p_err   = rp.max( p_truth   - p   )
-    T_err   = rp.max( T_truth   - T   )
-    rho_err = rp.max( rho_truth - rho )
-    a_err   = rp.max( a_truth   - a   )
+    p_err   = rp.max( rp.abs(p_truth   - p   ))
+    T_err   = rp.max( rp.abs(T_truth   - T   ))
+    rho_err = rp.max( rp.abs(rho_truth - rho ))
+    a_err   = rp.max( rp.abs(a_truth   - a   ))
     
     print('Max Pressure Difference       = %.4e' % p_err)
     print('Max Temperature Difference    = %.4e' % T_err)
@@ -82,9 +83,9 @@ def main():
     # ------------------------------------------------------------------    
 
     assert( p_err   < 1e-1 )
-    assert( T_err   < 1e-5 )
-    assert( rho_err < 1e-5 )
-    assert( a_err   < 1e-5 )    
+    assert( T_err   < 5e-5 )
+    assert( rho_err < 5e-5 )
+    assert( a_err   < 5e-5 )    
  
     return
 

@@ -13,6 +13,7 @@ from RCAIDE.Framework.Analyses.Geodesics.Geodesics import Calculate_Distance
 # package imports 
 from scipy.interpolate import griddata
 import RNUMPY as rp 
+import numpy as np
  
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  generate_terrain_microphone_locations
@@ -57,7 +58,7 @@ def generate_terrain_microphone_locations(settings):
     x_res = settings.microphone_x_resolution 
     
     # extract data from file 
-    data  = rp.loadtxt(settings.topography_file) # settings.topography_file) CHANGED 10-15-2024
+    data  = np.loadtxt(settings.topography_file) # settings.topography_file) CHANGED 10-15-2024
     Long  = data[:,0]
     Lat   = data[:,1]
     Elev  = data[:,2] 

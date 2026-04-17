@@ -359,7 +359,7 @@ def VLM(conditions,settings,geometry):
     CAXL = rp.add.reduceat(CAXL,chord_breaks[0],axis=1)
     BMLE = rp.add.reduceat(BMLE,chord_breaks[0],axis=1)
     
-    SICPLE *= (-1) * COSIN * COD * GAF
+    SICPLE = SICPLE * (-1) * COSIN * COD * GAF
     DCP_LE = DCP[LE_ind].reshape(dim_1,dim_2)
     
     # COMPUTE LEADING EDGE THRUST COEFF. (CSUC) BY CALCULATING

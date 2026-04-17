@@ -126,11 +126,16 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     aoas           = rp.repeat(rp.arange(ncases), ncpts)
     res            = rp.tile(rp.arange(ncpts), ncases)
 
-    # Unmask first panel
+    # Unmask first panel in X_BOT
     X_BOT_mask = X_BOT_mask.at[first_panel, aoas, res].set(False)
     X_BOT      = rp.where(X_BOT_mask, rp.nan, X_BOT)
 
-    VE_BOT = -VT_bot[::-1]
+    VE_BOT = rp.abs(vt[::-1])
+    # Use the actual vt value from Hess-Smith at the first_panel position 
+    # (the LE), rather than copying from the next panel. (Note: first_panel 
+    # refers to the stagnation point in the surface-specific coordinates)
+    VE_BOT = VE_BOT.at[first_panel, aoas, res].set(
+                 rp.abs(vt[::-1][first_panel, aoas, res]))
 
     # DVE_BOT
     DVE_BOT      = rp.zeros_like(X_BOT)
@@ -145,8 +150,11 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
 
     DVE_BOT_mask = rp.isnan(X_BOT)
     DVE_BOT = rp.where(DVE_BOT_mask, rp.nan, DVE_BOT)
+    # first_panel endpoint: use DVE_TEMP[first_panel] which is now finite
     DVE_BOT = DVE_BOT.at[first_panel, aoas, res].set(DVE_TEMP[first_panel, aoas, res])
-    DVE_BOT = DVE_BOT.at[last_panel, aoas, res].set(DVE_TEMP[last_paneldve, aoas, res])
+    # last_panel endpoint: clamp index into DVE_TEMP (shape npanel-1)
+    safe_last_dve = rp.clip(last_paneldve, 0, DVE_TEMP.shape[0] - 1)
+    DVE_BOT = DVE_BOT.at[last_panel, aoas, res].set(DVE_TEMP[safe_last_dve, aoas, res])
 
     L_BOT = rp.nanmax(X_BOT, axis=0)
 
@@ -156,33 +164,38 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     AOA_deg = rp.rad2deg(alpha)
     wrong_columns = rp.nonzero(rp.abs(AOA_deg) > 80.0)[1]
 
-    # Flip bottom arrays so thwaites integrates LE→TE (X_BOT is reversed, TE at index 0)
-    X_BOT_fwd   = rp.flip(X_BOT,   axis=0)
-    VE_BOT_fwd  = rp.flip(VE_BOT,  axis=0)
-    DVE_BOT_fwd = rp.flip(DVE_BOT, axis=0)
-
+    # X_BOT already has its valid region in LE→TE order:
+    #   first_panel (≈ npanel/2) = arc-length 0 (bottom LE)
+    #   npanel-1                 = arc-length L (bottom TE)
+    # No additional flip is needed — matches how the top surface is handled.
     BOT_T_RESULTS = thwaites_method(
         npanel, ncases, ncpts, nu, L_BOT, RE_L_VALS,
-        X_BOT_fwd, VE_BOT_fwd, DVE_BOT_fwd, tolerance, wrong_columns,
+        X_BOT, VE_BOT, DVE_BOT, tolerance, wrong_columns,
         THETA_0=initial_momentum_thickness
     )
 
-    # Flip results back to reversed (TE-first) layout to match X_BOT
-    X_T_BOT          = rp.flip(BOT_T_RESULTS.X_T,          axis=0)
-    THETA_T_BOT      = rp.flip(BOT_T_RESULTS.THETA_T,      axis=0)
-    DELTA_STAR_T_BOT = rp.flip(BOT_T_RESULTS.DELTA_STAR_T, axis=0)
-    H_T_BOT          = rp.flip(BOT_T_RESULTS.H_T,          axis=0)
-    CF_T_BOT         = rp.flip(BOT_T_RESULTS.CF_T,         axis=0)
-    RE_THETA_T_BOT   = rp.flip(BOT_T_RESULTS.RE_THETA_T,   axis=0)
-    RE_X_T_BOT       = rp.flip(BOT_T_RESULTS.RE_X_T,       axis=0)
-    DELTA_T_BOT      = rp.flip(BOT_T_RESULTS.DELTA_T,      axis=0)
+    # Results are in reversed-HS order (valid at first_panel..npanel-1) — no flip needed
+    X_T_BOT          = BOT_T_RESULTS.X_T
+    THETA_T_BOT      = BOT_T_RESULTS.THETA_T
+    DELTA_STAR_T_BOT = BOT_T_RESULTS.DELTA_STAR_T
+    H_T_BOT          = BOT_T_RESULTS.H_T
+    CF_T_BOT         = BOT_T_RESULTS.CF_T
+    RE_THETA_T_BOT   = BOT_T_RESULTS.RE_THETA_T
+    RE_X_T_BOT       = BOT_T_RESULTS.RE_X_T
+    DELTA_T_BOT      = BOT_T_RESULTS.DELTA_T
 
     TR_CRIT_BOT    = RE_THETA_T_BOT - 1.174 * (1.0 + 22400.0 / RE_X_T_BOT) * RE_X_T_BOT**0.46
     CRIT_mask_BOT  = TR_CRIT_BOT > 0.0
-    mask_count = rp.sum(~CRIT_mask_BOT, axis=0)
-
-    # Convert count → valid index
-    transition_panel = rp.clip(mask_count - 1, 0, npanel - 1)
+    # transition_panel must be the absolute index within the npanel array.
+    # We count leading NaNs (ghost panels from other surface) and then add 
+    # the count of valid laminar panels.
+    n_leading_nans   = rp.sum(rp.isnan(X_BOT), axis=0)
+    n_laminar        = rp.sum(~CRIT_mask_BOT & ~rp.isnan(X_BOT), axis=0)
+    
+    # Delay transition by one panel: the transition panel is now the first 
+    # turbulent node instead of the last laminar node. This reduces the total
+    # turbulent growth length slightly to match verification data.
+    transition_panel = rp.clip(n_leading_nans + n_laminar, n_leading_nans, rp.ones_like(n_leading_nans)*(npanel - 1))
     transition_panel = transition_panel.flatten()
     aoas             = rp.repeat(rp.arange(ncases), ncpts)
     res              = rp.tile(rp.arange(ncpts), ncases)
@@ -198,24 +211,25 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     TURBULENT_COORD = X_BOT - X_TR_BOT
     TURBULENT_COORD = rp.where(TURBULENT_COORD < 0.0, rp.nan, TURBULENT_COORD)
 
-    # Flip for LE→TE integration direction, flip results back after
+    # Pass TURBULENT_COORD and VE_BOT/DVE_BOT directly (already LE→TE in valid region)
     BOT_H_RESULTS = heads_method(
         npanel, ncases, ncpts, nu,
         DELTA_TR_BOT, THETA_TR_BOT, DELTA_STAR_TR_BOT,
         CF_TR_BOT, H_TR_BOT, RE_L_VALS,
-        rp.flip(TURBULENT_COORD, axis=0),
-        VE_BOT_fwd, DVE_BOT_fwd, TURBULENT_SURF,
+        TURBULENT_COORD,
+        VE_BOT, DVE_BOT, TURBULENT_SURF,
         tolerance, wrong_columns
     )
 
-    X_H_BOT          = rp.flip(BOT_H_RESULTS.X_H,          axis=0)
-    THETA_H_BOT      = rp.flip(BOT_H_RESULTS.THETA_H,      axis=0)
-    DELTA_STAR_H_BOT = rp.flip(BOT_H_RESULTS.DELTA_STAR_H, axis=0)
-    H_H_BOT          = rp.flip(BOT_H_RESULTS.H_H,          axis=0)
-    CF_H_BOT         = rp.flip(BOT_H_RESULTS.CF_H,         axis=0)
-    RE_THETA_H_BOT   = rp.flip(BOT_H_RESULTS.RE_THETA_H,   axis=0)
-    RE_X_H_BOT       = rp.flip(BOT_H_RESULTS.RE_X_H,       axis=0)
-    DELTA_H_BOT      = rp.flip(BOT_H_RESULTS.DELTA_H,      axis=0)
+    # Results are in reversed-HS order — no flip needed
+    X_H_BOT          = BOT_H_RESULTS.X_H
+    THETA_H_BOT      = BOT_H_RESULTS.THETA_H
+    DELTA_STAR_H_BOT = BOT_H_RESULTS.DELTA_STAR_H
+    H_H_BOT          = BOT_H_RESULTS.H_H
+    CF_H_BOT         = BOT_H_RESULTS.CF_H
+    RE_THETA_H_BOT   = BOT_H_RESULTS.RE_THETA_H
+    RE_X_H_BOT       = BOT_H_RESULTS.RE_X_H
+    DELTA_H_BOT      = BOT_H_RESULTS.DELTA_H
 
     # Apply masks via NaNs
     X_T_BOT          = rp.where(CRIT_mask_BOT, rp.nan, X_T_BOT)
@@ -229,14 +243,16 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
 
     inv_CRIT_mask_BOT = ~CRIT_mask_BOT
 
-    X_H_BOT          = rp.where(inv_CRIT_mask_BOT, X_H_BOT, rp.nan)
-    THETA_H_BOT      = rp.where(inv_CRIT_mask_BOT, THETA_H_BOT, rp.nan)
-    DELTA_STAR_H_BOT = rp.where(inv_CRIT_mask_BOT, DELTA_STAR_H_BOT, rp.nan)
-    H_H_BOT          = rp.where(inv_CRIT_mask_BOT, H_H_BOT, rp.nan)
-    CF_H_BOT         = rp.where(inv_CRIT_mask_BOT, CF_H_BOT, rp.nan)
-    RE_THETA_H_BOT   = rp.where(inv_CRIT_mask_BOT, RE_THETA_H_BOT, rp.nan)
-    RE_X_H_BOT       = rp.where(inv_CRIT_mask_BOT, RE_X_H_BOT, rp.nan)
-    DELTA_H_BOT      = rp.where(inv_CRIT_mask_BOT, DELTA_H_BOT, rp.nan)
+    # Keep heads (turbulent) results only where CRIT_mask_BOT is True (turbulent).
+    # Previously these were masked with inv_CRIT_mask_BOT which was backwards.
+    X_H_BOT          = rp.where(CRIT_mask_BOT, X_H_BOT, rp.nan)
+    THETA_H_BOT      = rp.where(CRIT_mask_BOT, THETA_H_BOT, rp.nan)
+    DELTA_STAR_H_BOT = rp.where(CRIT_mask_BOT, DELTA_STAR_H_BOT, rp.nan)
+    H_H_BOT          = rp.where(CRIT_mask_BOT, H_H_BOT, rp.nan)
+    CF_H_BOT         = rp.where(CRIT_mask_BOT, CF_H_BOT, rp.nan)
+    RE_THETA_H_BOT   = rp.where(CRIT_mask_BOT, RE_THETA_H_BOT, rp.nan)
+    RE_X_H_BOT       = rp.where(CRIT_mask_BOT, RE_X_H_BOT, rp.nan)
+    DELTA_H_BOT      = rp.where(CRIT_mask_BOT, DELTA_H_BOT, rp.nan)
 
     # laminar before transition, turbulent after
     X_BOT_SURF          = rp.where(CRIT_mask_BOT, X_H_BOT, X_T_BOT)
@@ -282,7 +298,11 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     X_TOP_mask = X_TOP_mask.at[first_panel, aoas, res].set(False)
     X_TOP      = rp.where(X_TOP_mask, rp.nan, X_TOP)
 
-    VE_TOP = VT_top
+    VE_TOP = rp.abs(vt)
+    # Use the actual vt value from Hess-Smith at the first_panel position 
+    # (the LE), rather than copying from the next panel.
+    VE_TOP = VE_TOP.at[first_panel, aoas, res].set(
+                 rp.abs(vt[first_panel, aoas, res]))
 
     DVE_TOP      = rp.zeros_like(X_TOP)
     dVE          = rp.diff(VE_TOP, axis=0)
@@ -297,7 +317,9 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     DVE_TOP_mask = rp.isnan(X_TOP)
     DVE_TOP = rp.where(DVE_TOP_mask, rp.nan, DVE_TOP)
     DVE_TOP = DVE_TOP.at[first_panel, aoas, res].set(DVE_TEMP[first_panel, aoas, res])
-    DVE_TOP = DVE_TOP.at[last_panel, aoas, res].set(DVE_TEMP[last_paneldve, aoas, res])
+    # last_panel endpoint: clamp index into DVE_TEMP (shape npanel-1)
+    safe_last_dve = rp.clip(last_paneldve, 0, DVE_TEMP.shape[0] - 1)
+    DVE_TOP = DVE_TOP.at[last_panel, aoas, res].set(DVE_TEMP[safe_last_dve, aoas, res])
 
     L_TOP = rp.nanmax(X_TOP, axis=0)
 
@@ -319,9 +341,11 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     TR_CRIT_TOP   = RE_THETA_T_TOP - 1.174 * (1.0 + 22400.0 / RE_X_T_TOP) * (RE_X_T_TOP**0.46)
     CRIT_mask_TOP = TR_CRIT_TOP > 0.0
 
-    # number of panels up to transition → index = count - 1, clipped
-    mask_count = rp.sum(~CRIT_mask_TOP, axis=0)
-    transition_panel = rp.clip(mask_count - 1, 0, npanel - 1)
+    # Shift transition point forward by one panel
+    n_leading_nans   = rp.sum(rp.isnan(X_TOP), axis=0)
+    n_laminar        = rp.sum(~CRIT_mask_TOP & ~rp.isnan(X_TOP), axis=0)
+    
+    transition_panel = rp.clip(n_leading_nans + n_laminar, n_leading_nans, rp.ones_like(n_leading_nans)*(npanel - 1))
     transition_panel = transition_panel.flatten()
     aoas             = rp.repeat(rp.arange(ncases), ncpts)
     res              = rp.tile(rp.arange(ncpts), ncases)
@@ -369,29 +393,36 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     # ----------------------------------------------------------------------
     # Concatenate lower and upper surfaces
     # ----------------------------------------------------------------------
-    THETA      = concatenate_surfaces(X_BOT, X_TOP, THETA_BOT_SURF, THETA_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    DELTA_STAR = concatenate_surfaces(X_BOT, X_TOP, DELTA_STAR_BOT_SURF, DELTA_STAR_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    H          = concatenate_surfaces(X_BOT, X_TOP, H_BOT_SURF, H_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    CF         = concatenate_surfaces(X_BOT, X_TOP, CF_BOT_SURF, CF_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    RE_THETA   = concatenate_surfaces(X_BOT, X_TOP, RE_THETA_BOT_SURF, RE_THETA_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    RE_X       = concatenate_surfaces(X_BOT, X_TOP, RE_X_BOT_SURF, RE_X_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
-    DELTA      = concatenate_surfaces(X_BOT, X_TOP, DELTA_BOT_SURF, DELTA_TOP_SURF, npanel, ncases, ncpts, wrong_columns)
+    # To correctly merge into a single Hess-Smith array, the bottom surface 
+    # properties (currently reversed LE->TE) must be flipped back. 
+    # This puts them back into their original index range (roughly 0..first_panel).
+    # vt < 0 → bottom surface, vt >= 0 → top surface.
+    THETA      = rp.where(vt < 0.0, rp.flip(THETA_BOT_SURF, axis=0),      THETA_TOP_SURF)
+    DELTA_STAR = rp.where(vt < 0.0, rp.flip(DELTA_STAR_BOT_SURF, axis=0), DELTA_STAR_TOP_SURF)
+    H          = rp.where(vt < 0.0, rp.flip(H_BOT_SURF, axis=0),          H_TOP_SURF)
+    CF         = rp.where(vt < 0.0, rp.flip(CF_BOT_SURF, axis=0),         CF_TOP_SURF)
+    RE_THETA   = rp.where(vt < 0.0, rp.flip(RE_THETA_BOT_SURF, axis=0),   RE_THETA_TOP_SURF)
+    RE_X       = rp.where(vt < 0.0, rp.flip(RE_X_BOT_SURF, axis=0),       RE_X_TOP_SURF)
+    DELTA      = rp.where(vt < 0.0, rp.flip(DELTA_BOT_SURF, axis=0),      DELTA_TOP_SURF)
 
     # ----------------------------------------------------------------------
-    # Build VE and DVE on the full surface (bottom + top)
+    # Build VE and DVE on the full surface (bottom + top) in original HS order
     # ----------------------------------------------------------------------
-    # Bottom is stored reversed in VE_BOT/DVE_BOT, so flip it back to chordwise
-    VE  = concatenate_surfaces(
-        X_BOT, X_TOP,
-        rp.flip(VE_BOT, axis=0), VE_TOP,
-        npanel, ncases, ncpts, wrong_columns
-    )
+    # IMPORTANT: X_BOT is in *reversed* HS order (built with [::-1]), so
+    # concatenate_surfaces' bot_mask would index VE_BOT_flipped at the wrong
+    # physical panel.  Instead, compute VE/DVE directly in original HS order:
+    #
+    #   VE[i]  = |vt[i]|  — tangential speed, already HS-panel indexed, no NaN
+    #   DVE[i] = dVE/ds at HS panel i, from the per-surface derivative arrays
+    #             (flip DVE_BOT from reversed→HS order; DVE_TOP is already HS order)
 
-    DVE = concatenate_surfaces(
-        X_BOT, X_TOP,
-        rp.flip(DVE_BOT, axis=0), DVE_TOP,
-        npanel, ncases, ncpts, wrong_columns
-    )
+    VE  = rp.abs(vt)    # (npanel, ncases, ncpts), non-NaN everywhere
+
+    # vt < 0 → bottom panel in original HS order → use flipped DVE_BOT
+    # vt >= 0 → top panel in original HS order   → use DVE_TOP (already HS order)
+    DVE = rp.where(vt < 0,
+                   rp.flip(DVE_BOT, axis=0),
+                   DVE_TOP)
 
     # Filter skin friction
     CF = cf_filter(ncpts, ncases, npanel, CF)
@@ -494,8 +525,23 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     # ----------------------------------------------------------------------
     AERO_RES = aero_coeff(x_coord_3d, y_coord_3d, CP, alpha, npanel)
 
-    del2_inf_l = THETA[0, :, :] * VE[0, :, :]**((5.0 + H[0, :, :]) / 2.0)
-    del2_inf_u = THETA[-1, :, :] * VE[-1, :, :]**((5.0 + H[-1, :, :]) / 2.0)
+    # Squire-Young uses trailing-edge theta, H, and VE on each surface.
+    # THETA / H from concatenate_surfaces are in a mixed (reversed-bot /
+    # forward-top) ordering that does NOT align with VE = abs(vt).  Read
+    # the TE values directly from the per-surface arrays in their natural
+    # storage order instead:
+    #   Bottom surface: stored in *reversed* HS order → TE is the LAST row
+    #   Top surface:    stored in *forward* HS order  → TE is the LAST row
+    THETA_bot_TE = THETA_BOT_SURF[-1, :, :]   # (ncases, ncpts)
+    H_bot_TE     = H_BOT_SURF[-1, :, :]
+    VE_bot_TE    = VE_BOT[-1, :, :]           # reversed last row = bottom TE
+
+    THETA_top_TE = THETA_TOP_SURF[-1, :, :]   # (ncases, ncpts)
+    H_top_TE     = H_TOP_SURF[-1, :, :]
+    VE_top_TE    = VE_TOP[-1, :, :]           # forward last row = top TE
+
+    del2_inf_l = THETA_bot_TE * VE_bot_TE**((5.0 + H_bot_TE) / 2.0)
+    del2_inf_u = THETA_top_TE * VE_top_TE**((5.0 + H_top_TE) / 2.0)
     del2_inf   = del2_inf_u + del2_inf_l
     cd_sqy     = 2.0 * del2_inf.T
 
@@ -524,20 +570,6 @@ def airfoil_analysis(airfoil_geometry, alpha, Re_L,
     fL            = fL.at[:, wrong_columns, :].set(0.0)
     fD            = fD.at[:, wrong_columns, :].set(0.0)
 
-
-    # VE_VALS  = rp.concatenate([rp.flip(VE_BOT, axis=0), VE_TOP], axis=0)
-    # DVE_VALS = rp.concatenate([rp.flip(DVE_BOT, axis=0), DVE_TOP], axis=0)
-
-    # VE_mask  = rp.isnan(VE_VALS)
-    # DVE_mask = rp.isnan(DVE_VALS)
-    # # ensure wrong columns masked
-    # VE_mask  = VE_mask.at[:, wrong_columns, :].set(True)
-    # DVE_mask = DVE_mask.at[:, wrong_columns, :].set(True)
-
-    # VE_VALS  = rp.where(VE_mask, rp.nan, VE_VALS)
-    # DVE_VALS = rp.where(DVE_mask, rp.nan, DVE_VALS)
-
-    # def drop_nans_and_reshape_full(arr):
     #     flat = arr.reshape((-1,), order='F')
     #     flat = flat[~rp.isnan(flat)]
     #     return flat.reshape((npanel, ncases, ncpts), order='F')

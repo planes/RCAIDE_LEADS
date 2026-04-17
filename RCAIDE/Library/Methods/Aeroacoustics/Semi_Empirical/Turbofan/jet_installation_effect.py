@@ -50,7 +50,7 @@ def jet_installation_effect(Xe, Ye, Ce, theta_s, Diameter_mixed):
     [2] de Almeida, Odenir. "Semi-empirical methods for coaxial jet noise prediction." (2008). (adapted)
     """
     # Installation effect
-    INST_s = rp.array([0.5 * ((Ce - Xe) ** 2 / (Ce * Diameter_mixed)) * (rp.exp(-Ye / Diameter_mixed) * ((1.8 * theta_s / rp.pi) - 0.6) ** 2)])
+    INST_s = 0.5 * ((Ce - Xe) ** 2 / (Ce * Diameter_mixed)) * (rp.exp(-Ye / Diameter_mixed) * ((1.8 * theta_s / rp.pi) - 0.6) ** 2)
     INST_s[INST_s > 2.5] = 2.5
 
     return INST_s

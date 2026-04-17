@@ -8,6 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 import sys, os
 import RNUMPY as rp
+import numpy as np
 import time
 
 import RCAIDE
@@ -63,9 +64,9 @@ def main():
         numer = rp.abs(rp.atleast_1d(payload_range_results[key]) - denom)
 
         # Avoid division by zero
-        with rp.errstate(divide='ignore', invalid='ignore'):
-            rel_error = rp.where(denom != 0, numer / denom, 0.0)
-            error = rp.max(rel_error)
+        with np.errstate(divide='ignore', invalid='ignore'):
+            rel_error = np.where(denom != 0, numer / denom, 0.0)
+            error = np.max(rel_error)
 
         assert error < 2e-2, f"{key} error too large: {error}"
     tf                   = time.time()

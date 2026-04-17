@@ -212,15 +212,15 @@ def turbofan_engine_noise(microphone_locations, turbofan, aeroacoustic_data, seg
     # =============================================================================
    
     frequency          = rp.tile(rp.atleast_2d(frequency),(n_cpts,1))  
-    Diameter_primary   = rp.tile(rp.array([[Diameter_primary]]),(n_cpts,n_freq))  
-    DVPS               = rp.tile(DVPS,(1,n_freq))  
-    Diameter_secondary = rp.tile(rp.array([[Diameter_secondary]]),(n_cpts,n_freq))  
-    Velocity_secondary = rp.tile(Velocity_secondary,(1,n_freq))
-    Velocity_primary   = rp.tile(Velocity_primary,(1,n_freq))
-    Velocity_aircraft  = rp.tile(Velocity_aircraft,(1,n_freq))   
-    Diameter_mixed     = rp.tile(Diameter_mixed,(1,n_freq))  
-    Velocity_mixed     = rp.tile(Velocity_mixed,(1,n_freq))
-    sound_ambient      = rp.tile(sound_ambient,(1,n_freq))
+    Diameter_primary   = rp.reshape(rp.array([Diameter_primary]), (-1, 1)) * rp.ones((n_cpts, n_freq))  
+    DVPS               = rp.reshape(DVPS, (-1, 1)) * rp.ones((n_cpts, n_freq))  
+    Diameter_secondary = rp.reshape(rp.array([Diameter_secondary]), (-1, 1)) * rp.ones((n_cpts, n_freq))  
+    Velocity_secondary = rp.reshape(Velocity_secondary, (-1, 1)) * rp.ones((n_cpts, n_freq))
+    Velocity_primary   = rp.reshape(Velocity_primary, (-1, 1)) * rp.ones((n_cpts, n_freq))
+    Velocity_aircraft  = rp.reshape(Velocity_aircraft, (-1, 1)) * rp.ones((n_cpts, n_freq))   
+    Diameter_mixed     = rp.reshape(Diameter_mixed, (-1, 1)) * rp.ones((n_cpts, n_freq))  
+    Velocity_mixed     = rp.reshape(Velocity_mixed, (-1, 1)) * rp.ones((n_cpts, n_freq))
+    sound_ambient      = rp.reshape(sound_ambient, (-1, 1)) * rp.ones((n_cpts, n_freq))
 
     # =============================================================================     
     # Step 4: Comptue noise at each microphone
@@ -307,11 +307,12 @@ def turbofan_engine_noise(microphone_locations, turbofan, aeroacoustic_data, seg
         # Sum of the Total Noise
         SPL_total = 10 * rp.log10(10**(0.1*SPL_p)+10**(0.1*SPL_s)+10**(0.1*SPL_m))
 
+
         # Store SPL history      
         SPL_1_3_spectrum = SPL_1_3_spectrum.at[:,j,:].set(SPL_total)
-        SPL = SPL.at[:, j:j+1].set(SPL_arithmetic(SPL_total, sum_axis=1))
+        SPL = SPL.at[:, j:j+1].set(rp.reshape(SPL_arithmetic(SPL_total, sum_axis=1), (n_cpts, 1)))
         SPL_1_3_spectrum_dBA = SPL_1_3_spectrum_dBA.at[:,j,:].set(A_weighting_metric(SPL_total,frequency))
-        SPL_dBA = SPL_dBA.at[:, j:j+1].set(SPL_arithmetic(rp.atleast_2d(A_weighting_metric(SPL_total, frequency)), sum_axis=1))
+        SPL_dBA = SPL_dBA.at[:, j:j+1].set(rp.reshape(SPL_arithmetic(A_weighting_metric(SPL_total, frequency), sum_axis=1), (n_cpts, 1)))
 
     engine_noise                   = Data()   
     engine_noise.SPL_1_3_spectrum  = SPL_1_3_spectrum_dBA

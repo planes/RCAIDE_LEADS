@@ -8,8 +8,10 @@
 # ----------------------------------------------------------------------------------------------------------------------  
 import RCAIDE
 from RCAIDE.Framework.Core import Units 
-from scipy.interpolate import griddata
 import RNUMPY as rp
+# from rp.scipy.interpolate import griddata
+from scipy.interpolate import griddata
+
 import numpy as np
 
 # ----------------------------------------------------------------------
@@ -71,14 +73,41 @@ def compute_point_to_point_geospacial_data(settings):
     x1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(x1_coord,bottom_left_map_coords) * Units.kilometers
     y1 = RCAIDE.Framework.Analyses.Geodesics.Geodesics.Calculate_Distance(y1_coord,bottom_left_map_coords) * Units.kilometers
     
-    lat_flag             = rp.where(origin_coordinates<0)[0]
-    origin_coordinates[lat_flag]  = origin_coordinates[lat_flag] + 360 
-    long_flag            = rp.where(destination_coordinates<0)[0]
-    destination_coordinates[long_flag] = destination_coordinates[long_flag] + 360 
-    z0                   = griddata((Lat,Long), Elev, (rp.array([origin_coordinates[0]]),rp.array([origin_coordinates[1]])), method='nearest')[0]
-    z1                   = griddata((Lat,Long), Elev, (rp.array([destination_coordinates[0]]),rp.array([destination_coordinates[1]])), method='nearest')[0] 
-    dep_loc              = rp.array([x0,y0,z0])
-    des_loc              = rp.array([x1,y1,z1])
+    # Fix origin coordinates
+    origin_coordinates = rp.where(
+        origin_coordinates < 0,
+        origin_coordinates + 360,
+        origin_coordinates
+    )
+
+    # Fix destination coordinates
+    destination_coordinates = rp.where(
+        destination_coordinates < 0,
+        destination_coordinates + 360,
+        destination_coordinates
+    )
+
+    # Interpolate elevations
+    z0 = griddata(
+        (Lat, Long),
+        Elev,
+        (rp.array([origin_coordinates[0]]),
+        rp.array([origin_coordinates[1]])),
+        method='nearest'
+    )[0]
+
+    z1 = griddata(
+        (Lat, Long),
+        Elev,
+        (rp.array([destination_coordinates[0]]),
+        rp.array([destination_coordinates[1]])),
+        method='nearest'
+    )[0]
+
+    # Build 3D vectors
+    dep_loc = rp.array([x0, y0, z0])
+    des_loc = rp.array([x1, y1, z1])
+
     
     # pack data 
     settings.aircraft_origin_location      = dep_loc

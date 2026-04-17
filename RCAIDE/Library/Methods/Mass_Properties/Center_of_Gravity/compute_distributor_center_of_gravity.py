@@ -78,7 +78,7 @@ def compute_distributor_center_of_gravity(component,vehicle, length=0):
         lat_line_length    = abs(c_locs[i][1]) 
         lat_line_centroid  = c_locs[i][0]
         
-        lat_line_length *= (c_symm[i]+ 1)
+        lat_line_length = lat_line_length * (c_symm[i]+ 1)
         
         if insulation_cross_sectional_area == 0.0:
             lat_line_insulation_mass   = 0

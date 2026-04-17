@@ -167,7 +167,7 @@ def compute_rotor_weight(rotor,
     #-------------------------------------------------------------------------------
     x         = rp.linspace(0,rProp,N)
     dx        = x[1] - x[0]
-    fwdWeb = fwdWeb.at[:].set([round(loc - xShear,2) for loc in fwdWeb])
+    fwdWeb    = [round(loc - xShear,2) for loc in fwdWeb]
 
     #-------------------------------------------------------------------------------
     # Loads

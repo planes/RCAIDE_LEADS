@@ -200,20 +200,20 @@ def import_airfoil_geometry(airfoil_geometry_file, npoints = 201,surface_interpo
         
     # thicknes and camber distributions require equal points     
     x_up_surf_old  = rp.array(x_up_surf)   
-    arrx_up_interp = interpolate.interp1d(rp.arange(x_up_surf_old.size,dtype=rp.float),x_up_surf_old, kind=surface_interpolation)
+    arrx_up_interp = interpolate.interp1d(rp.arange(x_up_surf_old.size),x_up_surf_old, kind=surface_interpolation)
     x_up_surf_new  = arrx_up_interp(rp.linspace(0,x_up_surf_old.size-1,half_npoints))    
  
     x_lo_surf_old  = rp.array(x_lo_surf) 
-    arrx_lo_interp = interpolate.interp1d(rp.arange(x_lo_surf_old.size,dtype=rp.float),x_lo_surf_old, kind=surface_interpolation )
+    arrx_lo_interp = interpolate.interp1d(rp.arange(x_lo_surf_old.size),x_lo_surf_old, kind=surface_interpolation )
     x_lo_surf_new  = arrx_lo_interp(rp.linspace(0,x_lo_surf_old.size-1,half_npoints)) 
  
     # y coordinate s 
     y_up_surf_old  = rp.array(y_up_surf)   
-    arry_up_interp = interpolate.interp1d(rp.arange(y_up_surf_old.size,dtype=rp.float),y_up_surf_old, kind=surface_interpolation)
+    arry_up_interp = interpolate.interp1d(rp.arange(y_up_surf_old.size),y_up_surf_old, kind=surface_interpolation)
     y_up_surf_new  = arry_up_interp(rp.linspace(0,y_up_surf_old.size-1,half_npoints))    
  
     y_lo_surf_old  = rp.array(y_lo_surf) 
-    arry_lo_interp = interpolate.interp1d(rp.arange(y_lo_surf_old.size,dtype=rp.float),y_lo_surf_old, kind=surface_interpolation)
+    arry_lo_interp = interpolate.interp1d(rp.arange(y_lo_surf_old.size),y_lo_surf_old, kind=surface_interpolation)
     y_lo_surf_new  = arry_lo_interp(rp.linspace(0,y_lo_surf_old.size-1,half_npoints)) 
 
     # compute thickness, camber and concatenate coodinates 

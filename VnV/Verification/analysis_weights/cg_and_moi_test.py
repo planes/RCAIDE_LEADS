@@ -89,7 +89,7 @@ def Transport_Aircraft_Test():
     overwrite_MOI = True
     verbose_flag = False
     MOI ,moment_of_inertia_df = compute_vehicle_moment_of_inertia(vehicle,moment_of_inertia_df,
-                                        overwrite_moment_of_intertia = overwrite_MOI,
+                                        overwrite_moment_of_inertia = overwrite_MOI,
                                         verbose=verbose_flag)   
     
     print(vehicle.tag + ' Moment of Inertia')
@@ -98,7 +98,7 @@ def Transport_Aircraft_Test():
                           [       0.        , 58633557.83917309,        0.        ],
                           [-7824233.96896249,        0.        , 54526483.54615998]])
                           
-    MOI_error     = np.nan_to_num((MOI - accepted) / accepted)
+    MOI_error     = rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error = Data()

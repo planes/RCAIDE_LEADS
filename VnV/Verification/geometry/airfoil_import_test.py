@@ -15,6 +15,7 @@ from RCAIDE.Library.Plots import *
 import os
 
 import RNUMPY as rp
+import numpy as np
 import matplotlib.pyplot as plt
 
 # ----------------------------------------------------------------------
@@ -69,7 +70,7 @@ def main():
     # Multiple meshes use too much memory on AppVeyor 
     A_MASK_1 = convert_airfoil_to_meshgrid(airfoil_geometry_1) 
 
-    assert (len(rp.where(A_MASK_1)[0]) == 32313) 
+    assert (len(np.where(A_MASK_1)[0]) == 32313) 
 
     plot_airfoil(airfoil_geometry_with_selig[1])
 

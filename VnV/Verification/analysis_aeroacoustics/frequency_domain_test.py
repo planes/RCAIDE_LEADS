@@ -89,9 +89,9 @@ def Harmonic_Noise_Validation(PP):
     mic_positions = rp.zeros(( len(theta),3))
     for i in range(len(theta)):
         if theta[i]*Units.degrees < rp.pi/2:
-            mic_positions[i][:] = [-S*rp.cos(theta[i]*Units.degrees)  ,S*rp.sin(theta[i]*Units.degrees), 0.0]
+            mic_positions[i][:] = rp.array([-S*rp.cos(theta[i]*Units.degrees)  ,S*rp.sin(theta[i]*Units.degrees), 0.0])
         else: 
-            mic_positions[i][:] = [S*rp.sin(theta[i]*Units.degrees- rp.pi/2)  ,S*rp.cos(theta[i]*Units.degrees - rp.pi/2), 0.0]   
+            mic_positions[i][:] = rp.array([S*rp.sin(theta[i]*Units.degrees- rp.pi/2)  ,S*rp.cos(theta[i]*Units.degrees - rp.pi/2), 0.0])
  
     segment                                                = Segment()  
     conditions                                             = Results() 
