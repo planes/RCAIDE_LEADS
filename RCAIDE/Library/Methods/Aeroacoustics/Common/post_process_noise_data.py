@@ -236,7 +236,7 @@ def post_process_noise_data(results,
     
     # Step 8: Perform noise metric calculations 
     if (compute_SENEL or compute_SEL) or compute_eqivalent_noise:
-        Equivalent_SENEL_SEL_noise_metrics(noise_data, flight_times) 
+        noise_data = Equivalent_SENEL_SEL_noise_metrics(noise_data, flight_times) 
     
     if compute_PNL or compute_EPNL:
         noise_data.PLN  = PNL_noise_metric(noise_data.SPL_dBA_1_3_spectrum)

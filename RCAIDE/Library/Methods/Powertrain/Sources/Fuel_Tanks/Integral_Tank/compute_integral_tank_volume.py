@@ -1,4 +1,3 @@
-
 # RCAIDE/Methods/Powertrain/Sources/Fuel_Tanks/compute_integral_tank_volume.py
 # 
 # 
@@ -13,7 +12,8 @@ import  RCAIDE
 from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry,  compute_naca_4series 
 from RCAIDE.Library.Methods.Geometry.Planform import compute_segment_meshes
 import RNUMPY as rp
-from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_convex_hull, extrude_polygon
+from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_convex_hull, extrude_polygon, intersect_convex_polygons, get_polygon_area
+
 from RNUMPY.scipy.interpolate import interp1d
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -822,37 +822,36 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     for seg_i in range(1, num_tank_sections):
 
         if seg_i == 1:
-            inner_polygon = Polygon(polygon_points[seg_i - 1])
+            inner_pts  = rp.array(polygon_points[seg_i - 1])
+            inner_x    = inner_pts[:, 0]
+            inner_y    = inner_pts[:, 1]
         else:
-            inner_polygon = intersection_polygon
+            inner_x, inner_y = intersection_polygon
 
-        outer_polygon = Polygon(polygon_points[seg_i])
+        outer_pts  = rp.array(polygon_points[seg_i])
+        outer_x    = outer_pts[:, 0]
+        outer_y    = outer_pts[:, 1]
 
-        intersection_polygon = inner_polygon.intersection(outer_polygon)
+        ix, iy = intersect_convex_polygons(inner_x, inner_y, outer_x, outer_y)
+        intersection_polygon = (ix, iy)
 
-        if intersection_polygon.is_empty:
+        if len(ix) == 0:
             tank_volumes[seg_i - 1] = 0.0
             tank_lengths[seg_i - 1] = 0.0
             intersection_polygons.append(None)
             continue
 
-        if intersection_polygon.geom_type == 'MultiPolygon':
-            intersection_polygon = max(
-                intersection_polygon.geoms,
-                key=lambda g: g.area
-            )
+        area        = abs(get_polygon_area(ix, iy))
 
-        area = intersection_polygon.area
-
-        y_curr = segments[seg_names[seg_i]].percent_span_location * wing_span
-        y_prev = segments[seg_names[seg_i - 1]].percent_span_location * wing_span
+        y_curr      = segments[seg_names[seg_i]].percent_span_location * wing_span
+        y_prev      = segments[seg_names[seg_i - 1]].percent_span_location * wing_span
         span_length = y_curr - y_prev
-
-        volume = area * span_length
+        volume      = area * span_length
 
         tank_volumes[seg_i - 1] = volume
         tank_lengths[seg_i - 1] = span_length
         intersection_polygons.append(intersection_polygon)
+
 
     # ------------------------------------------------------
     # Get maximum volume section
@@ -870,16 +869,15 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
     if best_polygon is None:
         raise AttributeError("No valid intersection polygon found for aft tank volume.")
 
-    polygon_for_calc = best_polygon
-    if best_polygon.geom_type == 'MultiPolygon':
-        polygon_for_calc = max(best_polygon.geoms, key=lambda g: g.area)
+    ix, iy = best_polygon
 
     # Extract coordinates
-    coords = list(polygon_for_calc.exterior.coords)
+    coords = rp.column_stack([ix, iy])
 
-    # Remove duplicate last point (Shapely closes polygon automatically)
+    # Remove duplicate last point (Mesh utilities return closed polygons)
     if rp.allclose(coords[0], coords[-1]):
         coords = coords[:-1]
+
 
     # Ensure it's 4-sided
     if len(coords) != 4:
@@ -913,10 +911,8 @@ def compute_bwb_aft_integral_prismatic_tank_volume(fuel_tank, wing,fuel_tanks):
    
     # Build a 3D tank mesh by extruding the 2D section over length_external.
     # Extrusion is centered about y = 0 (symmetric about origin in spanwise axis).
-    tank_mesh = extrude_polygon(
-        polygon=polygon_for_calc,
-        height=float(fuel_tank.length_external),
-    )
+    tank_mesh = extrude_polygon(ix, iy, float(fuel_tank.length_external))
+
     R = Mesh.rotation_matrix(-rp.pi / 2.0, [1.0, 0.0, 0.0])
     T = Mesh.translation_matrix(
         [0.0, -0.5 * float(fuel_tank.length_external), 0.0]

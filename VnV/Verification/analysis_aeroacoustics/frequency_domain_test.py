@@ -104,7 +104,7 @@ def Harmonic_Noise_Validation(PP):
     conditions.frames.inertial.velocity_vector             = rp.array([[77.2, 0. ,0.],[ 77.0,0.,0.], [ 77.2, 0. ,0.]]) 
     conditions.freestream.mach_number                      = rp.atleast_2d(rp.linalg.norm(conditions.frames.inertial.velocity_vector,axis = 1)).T/ a
     conditions.frames.planet.true_course                   = rp.zeros((ctrl_pts,3,3)) 
-    conditions.frames.planet.true_course[:,0,0]            = rp.cos(true_course),
+    conditions.frames.planet.true_course[:,0,0]            = rp.cos(true_course)
     conditions.frames.planet.true_course[:,0,1]            = - rp.sin(true_course)
     conditions.frames.planet.true_course[:,1,0]            = rp.sin(true_course)
     conditions.frames.planet.true_course[:,1,1]            = rp.cos(true_course) 

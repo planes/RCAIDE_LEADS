@@ -10,6 +10,7 @@ import RCAIDE
 # package imports 
 import RNUMPY as rp
 from RCAIDE.Library.Methods.Geometry.Mesh import Mesh, get_convex_hull, clip_polygon_x, get_polygon_area, get_polygon_centroid
+from copy import deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Compute Blended Wing Body Center of Gravity
@@ -67,6 +68,7 @@ def compute_bwb_wing_center_of_gravity(bwb_wing,seg_keys):
         x_out = rp.array(outer_segment.airfoil.geometry.x_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][0]
         y_out = rp.array(outer_segment.airfoil.geometry.y_coordinates)[:-1] * bwb_wing.chords.root *outer_segment.root_chord_percent+ outer_segment.origin[0][2]
 
+        L = (outer_segment.percent_span_location - inner_segment.percent_span_location) * bwb_wing.spans.projected/2
 
         # STEP 1: Build 3D point clouds for both sections
         x1, y1 = x_in, y_in

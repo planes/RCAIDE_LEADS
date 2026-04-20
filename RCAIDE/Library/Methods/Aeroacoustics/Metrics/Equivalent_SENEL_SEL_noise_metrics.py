@@ -98,12 +98,15 @@ def Equivalent_SENEL_SEL_noise_metrics(noise_data, flight_times = ['12:00:00'],t
     SPL_max_min10 = SPL_max - 10 
     time_history  = rp.tile(flight_time[:,None,None], (1,len(SPL[0,:,0]),len(SPL[0,0,:])))
  
-    t_window      = rp.ma.masked_array(time_history, SPL >SPL_max_min10)
-    t_interval    = t_window[-1] -  t_window[0]
-    
+    mask          = SPL > SPL_max_min10
+    t_window      = rp.where(mask, rp.nan, time_history)
+    t_interval    = rp.nanmax(t_window, axis=0) - rp.nanmin(t_window, axis=0)
+        
     # mask all noise values that are lower than L-10 level
-    P0                = rp.ma.masked_array(p_sq_ref_flight_sq_SEL, SPL >SPL_max_min10)
-    P0_tot            = rp.nansum((1/(t_interval))*P0, axis=0)
+    P0_masked         = rp.where(SPL > SPL_max_min10, rp.nan, p_sq_ref_flight_sq_SEL)
+    safe_inv_t        = rp.where(t_interval == 0, rp.nan, 1.0 / t_interval)
+    P0_tot            = rp.nansum(safe_inv_t * P0_masked, axis=0)
     SENEL             = 10*rp.log10(P0_tot)
     noise_data.SENEL  = SENEL 
-    return  
+
+    return noise_data

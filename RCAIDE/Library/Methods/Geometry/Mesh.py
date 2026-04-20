@@ -189,18 +189,30 @@ def get_polygon_area(x, y):
     """Computes the signed area of a 2D polygon using the Shoelace formula."""
     x = rp.array(x)
     y = rp.array(y)
+    
+    if len(x) < 3:
+        return 0.0
+
     # Ensure closed
     if not rp.allclose(x[0], x[-1]) or not rp.allclose(y[0], y[-1]):
         x = rp.concatenate([x, [x[0]]])
         y = rp.concatenate([y, [y[0]]])
     return rp.sum(x[:-1] * y[1:] - x[1:] * y[:-1]) / 2.0
 
+
 def get_polygon_centroid(x, y):
     """Computes the centroid of a 2D polygon."""
     x = rp.array(x)
     y = rp.array(y)
+
+    if len(x) == 0:
+        return rp.zeros(2)
+    if len(x) < 3:
+        return rp.array([rp.mean(x), rp.mean(y)])
+
     # Ensure closed
     if not rp.allclose(x[0], x[-1]) or not rp.allclose(y[0], y[-1]):
+
         x = rp.concatenate([x, [x[0]]])
         y = rp.concatenate([y, [y[0]]])
     area = get_polygon_area(x, y)
@@ -298,6 +310,9 @@ def point_to_polygon_distance(px, py, x, y):
 
 def intersect_convex_polygons(x1, y1, x2, y2):
     """Intersects two convex polygons using Sutherland-Hodgman."""
+    if len(x1) < 3 or len(x2) < 3:
+        return rp.array([]), rp.array([])
+
     pts1 = rp.column_stack([x1, y1])
     if not rp.allclose(pts1[0], pts1[-1]):
         pts1 = rp.vstack([pts1, pts1[0]])
@@ -305,6 +320,7 @@ def intersect_convex_polygons(x1, y1, x2, y2):
     pts2 = rp.column_stack([x2, y2])
     if not rp.allclose(pts2[0], pts2[-1]):
         pts2 = rp.vstack([pts2, pts2[0]])
+
 
     # Ensure CCW
     if get_polygon_area(pts2[:, 0], pts2[:, 1]) < 0:

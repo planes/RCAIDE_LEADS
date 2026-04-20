@@ -304,7 +304,11 @@ def apply_pre_stall_data(AoA_sweep_deg, airfoil_aoa, airfoil_cl, airfoil_cd, CL,
     idx_lb = rp.argmin(rp.abs(CD - airfoil_cd[0]))
 
     # Find upper bound: last index where CD equals the maximum experimental CD
-    idx_ub = rp.argmax(rp.array(rp.abs(CD - airfoil_cd[-1]) < 1e-12,dtype=int))   # tolerance for float compare
+    # Create a boolean mask of matches
+    matches = rp.abs(CD - airfoil_cd[-1]) < 1e-12
+
+    # Multiply by indices to find the highest index where the condition is True
+    idx_ub = rp.argmax(matches * rp.arange(len(CD)))
 
     # Enforce monotonicity before and after the experimental region
     CD = CD.at[:idx_lb].set(rp.maximum(CD[:idx_lb], CD[idx_lb]))

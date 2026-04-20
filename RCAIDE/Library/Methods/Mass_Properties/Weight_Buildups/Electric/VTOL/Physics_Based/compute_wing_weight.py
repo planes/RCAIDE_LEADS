@@ -184,8 +184,8 @@ def compute_wing_weight(wing,
     x         = rp.sort(rp.concatenate((x,motor_spanwise_locations), axis=0))
     dx        = x[1] - x[0]
     N         = rp.size(x)
-    fwdWeb = fwdWeb.at[:].set([round(locFwd - xShear, 2) for locFwd in fwdWeb])
-    aftWeb = aftWeb.at[:].set([round(locAft - xShear, 2) for locAft in aftWeb])
+    fwdWeb = [round(locFwd - xShear, 2) for locFwd in fwdWeb]
+    aftWeb = [round(locAft - xShear, 2) for locAft in aftWeb]
 
     #-------------------------------------------------------------------------------
     # Loads

@@ -547,7 +547,7 @@ def apply_component_weights(analyses):
                         wing.mass_properties.mass = wing.mass_properties.mass * weight_correction_factors.empty.structural.empennage
                 if isinstance(wing, RCAIDE.Library.Components.Wings.Vertical_Tail):
                     if hasattr(weight_correction_factors.empty.structural, 'empennage'):
-                        wing.mass_properties.mass = wing.mass_properties.mas * weight_correction_factors.empty.structural.empennage
+                        wing.mass_properties.mass = wing.mass_properties.mass * weight_correction_factors.empty.structural.empennage
         elif key == 'fuselages':
             for fuselage in analyses.vehicle.fuselages:
                 if isinstance(fuselage, RCAIDE.Library.Components.Fuselages.Fuselage):
