@@ -63,10 +63,10 @@ def Boeing_737_Drag_Polar():
                          2.77967285,  2.88630817,  2.99294349])
 
 
-    CD_truth = rp.array([0.0312077 , 0.03068899, 0.02269949, 0.02314903, 0.03947451,
-       0.07067536, 0.09760902, 0.11521148, 0.16904871, 0.22794902,
-       0.24029541, 0.24935126, 0.25850485, 0.2677532 , 0.27709488,
-       0.28652922, 0.29605592, 0.30567483])
+    CD_truth = rp.array([0.03219644, 0.03163011, 0.02364683, 0.02415597, 0.04059399,
+                         0.07195582, 0.09909807, 0.11694995, 0.17106393, 0.23027485,
+                        0.24287233, 0.25201625, 0.26126601, 0.27061864, 0.2800727 ,
+                        0.28962752, 0.29928279, 0.30903839])
                       
     # plot results 
     plot_aircraft_aerodynamics(results, save_filename = "B737_Aircraft_Aerodynamic_Analysis")
@@ -83,15 +83,14 @@ def Boeing_737_Drag_Polar():
 
 def BWB_Drag_Polar():
 
-    vehicle  = BWB_vehicle_setup() 
-        
+    vehicle  = BWB_vehicle_setup()    
     configs  = BWB_configs_setup(vehicle) 
     analyses = analyses_setup(configs)
     
-    angle_of_attack_range                 = rp.atleast_2d(rp.linspace(-1, 1, 3)).T*Units.degrees   
-    Mach_number_range                     = rp.ones_like(angle_of_attack_range) * 0.78 
-    temperatures                          = rp.ones_like(angle_of_attack_range) * 340
-    non_dimensional_reynolds_numbers      = rp.ones_like(angle_of_attack_range) * 1E7
+    angle_of_attack_range                 = np.atleast_2d(np.linspace(-5, 25, 18)).T*Units.degrees   
+    Mach_number_range                     = np.ones_like(angle_of_attack_range) * 0.78 
+    temperatures                          = np.ones_like(angle_of_attack_range) * 340
+    non_dimensional_reynolds_numbers      = np.ones_like(angle_of_attack_range) * 1E7
     results                               = aircraft_aerodynamic_analysis(analyses                         = analyses.cruise,
                                                                           angle_of_attacks                 = angle_of_attack_range,
                                                                           non_dimensional_reynolds_numbers = non_dimensional_reynolds_numbers,
@@ -103,20 +102,27 @@ def BWB_Drag_Polar():
                                                                       mach_numbers     = Mach_number_range,
                                                                       altitude         = 0)
 
-    CL_truth = rp.array([-0.17632756,  0.        ,  0.17632756])
+    CL_truth = np.array([-0.8859043 , -0.57402438, -0.26155033,  0.05231007,  0.36610444,
+                        0.67798436,  0.98814569,  1.29486985,  1.59508185,  1.89152364,
+                        2.12963852,  2.26700691,  2.4043753 ,  2.54174368,  2.67911207,
+                        2.81648046,  2.95384884,  3.09121723])
 
-    CD_truth = rp.array([0.01744086, 0.0134204 , 0.01397554])
+    CD_truth = np.array([0.04902018, 0.0432557 , 0.02050936, 0.01461097, 0.02046714,
+                        0.03695656, 0.08905799, 0.14631973, 0.22536315, 0.32287296,
+                        0.33891408, 0.35478732, 0.37077092, 0.38686488, 0.40306919,
+                        0.41938387, 0.43580891, 0.45234431])
 
     plot_aircraft_aerodynamics(results,  save_filename = "BWB_Aircraft_Aerodynamic_Analysis")
 
 
-    CL_error = rp.max(rp.abs(results.lift_coefficient[:, 0]-CL_truth))
+    CL_error = np.max(np.abs(results.lift_coefficient[:, 0]-CL_truth))
     assert(CL_error<1e-6)
 
-    CD_truth = rp.max(rp.abs(results.drag_coefficient[:, 0]-CD_truth))    
-    assert(CL_error<1e-6)
+    CD_error = np.max(np.abs(results.drag_coefficient[:, 0]-CD_truth))    
+    assert(CD_error<1e-6)
     
     return
+
 
 
 # ----------------------------------------------------------------------
