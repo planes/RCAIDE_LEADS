@@ -12,9 +12,8 @@ from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 from RCAIDE.Framework.Optimization.Common         import Nexus
 from RCAIDE.Framework.Analyses.Process            import Process
 
-import scipy 
-import scipy.optimize
 import RNUMPY as rp 
+
 import numpy as np
 import sys 
 import os 
@@ -76,13 +75,16 @@ def converge(segment):
                                  ' to be equal to the number of residuals (equations) to use fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
                                  '\n i.e. segment.state.numerics.solver.type  = "optimize" ') 
         else:
-            unknowns,infodict,ier,error_message = scipy.optimize.fsolve(iterate_root_finder,
+            unknowns,infodict,ier,error_message = rp.scipy.optimize.fsolve(iterate_root_finder,
                                                  unknowns,
                                                  args   = segment,
                                                  xtol   = segment.state.numerics.solver.tolerance_solution,
                                                  maxfev = segment.state.numerics.solver.max_evaluations,
                                                  epsfcn = segment.state.numerics.solver.step_size,
                                                  full_output = 1)
+            
+            # Run the mission again to reset the unknowns to the final ones
+            residuals = iterate_root_finder(unknowns,segment)
         
         if ier !=1:
             mission_converge = False
