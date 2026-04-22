@@ -70,7 +70,6 @@ def Boeing_737_Drag_Polar():
                       
     # plot results 
     plot_aircraft_aerodynamics(results, save_filename = "B737_Aircraft_Aerodynamic_Analysis")
-    plot_pressure_coefficient_distribution(results)
     
     # check errors 
     CL_error = rp.max(rp.abs(results.lift_coefficient[:, 0]-CL_truth))

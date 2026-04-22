@@ -94,9 +94,10 @@ def total_drag(state,settings,geometry):
     cooling_drag          = drag.cooling.total 
     trim_drag             = drag.trim.total  
     form_drag             = drag.form.total   
+    wave_drag             = drag.wave.total  
  
     # total drag 
     drag.total =  settings.trim_drag_correction_factor * (parasite_total + induced_total  + compressibility_total + miscellaneous_drag \
-                  + cooling_drag + trim_drag + form_drag   + settings.drag_coefficient_increment)  
+                  + cooling_drag + trim_drag + form_drag + wave_drag    + settings.drag_coefficient_increment)  
 
     return  
