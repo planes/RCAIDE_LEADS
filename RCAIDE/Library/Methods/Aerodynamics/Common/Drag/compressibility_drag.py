@@ -151,7 +151,10 @@ def compressibility_drag(state,settings,geometry):
             # Compressibility drag  
             cd_compressibility = dcdc_cos3g * (rp.cos(sweep_w)**3)  
  
-    cd_comp  = cd_compressibility 
+    cd_comp  = cd_compressibility*(sub_h00(Mach))   
+   
+    # store results  
+    conditions.aerodynamics.coefficients.drag.compressible.total =  cd_comp # Verification Required
 
     return  cd_comp
 
