@@ -46,7 +46,7 @@ def Boeing_737_Drag_Polar():
     configs  = B737_configs_setup(vehicle) 
     analyses = analyses_setup(configs)  
     
-    angle_of_attack_range                 = rp.atleast_2d(rp.linspace(-1, 1, 3)).T*Units.degrees   
+    angle_of_attack_range                 = np.atleast_2d(np.linspace(-5, 25, 18)).T*Units.degrees   
     Mach_number_range                     = rp.ones_like(angle_of_attack_range) * 0.78 
     temperatures                          = rp.ones_like(angle_of_attack_range) * 340
     non_dimensional_reynolds_numbers      = rp.ones_like(angle_of_attack_range) * 1E7
@@ -57,10 +57,16 @@ def Boeing_737_Drag_Polar():
                                                                           mach_numbers                     = Mach_number_range)
 
 
-    CL_truth = rp.array([0.46705086, 0.64126679, 0.81505847])
+    CL_truth = rp.array([-0.38186938, -0.10627372,  0.16950056,  0.4455403 ,  0.72072764,
+                         0.99313006,  1.26355613,  1.5300295 ,  1.78970029,  2.04543276,
+                         2.24649627,  2.35313159,  2.4597669 ,  2.56640222,  2.67303754,
+                         2.77967285,  2.88630817,  2.99294349])
 
 
-    CD_truth = rp.array([0.02162666, 0.02365738, 0.02865083])
+    CD_truth = rp.array([0.0312077 , 0.03068899, 0.02269949, 0.02314903, 0.03947451,
+       0.07067536, 0.09760902, 0.11521148, 0.16904871, 0.22794902,
+       0.24029541, 0.24935126, 0.25850485, 0.2677532 , 0.27709488,
+       0.28652922, 0.29605592, 0.30567483])
                       
     # plot results 
     plot_aircraft_aerodynamics(results, save_filename = "B737_Aircraft_Aerodynamic_Analysis")
