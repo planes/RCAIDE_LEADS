@@ -313,7 +313,7 @@ def add_mission_variables(segment):
     elif segment.state.numerics.solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
         optimization_problem.objective = Data()
-        optimization_problem.objective.name = np.array(['maximum_power'], dtype=object)
+        optimization_problem.objective.name = np.array([['maximum_power']], dtype=object)
         optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     else:
         raise Exception('undefined objective function')
@@ -337,9 +337,76 @@ def add_mission_variables(segment):
     nexus.postprocess = Data()
     
     # Step 10: Append optimization problem 
-    nexus.optimization_problem   = optimization_problem
+    nexus.optimization_problem   = convert_problem_style(optimization_problem)
+
+
     
     return nexus
+
+def convert_problem_style(problem):
+    # 1. INPUTS
+    if hasattr(problem, 'inputs') and not isinstance(problem.inputs, Data):
+        arr = rp.array(problem.inputs or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1) # Force 2D if passed a flat list
+            
+        D = Data()
+        if len(arr) == 0:
+            D.name = rp.array([], dtype=object).reshape(0, 1)
+            D.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            D.name = arr[:, 0:1] # 0:1 keeps it 2D
+            D.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.inputs = D
+
+    # 2. OBJECTIVE
+    if hasattr(problem, 'objective') and not isinstance(problem.objective, Data):
+        arr = rp.array(problem.objective or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        D = Data()
+        if len(arr) == 0:
+            D.name = rp.array([], dtype=object).reshape(0, 1)
+            D.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            D.name = arr[:, 0:1]
+            D.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.objective = D
+
+    # 3. CONSTRAINTS
+    if hasattr(problem, 'constraints') and not isinstance(problem.constraints, Data):
+        arr = rp.array(problem.constraints or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        C = Data()
+        if len(arr) == 0:
+            C.name_signs = rp.array([], dtype=object).reshape(0, 2)
+            C.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            C.name_signs = arr[:, 0:2]
+            C.value = rp.array(arr[:, 2:], dtype=rp.float)
+        problem.constraints = C
+
+    # 4. OUTPUTS (Adding this since your debugger referenced it)
+    if hasattr(problem, 'outputs') and not isinstance(problem.outputs, Data):
+        arr = rp.array(problem.outputs or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        O = Data()
+        if len(arr) == 0:
+            O.name = rp.array([], dtype=object).reshape(0, 1)
+            O.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            O.name = arr[:, 0:1]
+            O.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.outputs = O
+
+    return problem
+
+    return problem
 
 def iterate_segment(): 
     procedure                           = Process()  

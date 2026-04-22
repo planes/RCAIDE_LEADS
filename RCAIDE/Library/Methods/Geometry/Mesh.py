@@ -185,8 +185,8 @@ def extrude_polygon(x, y, height):
     all_pts    = rp.vstack([pts_bottom, pts_top])
     return get_convex_hull(all_pts)
 
-def get_polygon_area(x, y):
-    """Computes the signed area of a 2D polygon using the Shoelace formula."""
+def get_polygon_area_signed(x, y):
+    """Computes the signed area of a 2D polygon using the Shoelace formula. Can be negative"""
     x = rp.array(x)
     y = rp.array(y)
     
@@ -198,6 +198,10 @@ def get_polygon_area(x, y):
         x = rp.concatenate([x, [x[0]]])
         y = rp.concatenate([y, [y[0]]])
     return rp.sum(x[:-1] * y[1:] - x[1:] * y[:-1]) / 2.0
+
+def get_polygon_area(x,y):
+    """Computes the total area of a 2D polygon using the Shoelace formula. Postive only."""
+    return rp.abs(get_polygon_area_signed(x,y))
 
 
 def get_polygon_centroid(x, y):
@@ -215,7 +219,7 @@ def get_polygon_centroid(x, y):
 
         x = rp.concatenate([x, [x[0]]])
         y = rp.concatenate([y, [y[0]]])
-    area = get_polygon_area(x, y)
+    area = get_polygon_area_signed(x, y)
     if abs(area) < 1e-18:
         return rp.array([rp.mean(x[:-1]), rp.mean(y[:-1])])
     
@@ -323,7 +327,7 @@ def intersect_convex_polygons(x1, y1, x2, y2):
 
 
     # Ensure CCW
-    if get_polygon_area(pts2[:, 0], pts2[:, 1]) < 0:
+    if get_polygon_area_signed(pts2[:, 0], pts2[:, 1]) < 0:
         pts2 = pts2[::-1]
     
     def clip_edge(current_pts, a, b):
