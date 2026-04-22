@@ -261,16 +261,22 @@ class Data(dict):
                 continue
             
             # recurse into other dict types
-            if isinstance(value,dict):
+            if isinstance(value, dict):
                 if not value:
                     val = '\n'
                 else:
                     try:
-                        val = value.__str2(indent+new_indent)
+                        # This works if 'value' is another custom Data object
+                        val = value.__str2(indent + new_indent)
                     except RuntimeError: # recursion limit
                         val = ''
-                    except:
-                        val = value.__str__(indent+new_indent)
+                    except AttributeError:
+                        # If 'value' is a standard dict, it won't have __str2.
+                        # Standard dicts don't take indent arguments, so we cast directly.
+                        val = str(value) + '\n'
+                    except TypeError:
+                        # Catch-all just in case another type issue arises
+                        val = str(value) + '\n'
                                                 
             # everything else
             else:
