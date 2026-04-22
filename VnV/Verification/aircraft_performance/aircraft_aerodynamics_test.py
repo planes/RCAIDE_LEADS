@@ -148,7 +148,7 @@ def base_analysis(vehicle):
     analyses.append(geometry)
   
     aerodynamics   = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
-    aerodynamics.settings.use_surrogate = False 
+    aerodynamics.settings.use_surrogate = True
     analyses.append(aerodynamics)
     
     return analyses 
