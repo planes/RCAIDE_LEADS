@@ -65,7 +65,7 @@ def velocity_distribution(qg,x,y,xbar,ybar,st,ct,alpha_2d,npanel,ncases,ncpts):
     rij_dot_rij_plus_1   = (xbar_2d-x_2d[:,:,:,:-1])*(xbar_2d-x_2d[:,:,:,1:]) + (ybar_2d-y_2d[:,:,:,:-1])*(ybar_2d-y_2d[:,:,:,1:])  
     anglesign            = rp.sign((xbar_2d-x_2d[:,:,:,:-1])*(ybar_2d-y_2d[:,:,:,1:]) - (xbar_2d-x_2d[:,:,:,1:])*(ybar_2d-y_2d[:,:,:,:-1]))
     r_ratio              = rij_dot_rij_plus_1/rij/rij_plus_1
-    r_ratio[r_ratio>1.0] = 1.0 # numerical noise     
+    r_ratio              = rp.minimum(r_ratio, 1.0) # numerical noise     
     betaij               = rp.real(anglesign*rp.arccos(r_ratio))     
     # betaij[aoas,res,diag_indices,diag_indices] = rp.pi
     for i in range(ncases):
@@ -79,7 +79,7 @@ def velocity_distribution(qg,x,y,xbar,ybar,st,ct,alpha_2d,npanel,ncases,ncpts):
     rij_2d          = rp.swapaxes(rp.swapaxes(rij,0,2),1,3) 
     rij_plus_1_2d   = rp.swapaxes(rp.swapaxes(rij_plus_1,0,2),1,3) 
      
-    vt_2d += rp.sum(qg_2d/2/rp.pi*(sti_minus_j_2d*betaij_2d - cti_minus_j_2d*rp.log(rij_plus_1_2d/rij_2d)),1)  + \
+    vt_2d = vt_2d + rp.sum(qg_2d/2/rp.pi*(sti_minus_j_2d*betaij_2d - cti_minus_j_2d*rp.log(rij_plus_1_2d/rij_2d)),1)  + \
              rp.sum(gamma/2/rp.pi*(sti_minus_j_2d*rp.log(rij_plus_1_2d/rij_2d) + cti_minus_j_2d*betaij_2d),1)
     
     return  vt_2d

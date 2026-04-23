@@ -70,7 +70,7 @@ def infl_coeff(x,y,xbar,ybar,st,ct,npanel,ncases,ncpts):
     rij_dot_rij_plus_1   = (xbar_2d-x_2d[:,:,:,:-1])*(xbar_2d-x_2d[:,:,:,1:]) + (ybar_2d-y_2d[:,:,:,:-1])*(ybar_2d-y_2d[:,:,:,1:])  
     anglesign            = rp.sign((xbar_2d-x_2d[:,:,:,:-1])*(ybar_2d-y_2d[:,:,:,1:]) - (xbar_2d-x_2d[:,:,:,1:])*(ybar_2d-y_2d[:,:,:,:-1]))
     r_ratio              = rij_dot_rij_plus_1/rij/rij_plus_1
-    r_ratio[r_ratio>1.0] = 1.0 # numerical noise 
+    r_ratio              = rp.minimum(r_ratio, 1.0) # numerical noise 
     betaij               = rp.real(anglesign*rp.arccos(r_ratio))  
     diag_indices         = rp.array(rp.tile(rp.repeat(rp.arange(npanel),ncases),ncpts))
     aoas                 = rp.array(rp.tile(rp.arange(ncases),ncpts*npanel))

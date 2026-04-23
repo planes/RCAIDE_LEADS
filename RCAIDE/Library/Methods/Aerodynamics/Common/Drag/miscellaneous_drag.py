@@ -147,20 +147,20 @@ def miscellaneous_drag(state,settings,geometry):
     miscellaneous_drag =  rp.zeros_like(Mach) 
     swet_tot       = 0.
     for wing in geometry.wings:
-        swet_tot += wing.areas.wetted 
+        swet_tot = swet_tot + wing.areas.wetted 
     for fuselage in geometry.fuselages:
-        swet_tot += fuselage.areas.wetted
+        swet_tot = swet_tot + fuselage.areas.wetted
     for boom in geometry.booms:
-        swet_tot += boom.areas.wetted
+        swet_tot = swet_tot + boom.areas.wetted
     for network in geometry.networks: 
         for propulsor in network.propulsors:   
             if propulsor.nacelle !=  None:                    
-                swet_tot += propulsor.nacelle.areas.wetted 
+                swet_tot = swet_tot + propulsor.nacelle.areas.wetted 
     miscellaneous_drag = miscellaneous_drag.at[:,0].set((0.40* (0.0184 + 0.000469 * swet_tot - 1.13*10**-7 * swet_tot ** 2)) / S_ref)
     
     # supersonic 
     fuselage_upsweep_drag   = 0.006 /S_ref  
-    miscellaneous_drag[Mach>1] = fuselage_upsweep_drag
+    miscellaneous_drag = rp.where(Mach > 1, fuselage_upsweep_drag, miscellaneous_drag)
     
     # total misc drag 
     total_miscellaneous_drag = miscellaneous_drag + landing_gear_drag

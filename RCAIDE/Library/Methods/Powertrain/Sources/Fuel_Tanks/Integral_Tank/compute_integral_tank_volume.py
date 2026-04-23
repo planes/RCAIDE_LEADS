@@ -281,9 +281,9 @@ def compute_wing_integral_tank_volume(fuel_tank,wing,n_points = 101,scale_factor
             volume = compute_segmented_wing_integral_tank_fuel_volume(wing,inner_segment,outer_segment,fuel_tank)
             inner_segment.volume_properties.fuel = volume
     
-            total_fuel_mass      += volume * fuel_tank.fuel.density
-            segment_tank_moment  += rp.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
-            total_fuel_volume    += volume
+            total_fuel_mass      =  total_fuel_mass + volume * fuel_tank.fuel.density
+            segment_tank_moment  = segment_tank_moment + rp.array(inner_segment.mass_properties.center_of_gravity)[0] * volume * fuel_tank.fuel.density  
+            total_fuel_volume    = total_fuel_volume + volume
      
         inner_segment_x_start = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_start[0])
         inner_segment_x_end   = wing.segments[seg_tags[0]].origin[0][0] + wing.segments[seg_tags[0]].root_chord_percent * wing.chords.root * (fuel_tank.segments_percent_chord_end[0])
@@ -477,7 +477,7 @@ def compute_segmented_wing_integral_tank_fuel_volume(wing,inner_segment,outer_se
     volume = (1 /3) * ( A_1 + A_2 + rp.sqrt(A_1*A_2)) *h
 
     if wing.xz_plane_symmetric:
-        volume *= 2    
+        volume = volume * 2    
  
     return volume
 

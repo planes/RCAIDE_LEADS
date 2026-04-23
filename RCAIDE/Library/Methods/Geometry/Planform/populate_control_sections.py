@@ -40,8 +40,8 @@ def populate_control_sections(wing):
     # loop throught the control surfaces on the wing 
     for cs in w_cs :
         sf    = rp.zeros(2) # set a temporary data structure to store the span fraction bounds
-        sf[0] = cs.span_fraction_start
-        sf[1] = cs.span_fraction_end
+        sf = sf.at[0].set(cs.span_fraction_start)
+        sf = sf.at[1].set(cs.span_fraction_end)
         
         # loop though the segments on the wing
         for i , seg in enumerate(w_seg):

@@ -144,7 +144,7 @@ def wing_planform(wing):
         C = span_locs[:-1]
         integral = ((A+B*(span_locs[1:]-C))**3-(A+B*(span_locs[:-1]-C))**3)/(3*B)
         # For the cases when the wing doesn't taper in a spot
-        integral[rp.isnan(integral)] = (A[rp.isnan(integral)]**2)*((lengths_ndim)[rp.isnan(integral)])
+        integral = rp.where(rp.isnan(integral), (A**2) * lengths_ndim, integral)
         MAC = (semispan*(1+sym)/(ref_area))*rp.sum(integral)
         
         # Calculate the taper ratio
@@ -180,11 +180,11 @@ def wing_planform(wing):
         
         
         single_side_aerodynamic_center = (rp.array(aerodynamic_center)*1.)
-        single_side_aerodynamic_center[0] = single_side_aerodynamic_center[0] - MAC*.25    
+        single_side_aerodynamic_center = single_side_aerodynamic_center.at[0].set(single_side_aerodynamic_center[0] - MAC*.25)    
         if sym== True:
-            aerodynamic_center[1] = 0 
+            aerodynamic_center = aerodynamic_center.at[1].set(0) 
             
-        aerodynamic_center[0] = single_side_aerodynamic_center[0]
+        aerodynamic_center = aerodynamic_center.at[0].set(single_side_aerodynamic_center[0])
         
         # Total length for supersonics
         total_length = rp.tan(le_sweep_total)*semispan + chords[-1]*RC
@@ -442,7 +442,7 @@ def segment_properties(wing):
             inboard_segment.aspect_ratio                   = (span_seg **2) / Sref_seg
             inboard_segment.areas.exposed                  = S_exposed_seg
             inboard_segment.areas.wetted                   = Swet_seg
-            total_wetted_area                              += Swet_seg  
+            total_wetted_area                              = total_wetted_area + Swet_seg  
            
             # compute wing mean aerodynamic chord  
             MAC = wing.chords.mean_aerodynamic

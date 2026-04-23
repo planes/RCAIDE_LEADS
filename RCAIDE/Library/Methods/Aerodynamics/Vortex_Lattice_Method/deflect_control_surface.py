@@ -212,45 +212,50 @@ def deflect_control_surface(VD,wing):
             Z_as = Z_as.at[start_full:stop_full].set(rp.append(raw_VD.zeta_prime_a1, raw_VD.zeta_prime_a2[-1]))
         
         # pack surface VD values into vehicle VD    
-        VD.XA1[condition]    = xi_prime_a1    
-        VD.XAC[condition]    = xi_prime_ac    
-        VD.XAH[condition]    = xi_prime_ah    
-        VD.XA2[condition]    = xi_prime_a2    
-        VD.YA1[condition]    = y_prime_a1     
-        VD.YAH[condition]    = y_prime_ah     
-        VD.YAC[condition]    = y_prime_ac     
-        VD.YA2[condition]    = y_prime_a2     
-        VD.ZA1[condition]    = zeta_prime_a1  
-        VD.ZAH[condition]    = zeta_prime_ah  
-        VD.ZAC[condition]    = zeta_prime_ac  
-        VD.ZA2[condition]    = zeta_prime_a2  
-        VD.XB1[condition]    = xi_prime_b1    
-        VD.XBH[condition]    = xi_prime_bh    
-        VD.XBC[condition]    = xi_prime_bc    
-        VD.XB2[condition]    = xi_prime_b2    
-        VD.YB1[condition]    = y_prime_b1     
-        VD.YBH[condition]    = y_prime_bh     
-        VD.YBC[condition]    = y_prime_bc     
-        VD.YB2[condition]    = y_prime_b2     
-        VD.ZB1[condition]    = zeta_prime_b1  
-        VD.ZBH[condition]    = zeta_prime_bh  
-        VD.ZBC[condition]    = zeta_prime_bc  
-        VD.ZB2[condition]    = zeta_prime_b2  
-        VD.XCH[condition]    = xi_prime_ch    
-        VD.XC [condition]    = xi_prime       
-        VD.YCH[condition]    = y_prime_ch     
-        VD.YC [condition]    = y_prime        
-        VD.ZCH[condition]    = zeta_prime_ch  
-        VD.ZC [condition]    = zeta_prime    
+        VD.XA1 = VD.XA1.at[condition].set(xi_prime_a1)    
+        VD.XAC = VD.XAC.at[condition].set(xi_prime_ac)    
+        VD.XAH = VD.XAH.at[condition].set(xi_prime_ah)    
+        VD.XA2 = VD.XA2.at[condition].set(xi_prime_a2)    
+        
+        VD.YA1 = VD.YA1.at[condition].set(y_prime_a1)     
+        VD.YAH = VD.YAH.at[condition].set(y_prime_ah)     
+        VD.YAC = VD.YAC.at[condition].set(y_prime_ac)     
+        VD.YA2 = VD.YA2.at[condition].set(y_prime_a2)     
+        
+        VD.ZA1 = VD.ZA1.at[condition].set(zeta_prime_a1)  
+        VD.ZAH = VD.ZAH.at[condition].set(zeta_prime_ah)  
+        VD.ZAC = VD.ZAC.at[condition].set(zeta_prime_ac)  
+        VD.ZA2 = VD.ZA2.at[condition].set(zeta_prime_a2)  
+        
+        VD.XB1 = VD.XB1.at[condition].set(xi_prime_b1)    
+        VD.XBH = VD.XBH.at[condition].set(xi_prime_bh)    
+        VD.XBC = VD.XBC.at[condition].set(xi_prime_bc)    
+        VD.XB2 = VD.XB2.at[condition].set(xi_prime_b2)    
+        
+        VD.YB1 = VD.YB1.at[condition].set(y_prime_b1)     
+        VD.YBH = VD.YBH.at[condition].set(y_prime_bh)     
+        VD.YBC = VD.YBC.at[condition].set(y_prime_bc)     
+        VD.YB2 = VD.YB2.at[condition].set(y_prime_b2)     
+        
+        VD.ZB1 = VD.ZB1.at[condition].set(zeta_prime_b1)  
+        VD.ZBH = VD.ZBH.at[condition].set(zeta_prime_bh)  
+        VD.ZBC = VD.ZBC.at[condition].set(zeta_prime_bc)  
+        VD.ZB2 = VD.ZB2.at[condition].set(zeta_prime_b2)  
+        
+        VD.XCH = VD.XCH.at[condition].set(xi_prime_ch)    
+        VD.XC  = VD.XC.at[condition].set(xi_prime)       
+        VD.YCH = VD.YCH.at[condition].set(y_prime_ch)     
+        VD.YC  = VD.YC.at[condition].set(y_prime)        
+        VD.ZCH = VD.ZCH.at[condition].set(zeta_prime_ch)  
+        VD.ZC  = VD.ZC.at[condition].set(zeta_prime)    
         
         X_last_bs = rp.append(raw_VD.xi_prime_b1  , raw_VD.xi_prime_b2  [-1])
         Y_last_bs = rp.append(raw_VD.y_prime_b1   , raw_VD.y_prime_b2   [-1])
         Z_last_bs = rp.append(raw_VD.zeta_prime_b1, raw_VD.zeta_prime_b2[-1])
         
-        VD.X[condition_full] = rp.append(X_as, X_last_bs)
-        VD.Y[condition_full] = rp.append(Y_as, Y_last_bs)
-        VD.Z[condition_full] = rp.append(Z_as, Z_last_bs)
-        
+        VD.X = VD.X.at[condition_full].set(rp.append(X_as, X_last_bs))
+        VD.Y = VD.Y.at[condition_full].set(rp.append(Y_as, Y_last_bs))
+        VD.Z = VD.Z.at[condition_full].set(rp.append(Z_as, Z_last_bs))
         
     wing.deflection_last = wing.deflection*1.
     

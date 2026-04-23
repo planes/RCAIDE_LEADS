@@ -212,7 +212,7 @@ def add_mission_variables(segment):
     units             = rp.broadcast_to(rp.array(Units.less),(len_inputs,))
     # scaling factor for optimizer 
     factor = rp.ceil(rp.log10(abs(initial_values)))
-    factor[rp.isinf(factor)] = 0
+    factor = rp.where(rp.isinf(factor), 0, factor)
     scale  = 10 ** (factor)
     
     # Step 2.4 Add in the inputs 

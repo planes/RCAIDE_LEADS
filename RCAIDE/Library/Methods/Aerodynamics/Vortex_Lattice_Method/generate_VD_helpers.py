@@ -62,7 +62,7 @@ def postprocess_VD(VD, settings):
     
     # Leading edge sweeps 
     panel_sweeps = rp.arctan((VD.XA1-VD.XB1) /(VD.YA1-VD.YB1))
-    panel_sweeps[VD.YA1 > VD.YB1] = -panel_sweeps[VD.YA1 > VD.YB1]
+    panel_sweeps = rp.where(VD.YA1 > VD.YB1, -panel_sweeps, panel_sweeps)
     VD.leading_edge_sweeps =  panel_sweeps[LE_ind] 
 
     # Chord widths
@@ -169,6 +169,6 @@ def compute_unit_normal(VD):
     unit_normal = (cross.T / rp.linalg.norm(cross,axis=1)).T
 
      # adjust Z values, no values should point down, flip vectors if so
-    unit_normal[unit_normal[:,2]<0,:] = -unit_normal[unit_normal[:,2]<0,:]
+    unit_normal = rp.where((unit_normal[:, 2] < 0)[:, None], -unit_normal, unit_normal)
 
     return unit_normal

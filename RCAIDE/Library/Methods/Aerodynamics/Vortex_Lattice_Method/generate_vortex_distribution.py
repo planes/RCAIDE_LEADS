@@ -493,7 +493,7 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
         span = span/2
         VD.vortex_lift.append(wing.vortex_lift)
         
-    VD.counter  +=1
+    VD.counter  = VD.counter + 1
     wing.surface_ID = VD.counter*1
 
     # ---------------------------------------------------------------------------------------
@@ -538,25 +538,27 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
     #          If applicable, append airfoil section VD and flap/aileron deflection angles.
     # --------------------------------------------------------------------------------------- 
     for i_break in range(n_breaks):   
-        break_spans[i_break]    = span_breaks[i_break].span_fraction*span  
-        break_chord[i_break]    = span_breaks[i_break].local_chord
-        break_twist[i_break]    = span_breaks[i_break].twist
-        break_dihedral[i_break] = span_breaks[i_break].dihedral_outboard                    
+        break_spans = break_spans.at[i_break].set(span_breaks[i_break].span_fraction*span)  
+        break_chord = break_chord.at[i_break].set(span_breaks[i_break].local_chord)
+        break_twist = break_twist.at[i_break].set(span_breaks[i_break].twist)
+        break_dihedral = break_dihedral.at[i_break].set(span_breaks[i_break].dihedral_outboard)             
 
         # get leading edge sweep. make_VLM wings should have precomputed this for all span_breaks
         is_not_last_break    = (i_break != n_breaks-1)
-        break_sweep[i_break] = span_breaks[i_break].sweep_outboard_LE if is_not_last_break else 0
+        break_sweep = break_sweep.at[i_break].set(span_breaks[i_break].sweep_outboard_LE if is_not_last_break else 0)
 
         # find span and area. All span_break offsets should be calculated in make_VLM_wings
         if i_break == 0:
-            section_span[i_break]   = 0.0
-            break_x_offset[i_break] = 0.0  
-            break_z_offset[i_break] = 0.0       
+            section_span = section_span.at[i_break].set(0.0)
+            break_x_offset = break_x_offset.at[i_break].set(0.0)  
+            break_z_offset = break_z_offset.at[i_break].set(0.0)       
         else:
-            section_span[i_break]   = break_spans[i_break] - break_spans[i_break-1]
-            section_area[i_break]   = 0.5*(break_chord[i_break-1] + break_chord[i_break])*section_span[i_break]
-            break_x_offset[i_break] = span_breaks[i_break].x_offset
-            break_z_offset[i_break] = span_breaks[i_break].dih_offset
+            section_span = section_span.at[i_break].set(break_spans[i_break] - break_spans[i_break-1])
+            new_area = 0.5 * (break_chord[i_break-1] + break_chord[i_break]) * section_span[i_break]
+            section_area = section_area.at[i_break].set(new_area)
+            
+            break_x_offset = break_x_offset.at[i_break].set(span_breaks[i_break].x_offset)
+            break_z_offset = break_z_offset.at[i_break].set(span_breaks[i_break].dih_offset)
 
         # Get airfoil section VD  
         if span_breaks[i_break].airfoil: 
@@ -571,8 +573,8 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
             break_camber_xs.append(rp.linspace(0,1,30)) 
 
         # Get control surface leading and trailing edge cute cuts: section__cuts[-1] should never be used in the following code
-        section_LE_cut[i_break] = span_breaks[i_break].cuts[0,1]
-        section_TE_cut[i_break] = span_breaks[i_break].cuts[1,1]
+        section_LE_cut = section_LE_cut.at[i_break].set(span_breaks[i_break].cuts[0,1])
+        section_TE_cut = section_TE_cut.at[i_break].set(span_breaks[i_break].cuts[1,1])
 
     VD.wing_areas.append(rp.sum(section_area[:], dtype=precision))
     if sym_para is True :
@@ -586,8 +588,8 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
     shifted_idxs = rp.zeros(len(y_coordinates))
     for y_req in y_coords_required:
         idx = (rp.abs(y_coordinates - y_req) + shifted_idxs).argmin() #index of y-coord nearest to the span break
-        shifted_idxs[idx]  = rp.inf 
-        y_coordinates[idx] = y_req
+        shifted_idxs = shifted_idxs.at[idx].set(rp.inf) 
+        y_coordinates = y_coordinates.at[idx].set(y_req)
 
     y_coordinates = rp.array(sorted(y_coordinates))
     
@@ -714,9 +716,9 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
             nondim_camber          = break_camber_zs[i_break] *1
             if wing.is_a_control_surface: #rescale so that airfoils get cut properly
                 if not wing.is_slat:
-                    nondim_camber_x_coords -= 1 - wing.chord_fraction
-                nondim_camber_x_coords /= wing.chord_fraction
-                nondim_camber          /= wing.chord_fraction
+                    nondim_camber_x_coords = nondim_camber_x_coords - 1 - wing.chord_fraction
+                nondim_camber_x_coords = nondim_camber_x_coords/wing.chord_fraction
+                nondim_camber          = nondim_camber/ wing.chord_fraction
     
             # adjustment of coordinates for camber
             section_camber_a  = nondim_camber*wing_chord_section_a  
@@ -763,9 +765,9 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
             # adjust twist pivot line for control surface wings: offset leading edge to match that of the owning wing            
             if wing.is_a_control_surface and not wing.is_slat: #correction only leading for non-leading edge control surfaces since the LE is the pivot by default
                 nondim_cs_LE = (1 - wing.chord_fraction)
-                pivot_x_a   -= nondim_cs_LE *(wing_chord_section_a /wing.chord_fraction) 
-                pivot_x_b   -= nondim_cs_LE *(wing_chord_section_b /wing.chord_fraction) 
-                pivot_x     -= nondim_cs_LE *(wing_chord_section   /wing.chord_fraction) 
+                pivot_x_a   = pivot_x_a - nondim_cs_LE *(wing_chord_section_a /wing.chord_fraction) 
+                pivot_x_b   = pivot_x_b - nondim_cs_LE *(wing_chord_section_b /wing.chord_fraction) 
+                pivot_x     = pivot_x - nondim_cs_LE *(wing_chord_section   /wing.chord_fraction) 
     
             # adjust coordinates for twist
             section_twist_a = break_twist[i_break] + (eta_a * segment_twist_ratio)               # twist at left side of panel
@@ -874,13 +876,13 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
             y = y.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(y_prime_as) # the final right corners get appended at last strip in wing, later
             z = z.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(zeta_prime_as)
 
-            cs_w[idx_y] = wing_chord_section       
+            cs_w = cs_w.at[idx_y].set(wing_chord_section)     
                    
             # store this strip's discretization information--------------------------------------------------------
             LE_inds        = rp.full((n_cw,), False)
             TE_inds        = rp.full((n_cw,), False)
-            LE_inds[0]     = True
-            TE_inds[-1]    = True
+            LE_inds = LE_inds.at[0].set(True)
+            TE_inds = TE_inds.at[-1].set(True)
             
             RNMAX          = rp.ones(n_cw, rp.int16)*n_cw
             panel_numbers  = rp.linspace(1,n_cw,n_cw, dtype=rp.int16)           
@@ -948,8 +950,8 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
         
         # increment number of wings and panels
         n_panels = len(xch)
-        VD.n_w  += 1             
-        VD.n_cp += n_panels 
+        VD.n_w  = VD.n_w + 1             
+        VD.n_cp = VD.n_cp + n_panels 
         
         # store this wing's discretization information  
         first_panel_ind  = VD.XAH.size
@@ -1115,15 +1117,15 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
             fhs.nose_length   = ((1 - ((abs(h_array[i]/semispan_h))**fus_nose_curvature ))**(1/fus_nose_curvature))*fus.lengths.nose
             fhs.tail_length   = ((1 - ((abs(h_array[i]/semispan_h))**fus_tail_curvature ))**(1/fus_tail_curvature))*fus.lengths.tail
             fhs.nose_origin   = fus.lengths.nose - fhs.nose_length
-            fhs.origin[i] = fhs.origin[i].at[:].set(rp.array([fhs.nose_origin , h_array[i], 0.])) # Local origin
-            fhs.chord[i]      = fhs_cabin_length + fhs.nose_length + fhs.tail_length
+            fhs.origin        = fhs.origin.at[i,:].set(rp.array([fhs.nose_origin , h_array[i], 0.])) # Local origin
+            fhs.chord         = fhs.chord.at[i].set(fhs_cabin_length + fhs.nose_length + fhs.tail_length)
 
             fvs_cabin_length  = fus.lengths.total - (fus.lengths.nose + fus.lengths.tail)
             fvs.nose_length   = ((1 - ((abs(v_array[i]/semispan_v))**fus_nose_curvature ))**(1/fus_nose_curvature))*fus.lengths.nose
             fvs.tail_length   = ((1 - ((abs(v_array[i]/semispan_v))**fus_tail_curvature ))**(1/fus_tail_curvature))*fus.lengths.tail
             fvs.nose_origin   = fus.lengths.nose - fvs.nose_length
-            fvs.origin[i] = fvs.origin[i].at[:].set(rp.array([origin[0] + fvs.nose_origin , origin[1] , origin[2]+  v_array[i]]))
-            fvs.chord[i]      = fvs_cabin_length + fvs.nose_length + fvs.tail_length
+            fvs.origin        = fvs.origin.at[i,:].set(rp.array([origin[0] + fvs.nose_origin , origin[1] , origin[2]+  v_array[i]]))
+            fvs.chord         = fvs.chord.at[i].set(fvs_cabin_length + fvs.nose_length + fvs.tail_length)
 
         fhs.sweep = fhs.sweep.at[:].set(rp.concatenate([rp.arctan((fhs.origin[:,0][1:] - fhs.origin[:,0][:-1])/(fhs.origin[:,1][1:]  - fhs.origin[:,1][:-1])) ,rp.zeros(1)]))
         fvs.sweep = fvs.sweep.at[:].set(rp.concatenate([rp.arctan((fvs.origin[:,0][1:] - fvs.origin[:,0][:-1])/(fvs.origin[:,2][1:]  - fvs.origin[:,2][:-1])) ,rp.zeros(1)]))
@@ -1231,8 +1233,8 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
         # store this strip's discretization information
         LE_inds        = rp.full((n_cw,), 0)
         TE_inds        = rp.full((n_cw,), 0)
-        LE_inds[0]     = True
-        TE_inds[-1]    = True
+        LE_inds = LE_inds.at[0].set(True) 
+        TE_inds = TE_inds.at[-1].set(True)
         
         RNMAX          = rp.ones(n_cw, rp.int16)*n_cw
         panel_numbers  = rp.linspace(1,n_cw,n_cw, dtype=rp.int16)

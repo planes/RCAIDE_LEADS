@@ -144,7 +144,7 @@ def form_drag(state,settings,geometry):
                                              0.014302608,0.021245786,0.030822828,0.04750903,0.074083351])
                                    
                     CD_sep    = rp.interp(alpha, CD_sep_AoA, CD_sep_data) *AR_correction                       
-                    CD_form_wing  += CD_sep   * segment.areas.reference  
+                    CD_form_wing  = CD_form_wing  + CD_sep   * segment.areas.reference  
             else:  
                 CD_sep_AoA =  rp.array([-0.04956595,-0.02293939,-0.00545218,0.01166707,0.02896147,0.03815988,0.04636345,
                                         0.0552182,0.06408814,0.07361293,0.08121052,0.08995183,

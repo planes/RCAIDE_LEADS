@@ -70,6 +70,6 @@ class Vertical_Tail_All_Moving(Vertical_Tail, All_Moving_Surface):
         * Should be called after setting control surface deflections
         """       
         wing                  = super().make_x_z_reflection()
-        wing.deflection      *= -1*self.sign_duplicate
-        wing.hinge_vector[1] *= -1
+        wing.deflection      = -1 * self.sign_duplicate * wing.deflection
+        wing.hinge_vector[1] = -1 * wing.hinge_vector[1]
         return wing

@@ -78,24 +78,31 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     D      = rp.sqrt((YAH-YBH)**2+(ZAH-ZBH)**2)
     COS_DL = (YBH-YAH)/D    
     DL     = rp.arccos(COS_DL)
-    DL[DL>rp.pi/2] = DL[DL>rp.pi/2] - rp.pi # This flips the dihedral angle for the other side of the wing
+    DL     = rp.where(DL > rp.pi / 2, DL - rp.pi, DL) # This flips the dihedral angle for the other side of the wing
     
     # -------------------------------------------------------------------------------------------
     # Compute velocity induced by horseshoe vortex segments on every control point by every panel
     # ------------------------------------------------------------------------------------------- 
     # If YBH is negative, flip A and B, ie negative side of the airplane. Vortex order flips
     boolean = YAH>YBH
-    XA1[boolean], XB1[boolean] = XB1[boolean], XA1[boolean]
-    YA1[boolean], YB1[boolean] = YB1[boolean], YA1[boolean]
-    ZA1[boolean], ZB1[boolean] = ZB1[boolean], ZA1[boolean]
-    XA2[boolean], XB2[boolean] = XB2[boolean], XA2[boolean]
-    YA2[boolean], YB2[boolean] = YB2[boolean], YA2[boolean]
-    ZA2[boolean], ZB2[boolean] = ZB2[boolean], ZA2[boolean]    
-    XAH[boolean], XBH[boolean] = XBH[boolean], XAH[boolean]
-    YAH[boolean], YBH[boolean] = YBH[boolean], YAH[boolean] 
-    ZAH[boolean], ZBH[boolean] = ZBH[boolean], ZAH[boolean]
+    # Define a quick functional swap helper
+    def swap(cond, a, b):
+        return rp.where(cond, b, a), rp.where(cond, a, b)
 
-    XA_TE[boolean], XB_TE[boolean] = XB_TE[boolean], XA_TE[boolean]
+    # Execute the swaps, maintaining the clean visual columns
+    XA1, XB1 = swap(boolean, XA1, XB1)
+    YA1, YB1 = swap(boolean, YA1, YB1)
+    ZA1, ZB1 = swap(boolean, ZA1, ZB1)
+    
+    XA2, XB2 = swap(boolean, XA2, XB2)
+    YA2, YB2 = swap(boolean, YA2, YB2)
+    ZA2, ZB2 = swap(boolean, ZA2, ZB2)
+    
+    XAH, XBH = swap(boolean, XAH, XBH)
+    YAH, YBH = swap(boolean, YAH, YBH)
+    ZAH, ZBH = swap(boolean, ZAH, ZBH)
+
+    XA_TE, XB_TE = swap(boolean, XA_TE, XB_TE)
     
     # These vortices will use AH and BH, rather than the typical location
     xa = XAH[:,None,:]
@@ -172,7 +179,7 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
     if rp.sum(sub)>0:
         # COMPUTATION FOR SUBSONIC HORSESHOE VORTEX
         U_sub, V_sub, W_sub = subsonic(zobar,XSQ1,RO1,XSQ2,RO2,XTY,t,B2,ZSQ,TOLSQ,X1,Y1,X2,Y2,RTV1,RTV2)   
-        U[sub], V[sub], W[sub] = U_sub[sub], V_sub[sub], W_sub[sub]
+        U, V, W = rp.where(sub[:, None, None], U_sub, U), rp.where(sub[:, None, None], V_sub, V), rp.where(sub[:, None, None], W_sub, W)
     
     # COMPUTATION FOR SUPERSONIC HORSESHOE VORTEX. some values computed in a preprocessing section in VLM
     sup = (B2>=0)[:,0,0]
@@ -182,7 +189,8 @@ def compute_wing_induced_velocity(VD,mach,compute_EW=False):
         CHORD       = rp.repeat(VD.chord_lengths[:, rp.newaxis, :],shape[1],axis=1)
         U_sup, V_sup, W_sup, RFLAG_sup  = supersonic(zobar,XSQ1,RO1,XSQ2,RO2,XTY,t,B2,ZSQ,TOLSQ,TOL,TOLSQ2,\
                                                     X1,Y1,X2,Y2,RTV1,RTV2,CUTOFF,CHORD,RNMAX,n_cp,TE_ind,LE_ind)
-        U[sup], V[sup], W[sup], RFLAG[sup,:]  = U_sup[sup], V_sup[sup], W_sup[sup], RFLAG_sup[sup,:] 
+        U, V, W = rp.where(sup[:, None, None], U_sup, U), rp.where(sup[:, None, None], V_sup, V), rp.where(sup[:, None, None], W_sup, W)
+        RFLAG = rp.where(sup[:, None], RFLAG_sup, RFLAG)
     
     # Rotate into the vehicle frame and pack into a velocity matrix
     C_mn = rp.stack([U, V*costheta - W*sintheta, V*sintheta + W*costheta],axis=-1)
@@ -253,22 +261,22 @@ def subsonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,X1,Y1,X2,Y2,RTV1,RTV2):
     
     TOLSQ = rp.broadcast_to(TOLSQ,rp.shape(DENOM))
     
-    DENOM[DENOM<TOLSQ] = TOLSQ[DENOM<TOLSQ]
+    DENOM = rp.where(DENOM < TOLSQ, TOLSQ, DENOM)
     
     FB1 = (T *X1 - B2 *Y1) /RAD1
     FT1 = (X1 + RAD1) /(RAD1 *RTV1)
-    FT1[RTV1<TOLSQ] = 0.
+    FT1 = rp.where(RTV1 < TOLSQ, 0.0, FT1)
     
     FB2 = (T *X2 - B2 *Y2) /RAD2
     FT2 = (X2 + RAD2) /(RAD2 *RTV2)
-    FT2[RTV2<TOLSQ] = 0.
+    FT2 = rp.where(RTV2 < TOLSQ, 0.0, FT2)
     
     QB = (FB1 - FB2) /DENOM
     ZETAPI = Z /CPI
     U = ZETAPI *QB
-    U[ZSQ<TOLSQ] = 0.
+    U = rp.where(ZSQ < TOLSQ, 0.0, U)
     V = ZETAPI * (FT1 - FT2 - QB *T)
-    V[ZSQ<TOLSQ] = 0.
+    V = rp.where(ZSQ < TOLSQ, 0.0, V)
     W = - (QB *XTY + FT1 *Y1 - FT2 *Y2) /CPI
     
     return U, V, W
@@ -329,125 +337,125 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     RAD1   = rp.sqrt(XSQ1 - RO1)
     RAD2   = rp.sqrt(XSQ2 - RO2)
     
-    RAD1[rp.isnan(RAD1)] = 0. 
-    RAD2[rp.isnan(RAD2)] = 0. 
+    RAD1 = rp.where(rp.isnan(RAD1), 0.0, RAD1)
+    RAD2 = rp.where(rp.isnan(RAD2), 0.0, RAD2)
     
-    DENOM             = XTY * XTY + (T2 - B2) *ZSQ # The last part of this is the TBZ term
-    SIGN              = rp.ones(shape,dtype=rp.int8)
-    SIGN[DENOM<0]     = -1.
-    TOLSQ             = rp.broadcast_to(TOLSQ,shape)
-    DENOM_COND        = rp.abs(DENOM)<TOLSQ
-    DENOM[DENOM_COND] = SIGN[DENOM_COND]*TOLSQ[DENOM_COND]
+
+    DENOM = XTY * XTY + (T2 - B2) * ZSQ
+    SIGN  = rp.where(DENOM < 0, -1., 1.)
+    TOLSQ = rp.broadcast_to(TOLSQ, shape)
+    
+    DENOM_COND = rp.abs(DENOM) < TOLSQ
+    DENOM = rp.where(DENOM_COND, SIGN * TOLSQ, DENOM)
+    
+
+    REPS = CUTOFF * XSQ1
+    RAD1 = rp.where(X1 < TOL, 0.0, RAD1)
     
     # Create a boolean for various conditions for F1 that goes to zero
-    bool1           = rp.ones(shape,dtype=bool)  
-    bool1[X1<TOL]   = False
-    bool1[RAD1==0.] = False
-    RAD1[X1<TOL]    = 0.0
+    bool1 = ~((X1 < TOL) | (RAD1 == 0.) | (RO1 > REPS))
+    FRAD1 = RAD1 
     
-    REPS = CUTOFF*XSQ1
-    FRAD = RAD1
-
-    bool1[RO1>REPS] = False
-    FB1 = (T*X1-B2*Y1)/FRAD
-    FT1 = X1/(FRAD*RTV1)
-    FT1[RTV1<TOLSQ] = 0.
+    # Protect against Div-by-Zero
+    safe_FRAD1 = rp.where(FRAD1 == 0., 1.0, FRAD1)
+    safe_RTV1  = rp.where(RTV1 == 0.,  1.0, RTV1)
+    
+    FB1 = (T * X1 - B2 * Y1) / safe_FRAD1
+    FT1 = X1 / (safe_FRAD1 * safe_RTV1)
+    FT1 = rp.where(RTV1 < TOLSQ, 0., FT1)
     
     # Use the boolean to turn things off
-    FB1[rp.isnan(FB1)] = 1.
-    FT1[rp.isnan(FT1)] = 1.
-    FB1[rp.isinf(FB1)] = 1.
-    FT1[rp.isinf(FT1)] = 1.    
-    FB1 = FB1*bool1
-    FT1 = FT1*bool1
+    FB1 = rp.where(~rp.isfinite(FB1), 1., FB1)
+    FT1 = rp.where(~rp.isfinite(FT1), 1., FT1)    
+    
+    # Apply the boolean mask
+    FB1 = rp.where(bool1, FB1, 0.)
+    FT1 = rp.where(bool1, FT1, 0.)
+    
+
+    REPS = CUTOFF * XSQ2
+    RAD2 = rp.where(X2 < TOL, 0.0, RAD2)
     
     # Round 2
     # Create a boolean for various conditions for F2 that goes to zero
-    bool2           = rp.ones(shape,dtype=bool)  
-    bool2[X2<TOL] = False
-    bool2[RAD2==0.] = False
-    RAD2[X2<TOL]  = 0.0
+    bool2 = ~((X2 < TOL) | (RAD2 == 0.) | (RO2 > REPS))
+    FRAD2 = RAD2    
     
-    REPS = CUTOFF *XSQ2
-    FRAD = RAD2    
+    safe_FRAD2 = rp.where(FRAD2 == 0., 1.0, FRAD2)
+    safe_RTV2  = rp.where(RTV2 == 0.,  1.0, RTV2)
     
-    bool2[RO2>REPS] = False
-    FB2 = (T *X2 - B2 *Y2)/FRAD
-    FT2 = X2 /(FRAD *RTV2)
-    FT2[RTV2<TOLSQ] = 0.
+    FB2 = (T * X2 - B2 * Y2) / safe_FRAD2
+    FT2 = X2 / (safe_FRAD2 * safe_RTV2)
+    FT2 = rp.where(RTV2 < TOLSQ, 0., FT2)
     
     # Use the boolean to turn things off
-    FB2[rp.isnan(FB2)] = 1.
-    FT2[rp.isnan(FT2)] = 1.
-    FB2[rp.isinf(FB2)] = 1.
-    FT2[rp.isinf(FT2)] = 1.    
-    FB2 = FB2*bool2
-    FT2 = FT2*bool2
+    FB2 = rp.where(~rp.isfinite(FB2), 1., FB2)
+    FT2 = rp.where(~rp.isfinite(FT2), 1., FT2)    
     
-    QB = (FB1 - FB2) /DENOM
-    U  = ZETAPI *QB
-    V  = ZETAPI *(FT1 - FT2 - QB *T)
-    W  = - (QB *XTY + FT1 *Y1 - FT2 *Y2) /CPI    
+    FB2 = rp.where(bool2, FB2, 0.)
+    FT2 = rp.where(bool2, FT2, 0.)
+    
+
+    QB = (FB1 - FB2) / DENOM
+    U  = ZETAPI * QB
+    V  = ZETAPI * (FT1 - FT2 - QB * T)
+    W  = - (QB * XTY + FT1 * Y1 - FT2 * Y2) / CPI    
     
     # COMPUTATION FOR SUPERSONIC HORSESHOE VORTEX WHEN RECEIVING POINT IS IN THE PLANE OF THE HORSESHOE
-    in_plane = rp.broadcast_to(ZSQ<TOLSQ2,shape)
-    RAD1_in  = RAD1[in_plane]
-    RAD2_in  = RAD2[in_plane] 
-    Y1_in    = Y1[ZSQ<TOLSQ2]
-    Y2_in    = Y2[ZSQ<TOLSQ2]
-    XTY_in   = XTY[ZSQ<TOLSQ2]
-    TOL_in   = TOL[ZSQ<TOLSQ2]
+    in_plane = rp.broadcast_to(ZSQ < TOLSQ2, shape)
     
-    if rp.sum(in_plane)>0:
-        W_in = supersonic_in_plane(RAD1_in, RAD2_in, Y1_in, Y2_in, TOL_in, XTY_in, CPI)
-    else:
-        W_in = []
 
-    U[in_plane] = 0.
-    V[in_plane] = 0.
-    W[in_plane] = W_in
+    W_in_full = supersonic_in_plane(RAD1, RAD2, Y1, Y2, TOL, XTY, CPI)
+
+    U = rp.where(in_plane, 0., U)
+    V = rp.where(in_plane, 0., V)
+    W = rp.where(in_plane, W_in_full, W)
     
     # DETERMINE IF TRANSVERSE VORTEX LEG OF HORSESHOE ASSOCIATED TO THE
     # CONTROL POINT UNDER CONSIDERATION IS SONIC (SWEPT PARALLEL TO MACH
     # LINE)? IF SO THEN RFLAG = 0.0, OTHERWISE RFLAG = 1.0.
     size   = shape[1]
     n_mach = shape[0]    
-    T2S    = T2[:,0,:] 
-    T2F    = rp.zeros((n_mach,size))
-    T2A    = rp.zeros((n_mach,size))
+    T2S    = T2[:, 0, :] 
+    T2F    = rp.zeros((n_mach, size))
+    T2A    = rp.zeros((n_mach, size))
     
     # Setup masks
-    F_mask = rp.ones((n_mach,size),dtype=bool) 
-    A_mask = rp.ones((n_mach,size),dtype=bool) 
-    F_mask[TE_ind] = False
-    A_mask[LE_ind] = False
+    F_mask = rp.ones((n_mach, size), dtype=bool).at[TE_ind].set(False)
+    A_mask = rp.ones((n_mach, size), dtype=bool).at[LE_ind].set(False)
     
     # Apply the mask
-    T2F[A_mask] = T2S[F_mask]
-    T2A[F_mask] = T2S[A_mask]
+    T2F = T2F.at[A_mask].set(T2S[F_mask])
+    T2A = T2A.at[F_mask].set(T2S[A_mask])
     
     # Zero out terms on the LE and TE
-    T2F[TE_ind] = 0.
-    T2A[LE_ind] = 0.
+    T2F = T2F.at[TE_ind].set(0.)
+    T2A = T2A.at[LE_ind].set(0.)
 
-    TRANS = (B2[:,:,0]-T2F)*(B2[:,:,0]-T2A)
+    TRANS = (B2[:, :, 0] - T2F) * (B2[:, :, 0] - T2A)
     
-    RFLAG = rp.ones((n_mach,size),dtype=rp.int8)
-    RFLAG[TRANS<0] = 0.
-    
-    FLAG_bool          = rp.zeros_like(TRANS,dtype=bool)
-    FLAG_bool[TRANS<0] = True
-    FLAG_bool          = rp.reshape(FLAG_bool,(n_mach,size,-1))
+    # RFLAG and FLAG_bool
+    RFLAG = rp.where(TRANS < 0, 0, 1).astype(rp.int8)
+    FLAG_bool = rp.where(TRANS < 0, True, False).reshape((n_mach, size, -1))
     
 
     # COMPUTE THE GENERALIZED PRINCIPAL PART OF THE VORTEX-INDUCED VELOCITY INTEGRAL, WWAVE.
     # FROM LINE 2647 VORLAX, the IR .NE. IRR means that we're looking at vortices that affect themselves
-    WWAVE   = rp.zeros(shape,dtype=rp.float32)
-    COX     = CHORD /RNMAX[:, :, None] 
-    T2      = rp.broadcast_to(T2,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
-    B2_full = rp.broadcast_to(B2,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
-    COX     = rp.broadcast_to(COX,shape)*rp.eye(n_cp[0, 0],dtype=rp.int8)
-    WWAVE[B2_full>T2] = - 0.5 *rp.sqrt(B2_full[B2_full>T2] -T2[B2_full>T2] )/COX[B2_full>T2] 
+    COX = CHORD / RNMAX[:, :, None] 
+    
+    # Differentiate the variable names so we don't overwrite the original T2 and B2
+    T2_full  = rp.broadcast_to(T2, shape) * rp.eye(n_cp[0, 0], dtype=rp.int8)
+    B2_full  = rp.broadcast_to(B2, shape) * rp.eye(n_cp[0, 0], dtype=rp.int8)
+    COX_full = rp.broadcast_to(COX, shape) * rp.eye(n_cp[0, 0], dtype=rp.int8)
+    
+    WWAVE_mask = B2_full > T2_full
+    
+
+    safe_radicand = rp.where(WWAVE_mask, B2_full - T2_full, 0.0)
+    safe_COX      = rp.where(WWAVE_mask & (COX_full != 0.), COX_full, 1.0)
+    
+    WWAVE_calc = -0.5 * rp.sqrt(safe_radicand) / safe_COX
+    WWAVE = rp.where(WWAVE_mask, WWAVE_calc, 0.0)
 
     W = W + WWAVE    
     
@@ -459,7 +467,7 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     
     # Zero out the row
     FLAG_bool_rep     = rp.broadcast_to(FLAG_bool,shape)
-    W[FLAG_bool_rep]  = 0. # Default to zero
+    W = rp.where(FLAG_bool_rep, 0.0, W) # Default to zero
 
     # # The self velocity goes to 2
     # FLAG_bool_split   = rp.array(rp.split(FLAG_bool.ravel(),n_mach))
@@ -548,21 +556,17 @@ def supersonic_in_plane(RAD1,RAD2,Y1,Y2,TOL,XTY,CPI):
     N/A
     """    
     
-    shape = rp.shape(RAD2)
-    F1    = rp.zeros(shape)
-    F2    = rp.zeros(shape)
+    cond1 = rp.abs(Y1) > TOL
+    cond2 = rp.abs(Y2) > TOL
+    condW = rp.abs(XTY) > TOL
     
-    reps  = int(shape[0]/rp.size(Y1))
+    safe_Y1  = rp.where(cond1, Y1, 1.0)
+    safe_Y2  = rp.where(cond2, Y2, 1.0)
+    safe_XTY = rp.where(condW, XTY, 1.0)
     
-    Y1  = rp.tile(Y1,reps)
-    Y2  = rp.tile(Y2,reps)
-    TOL = rp.tile(TOL,reps)
-    XTY = rp.tile(XTY,reps)
+    F1 = rp.where(cond1, RAD1 / safe_Y1, 0.0)
+    F2 = rp.where(cond2, RAD2 / safe_Y2, 0.0)
     
-    F1[rp.abs(Y1)>TOL] = RAD1[rp.abs(Y1)>TOL]/Y1[rp.abs(Y1)>TOL]
-    F2[rp.abs(Y2)>TOL] = RAD2[rp.abs(Y2)>TOL]/Y2[rp.abs(Y2)>TOL]
-    
-    W = rp.zeros(shape)
-    W[rp.abs(XTY)>TOL] = (-F1[rp.abs(XTY)>TOL] + F2[rp.abs(XTY)>TOL])/(XTY[rp.abs(XTY)>TOL]*CPI)
+    W  = rp.where(condW, (-F1 + F2) / (safe_XTY * CPI), 0.0)
 
     return W

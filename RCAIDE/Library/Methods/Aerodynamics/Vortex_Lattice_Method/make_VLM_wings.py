@@ -591,9 +591,10 @@ def add_span_break(span_break, span_breaks):
         
         # else coincident: need to superimpose cs_IDs and cuts, not append
         else:
-            boolean = span_breaks[-1].cs_IDs==-1
-            span_breaks[-1].cs_IDs[boolean] = span_break.cs_IDs[boolean]
-            span_breaks[-1].cuts[boolean]   = span_break.cuts[boolean]
+            boolean = span_breaks[-1].cs_IDs == -1
+
+            span_breaks[-1].cs_IDs = rp.where(boolean, span_break.cs_IDs, span_breaks[-1].cs_IDs)
+            span_breaks[-1].cuts   = rp.where(boolean, span_break.cuts,   span_breaks[-1].cuts)
                 
     return
 

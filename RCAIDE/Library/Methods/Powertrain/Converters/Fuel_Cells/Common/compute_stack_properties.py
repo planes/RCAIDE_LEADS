@@ -178,7 +178,7 @@ def compute_stack_properties(fuel_cell_stack):
         rated_current_density, rated_power_density                               = evaluate_max_gross_power(fuel_cell_stack,fuel_cell_stack_conditions,t_idx)
         set_rated_current_density(fuel_cell_stack, rated_current_density, rated_power_density)
         
-        fuel_cell_stack_conditions.fuel_cell.current_density[t_idx] = rated_current_density
+        fuel_cell_stack_conditions.fuel_cell.current_density = fuel_cell_stack_conditions.fuel_cell.current_density.at[t_idx].set(rated_current_density)
         m_dot_H2, V_fuel_cell, P_fuel_cell, _, _, _, _, _,_  =  evaluate_PEM(fuel_cell_stack,fuel_cell_stack_conditions, t_idx)
    
         # store properties

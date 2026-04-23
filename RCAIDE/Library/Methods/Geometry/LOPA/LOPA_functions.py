@@ -111,7 +111,7 @@ def get_seat_y_coords(cabin,cabin_class,cabin_class_origin):
         y_10 = -y_9
         s_y_coord = rp.array([ y_1, y_2, y_3,y_4, y_5,y_6,y_7,y_8,y_9,y_10 ])
     cabin.width = 2 * (rp.max(s_y_coord) + s_w /2 + ar_w)
-    s_y_coord   += cabin_class_origin[1]
+    s_y_coord   = s_y_coord + cabin_class_origin[1]
     return s_y_coord , cabin_class_origin
 # ----------------------------------------------------------------------------------------------------------------------
 #  get_seat_x_coords
@@ -179,7 +179,7 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
         offset = gl_l / 2
     if object_type[0, 3] == 1:
         offset = A_l / 2
-    s_x_coord += offset
+    s_x_coord = s_x_coord + offset
     if object_type[-1, 0] == 1:
         offset_end =   s_p / 2
     if object_type[-1, 2] == 1:
@@ -187,8 +187,8 @@ def get_seat_x_coords(cabin,cabin_class,cabin_class_origin,cabin_length):
     if object_type[-1, 3] == 1:
         offset_end = A_l / 2
     cabin_class.length    =  s_x_coord[-1] + offset_end
-    cabin_length          += s_x_coord[-1] + offset_end
-    s_x_coord             += cabin_class_origin[0]
+    cabin_length          = cabin_length + s_x_coord[-1] + offset_end
+    s_x_coord             =  s_x_coord + cabin_class_origin[0]
     cabin_class_origin[0] = s_x_coord[-1] + offset_end
     return s_x_coord , object_type, cabin_class_origin,cabin_length
 # ----------------------------------------------------------------------------------------------------------------------

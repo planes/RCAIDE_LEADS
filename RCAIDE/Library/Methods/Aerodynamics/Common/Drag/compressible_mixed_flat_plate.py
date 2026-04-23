@@ -117,7 +117,7 @@ def compressible_mixed_flat_plate(Re,Ma,Tc,xt):
         raise ValueError("Turbulent transition must be between 0 and 1")
 
     Rex = Re*xt
-    Rex[Rex==0.0] = 0.0001
+    Rex = rp.where(Rex == 0.0, 0.0001, Rex)
 
     theta = 0.671*xt/(Rex**0.5)
     xeff  = (27.78*theta*Re**0.2)**1.25

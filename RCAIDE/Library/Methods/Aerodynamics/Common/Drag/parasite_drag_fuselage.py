@@ -159,17 +159,17 @@ def parasite_drag_fuselage(state,settings,fuselage):
  
     if rp.all((Mach<=1.0) == True): 
         # compute form factor for cylindrical bodies 
-        D             = rp.zeros_like(Mach)    
-        D[Mach < 0.95]  = rp.sqrt(1 - (1-Mach[Mach < 0.95]**2) * d_d**2)
-        D[Mach >= 0.95] = rp.sqrt(1 - d_d**2)
+        D = rp.zeros_like(Mach)    
+        D = rp.where(Mach < 0.95, rp.sqrt(1 - (1 - Mach ** 2) * d_d ** 2), D)
+        D = rp.where(Mach >= 0.95, rp.sqrt(1 - d_d ** 2), D)
     
-        a             = rp.zeros_like(Mach)    
-        a[Mach < 0.95]  = 2 * (1-Mach[Mach < 0.95]**2) * (d_d**2) *(rp.arctanh(D[Mach < 0.95])-D[Mach < 0.95]) / (D[Mach < 0.95]**3)
-        a[Mach >= 0.95] = 2  * (d_d**2) *(rp.arctanh(D[Mach >= 0.95])-D[Mach >= 0.95]) / (D[Mach >= 0.95]**3)
+        a = rp.zeros_like(Mach)    
+        a = rp.where(Mach < 0.95, 2 * (1 - Mach ** 2) * d_d ** 2 * (rp.arctanh(D) - D) / D ** 3, a)
+        a = rp.where(Mach >= 0.95, 2 * d_d ** 2 * (rp.arctanh(D) - D) / D ** 3, a)
     
-        du_max_u               = rp.zeros_like(Mach)    
-        du_max_u[Mach < 0.95]  = a[Mach < 0.95] / ( (2-a[Mach < 0.95]) * (1-Mach[Mach < 0.95]**2)**0.5 ) 
-        du_max_u[Mach >= 0.95] = a[Mach >= 0.95] / ( (2-a[Mach >= 0.95]) )
+        du_max_u = rp.zeros_like(Mach)    
+        du_max_u = rp.where(Mach < 0.95, a / ((2 - a) * (1 - Mach ** 2) ** 0.5), du_max_u)
+        du_max_u = rp.where(Mach >= 0.95, a / (2 - a), du_max_u)
         
         k_fus                  = (1 + form_factor*du_max_u)**2 
         fuselage_parasite_drag = k_fus * cf_fus * Swet / Sref
@@ -189,7 +189,7 @@ def parasite_drag_fuselage(state,settings,fuselage):
         low_inds      = Mach < high_cutoff
         high_inds     = Mach > low_cutoff
         
-        D_low[low_inds]        = rp.sqrt(1 - (1-Mach[low_inds]**2) * d_d**2)
+        D_low = rp.where(low_inds, rp.sqrt(1 - (1 - Mach ** 2) * d_d ** 2), D_low)
         a_low[low_inds]        = 2 * (1-Mach[low_inds]**2) * (d_d**2) *(rp.arctanh(D_low[low_inds])-D_low[low_inds]) / (D_low[low_inds]**3)
         du_max_u_low[low_inds] = a_low[low_inds] / ( (2-a_low[low_inds]) * (1-Mach[low_inds]**2)**0.5 )
         

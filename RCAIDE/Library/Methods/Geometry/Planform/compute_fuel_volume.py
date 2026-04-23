@@ -76,15 +76,15 @@ def compute_fuel_volume(vehicle, compute_fuel_volume = False, update_max_fuel = 
                 try:
                     compute_fuel_tank_volume = fuel_tank.compute_volume
                 except Exception as e:
-                    total_fuel_volume += getattr(fuel_tank.fuel.volume_properties, "net_volume", None)
-                    total_fuel_mass   += getattr(fuel_tank.fuel.mass_properties, "mass", None)
+                    total_fuel_volume = total_fuel_volume + getattr(fuel_tank.fuel.volume_properties, "net_volume", None)
+                    total_fuel_mass   = total_fuel_mass + getattr(fuel_tank.fuel.mass_properties, "mass", None)
                 else:
                     # if no error getting the method, run it normally
                     if compute_fuel_volume:
                         compute_fuel_tank_volume(wings, fuselages, fuel_tanks) 
                         fuel_tank.fuel.volume_properties.net_volume = fuel_tank.fuel.mass_properties.mass / fuel_tank.fuel.density
-                    total_fuel_volume += fuel_tank.fuel.volume_properties.net_volume 
-                    total_fuel_mass   += fuel_tank.fuel.mass_properties.mass
+                    total_fuel_volume = total_fuel_volume + fuel_tank.fuel.volume_properties.net_volume 
+                    total_fuel_mass   = total_fuel_mass + fuel_tank.fuel.mass_properties.mass
         
         for bus in network.busses:
             fuel_tanks = bus.fuel_tanks
@@ -96,15 +96,15 @@ def compute_fuel_volume(vehicle, compute_fuel_volume = False, update_max_fuel = 
                 try:
                     compute_fuel_tank_volume = fuel_tank.compute_volume
                 except Exception as e:
-                    total_fuel_volume += getattr(fuel_tank.fuel.volume_properties, "net_volume", None)
-                    total_fuel_mass   += getattr(fuel_tank.fuel.mass_properties, "mass", None)
+                    total_fuel_volume = total_fuel_volume + getattr(fuel_tank.fuel.volume_properties, "net_volume", None)
+                    total_fuel_mass   = total_fuel_mass+ getattr(fuel_tank.fuel.mass_properties, "mass", None)
                 else:
                     # if no error getting the method, run it normally
                     if compute_fuel_volume:
                         compute_fuel_tank_volume(wings, fuselages, fuel_tanks) 
                         fuel_tank.fuel.volume_properties.net_volume = fuel_tank.fuel.mass_properties.mass / fuel_tank.fuel.density
-                    total_fuel_volume += fuel_tank.fuel.volume_properties.net_volume 
-                    total_fuel_mass   += fuel_tank.fuel.mass_properties.mass
+                    total_fuel_volume = total_fuel_volume + fuel_tank.fuel.volume_properties.net_volume 
+                    total_fuel_mass   = total_fuel_mass + fuel_tank.fuel.mass_properties.mass
                 
     # Assign Total Fuel Volume and to Vehicle 
     if compute_fuel_volume:

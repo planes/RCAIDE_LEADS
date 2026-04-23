@@ -138,11 +138,11 @@ def wave_drag(state,settings,geometry):
     CD_wave_volume = supersonic_volume_wave_drag(conditions, settings, geometry) *(1-sup_h00(Mach))
     
     # wave drag due to lift  
-    transonic_CDw_lift           = transonic_lift_wave_drag(conditions, settings, geometry) *sup_h00(Mach)
-    transonic_CDw_lift[Mach<0.7] = 0
-    transonic_CDw_lift[Mach>high_mach_cutoff] = 0
-    supersonic_CDw_lift          = supersonic_lift_wave_drag(conditions, settings, geometry) *(1-sup_h00(Mach))
-    supersonic_CDw_lift[Mach<1]  = 0   
+    transonic_CDw_lift  = transonic_lift_wave_drag(conditions, settings, geometry) *sup_h00(Mach)
+    transonic_CDw_lift  = rp.where(Mach < 0.7, 0, transonic_CDw_lift)
+    transonic_CDw_lift  = rp.where(Mach > high_mach_cutoff, 0, transonic_CDw_lift)
+    supersonic_CDw_lift = supersonic_lift_wave_drag(conditions, settings, geometry) *(1-sup_h00(Mach))
+    supersonic_CDw_lift = rp.where(Mach < 1, 0, supersonic_CDw_lift)
    
     # total wave drag  
     CD_wave_lift   = supersonic_CDw_lift + transonic_CDw_lift
@@ -372,7 +372,7 @@ def supersonic_lift_wave_drag(conditions,configuration,geometry):
             x    =  beta*s/l
         
             ret = rp.zeros_like(x) 
-            ret[x > 0.178] = 0.4935 - 0.2382*x[x > 0.178] + 1.6306*x[x > 0.178]**2 - 0.86*x[x > 0.178]**3 + 0.2232*x[x > 0.178]**4 - 0.0365*x[x > 0.178]**5 - 0.5            
+            ret = rp.where(x > 0.178, 0.4935 - 0.2382 * x + 1.6306 * x ** 2 - 0.86 * x ** 3 + 0.2232 * x ** 4 - 0.0365 * x ** 5 - 0.5, ret)        
             
             Kw           = (1+1/p)*ret/(2*beta**2*(s/l)**2) 
             cd_lift_wave = CL**2 * (beta**2/rp.pi*p*(s/l)*Kw) 

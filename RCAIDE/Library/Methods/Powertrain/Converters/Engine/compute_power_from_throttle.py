@@ -89,7 +89,7 @@ def compute_power_from_throttle(engine,conditions):
 
     # shift in power lapse due to flat rate
     altitude_virtual = altitude - h_flat       
-    altitude_virtual[altitude_virtual<0.] = 0. 
+    altitude_virtual = rp.where(altitude_virtual < 0., 0., altitude_virtual)
 
     # Compute the sea-level ISA atmosphere conditions
     atmo             = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
@@ -103,7 +103,7 @@ def compute_power_from_throttle(engine,conditions):
     
     # Compute available power 
     Pavailable                    = PSLS * (sigma - 0.117) / 0.883        
-    Pavailable[h_flat > altitude] = PSLS
+    Pavailable = rp.where(h_flat > altitude, PSLS, Pavailable)
 
     # Regulate using throttle 
     P       = Pavailable * engine_conditions.throttle  

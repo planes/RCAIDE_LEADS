@@ -136,35 +136,44 @@ def compute_compression_nozzle_performance(compression_nozzle, conditions):
     ht_out  = Tt_out*Cp 
 
     if compressibility_effects: 
-        # initilize arrays
-        Pt_out   = rp.ones_like(Tt_in)
-        M_out     = rp.ones_like(Tt_in)
-        T_out    = rp.ones_like(Tt_in)
-        P_out    = rp.ones_like(Tt_in)
+        
+        # Condition for blending
+        is_subsonic = M0 <= 1.0
+        
+        # LOW BRANCH: Calculate Isentropic Relations (Unconditionally)
+        Pt_out_low = Pt_in * PR
+        M_out_low  = rp.sqrt((((Pt_out_low / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.)) 
+        T_out_low  = Tt_out / (1. + (gamma - 1.) / 2. * M_out_low**2)
+        P_out_low  = Pt_out_low / ((1. + (gamma - 1.) / 2. * M_out_low**2)**(gamma / (gamma - 1.)))
 
-        if M_out <= 1.0: # use isentropic relations
-            i_low          = M0 <= 1.0
-            Pt_out[i_low]  = Pt_in[i_low]*PR
-            M_out[i_low]    = rp.sqrt( (((Pt_out[i_low]/P0[i_low])**((gamma[i_low]-1.)/gamma[i_low]))-1.) *2./(gamma[i_low]-1.) ) 
-            T_out[i_low]   = Tt_out[i_low]/(1.+(gamma[i_low]-1.)/2.*M_out[i_low]*M_out[i_low])
-            P_out[i_low]   = Pt_out[i_low]/((1.+(gamma[i_low]-1.)/2.*M_out[i_low]*M_out[i_low])**(gamma[i_low]/(gamma[i_low]-1.)))
+        # HIGH BRANCH: Calculate Normal Shock Relations (Unconditionally), Protect against NaNs by forcing M0 > 1.0 where it's actually subsonic
+        safe_M0 = rp.where(is_subsonic, 1.01, M0)
+        
+        M_out_high = rp.sqrt((1. + (gamma - 1.) / 2. * safe_M0**2) / (gamma * safe_M0**2 - (gamma - 1.) / 2.))
+        T_out_high = Tt_out / (1. + (gamma - 1.) / 2. * M_out_high**2)
+        
+        # Splitting the massive Pt_out_high equation for slight readability
+        term1 = (((gamma + 1.) * (safe_M0**2)) / ((gamma - 1.) * safe_M0**2 + 2.))**(gamma / (gamma - 1.))
+        term2 = ((gamma + 1.) / (2. * gamma * safe_M0**2 - (gamma - 1.)))**(1. / (gamma - 1.))
+        Pt_out_high = PR * Pt_in * term1 * term2
+        
+        P_out_high = Pt_out_high / (1. + (gamma - 1.) / 2. * M_out_high**2)**(gamma / (gamma - 1.))
 
-        else: # use normal shock
-            i_high         = M0 > 1.0
-            M_out[i_high]   = rp.sqrt((1.+(gamma[i_high]-1.)/2.*M0[i_high]**2.)/(gamma[i_high]*M0[i_high]**2-(gamma[i_high]-1.)/2.))
-            T_out[i_high]  = Tt_out[i_high]/(1.+(gamma[i_high]-1.)/2*M_out[i_high]*M_out[i_high])
-            Pt_out[i_high] = PR*Pt_in[i_high]*((((gamma[i_high]+1.)*(M0[i_high]**2.))/((gamma[i_high]-1.)*\
-                            M0[i_high]**2.+2.))**(gamma[i_high]/(gamma[i_high]-1.)))*((gamma[i_high]+1.)/(2.*gamma[i_high]*\
-                            M0[i_high]**2.-(gamma[i_high]-1.)))**(1./(gamma[i_high]-1.))
-            P_out[i_high]  = Pt_out[i_high]/(1.+(gamma[i_high]-1.)/2.*M_out[i_high]**2.)**(gamma[i_high]/(gamma[i_high]-1.))
+        # Blend the two branches based on the is_subsonic mask
+        Pt_out = rp.where(is_subsonic, Pt_out_low, Pt_out_high)
+        M_out  = rp.where(is_subsonic, M_out_low, M_out_high)
+        T_out  = rp.where(is_subsonic, T_out_low, T_out_high)
+        P_out  = rp.where(is_subsonic, P_out_low, P_out_high)
+
     else:
-        Pt_out  = Pt_in*PR*eta_rec 
-        if rp.any(Pt_out<P0): # in case pressures go too low
-            warn('Pt_out goes too low',RuntimeWarning)
-            Pt_out[Pt_out<P0] = P0[Pt_out<P0] 
-        M_out   = rp.sqrt( (((Pt_out/P0)**((gamma-1.)/gamma))-1.) *2./(gamma-1.) )
-        T_out  = Tt_out/(1.+(gamma-1.)/2.*M_out*M_out)
-        P_out  = Pt_out/(1.+(gamma-1.)/2.*M_out*M_out)**(gamma/(gamma-1.))
+        Pt_out = Pt_in * PR * eta_rec 
+        
+        # Replace data-dependent warning and in-place capping
+        Pt_out = rp.where(Pt_out < P0, P0, Pt_out) 
+        
+        M_out = rp.sqrt((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.))
+        T_out = Tt_out / (1. + (gamma - 1.) / 2. * M_out**2)
+        P_out = Pt_out / (1. + (gamma - 1.) / 2. * M_out**2)**(gamma / (gamma - 1.))
         
     # Compute exit ethalpy and velocity  
     h_out   = Cp*T_out

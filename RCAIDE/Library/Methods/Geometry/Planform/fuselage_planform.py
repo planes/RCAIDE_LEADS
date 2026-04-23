@@ -67,7 +67,7 @@ def fuselage_planform(fuselage, circular_cross_section = True):
             side_projected_area   += ((seg_1.height +  seg_2.height ) / 2) * delta_x 
 
             area = truncated_elliptic_cone_lateral_area(seg_1.width/2, seg_1.height/2, seg_2.width/2, seg_2.height/2, delta_x)
-            wetted_area += area
+            wetted_area = wetted_area + area
 
             A_1  = rp.pi *  (seg_1.height / 2) *  (seg_1.width / 2)   
             A_2  = rp.pi *  (seg_2.height / 2) *  (seg_2.width / 2)    

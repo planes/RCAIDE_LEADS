@@ -327,8 +327,7 @@ def compute_parasite_drag(re,mac_w,Mc,Tc,xtu,xtl,sweep_w,t_c_w,Sref,Swet,C):
     
     k_w = rp.ones_like(Mc)
     beta   =  ( rp.sqrt(1.-(Mc[ind]*cos_sweep)**2.) )
-    k_w[ind] = 1. + ( 2.* C * (t_c_w * cos2) ) /beta \
-                  + (( C**2) * cos2 * (t_c_w** 2) * (1. + 5.*(cos2)) ) / (2.* beta ** 2)             
+    k_w = rp.where(ind, 1.0 + 2.0 * C * (t_c_w * cos2) / beta + C ** 2 * cos2 * t_c_w ** 2 * (1.0 + 5.0 * cos2) / (2.0 * beta ** 2), k_w)           
     
     spline = Cubic_Spline_Blender(.95,1.0)
     h00 = lambda M:spline.compute(M)

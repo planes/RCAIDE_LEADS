@@ -499,11 +499,20 @@ class Data(dict):
         if keys[-1][-1] ==']':
             splitkey = keys[-1].split('[')
             thing = data[splitkey[0]]
-            for ii in range(1,len(splitkey)-1):
-                index    = int(splitkey[ii][:-1])
-                thing = thing[index]
-            index    = int(splitkey[-1][:-1])
-            thing[index] = val
+            
+            # Extract all indices
+            indices = []
+            for ii in range(1, len(splitkey)):
+                indices.append(int(splitkey[ii][:-1]))
+                
+            if hasattr(thing, 'at'):
+                # For RNUMPY/JAX immutable arrays, use .at[] and update the parent dictionary
+                data[splitkey[0]] = thing.at[tuple(indices)].set(val)
+            else:
+                # For standard mutable lists/arrays
+                for i in range(len(indices)-1):
+                    thing = thing[indices[i]]
+                thing[indices[-1]] = val
         else:
             data[ keys[-1] ] = val
             

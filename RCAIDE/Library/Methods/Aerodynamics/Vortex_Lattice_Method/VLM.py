@@ -179,7 +179,7 @@ def VLM(conditions,settings,geometry):
     if not conditions.freestream.velocity.all():
         if settings.use_surrogate:
             velocity                       = conditions.freestream.velocity
-            velocity[velocity==0]          = rp.ones(len(velocity[velocity==0])) * 1e-6
+            VINF = velocity = rp.where(velocity == 0, rp.ones_like(velocity) * 1e-06, VINF)
             conditions.freestream.velocity = velocity
         else:
             raise AssertionError("VLM requires that conditions.freestream.velocity be specified and non-zero")    
@@ -287,7 +287,7 @@ def VLM(conditions,settings,geometry):
     GFX    = VD.chord_lengths
     GANT   = strip_cumsum(GFX*GAMMA, chord_breaks[0], RNMAX[LE_ind].reshape(dim_1,dim_2)[0]  )
     GANT   = rp.roll(GANT,1)
-    GANT[LE_ind] = 0 
+    GANT   = rp.where(LE_ind, 0, GANT)
     
     GLAT   = GANT *(TANA - TANB) - GFX *GAMMA *TANB
     cos_DL = (YBH-YAH)[LE_ind].reshape(dim_1,dim_2)/VD.D
@@ -306,15 +306,22 @@ def VLM(conditions,settings,geometry):
     # ------------------ --------------------------------------------------------------------  
     # Flip coordinates on the other side of the wing
     boolean = YBH<0. 
-    XA1[boolean], XB1[boolean] = XB1[boolean], XA1[boolean]
-    YAH[boolean], YBH[boolean] = YBH[boolean], YAH[boolean]
+    XA1, XB1 = rp.where(boolean, XB1, XA1), rp.where(boolean, XA1, XB1)
+    YAH, YBH = rp.where(boolean, YBH, YAH), rp.where(boolean, YAH, YBH)
 
     # Leading edge sweep. VORLAX does it panel by panel. This will be spanwise.
-    TLE   = TAN_LE[LE_ind].reshape(dim_1,dim_2)
-    B2_LE = B2[LE_ind].reshape(dim_1,dim_2)
-    T2    = TLE*TLE
-    STB   = rp.zeros_like(B2_LE)
-    STB[B2_LE<T2] = rp.sqrt(T2[B2_LE<T2]-B2_LE[B2_LE<T2])
+    TLE   = TAN_LE[LE_ind].reshape(dim_1, dim_2)
+    B2_LE = B2[LE_ind].reshape(dim_1, dim_2)
+    T2    = TLE * TLE
+    
+    # Create the mask
+    mask = B2_LE < T2
+    
+    # Protect the square root! 
+    safe_radicand = rp.where(mask, T2 - B2_LE, 0.0)
+    
+    # Compute safely and drop 0.0 into the slots where the mask is False
+    STB = rp.where(mask, rp.sqrt(safe_radicand), 0.0)
     
     # DL IS THE DIHEDRAL ANGLE (WITH RESPECT TO THE X-Y PLANE) OF
     # THE IR STREAMWISE STRIP OF HORSESHOE VORTICES. 
@@ -376,9 +383,9 @@ def VLM(conditions,settings,geometry):
     # If the vehicle is subsonic and there is vortex lift enabled then SPC changes to -1
     VL   = rp.repeat(VD.vortex_lift,VD.n_sw[0], axis=1)
     m_b  = rp.atleast_2d(mach[:,0]<1.)
-    SPC_cond      = VL*m_b.T
-    SPC[SPC_cond] = -1.
-    SPC           = SPC * exposed_leading_edge_flag
+    SPC_cond = VL*m_b.T
+    SPC      = rp.where(SPC_cond, -1.0, SPC)
+    SPC      = SPC * exposed_leading_edge_flag
     
     CLE  = CLE + 0.5* DCP_LE *rp.sqrt(XLE[LE_ind].reshape(dim_1,dim_2))
     CSUC = 0.5*rp.pi*rp.abs(SPC)*(CLE**2)*STB 
@@ -394,8 +401,8 @@ def VLM(conditions,settings,geometry):
     TFZ  = -1.*XSIN
 
     # If a negative number is used for SPC a different correction is used. See VORLAX documentation for Lan reference
-    TFX[SPC<0] = XSIN[SPC<0]*rp.sign(DCP_LE)[SPC<0]
-    TFZ[SPC<0] = rp.abs(XCOS)[SPC<0]*rp.sign(DCP_LE)[SPC<0]
+    TFX = rp.where(SPC < 0, XSIN * rp.sign(DCP_LE), TFX)
+    TFZ = rp.where(SPC < 0, rp.abs(XCOS) * rp.sign(DCP_LE), TFZ)
 
     CAXL = CAXL - TFX*CSUC
     
@@ -660,8 +667,8 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
         drag_sum = rp.sqrt(rp.square(y_control_points[:, 0]) + rp.square(z_control_points[:, 0]))
         s_wake   = rp.atleast_2d(deepcopy(drag_sum)).T
         for j in range(1,len(y_control_points[0])): 
-            drag_sum +=  rp.sqrt(rp.square(y_control_points[:,j] - y_control_points[:,j-1]) + rp.square(z_control_points[:,j] - z_control_points[:,j-1]))
-            s_wake    =  rp.hstack((s_wake, rp.atleast_2d(drag_sum).T))
+            drag_sum = drag_sum +  rp.sqrt(rp.square(y_control_points[:,j] - y_control_points[:,j-1]) + rp.square(z_control_points[:,j] - z_control_points[:,j-1]))
+            s_wake   = rp.hstack((s_wake, rp.atleast_2d(drag_sum).T))
         D_induced = D_induced.at[:,wing_index].set(-0.5 * rho * trapezoid(V_induced * circulation_segments, s_wake, axis=1))
 
         # Per-wing CDi (using wing's reference area)
