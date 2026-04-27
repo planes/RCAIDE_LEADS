@@ -12,6 +12,7 @@
 
 # rcaide imports
 import RNUMPY as rp
+import torch
 from RCAIDE.Framework.Optimization.Packages.particle_swarm import particle_swarm_optimization 
 from scipy.optimize import NonlinearConstraint
 from RCAIDE.Framework.Optimization.Common import helper_functions as help_fun
@@ -70,8 +71,10 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
      
     # Finalize problem statement and run
     if solver=='SLSQP':
-        outputs = rp.scipy.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,\
-                                        iter=iter, epsilon = sense_step, acc  = tolerance, full_output=True,  iprint=0)
+        import torch
+        with torch.autograd.detect_anomaly(check_nan=True):
+            outputs = rp.scipy.optimize.fmin_slsqp(wrapper,x,f_eqcons=problem.equality_constraint,f_ieqcons=problem.inequality_constraint,bounds=bnds,\
+                                                iter=iter, epsilon = sense_step, acc  = tolerance, full_output=True,  iprint=0)
     elif solver == 'differential_evolution':
         # Define constraints as a tuple of nonlinear constraints 
         scaled_constraints = []

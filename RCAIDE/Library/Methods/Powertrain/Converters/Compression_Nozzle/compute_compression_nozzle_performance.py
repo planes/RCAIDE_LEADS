@@ -9,7 +9,6 @@
 
 # package imports
 import RNUMPY as rp  
-from warnings import warn
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # compute_compression_nozzle_performance
@@ -171,13 +170,13 @@ def compute_compression_nozzle_performance(compression_nozzle, conditions):
         # Replace data-dependent warning and in-place capping
         Pt_out = rp.where(Pt_out < P0, P0, Pt_out) 
         
-        M_out = rp.sqrt((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.))
+        M_out = rp.sqrt(rp.maximum((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.),1e-12))
         T_out = Tt_out / (1. + (gamma - 1.) / 2. * M_out**2)
         P_out = Pt_out / (1. + (gamma - 1.) / 2. * M_out**2)**(gamma / (gamma - 1.))
         
     # Compute exit ethalpy and velocity  
     h_out   = Cp*T_out
-    u_out   = rp.sqrt(2.*(ht_out-h_out))
+    u_out   = rp.sqrt(rp.maximum(2.*(ht_out-h_out),1e-12))
 
     # Pack computed quantities into outputs
     nozzle_conditions.outputs.mach_number             = M_out

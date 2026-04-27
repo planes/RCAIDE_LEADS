@@ -2,6 +2,8 @@
 # 
 # 
 # Created:  Jul 2023, M. Clarke
+
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # compute_electric_rotor_performance
@@ -58,10 +60,10 @@ def compute_voltage_out_from_throttle(esc,conditions):
     eta            = esc_conditions.throttle * 1.0
     
     # Negative throttle is bad
-    eta[eta<=0.0] = 0.0
+    eta = rp.where(eta <= 0.0, 0.0, eta)
     
     # Cap the throttle
-    eta[eta>=1.0] = 1.0
+    eta = rp.where(eta >= 1.0, 1.0, eta)
     
     # Pack the output
     esc_conditions.outputs.voltage  =eta*esc_conditions.inputs.voltage

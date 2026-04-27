@@ -215,8 +215,8 @@ def compute_rotor_weight(rotor,
         l = rp.sqrt(rp.sum(rp.diff(seg[i],axis=0)**2,axis=1))   # Segment Lengths
         c = (seg[i][1::]+seg[i][0::-1])/2                       # Segment Centroids
 
-        capInertia += rp.abs(rp.sum(l*c[:,1] **2))
-        capLength  += rp.sum(l)
+        capInertia = capInertia + rp.abs(rp.sum(l * c[:, 1] ** 2))
+        capLength  = capLength + rp.sum(l)
 
     # Shear Properties
     box = coord
@@ -264,7 +264,7 @@ def compute_rotor_weight(rotor,
 
         # Core Mass
         mCore = coreArea*coreDen*rp.ones(N)
-        mGlue += glueMGT*glueDen*skinLength*rp.ones(N)
+        mGlue = mGlue + glueMGT * glueDen * skinLength * rp.ones(N) 
 
         # Leading Edge Protection
         box      = coord * chord

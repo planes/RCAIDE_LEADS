@@ -179,7 +179,7 @@ def compute_turbine_performance(turbine,conditions):
     T_out     = Tt_out/(1.+(gamma-1.)/2.*M0*M0)
     P_out     = Pt_out/((1.+(gamma-1.)/2.*M0*M0)**(gamma/(gamma-1.)))   
     h_out     = T_out * Cp
-    u_out     = rp.sqrt(2*(ht_out-h_out))      
+    u_out     = rp.sqrt(rp.maximum(2*(ht_out-h_out), 1E-12))     
     
     # Pack outputs of turbine 
     turbine_conditions.outputs.stagnation_pressure     = Pt_out

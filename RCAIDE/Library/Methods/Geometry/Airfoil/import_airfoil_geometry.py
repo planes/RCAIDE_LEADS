@@ -186,17 +186,17 @@ def import_airfoil_geometry(airfoil_geometry_file, npoints = 201,surface_interpo
     y_data   = y_data - y_delta
     
     if (x_data[arg_min] == 0) and (y_data[arg_min]  == 0): 
-        x_data[arg_min]  = 0  
-        y_data[arg_min]  = 0 
+        x_data = x_data.at[arg_min].set(0)
+        y_data = y_data.at[arg_min].set(0)
     
     # make sure points start and end at x = 1.0
-    x_data[0]  = 1.0
-    x_data[-1] = 1.0
+    x_data = x_data.at[0].set(1.0)
+    x_data = x_data.at[-1].set(1.0)
     
     # make sure a small gap at trailing edge
     if (y_data[0] == y_data[-1]): 
-        y_data[0]          = y_data[0]  - 1E-4
-        y_data[-1]         = y_data[-1] + 1E-4
+        y_data = y_data.at[0].set(y_data[0] - 0.0001)
+        y_data = y_data.at[-1].set(y_data[-1] + 0.0001)
         
     # thicknes and camber distributions require equal points     
     x_up_surf_old  = rp.array(x_up_surf)   

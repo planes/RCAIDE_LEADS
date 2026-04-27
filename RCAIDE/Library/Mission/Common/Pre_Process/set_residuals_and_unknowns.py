@@ -248,7 +248,7 @@ def set_residuals_and_unknowns(mission):
             if ctrls.altitude.initial_guess_values != None: 
                 segment.state.unknowns.altitude = ctrls.altitude.initial_guess_values[0][0] 
             else:
-                segment.state.unknowns.altitude = ones_row(1) * 0.0 
+                segment.state.unknowns.altitude = ones_row(1) * 1000.0 
         
             if ctrls.altitude.bounds !=  None:
                 segment.state.numerics.solver.lower_bounds.altitude = ctrls.altitude.bounds[0][0] * ones_row(1) 

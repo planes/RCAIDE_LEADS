@@ -230,17 +230,18 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
     # Current State 
     # ---------------------------------------------------------------------------------------------------
     if bus_config == 'Series':
-        I_module[t_idx]      = I_bus[t_idx]
+        I_module = I_module.at[t_idx].set(I_bus[t_idx])
     elif bus_config  == 'Parallel':
-        I_module[t_idx]      = I_bus[t_idx] /len(bus.battery_modules)
+        I_module = I_module.at[t_idx].set(I_bus[t_idx] /len(bus.battery_modules))
 
-    I_cell[t_idx] = I_module[t_idx] / n_parallel   
+    I_cell = I_cell.at[t_idx].set(I_module[t_idx] / n_parallel)
        
     # ---------------------------------------------------------------------------------
     # Compute battery_module cell temperature 
     # ---------------------------------------------------------------------------------
-    R_0_cell[t_idx]                     =  (0.01483*(SOC_cell[t_idx]**2) - 0.02518*SOC_cell[t_idx] + 0.1036) *battery_module_conditions.cell.resistance_growth_factor  
+    R_0_cell = R_0_cell.at[t_idx].set((0.01483*(SOC_cell[t_idx]**2) - 0.02518*SOC_cell[t_idx] + 0.1036) *battery_module_conditions.cell.resistance_growth_factor)  
     R_0_cell[t_idx][R_0_cell[t_idx]<0]  = 0. 
+    
 
     # Determine temperature increase         
     sigma                 = 139 # Electrical conductivity

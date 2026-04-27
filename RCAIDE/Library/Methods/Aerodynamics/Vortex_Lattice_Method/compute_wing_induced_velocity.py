@@ -334,12 +334,8 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     T2     = T*T
     ZETAPI = Z/CPI
     shape  = rp.shape(RO1)
-    RAD1   = rp.sqrt(XSQ1 - RO1)
-    RAD2   = rp.sqrt(XSQ2 - RO2)
-    
-    RAD1 = rp.where(rp.isnan(RAD1), 0.0, RAD1)
-    RAD2 = rp.where(rp.isnan(RAD2), 0.0, RAD2)
-    
+    RAD1 = rp.sqrt(rp.maximum(XSQ1 - RO1, 1e-12))
+    RAD2 = rp.sqrt(rp.maximum(XSQ2 - RO2, 1e-12))
 
     DENOM = XTY * XTY + (T2 - B2) * ZSQ
     SIGN  = rp.where(DENOM < 0, -1., 1.)
@@ -435,7 +431,7 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     TRANS = (B2[:, :, 0] - T2F) * (B2[:, :, 0] - T2A)
     
     # RFLAG and FLAG_bool
-    RFLAG = rp.where(TRANS < 0, 0, 1).astype(rp.int8)
+    RFLAG = rp.where(TRANS < 0, 0, 1)
     FLAG_bool = rp.where(TRANS < 0, True, False).reshape((n_mach, size, -1))
     
 
@@ -451,7 +447,7 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     WWAVE_mask = B2_full > T2_full
     
 
-    safe_radicand = rp.where(WWAVE_mask, B2_full - T2_full, 0.0)
+    safe_radicand = rp.where(WWAVE_mask, B2_full - T2_full, 1e-12)
     safe_COX      = rp.where(WWAVE_mask & (COX_full != 0.), COX_full, 1.0)
     
     WWAVE_calc = -0.5 * rp.sqrt(safe_radicand) / safe_COX
@@ -491,7 +487,6 @@ def supersonic(Z,XSQ1,RO1,XSQ2,RO2,XTY,T,B2,ZSQ,TOLSQ,TOL,TOLSQ2,X1,Y1,X2,Y2,RTV
     # Split boolean mask into n_mach chunks
     FLAG_bool_split = rp.array(rp.split(FLAG_bool.ravel(), n_mach))
 
-    # JAX-compatible replacement for np.where(FLAG_bool_split)
     # Returns (mach_idx, panel_idx)
     mach_idx, panel_idx = rp.nonzero(FLAG_bool_split)
 

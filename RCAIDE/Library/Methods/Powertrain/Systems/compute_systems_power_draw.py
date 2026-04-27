@@ -44,5 +44,5 @@ def compute_systems_power_draw(system,bus,conditions):
     bus_conditions                 = conditions.energy.busses[bus.tag]
     system_conditions              = bus_conditions[system.tag]    
     system_conditions.power = system_conditions.power.at[:,0].set(system.power_draw)
-    bus_conditions.power_draw      += system_conditions.power*bus.power_split_ratio /bus.efficiency    
+    bus_conditions.power_draw      = bus_conditions.power_draw + system_conditions.power*bus.power_split_ratio /bus.efficiency    
     return 

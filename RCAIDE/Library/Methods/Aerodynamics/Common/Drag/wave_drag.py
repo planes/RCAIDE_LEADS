@@ -368,7 +368,7 @@ def supersonic_lift_wave_drag(conditions,configuration,geometry):
             s    = wing.spans.projected / 2
             AR   = wing.aspect_ratio
             p    = 2/AR*s/l
-            beta = rp.sqrt(Mach**2-1) 
+            beta = rp.sqrt(rp.maximum(Mach**2-1,1e-12)) 
             x    =  beta*s/l
         
             ret = rp.zeros_like(x) 

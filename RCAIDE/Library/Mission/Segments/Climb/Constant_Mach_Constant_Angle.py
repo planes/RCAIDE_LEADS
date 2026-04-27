@@ -124,9 +124,9 @@ def residual_altitude(segment):
     alt_in  = segment.state.unknowns.altitude[:,0] 
     alt_out = segment.state.conditions.freestream.altitude[:,0]
     
-    segment.state.residuals.altitude = segment.state.residuals.altitude.at[:,0].set((alt_in - alt_out)/alt_out[-1])
+    segment.state.residuals.altitude = segment.state.residuals.altitude.at[:,0].set(alt_in - alt_out)
 
-    return    
+    return        
 
 # ----------------------------------------------------------------------------------------------------------------------  
 # Update Differentials
@@ -172,7 +172,8 @@ def update_differentials(segment):
     vz = -v[:,2,None] # maintain column array
 
     # get overall time step
-    dt = (dz/rp.dot(I,vz))[-1]
+    total_integrated_vz = rp.dot(I, vz)[-1]
+    dt = dz / total_integrated_vz
 
     # rescale operators
     x = x * dt

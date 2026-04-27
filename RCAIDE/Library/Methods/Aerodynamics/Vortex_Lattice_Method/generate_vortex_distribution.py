@@ -1227,8 +1227,8 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
         fvs_z = fvs_z.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.ones(n_cw+1)*fvs_eta_a[idx_y] + fus.origin[0][2])
         fvs_y = fvs_y.at[idx_y*(n_cw+1):(idx_y+1)*(n_cw+1)].set(rp.zeros(n_cw+1)                 + fus.origin[0][1])
         
-        fus_h_area += ((fhs.chord[idx_y]+fhs.chord[idx_y + 1])/2)*(fhs_eta_b[idx_y] - fhs_eta_a[idx_y])
-        fus_v_area += ((fvs.chord[idx_y]+fvs.chord[idx_y + 1])/2)*(fvs_eta_b[idx_y] - fvs_eta_a[idx_y])
+        fus_h_area = fus_h_area + ((fhs.chord[idx_y]+fhs.chord[idx_y + 1])/2)*(fhs_eta_b[idx_y] - fhs_eta_a[idx_y])
+        fus_v_area = fus_v_area + ((fvs.chord[idx_y]+fvs.chord[idx_y + 1])/2)*(fvs_eta_b[idx_y] - fvs_eta_a[idx_y])
         
         # store this strip's discretization information
         LE_inds        = rp.full((n_cw,), 0)

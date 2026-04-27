@@ -62,16 +62,16 @@ def pre_stall_coefficients(state,settings,geometry):
         
     # Equation 6c
     RCL1          = S1*(ACL1-A0)-CL1max
-    RCL1[RCL1<=0] = 1.e-16
+    RCL1 = rp.where(RCL1 <= 0, 1e-16, RCL1)
     
     # Equation 6d
     N1            = 1 + CL1max/RCL1
     
     # Equation 6a or 6b depending on the alpha
     CL1            = 0.0 * rp.ones_like(alpha)
-    CL1[alpha>A0]  = S1*(alpha[alpha>A0]-A0)-RCL1[alpha>A0]*((alpha[alpha>A0]-A0)/(ACL1[alpha>A0]-A0))**N1[alpha>A0]
-    CL1[alpha==A0] = 0.0
-    CL1[alpha<A0]  = S1*(alpha[alpha<A0]-A0)+RCL1[alpha<A0]*((A0-alpha[alpha<A0])/(ACL1[alpha<A0]-A0))**N1[alpha<A0]
+    CL1 = rp.where(alpha > A0, S1 * (alpha - A0) - RCL1 * ((alpha - A0) / (ACL1 - A0)) ** N1, CL1)
+    CL1 = rp.where(alpha == A0, 0.0, CL1)
+    CL1 = rp.where(alpha < A0, S1 * (alpha - A0) + RCL1 * ((A0 - alpha) / (ACL1 - A0)) ** N1, CL1)
     
     # M what is m?
     M              = 2. # Does this need changing

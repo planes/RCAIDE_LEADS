@@ -256,27 +256,27 @@ def add_mission_variables(segment):
     input_string = []
 
     if ground_seg_flag:       
-        output_numbers = rp.linspace(0,n_points-2,n_points-1,dtype=rp.int16)
+        output_numbers = np.linspace(0,n_points-2,n_points-1,dtype=np.int16)
         basic_string_con[unknown_keys[1]] = np.tile('segment.state.unknowns.'+unknown_keys[1]+'[', n_points-1)
         input_string.append(np.core.defchararray.add(basic_string_con[unknown_keys[1]],np.array(output_numbers).astype(str)))
         input_string        = np.array(input_string[0])
-        input_string        = np.core.defchararray.add(input_string, rp.tile(']',len_inputs-1))
-        input_aliases       = np.reshape(rp.tile(rp.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        input_string        = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1))
+        input_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
         input_aliases[0,1]  = 'segment.state.unknowns.'+unknown_keys[0] 
         input_aliases[1:,1] = input_string 
         
     elif single_pt_seg:  
         for unkn in unknown_keys:
-            basic_string_con[unkn] = rp.tile('segment.state.unknowns.'+unkn+'[', n_points)
+            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
             input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array([0]).astype(str)))
         input_string       = np.ravel(input_string)
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
-        input_aliases      = np.reshape(rp.tile(rp.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+        input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
         input_aliases[:,1] = input_string
     else:  
-        output_numbers = rp.linspace(0,n_points-1,n_points,dtype=rp.int16) 
+        output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
         for unkn in unknown_keys:
             basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
             input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
@@ -455,6 +455,6 @@ def segment_post_process(nexus):
     postprocess                 = nexus.postprocess
     postprocess.maximum_power   = max_power
     postprocess.energy_consumed = energy_consumed 
-    postprocess.nothing         = 0
-    
+    postprocess.nothing         = rp.sum(nexus.segment.state.unknowns.pack_array())*0.0
+
     return nexus  

@@ -300,7 +300,7 @@ def deflect_control_surface_strip(wing, raw_VD, is_first_strip, sym_sign):
     
     x_origin, y_origin, z_origin = wing.origin[0]
     
-    y_origin *= sym_sign
+    y_origin = y_origin * sym_sign
     
     xi_prime_a1    = raw_VD.xi_prime_a1   
     xi_prime_ac    = raw_VD.xi_prime_ac   

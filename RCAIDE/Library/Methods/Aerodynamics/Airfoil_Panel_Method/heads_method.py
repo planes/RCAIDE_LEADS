@@ -117,24 +117,23 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
                 nu           = NU[case,cpt]
                 
                 H            = rp.zeros(n) 
-                H[0]         = ShapeFactor_0[case,cpt]
+                H = H.at[0].set(ShapeFactor_0[case, cpt])
                 Theta        = rp.zeros(n)
-                Theta[0]     = THETA_0[case,cpt]
+                Theta = Theta.at[0].set(THETA_0[case, cpt])
                 H1           = rp.zeros(n) 
-                H1[0]        = (DEL_0[case,cpt] - DELTA_STAR_0[case,cpt])/THETA_0[case,cpt]
-                if H1[0]<3.3:
-                    H1[0] = 3.417285
+                H1 = H1.at[0].set((DEL_0[case, cpt] - DELTA_STAR_0[case, cpt]) / THETA_0[case, cpt])
+                H1 = rp.where(H1[0] < 3.3, H1.at[0].set(3.417285), H1)
                 
                 cf           = rp.zeros(n)
-                cf[0]        = CF_0[case,cpt] 
+                cf = cf.at[0].set(CF_0[case, cpt])
                 VeThetaH1    = rp.zeros(n)
-                VeThetaH1[0] = Ve_i[0]*Theta[0]*H1[0]
+                VeThetaH1 = VeThetaH1.at[0].set(Ve_i[0] * Theta[0] * H1[0])
                 
                 for i in range(1,n):
                     # initialise the variable values at the current grid point using previous grid points (to define the error functions)
                     H_er = H[i-1];  cf_er = cf[i-1];  H1_er = H1[i-1];  Theta_er = Theta[i-1]
                     # assign previous grid point values of H and Cf to start RK4
-                    H[i] = H[i-1]; cf[i] = cf[i-1]
+                    H = H.at[i].set(H[i - 1])
                     
                     #assume some error values
                     erH = 0.2; erH1 = 0.2; erTheta = 0.2; ercf = 0.2;
@@ -143,18 +142,19 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
                     while abs(erH)>0.00001 or abs(erH1)>0.00001 or abs(erTheta)>0.00001 or abs(ercf)>0.00001:
                         
                         # get Theta and VeThetaH1
-                        Theta[i], VeThetaH1[i] = RK4(i-1, dx, x_i, Theta, VeThetaH1, dTheta_by_dx, dVeThetaH1_by_dx)
-                        if rp.isnan(VeThetaH1[i]):
-                            VeThetaH1[i] = VeThetaH1[i-1]
+                        Theta_i, VeThetaH1_i = RK4(i-1, dx, x_i, Theta, VeThetaH1, dTheta_by_dx, dVeThetaH1_by_dx)
+                        Theta = Theta.at[i].set(Theta_i)
+                        VeThetaH1 = VeThetaH1.at[i].set(VeThetaH1_i)
+                        VeThetaH1 = rp.where(rp.isnan(VeThetaH1), rp.roll(VeThetaH1, 1), VeThetaH1)
                        
                         # get H1
-                        H1[i] = VeThetaH1[i]/(Ve_i[i]*Theta[i])
+                        H1 = H1.at[i].set(VeThetaH1[i] / (Ve_i[i] * Theta[i]))
                         
                         # get H
-                        H[i] = getH(H1[i])
+                        H = H.at[i].set(getH(H1[i]))
                         
                         # get skin friction
-                        cf[i] = getcf(i, nu, H[i], Theta[i])
+                        cf = cf.at[i].set(getcf(i, nu, H[i], Theta[i]))
                         
                         # define errors
                         erH = (H[i]-H_er)/H[i];

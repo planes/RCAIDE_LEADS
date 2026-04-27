@@ -318,7 +318,7 @@ def VLM(conditions,settings,geometry):
     mask = B2_LE < T2
     
     # Protect the square root! 
-    safe_radicand = rp.where(mask, T2 - B2_LE, 0.0)
+    safe_radicand = rp.where(mask, T2 - B2_LE, 1e-12)
     
     # Compute safely and drop 0.0 into the slots where the mask is False
     STB = rp.where(mask, rp.sqrt(safe_radicand), 0.0)
@@ -598,7 +598,7 @@ def compute_trefftz_plane_induced_drag(conditions, VD, cl, x_dist, y_dist, z_dis
     # Induced velocity calculation for this case 
     for wing_index,wing_segments in enumerate(VD.n_sw[0]):
         ws_prev = ws*1
-        ws += wing_segments
+        ws = ws + wing_segments
         circulation_segments = circulation_dist[:,ws_prev:ws]
         cl_segments = cl[:, ws_prev:ws]
         

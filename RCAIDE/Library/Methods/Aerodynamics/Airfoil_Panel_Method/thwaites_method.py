@@ -311,7 +311,7 @@ def getH(lambda_val ):
     """       
     H       = 0.0731/(0.14 + lambda_val ) + 2.088 
     idx1    = (lambda_val>0.0)  
-    H[idx1] = 2.61 - 3.75*lambda_val[idx1]  + 5.24*lambda_val[idx1]**2   
+    H = rp.where(idx1, 2.61 - 3.75 * lambda_val + 5.24 * lambda_val ** 2, H) 
     return H
 
 
@@ -336,7 +336,7 @@ def getcf(lambda_val , Re_theta):
     """        
     l       = 0.22 + 1.402*lambda_val  + (0.018*lambda_val)/(0.107 + lambda_val ) 
     idx1    = (lambda_val>0.0)   
-    l[idx1] = 0.22 + 1.57*lambda_val[idx1] - 1.8*lambda_val[idx1]**2 
+    l = rp.where(idx1, 0.22 + 1.57 * lambda_val - 1.8 * lambda_val ** 2, l)
     cf      = 2*l/Re_theta  
     return cf
 

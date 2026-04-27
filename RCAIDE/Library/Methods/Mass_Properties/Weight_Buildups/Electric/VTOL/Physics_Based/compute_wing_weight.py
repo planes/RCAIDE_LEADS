@@ -204,7 +204,7 @@ def compute_wing_weight(wing,
     Vt = 0 * Vz                                                      # Initialize Thrust Shear 
 
     for i in range(rp.size(motor_spanwise_locations)):
-        Vt[x<=motor_spanwise_locations[i]] = Vt[x<=motor_spanwise_locations[i]] + max_thrust
+        Vt = rp.where(x <= motor_spanwise_locations[i], Vt + max_thrust, Vt)
 
     Mx = rp.append(rp.cumsum((Vz[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Bending Moment
     My = rp.append(rp.cumsum(( T[0:-1]*rp.diff(x))[::-1])[::-1],0)  # Torsion Moment
@@ -254,19 +254,19 @@ def compute_wing_weight(wing,
         c = (seg[i][1::]+seg[i][0:-1])/2                         # Segment centroids
 
         if i<2:
-            flapInertia += rp.abs(rp.sum(l*c[:,1]**2))   # Bending Inertia per Unit Thickness
-            flapLength  += rp.sum(l)
+            flapInertia = flapInertia + rp.abs(rp.sum(l*c[:,1]**2))   # Bending Inertia per Unit Thickness
+            flapLength  = flapLength + rp.sum(l)
         else:
-            dragInertia += rp.abs(rp.sum(l*c[:,0]**2))   # Drag Inertia per Unit Thickness
-            dragLength  += rp.sum(l)
+            dragInertia = dragInertia + rp.abs(rp.sum(l*c[:,0]**2))   # Drag Inertia per Unit Thickness
+            dragLength  = dragLength + rp.sum(l)
 
 
     # Shear 
     box        = coord                                                                 # Box Initially Matches Airfoil
     box        = box[box[:,0]<=fwdWeb[1]]                                              # Include Only Parts Fwd of Aft Fwd Spar
     z          = rp.zeros(2)
-    z[0]       = rp.interp(fwdWeb[0], box[box[:, 1] > 0,0],box[box[:,1] > 0,1])*chord  # Upper Surf of Box at Fwdmost Spar
-    z[1]       = rp.interp(fwdWeb[0], box[box[:, 1] < 0,0],box[box[:,1] < 0,1])*chord  # Lower Surf of Box at Fwdmost Spar
+    z = z.at[0].set(rp.interp(fwdWeb[0], box[box[:, 1] > 0, 0], box[box[:, 1] > 0, 1]) * chord) # Upper Surf of Box at Fwdmost Spar
+    z = z.at[1].set(rp.interp(fwdWeb[0], box[box[:, 1] < 0, 0], box[box[:, 1] < 0, 1]) * chord) # Lower Surf of Box at Fwdmost Spar
     h          = rp.abs(z[0] - z[1])                                                   # Height of Box at Fwdmost Spar
 
     # Skin 
@@ -289,12 +289,12 @@ def compute_wing_weight(wing,
     # Calculate Flap Mass Based on Bending 
     tFlap    = Mx*rp.max(seg[0][:,1])/(flapInertia*bendUTS)    # Bending Flap Thickness
     mFlap    = tFlap*flapLength*bendDen                        # Bending Flap Mass
-    mGlue    += glueMGT*glueDen*flapLength*rp.ones(N)          # Updated Epoxy Mass
+    mGlue    = mGlue + glueMGT*glueDen*flapLength*rp.ones(N)          # Updated Epoxy Mass
 
     # Calculate Drag Flap Mass 
     tDrag    = Mz*rp.max(seg[2][:,0])/(dragInertia*bendUTS)    # Drag Flap Thickness
     mDrag    = tDrag*dragLength*bendDen                        # Drag Flap Mass
-    mGlue    += glueMGT*glueDen*dragLength*rp.ones(N)          # Updated Epoxy Mass
+    mGlue    = mGlue + glueMGT*glueDen*dragLength*rp.ones(N)          # Updated Epoxy Mass
 
     # Calculate Shear Spar Mass 
     tShear   = 1.5*Vz/(shearUSS*h)                            # Shear Spar Thickness

@@ -132,7 +132,7 @@ def compute_fan_performance(fan, conditions):
     P_out     = Pt_out/((1.+(gamma-1.)/2.*M0*M0)**(gamma/(gamma-1.))) 
     ht_out    = Tt_out*Cp   
     ht_in     = Tt_in*Cp 
-    M_out     = rp.sqrt( (((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.) )     
+    M_out     = rp.sqrt( rp.maximum((((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.),1e-12))     
     
     # Compute the work done by the fan (normalized by mass flow i.e. J/(kg/s)
     work_done = ht_out - ht_in

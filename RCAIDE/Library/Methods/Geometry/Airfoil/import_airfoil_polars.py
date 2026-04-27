@@ -55,9 +55,9 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
         for header_line in range(len(data_block)):
             line = data_block[header_line]   
             if 'Re =' in line:    
-                Re[j] = float(line[25:40].strip().replace(" ", ""))
+                Re = Re.at[j].set(float(line[25:40].strip().replace(' ', '')))
             if 'Mach =' in line:    
-                Ma[j] = float(line[7:20].strip().replace(" ", ""))    
+                Ma = Ma.at[j].set(float(line[7:20].strip().replace(' ', '')))  
             if '---' in line:
                 data_block = data_block[header_line+1:]
                 break
@@ -77,9 +77,9 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
     
         # Loop through each value: append to each column
         for line_count , line in enumerate(data_block):
-            airfoil_aoa[line_count] = float(data_block[line_count][0:8].strip())
-            airfoil_cl[line_count]  = float(data_block[line_count][10:17].strip())
-            airfoil_cd[line_count]  = float(data_block[line_count][20:27].strip())   
+            airfoil_aoa = airfoil_aoa.at[line_count].set(float(data_block[line_count][0:8].strip()))
+            airfoil_cl = airfoil_cl.at[line_count].set(float(data_block[line_count][10:17].strip()))
+            airfoil_cd = airfoil_cd.at[line_count].set(float(data_block[line_count][20:27].strip()))   
       
         AoA = AoA.at[j,:].set(AoA_interp)
         CL = CL.at[j,:].set(rp.interp(AoA_interp,airfoil_aoa,airfoil_cl))

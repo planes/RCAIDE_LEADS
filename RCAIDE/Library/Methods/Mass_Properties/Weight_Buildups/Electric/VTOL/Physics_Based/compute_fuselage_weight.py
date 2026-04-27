@@ -128,7 +128,7 @@ def compute_fuselage_weight(fuse,maxSpan, MTOW,
     M_bend      = L_max/2 * maxSpan/2                           # Max Bending Moment
     beamArea    = beamHeight * beamWidth                        # Enclosed Beam Area
     beamThk     = 0.5 * M_bend/(shearUSS * beamArea)            # Beam Thickness
-    massKeel   += 2*(beamHeight + beamWidth)*beamThk*shearDen
+    massKeel    = massKeel + 2*(beamHeight + beamWidth)*beamThk*shearDen
 
     # Calculate keel mass needed to carry landing impact load assuming
 
@@ -137,7 +137,7 @@ def compute_fuselage_weight(fuse,maxSpan, MTOW,
     boltDiam    = 2 * rp.sqrt(boltArea/rp.pi)           # Bolt Diameter
     lamThk      = F_landing/(boltDiam*bearingUBS)       # Laminate Thickness
     lamVol      = (rp.pi*(20*lamThk)**2)*(lamThk/3)     # Laminate Pad volume
-    massKeel   += 4*lamVol*bearingDen                   # Mass of 4 Pads
+    massKeel    = massKeel + 4*lamVol*bearingDen                   # Mass of 4 Pads
 
     # Calculate total mass as the sum of skin mass, bulkhead mass, canopy pass,
     # and keel mass. Called weight by RCAIDE convention

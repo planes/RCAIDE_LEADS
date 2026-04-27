@@ -11,7 +11,6 @@ import RNUMPY as rp
 from RCAIDE.Library.Methods.Gas_Dynamics.fm_id import fm_id
 
 # exceptions/warnings
-from warnings import warn
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_expansion_nozzle_performance
@@ -149,7 +148,7 @@ def compute_expansion_nozzle_performance(expansion_nozzle, conditions):
     Pt_out = rp.where(Pt_out < P0, P0, Pt_out)
     
     # Compute the unconstrained output Mach number. 
-    Mach_unc = rp.sqrt((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.)) 
+    Mach_unc = rp.sqrt(rp.maximum((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.),1E-12)) 
     
     # Define the choked flow condition
     is_choked = Mach_unc >= 1.0
@@ -170,7 +169,7 @@ def compute_expansion_nozzle_performance(expansion_nozzle, conditions):
     # Compute the output temperature,enthalpy,velocity and density
     T_out         = Tt_out/(1+(gamma-1)/2*Mach*Mach)
     h_out         = T_out * Cp
-    u_out         = rp.sqrt(2*(ht_out-h_out))
+    u_out         = rp.sqrt(rp.maximum(2*(ht_out-h_out),1E-12))
     #rho_out       = P_out/(R*T_out)
     
     # Compute the freestream to nozzle area ratio  

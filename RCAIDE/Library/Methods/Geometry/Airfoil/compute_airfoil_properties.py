@@ -95,7 +95,9 @@ def compute_airfoil_properties(airfoil_geometry, airfoil_polar_files = None,use_
         airfoil_aoa = Airfoil_Data.aoa_from_polar[j,:]/Units.degrees 
     
         # compute airfoil cl and cd for extended AoA range 
-        CL[j,:],CD[j,:] = compute_extended_polars(airfoil_cl,airfoil_cd,airfoil_aoa,AoA_sweep_deg,geometry,use_pre_stall_data)  
+        CL_j, CD_j = compute_extended_polars(airfoil_cl,airfoil_cd,airfoil_aoa,AoA_sweep_deg,geometry,use_pre_stall_data)  
+        CL = CL.at[j,:].set(CL_j)
+        CD = CD.at[j,:].set(CD_j) 
          
     # ----------------------------------------------------------------------------------------
     # Store data 
@@ -231,7 +233,7 @@ def compute_extended_polars(airfoil_cl,airfoil_cd,airfoil_aoa,AoA_sweep_deg,geom
     
     # Take the maxes
     CL_ij = rp.fmax(CL1,CL2)
-    CL_ij[AoA_sweep_radians<=A0] = rp.fmin(CL1[AoA_sweep_radians<=A0],CL2[AoA_sweep_radians<=A0])
+    CL_ij = rp.where(AoA_sweep_radians <= A0, rp.fmin(CL1, CL2), CL_ij)
     
     CD_ij = rp.fmax(CD1,CD2)
     
