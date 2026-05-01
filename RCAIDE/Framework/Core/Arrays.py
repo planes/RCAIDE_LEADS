@@ -80,12 +80,16 @@ def atleast_2d(A,oned_as='row'):
         
     # check rank
     if A.ndim < 2:
-        # expand row or col
-        if oned_as == 'row':
-            A = A[None,:]
-        elif oned_as == 'col':
-            A = A[:,None]
-        else:
-            raise Exception("oned_as must be 'row' or 'col' ")
+        A = rp.atleast_2d(A)
+        if A.ndim == 2 and A.shape[0] == 1 and oned_as == 'col':
+            A = A.T
+
+        # # expand row or col
+        # if oned_as == 'row':
+        #     A = A[None,:]
+        # elif oned_as == 'col':
+        #     A = A[:,None]
+        # else:
+        #     raise Exception("oned_as must be 'row' or 'col' ")
             
     return A

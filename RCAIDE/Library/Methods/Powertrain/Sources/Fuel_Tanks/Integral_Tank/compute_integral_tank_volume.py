@@ -546,10 +546,10 @@ def compute_non_dimensional_rib_coordinates(compoment,fuel_tank,front_rib_nondim
     f_lower            = interp1d(geometry.x_lower_surface, geometry.y_lower_surface, kind='linear')
 
     # non-wing box dimension coordinates 
-    front_rib_nondim_y_upper = f_upper([front_rib_nondim_x])[0] - clearance
-    rear_rib_nondim_y_upper  = f_upper([rear_rib_nondim_x])[0]  - clearance   
-    front_rib_nondim_y_lower = f_lower([front_rib_nondim_x])[0] + clearance   
-    rear_rib_nondim_y_lower  = f_lower([rear_rib_nondim_x])[0]  + clearance   
+    front_rib_nondim_y_upper = f_upper(rp.array([front_rib_nondim_x]))[0] - clearance
+    rear_rib_nondim_y_upper  = f_upper(rp.array([rear_rib_nondim_x]))[0]  - clearance   
+    front_rib_nondim_y_lower = f_lower(rp.array([front_rib_nondim_x]))[0] + clearance   
+    rear_rib_nondim_y_lower  = f_lower(rp.array([rear_rib_nondim_x]))[0]  + clearance   
 
     return front_rib_nondim_y_upper,rear_rib_nondim_y_upper, front_rib_nondim_y_lower, rear_rib_nondim_y_lower 
 

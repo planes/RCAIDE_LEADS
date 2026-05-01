@@ -251,7 +251,7 @@ def VLM(conditions,settings,geometry):
     RJTS = 0                         
     
     # COMPUTE FREE-STREAM AND ONSET FLOW PARAMETERS. Used throughout the remainder of VLM
-    B2     = rp.tile((mach**2 - 1),int(VD.n_cp[0]))
+    B2     = rp.tile((mach**2 - 1),int(VD.n_cp[0][0]))
     SINALF = rp.sin(aoa)
     COSALF = rp.cos(aoa)
     TANALF = rp.tan(aoa)

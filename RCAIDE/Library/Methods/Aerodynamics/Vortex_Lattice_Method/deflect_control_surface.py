@@ -91,7 +91,7 @@ def deflect_control_surface(VD,wing):
 
     # Symmetry loop
     signs         = rp.array([1, -1], dtype=int) # acts as a multiplier for symmetry. -1 is only ever used for symmetric wings
-    symmetry_mask = [True,sym_para]
+    symmetry_mask = rp.array([True,sym_para])
     for sym_sign in signs[symmetry_mask]:    
         
         # Pull out initial VD data points of surface

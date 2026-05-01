@@ -625,7 +625,7 @@ def generate_wing_vortex_distribution(VD,wing,n_cw,n_sw,spc,precision):
     # Run the strip contruction loop again if wing is symmetric. 
     # Reflection plane = x-y plane for vertical wings. Otherwise, reflection plane = x-z plane
     signs         = rp.array([1, -1]) # acts as a multiplier for symmetry. -1 is only ever used for symmetric wings
-    symmetry_mask = [True,sym_para]
+    symmetry_mask = rp.array([True,sym_para])
     for sym_sign in signs[symmetry_mask]:
         # create empty vectors for coordinates 
         xah   = rp.zeros(n_cw*n_sw)
@@ -1100,8 +1100,8 @@ def generate_fuselage_and_nacelle_vortex_distribution(VD,fus,n_cw,n_sw,precision
 
         # Compute the curvature of the nose/tail given fineness ratio. Curvature is derived from general quadratic equation
         # This method relates the fineness ratio to the quadratic curve formula via a spline fit interpolation
-        vec1               = [2 , 1.5, 1.2 , 1]
-        vec2               = [1  ,1.57 , 3.2,  8]
+        vec1               = rp.array([2 , 1.5, 1.2 , 1])
+        vec2               = rp.array([1  ,1.57 , 3.2,  8])
         x                  = rp.linspace(0,1,4)
         fus_nose_curvature =  rp.interp(rp.interp(fus.fineness.nose,vec2,x), x , vec1)
         fus_tail_curvature =  rp.interp(rp.interp(fus.fineness.tail,vec2,x), x , vec1)

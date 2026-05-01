@@ -64,9 +64,9 @@ def SciPy_Solve(problem,solver='SLSQP', sense_step = 1.4901161193847656e-08, ite
     
     for ii in range(0,len(inp.name)):
         # Scaled bounds
-        bnds[ii] = rp.array([bndl[ii]/scl[ii],bndu[ii]/scl[ii]])  
-        lb[ii]   = bndl[ii]/scl[ii]
-        ub[ii]   = bndu[ii]/scl[ii]
+        bnds = bnds.at[ii].set(rp.array([bndl[ii]/scl[ii],bndu[ii]/scl[ii]]))
+        lb   = lb.at[ii].set(bndl[ii]/scl[ii])
+        ub   = ub.at[ii].set(bndu[ii]/scl[ii])
         de_bnds.append((bndl[ii]/scl[ii],bndu[ii]/scl[ii]))  
      
     # Finalize problem statement and run

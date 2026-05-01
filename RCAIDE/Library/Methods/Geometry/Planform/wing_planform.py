@@ -114,6 +114,7 @@ def wing_planform(wing):
         span_locs = rp.array(span_locs)
         sweeps    = rp.array(sweeps)
         t_cs      = rp.array(t_cs)
+        dihedrals  = rp.array(dihedrals)
         
         # Basic calcs:
         semispan     = span/(1+sym)

@@ -418,8 +418,8 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     span_b                        = seg_b.percent_span_location
     twist_a                       = seg_a.twist
     twist_b                       = seg_b.twist
-    cs_wing.twists.root           = rp.interp(cs.span_fraction_start, [span_a, span_b], [twist_a, twist_b])
-    cs_wing.twists.tip            = rp.interp(cs.span_fraction_end,   [span_a, span_b], [twist_a, twist_b])
+    cs_wing.twists.root           = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([twist_a, twist_b]))
+    cs_wing.twists.tip            = rp.interp(cs.span_fraction_end,   rp.array([span_a, span_b]), rp.array([twist_a, twist_b]))
     cs_wing.dihedral              = seg_a.dihedral_outboard
     cs_wing.thickness_to_chord    = (seg_a.thickness_to_chord + seg_b.thickness_to_chord)/2
     cs_wing.origin                = rp.array(wing.origin) *1.
@@ -427,8 +427,8 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     span_fraction_tot             = cs.span_fraction_end - cs.span_fraction_start
     cs_wing.spans.projected       = wing.spans.projected * span_fraction_tot #includes 2x length if cs is on a symmetric wing 
     
-    wing_chord_local_at_cs_root   = rp.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.chord, seg_b.chord])
-    wing_chord_local_at_cs_tip    = rp.interp(cs.span_fraction_end,   [span_a, span_b], [seg_a.chord, seg_b.chord])
+    wing_chord_local_at_cs_root   = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.chord, seg_b.chord]))
+    wing_chord_local_at_cs_tip    = rp.interp(cs.span_fraction_end,   rp.array([span_a, span_b]), rp.array([seg_a.chord, seg_b.chord]))
     cs_wing.chords.root           = wing_chord_local_at_cs_root * cs.chord_fraction  
     cs_wing.chords.tip            = wing_chord_local_at_cs_tip  * cs.chord_fraction             
     cs_wing.taper                 = cs_wing.chords.tip / cs_wing.chords.root

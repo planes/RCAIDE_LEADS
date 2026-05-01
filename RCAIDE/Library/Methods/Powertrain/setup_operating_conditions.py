@@ -138,7 +138,7 @@ def setup_operating_conditions(component, velocity_range=rp.array([10]), altitud
      
     conditions.freestream.velocity                    = rp.atleast_2d(velocity_range) 
     conditions.frames.body.inertial_rotations = conditions.frames.body.inertial_rotations.at[:, 1].set(angle_of_attack)
-    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:, 0].set(rp.atleast_2d(velocity_range))
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:, 0].set(velocity_range)
 
     # setup conditions   
     segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
