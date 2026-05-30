@@ -1,4 +1,3 @@
-## @ingroup Library-Plots-Performance-Aerodynamics  
 # RCAIDE/Library/Plots/Performance/Aerodynamics/plot_airfoil_boundary_layer_properties.py
 # 
 # 
@@ -237,7 +236,7 @@ def plot_quantity(ap, q, qaxis, qname, ylim_low, ylim_high, file_type, show_lege
     
     for i in range(n_cpts):   
         for j in range(n_cases): 
-            case_label = 'AoA: ' + str(round(ap.AoA[i,j]/Units.degrees, 2)) + ', Re: ' + str(ap.Re[i,j]) 
+            case_label = 'AoA: ' + str(round(float(ap.AoA[i,j])/Units.degrees, 2)) + ', Re: ' + str(ap.Re[i,j]) 
             axis.plot( ap.x[i,j], q[i,j], color = line_colors[j], marker = ps.markers[0], linewidth = ps.line_width,  label =case_label)  
             axis.set_ylim([ylim_low,ylim_high]) 
      

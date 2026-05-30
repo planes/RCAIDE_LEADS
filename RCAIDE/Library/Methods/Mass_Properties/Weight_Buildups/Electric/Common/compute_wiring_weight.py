@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
  
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Compute wiring weight
@@ -39,8 +39,8 @@ def compute_wiring_weight(wing, config, cablePower):
         for propulsor in network.propulsors:
             motor = propulsor.motor
             if propulsor.wing_mounted == True:  
-                MSL             = np.array(motor.origin) #- np.array(bus.origin)  WHAT DO WE DO HERE SINCE WE DONT HAVE A BUS DEFINED YET AT THIS STAGE
-                cableLength     += np.sum(abs(MSL))  
+                MSL             = rp.array(motor.origin) #- rp.array(bus.origin)  WHAT DO WE DO HERE SINCE WE DONT HAVE A BUS DEFINED YET AT THIS STAGE
+                cableLength     = cableLength + rp.sum(abs(MSL))  
                     
     cableDensity    = 5.7e-6
     massCables      = cableDensity * cablePower * cableLength
@@ -57,6 +57,6 @@ def compute_wiring_weight(wing, config, cablePower):
     massWires       = wireDensity * wiresPerBundle * wireLength
      
     # Sum Total 
-    weight += massCables + massWires
+    weight = weight + massCables + massWires
     
     return weight

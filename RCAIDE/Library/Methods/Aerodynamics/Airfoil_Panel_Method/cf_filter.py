@@ -11,8 +11,9 @@
 from RCAIDE.Framework.Core import Data
 
 # package imports  
-import numpy as np 
-from scipy.signal import lfilter 
+import RNUMPY as rp 
+# from scipy.signal import lfilter 
+from RNUMPY.scipy.signal import lfilter 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # cf_filter.py
@@ -33,8 +34,8 @@ def cf_filter(ncpts,ncases,npanel,CF):
     
     for i in range(ncpts):
         for j in range(ncases):
-                CF_new[int(n_r):int((n/2)-(n_f)),j,i] = lfilter(b, a, CF[int(n_r):int((n/2)-(n_f)),j,i])
-                CF_new[int((n/2)+(n_f)):int(n-(n_r)),j,i] = lfilter(b, a, CF[int((n/2)+(n_f)):int(n-(n_r)),j,i])
+                CF_new = CF_new.at[int(n_r):int((n/2)-(n_f)),j,i].set(lfilter(b, a, CF[int(n_r):int((n/2)-(n_f)),j,i]))
+                CF_new = CF_new.at[int((n/2)+(n_f)):int(n-(n_r)),j,i].set(lfilter(b, a, CF[int((n/2)+(n_f)):int(n-(n_r)),j,i]))
     
     return CF_new
                 

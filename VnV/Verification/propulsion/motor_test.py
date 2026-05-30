@@ -14,11 +14,18 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Motor.design_optimal_motor imp
 from RCAIDE.Library.Methods.Powertrain                  import setup_operating_conditions 
 
 import os 
-import numpy as np 
+import RNUMPY as rp 
 import sys 
 
 # local imports 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles' + os.path.sep + 'Rotors'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles", "Rotors")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Test_Propeller    import Test_Propeller   
  
 def main():
@@ -72,22 +79,22 @@ def forward_mode_model():
  
         # Truth values 
         error = Data()
-        error.omega_test     = np.max(np.abs(omega_truth[i]   - omega[0][0]  ))
-        error.torque_test    = np.max(np.abs(torque_truth[i]  - torque[0][0] )) 
+        error.omega_test     = rp.max(rp.abs(omega_truth[i]   - omega[0][0]  ))
+        error.torque_test    = rp.max(rp.abs(torque_truth[i]  - torque[0][0] )) 
 
         if (type(motor) == RCAIDE.Library.Components.Powertrain.Converters.PMSM_Motor):
-            error.Q_cond_path_test      = np.max(np.abs(Q_cond_path_truth[0] - Q_cond_path))
-            error.Q_conv_path_test      = np.max(np.abs(Q_conv_path_truth[0] - Q_conv_path))
-            error.Q_conv_path_cooling_flow_test = np.max(np.abs(Q_conv_path_cooling_flow_truth[0] - Q_conv_path_cooling_flow))
-            error.Q_conv_airgap_test    = np.max(np.abs(Q_conv_airgap_truth[0] - Q_conv_airgap))
-            error.Q_conv_endspace_test  = np.max(np.abs(Q_conv_endspace_truth[0] - Q_conv_endspace))
-            error.Loss_cooling_test     = np.max(np.abs(Loss_cooling_truth[0] - Loss_cooling))
+            error.Q_cond_path_test      = rp.max(rp.abs(Q_cond_path_truth[0] - Q_cond_path))
+            error.Q_conv_path_test      = rp.max(rp.abs(Q_conv_path_truth[0] - Q_conv_path))
+            error.Q_conv_path_cooling_flow_test = rp.max(rp.abs(Q_conv_path_cooling_flow_truth[0] - Q_conv_path_cooling_flow))
+            error.Q_conv_airgap_test    = rp.max(rp.abs(Q_conv_airgap_truth[0] - Q_conv_airgap))
+            error.Q_conv_endspace_test  = rp.max(rp.abs(Q_conv_endspace_truth[0] - Q_conv_endspace))
+            error.Loss_cooling_test     = rp.max(rp.abs(Loss_cooling_truth[0] - Loss_cooling))
         
         print('Errors:')
         print(error)
         
         for k,v in list(error.items()):
-            assert(np.abs(v)<1e-6) 
+            assert(rp.abs(v)<1e-6) 
                
     return
 
@@ -117,14 +124,14 @@ def inverse_mode_model():
  
         # Truth values 
         error = Data() 
-        error.current_test   = np.max(np.abs(current_truth[i] - current[0][0])) 
-        error.voltage_test   = np.max(np.abs(voltage_truth[i] - voltage[0][0]))  
+        error.current_test   = rp.max(rp.abs(current_truth[i] - current[0][0])) 
+        error.voltage_test   = rp.max(rp.abs(voltage_truth[i] - voltage[0][0]))  
         
         print('Errors:')
         print(error)
         
         for k,v in list(error.items()):
-            assert(np.abs(v)<1e-6) 
+            assert(rp.abs(v)<1e-6) 
                
     return
 

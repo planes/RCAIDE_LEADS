@@ -1,21 +1,19 @@
 # find_take_off_weight_given_tofl.py
-#
-# Created:  Sep 2014, C. Ilario, T. Orra 
-# Modified: Jan 2016, E. Botero
 
-
+# Created: Apr 2025, M. Clarke  
 # ----------------------------------------------------------------------
-#  Imports
+#   Imports
 # ----------------------------------------------------------------------
-
+import RCAIDE
 from RCAIDE.Library.Methods.Performance.estimate_take_off_field_length import estimate_take_off_field_length
+from RCAIDE.Library.Methods.Geometry.Planform import wing_planform
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Find Takeoff Weight Given TOFL
 # ----------------------------------------------------------------------
-def find_take_off_weight_given_tofl(vehicle,analyses,target_tofl,altitude = 0, delta_isa = 0,):
+def find_take_off_weight_given_tofl(vehicle,analyses,target_tofl,altitude = 0, delta_isa = 0):
     """
     Estimates the maximum allowable takeoff weight for a given takeoff field length requirement.
 
@@ -66,6 +64,11 @@ def find_take_off_weight_given_tofl(vehicle,analyses,target_tofl,altitude = 0, d
     RCAIDE.Library.Methods.Performance.estimate_take_off_field_length
     """       
 
+    for wing in vehicle.wings: 
+        wing_planform(wing) 
+        if isinstance(wing, RCAIDE.Library.Components.Wings.Main_Wing):
+            vehicle.reference_area = wing.areas.reference
+            
     #unpack
     tow_lower = vehicle.mass_properties.operating_empty
     tow_upper = 1.10 * vehicle.mass_properties.max_takeoff
@@ -73,18 +76,18 @@ def find_take_off_weight_given_tofl(vehicle,analyses,target_tofl,altitude = 0, d
     #saving initial reference takeoff weight
     tow_ref = vehicle.mass_properties.max_takeoff
 
-    tow_vec = np.linspace(tow_lower,tow_upper,50)
-    tofl    = np.zeros_like(tow_vec)
+    tow_vec = rp.linspace(tow_lower,tow_upper,50)
+    tofl    = rp.zeros_like(tow_vec)
 
     for id,tow in enumerate(tow_vec):
         vehicle.mass_properties.takeoff = tow
         tofl[id], _ = estimate_take_off_field_length(vehicle,analyses,altitude = 0, delta_isa = 0)
 
-    target_tofl = np.atleast_1d(target_tofl)
-    max_tow     = np.zeros_like(target_tofl)
+    target_tofl = rp.atleast_1d(target_tofl)
+    max_tow     = rp.zeros_like(target_tofl)
 
     for id,toflid in enumerate(target_tofl):
-        max_tow[id] = np.interp(toflid,tofl,tow_vec)
+        max_tow[id] = rp.interp(toflid,tofl,tow_vec)
 
     #reset the initial takeoff weight
     vehicle.mass_properties.max_takeoff = tow_ref

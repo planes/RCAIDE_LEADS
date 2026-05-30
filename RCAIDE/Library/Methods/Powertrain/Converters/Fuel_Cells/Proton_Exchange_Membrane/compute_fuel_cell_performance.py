@@ -5,7 +5,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
-import  numpy as  np
+import RNUMPY as rp
 from scipy.optimize import minimize_scalar
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -108,14 +108,14 @@ def compute_fuel_cell_performance(fuel_cell_stack, state, bus, coolant_lines, t_
     n_total           = n_series*n_parallel  
      
     # Compute Bus electrical properties  
-    bus_conditions              = state.conditions.energy[bus.tag] 
+    bus_conditions              = state.conditions.energy.busses[bus.tag]
     P_bus                       = bus_conditions.power_draw
     bus_config                  = bus.fuel_cell_stack_electric_configuration 
     P_module                    = P_bus  /len(bus.fuel_cell_stacks)
     P_cell                      = P_module[t_idx]/n_total 
      
     # Compute fuel_cell_stack Conditions 
-    fuel_cell_stack_conditions = state.conditions.energy[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag]
+    fuel_cell_stack_conditions = state.conditions.energy.busses[bus.tag].fuel_cell_stacks[fuel_cell_stack.tag]
     
     # append atmospheric conditions to fuel cell 
     fuel_cell_stack_conditions.fuel_cell.stagnation_temperature[t_idx] = stagnation_temperature[t_idx]
@@ -134,8 +134,8 @@ def compute_fuel_cell_performance(fuel_cell_stack, state, bus, coolant_lines, t_
     # Future State 
     # --------------------------------------------------------------------------------------------------- 
     if t_idx != state.numerics.number_of_control_points-1:   
-        dT_dt              =  gross_heat / (fuel_cell.mass *fuel_cell.specific_heat_capacity) 
-        fuel_cell_stack_conditions.fuel_cell.stack_temperature[t_idx+1,0]  = fuel_cell_stack_conditions.fuel_cell.stack_temperature[t_idx, 0] + dT_dt*delta_t[t_idx]  
+        dT_dt              =  gross_heat[0] / (fuel_cell.mass *fuel_cell.specific_heat_capacity) 
+        fuel_cell_stack_conditions.fuel_cell.stack_temperature = fuel_cell_stack_conditions.fuel_cell.stack_temperature.at[t_idx+1,0].set(fuel_cell_stack_conditions.fuel_cell.stack_temperature[t_idx, 0] + dT_dt*delta_t[t_idx])
     
     I_cell  = P_fuel_cell / V_fuel_cell
     I_stack = I_cell * n_parallel
@@ -428,7 +428,7 @@ def calculate_P_O2(fuel_cell_stack, P_air, stack_temperature, RH, air_excess_rat
     log_P_H2O = -2.1794 + 0.02953 * T_C - 9.1837e-5 * T_C**2 + 1.4454e-7 * T_C**3
     P_H2O = 10 ** log_P_H2O
     N = 0.291 * i / (stack_temperature ** 0.832)
-    P_O2 = 0.21 * (P_air - P_drop / 2 - RH * P_H2O) *  ((1 + (air_excess_ratio - 1) / air_excess_ratio) / 2)/ np.exp(N)
+    P_O2 = 0.21 * (P_air - P_drop / 2 - RH * P_H2O) *  ((1 + (air_excess_ratio - 1) / air_excess_ratio) / 2)/ rp.exp(N)
     return P_O2
 
 def calculate_P_H2(fuel_cell_stack, P_H2_input, stack_temperature, RH, i):
@@ -454,7 +454,7 @@ def calculate_P_H2(fuel_cell_stack, P_H2_input, stack_temperature, RH, i):
     T_C = stack_temperature - 273.15
     log_P_H2O = -2.1794 + 0.02953 * T_C - 9.1837e-5 * T_C**2 + 1.4454e-7 * T_C**3
     P_H2O = 10 ** log_P_H2O
-    P_H2 = 0.5 * (P_H2_input / np.exp(1.653 * i / stack_temperature**1.334) - RH * P_H2O)
+    P_H2 = 0.5 * (P_H2_input / rp.exp(1.653 * i / stack_temperature**1.334) - RH * P_H2O)
     return P_H2
 
 def calculate_E_cell(fuel_cell_stack, stack_temperature, P_H2, P_O2):
@@ -478,7 +478,7 @@ def calculate_E_cell(fuel_cell_stack, stack_temperature, P_H2, P_O2):
     fuel_cell   = fuel_cell_stack.fuel_cell
     try:
         E_cell = 1.229 - 8.45e-4 * (stack_temperature - 298.15) + \
-        fuel_cell.Universal_gas_constant*stack_temperature / (4 * fuel_cell.alpha * fuel_cell.Faraday_constant) * (np.log(P_H2) + 0.5 * np.log(P_O2))
+        fuel_cell.Universal_gas_constant*stack_temperature / (4 * fuel_cell.alpha * fuel_cell.Faraday_constant) * (rp.log(P_H2) + 0.5 * rp.log(P_O2))
     except: 
         return -10
     return E_cell
@@ -504,8 +504,8 @@ def calculate_activation_losses(fuel_cell_stack, stack_temperature, P_O2, i):
     fuel_cell = fuel_cell_stack.fuel_cell
     A_const   = fuel_cell.Universal_gas_constant * stack_temperature / (2 * fuel_cell.alpha * fuel_cell.Faraday_constant)
     i0        = fuel_cell.i0ref * fuel_cell.L_c * fuel_cell.a_c * (P_O2/fuel_cell.i0ref_P_ref) ** (fuel_cell.gamma) * \
-        np.exp(-fuel_cell.E_C / (fuel_cell.Universal_gas_constant * stack_temperature) * (1 - (stack_temperature / fuel_cell.i0ref_T_ref)))
-    eta_act = A_const * np.log(i/i0)
+        rp.exp(-fuel_cell.E_C / (fuel_cell.Universal_gas_constant * stack_temperature) * (1 - (stack_temperature / fuel_cell.i0ref_T_ref)))
+    eta_act = A_const * rp.log(i/i0)
     return eta_act
 
 def calculate_ohmic_losses_LT(fuel_cell_stack, stack_temperature, i):
@@ -528,7 +528,7 @@ def calculate_ohmic_losses_LT(fuel_cell_stack, stack_temperature, i):
     t_m        = fuel_cell.t_m 
     lambda_eff = fuel_cell.lambda_eff
     num        = 181.6 * (1 + 0.03 * i + 0.062 * (stack_temperature/303) ** 2 * i ** 2.5)
-    denom      = (lambda_eff - 0.634 - 3 * i) * np.exp(4.18 * (stack_temperature - 303) / stack_temperature)
+    denom      = (lambda_eff - 0.634 - 3 * i) * rp.exp(4.18 * (stack_temperature - 303) / stack_temperature)
     rho        = num/denom 
     eta_ohmic  = (rho * t_m) * i
     return eta_ohmic 
@@ -587,7 +587,7 @@ def calculate_concentration_losses_LT(fuel_cell_stack, stack_temperature, P_O2, 
     if i >= i_lim: 
         return 10
     else: 
-        eta_conc = (1 + 1 / fuel_cell.alpha) * fuel_cell.Universal_gas_constant * stack_temperature / (2 * fuel_cell.Faraday_constant) * np.log(i_lim / (i_lim - i)) 
+        eta_conc = (1 + 1 / fuel_cell.alpha) * fuel_cell.Universal_gas_constant * stack_temperature / (2 * fuel_cell.Faraday_constant) * rp.log(i_lim / (i_lim - i)) 
         return eta_conc
     
 def calculate_limiting_current_density_LT(fuel_cell_stack, stack_temperature, P_O2, RH, air_excess_ratio, P_drop, i, **kwargs): 
@@ -649,7 +649,7 @@ def calculate_concentration_losses_HT(fuel_cell_stack, stack_temperature, P_O2, 
     if i >= i_lim: 
         return 10
     else: 
-        eta_conc = (1 + 1.8/fuel_cell.alpha) * fuel_cell.Universal_gas_constant * stack_temperature / (2* fuel_cell.Faraday_constant) * np.log(i_lim / (i_lim - i)) 
+        eta_conc = (1 + 1.8/fuel_cell.alpha) * fuel_cell.Universal_gas_constant * stack_temperature / (2* fuel_cell.Faraday_constant) * rp.log(i_lim / (i_lim - i)) 
         return eta_conc
 
 def calculate_limiting_current_density_HT(fuel_cell_stack, stack_temperature, P_O2, RH, air_excess_ratio, P_drop, i): 

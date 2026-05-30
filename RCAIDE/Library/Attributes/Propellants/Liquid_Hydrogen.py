@@ -7,7 +7,13 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
+import RCAIDE
+from pylab import fill
 from .Propellant import Propellant 
+
+import os
+import RNUMPY as rp
+from scipy.interpolate  import interp1d 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Liquid Hydrogen
@@ -71,17 +77,101 @@ class Liquid_Hydrogen(Propellant):
             http://arc.uta.edu/publications/td_files/Kristen%20Roberts%20MS.pdf 
         """ 
         
-        self.tag                        = 'Liquid_H2' 
-        self.reactant                   = 'O2' 
-        self.density                    = 70.85                            # [kg/m^3]
-        self.specific_energy            = 141.86e6                         # [J/kg] 
-        self.energy_density             = 8491.0e6                         # [J/m^3] 
-        self.temperatures.autoignition  = 845.15                           # [K]
-
+        self.tag                           = 'Liquid_H2' 
+        self.reactant                      = 'O2' 
+        self.density                       = 70.85                            # [kg/m^3]
+        self.specific_energy               = 120e6  # [J/kg] Considering the lower heating value https://ntrs.nasa.gov/api/citations/20020085127/downloads/20020085127.pdf
+        self.energy_density                = 8491.0e6                         # [J/m^3] 
+        self.gravimetric_efficiency        = .3
+        self.stoichiometric_fuel_to_air    = 0.029411 
+        self.temperatures.autoignition     = 845.15                           # [K]  
         self.stoichiometric_fuel_air_ratio = 0.029411         # [-] Stoichiometric Fuel to Air ratio
         self.heat_of_vaporization          = 0         # [J/kg] Heat of vaporization at standard conditions
-        self.temperature                   = 0         # [K] Temperature of fuel
+        self.temperature                   = 20         # [K] Temperature of fuel
         self.pressure                      = 0         # [Pa] Pressure of fuel
         self.fuel_surrogate_S1             = {} # [-] Mole fractions of fuel surrogate species
         self.kinetic_mechanism             = '' # [-] Kinetic mechanism for fuel surrogate species
-        self.oxidizer                      = ''
+        self.oxidizer                      = ''       
+
+        self.materials_properties = self.liquid_hydrogen_properties()
+
+    def liquid_hydrogen_properties(self, T, prop_name):
+        """
+            Return interpolated liquid hydrogen property value at a given temperature.
+
+            Parameters
+            ----------
+            T : float or ndarray
+                Temperature(s) in Kelvin at which the property is requested.  
+            prop_name : str
+                Name of the property to retrieve from the hydrogen data file.  
+                Valid keys include:
+                    - "Temperature (K)"
+                    - "Pressure (MPa)"
+                    - "Density (kg/m3)"
+                    - "Volume (m3/kg)"
+                    - "Internal Energy (kJ/kg)"
+                    - "Enthalpy (kJ/kg)"
+                    - "Entropy (J/g*K)"
+                    - "Cv (J/g*K)"
+                    - "Cp (J/g*K)"
+                    - "Sound Spd. (m/s)"
+                    - "Joule-Thomson (K/MPa)"
+                    - "Viscosity (Pa*s)"
+                    - "Therm. Cond. (W/m*K)"
+                    - "Phase"
+
+            Returns
+            -------
+            prop_value : float or ndarray
+                Interpolated property value(s) corresponding to the input temperature(s).  
+
+            Notes
+            -----
+            * Property data is loaded from ``H2_properties.res`` using 
+            :func:`load_hydrogen_properties`.  
+            * Linear interpolation is applied between tabulated values.  
+            * Extrapolation outside the data range is not supported (``fill_value=None``).  
+            * Phase information is categorical and may not be suitable for interpolation.  
+
+            See Also
+            --------
+            RCAIDE.Library.Attributes.Propellants.Liquid_Hydrogen.load_hydrogen_properties
+         """
+        data = load_hydrogen_properties()
+        temps = rp.array(data["Temperature (K)"], dtype=float)
+        props = rp.array(data[prop_name], dtype=float)
+        interp = interp1d(temps, props, kind="linear", fill_value=None)
+        
+        return interp(T)
+
+def load_hydrogen_properties(): 
+    """
+    Load hydrogen property data from the RES file.
+
+    Parameters
+    ----------
+    None
+
+    Returns
+    -------
+    hydrogen_data : dict
+        Raw hydrogen property data loaded from ``H2_properties.res``.
+
+    Notes
+    -----
+    Assumes hydrogen behaves as an ideal gas for the stored properties.  
+
+    Source
+    ------
+    Internal RCAIDE resource file: ``H2_properties.res``
+
+    See Also
+    --------
+    RCAIDE.load : Function used to load RES files
+    """
+    ospath    = os.path.abspath(__file__)
+    separator = os.path.sep
+    rel_path  = os.path.dirname(ospath) + separator     
+
+    return RCAIDE.load(rel_path+ 'H2_properties.res')

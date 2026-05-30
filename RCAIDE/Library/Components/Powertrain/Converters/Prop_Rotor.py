@@ -141,7 +141,7 @@ class Prop_Rotor(Rotor):
 
         self.tag                                 = 'prop_rotor'
         self.orientation_euler_angles            = [0.,0.,0.] # This is X-direction thrust in vehicle frame
-        self.use_2d_analysis                     = False    
+        self.use_2d_analysis                     = False
         
         self.hover                               = Data()
         self.hover.design_thrust                 = None
@@ -169,7 +169,7 @@ class Prop_Rotor(Rotor):
         self.oei.design_acoustics                = None
         self.oei.design_performance              = None 
         self.oei.design_freestream_velocity      = None   
-        self.oei.design_blade_pitch_command            = 0.0
+        self.oei.design_blade_pitch_command      = 0.0
         self.oei.design_efficiency               = 0.86  
         self.oei.design_altitude                 = None
         self.oei.design_SPL_dBA                  = None
@@ -187,7 +187,7 @@ class Prop_Rotor(Rotor):
         self.cruise.design_acoustics             = None
         self.cruise.design_performance           = None
         self.cruise.design_SPL_dBA               = None
-        self.cruise.design_blade_pitch_command         = 0.0
+        self.cruise.design_blade_pitch_command   = 0.0
         self.cruise.design_efficiency            = 0.86  
         self.cruise.design_Cl                    = None
         self.cruise.design_thrust_coefficient    = None

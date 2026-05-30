@@ -11,7 +11,7 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data  
-import numpy as np
+import RNUMPY as rp
 try:
     import vsp as vsp
 except ImportError:
@@ -125,7 +125,7 @@ def read_vsp_boom(b_id,fux_idx,sym_flag, units_type='SI', fineness=True, use_sca
     for ii in range(0, boom.vsp_data.xsec_num): 
         # Create the segment
         x_sec                     = vsp.GetXSec(boom.vsp_data.xsec_surf_id, ii) # VSP XSec ID.
-        segment                   = RCAIDE.Library.Components.Booms.Segment()
+        segment                   = RCAIDE.Library.Components.Booms.Segments.Segment()
         segment.vsp_data.xsec_id  = x_sec 
         segment.tag               = 'segment_' + str(ii)
 
@@ -167,10 +167,10 @@ def read_vsp_boom(b_id,fux_idx,sym_flag, units_type='SI', fineness=True, use_sca
     boom.width              = max(widths)           # Max segment width.
     boom.effective_diameter = max(eff_diams)        # Max segment effective diam.
 
-    boom.areas.front_projected  = np.pi*((boom.effective_diameter)/2)**2
+    boom.areas.front_projected  = rp.pi*((boom.effective_diameter)/2)**2
 
-    eff_diam_gradients_fwd = np.array(eff_diams[1:]) - np.array(eff_diams[:-1])		# Compute gradients of segment effective diameters.
-    eff_diam_gradients_fwd = np.multiply(eff_diam_gradients_fwd, lengths[:-1])
+    eff_diam_gradients_fwd = rp.array(eff_diams[1:]) - rp.array(eff_diams[:-1])		# Compute gradients of segment effective diameters.
+    eff_diam_gradients_fwd = rp.multiply(eff_diam_gradients_fwd, lengths[:-1])
 
     boom = compute_boom_fineness(boom, x_locs, eff_diams, eff_diam_gradients_fwd)	
 
@@ -268,8 +268,7 @@ def write_vsp_boom(boom,area_tags, OML_set_ind):
 
     if 'OpenVSP_values' in boom:        
         vals = boom.OpenVSP_values
-
-        # for wave drag testing
+ 
         boom.OpenVSP_ID = b_id
 
         # Nose
@@ -299,7 +298,7 @@ def write_vsp_boom(boom,area_tags, OML_set_ind):
     vals.tail.top.angle    = 0.0
     vals.tail.top.strength = 0.0
 
-    #if len(np.unique(x_poses)) != len(x_poses):
+    #if len(rp.unique(x_poses)) != len(x_poses):
         #raise ValueError('Duplicate boom section positions detected.')
     vsp.SetParmVal(b_id,"Length","Design",length)
     if num_segs != 5: # reduce to only nose and tail
@@ -385,8 +384,8 @@ def set_section_angles(i,nose_z,tail_z,x_poses,z_poses,heights,widths,length,end
 
     Inputs:  
     nose_z   [-] # 0.1 is 10% of the boom length
-    widths   np.array of [m]
-    heights  np.array of [m]
+    widths   rp.array of [m]
+    heights  rp.array of [m]
     tail_z   [-] # 0.1 is 10% of the boom length
 
     Outputs:
@@ -414,9 +413,9 @@ def set_section_angles(i,nose_z,tail_z,x_poses,z_poses,heights,widths,length,end
     y_diff     = w2/2-w0/2
     x_diff     = x2-x0
 
-    top_angle  = np.tan(top_z_diff/x_diff)/Units.deg
-    bot_angle  = np.tan(-bot_z_diff/x_diff)/Units.deg
-    side_angle = np.tan(y_diff/x_diff)/Units.deg
+    top_angle  = rp.tan(top_z_diff/x_diff)/Units.deg
+    bot_angle  = rp.tan(-bot_z_diff/x_diff)/Units.deg
+    side_angle = rp.tan(y_diff/x_diff)/Units.deg
 
     vsp.SetParmVal(b_id,"TBSym","XSec_"+str(i+1),0)
     vsp.SetParmVal(b_id,"TopLAngle","XSec_"+str(i+1),top_angle)
@@ -457,9 +456,9 @@ def compute_boom_fineness(boom, x_locs, eff_diams, eff_diam_gradients_fwd):
     segment_list       = list(boom.segments.keys())
     
     # Compute nose fineness.    
-    x_locs    = np.array(x_locs)					# Make numpy arrays.
-    eff_diams = np.array(eff_diams)
-    min_val   = np.min(eff_diam_gradients_fwd[x_locs[:-1]<=0.5])	# Computes smallest eff_diam gradient value in front 50% of boom.
+    x_locs    = rp.array(x_locs)					# Make numpy arrays.
+    eff_diams = rp.array(eff_diams)
+    min_val   = rp.min(eff_diam_gradients_fwd[x_locs[:-1]<=0.5])	# Computes smallest eff_diam gradient value in front 50% of boom.
     x_loc     = x_locs[:-1][eff_diam_gradients_fwd==min_val][0]		# Determines x-location of the first instance of that value (if gradient=0, Segments[segment_list[0]]ost x-loc).
     boom.lengths.nose  = (x_loc-boom.segments[segment_list[0]].percent_x_location)*boom.lengths.total	# Subtracts first segment x-loc in case not at global origin.
     boom.fineness.nose = boom.lengths.nose/(eff_diams[x_locs==x_loc][0])
@@ -467,8 +466,8 @@ def compute_boom_fineness(boom, x_locs, eff_diams, eff_diam_gradients_fwd):
     # Compute tail fineness.
     x_locs_tail		    = x_locs>=0.5						# Searches aft 50% of boom.
     eff_diam_gradients_fwd_tail = eff_diam_gradients_fwd[x_locs_tail[1:]]			# Smaller array of tail gradients.
-    min_val 		    = np.min(-eff_diam_gradients_fwd_tail)			# Computes min gradient, where boom tapers (minus sign makes positive).
-    x_loc = x_locs[np.hstack([False,-eff_diam_gradients_fwd==min_val])][-1]			# Saves aft-most value (useful for straight boom with multiple zero gradients.)
+    min_val 		    = rp.min(-eff_diam_gradients_fwd_tail)			# Computes min gradient, where boom tapers (minus sign makes positive).
+    x_loc = x_locs[rp.hstack([False,-eff_diam_gradients_fwd==min_val])][-1]			# Saves aft-most value (useful for straight boom with multiple zero gradients.)
     boom.lengths.tail       = (1.-x_loc)*boom.lengths.total
     boom.fineness.tail      = boom.lengths.tail/(eff_diams[x_locs==x_loc][0])	# Minus sign converts tail fineness to positive value.
 
@@ -538,7 +537,7 @@ def find_fuse_u_coordinate(x_target,b_id,fuel_tank_tag):
     diff  = 1000    
     u_min = 0
     u_max = 1    
-    while np.abs(diff) > tol:
+    while rp.abs(diff) > tol:
         u_current = (u_max+u_min)/2
         probe_id = vsp.AddProbe(b_id,0,u_current,0,fuel_tank_tag+'_probe')
         vsp.Update()

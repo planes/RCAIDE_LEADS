@@ -7,7 +7,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE Imports  
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # unpack unknowns
@@ -58,7 +58,6 @@ def initialize_conditions(segment):
             - conditions.ground.friction_coefficient [-]
             - conditions.freestream.altitude [m]
             - conditions.frames.inertial.position_vector [m]
-            - conditions.weights.total_mass [kg]
     
     Notes
     -----
@@ -102,7 +101,7 @@ def initialize_conditions(segment):
         alt = -1.0 *segment.state.initials.conditions.frames.inertial.position_vector[-1,2]   
 
     if v0  is None: 
-        v0 = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        v0 = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
         
     # avoid having zero velocity since aero and propulsion models need non-zero Reynolds number
     if v0 == 0.0: v0 = 0.01
@@ -123,10 +122,9 @@ def initialize_conditions(segment):
 
     # pack conditions 
     conditions = segment.state.conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = initialized_velocity[:,0]
-    conditions.ground.incline[:,0]                  = segment.ground_incline
-    conditions.ground.friction_coefficient[:,0]     = segment.friction_coefficient   
-    conditions.freestream.altitude[:,0]             = alt
-    conditions.frames.inertial.position_vector[:,2] = -alt   
-    conditions.weights.total_mass[:,0]              = segment.analyses.aerodynamics.vehicle.mass_properties.takeoff
-    conditions.frames.inertial.position_vector[:,:] = conditions.frames.inertial.position_vector[0,:][None,:][:,:]
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(initialized_velocity[:,0])
+    conditions.ground.incline = conditions.ground.incline.at[:,0].set(segment.ground_incline)
+    conditions.ground.friction_coefficient = conditions.ground.friction_coefficient.at[:,0].set(segment.friction_coefficient)
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,:].set(conditions.frames.inertial.position_vector[0,:][None,:][:,:])

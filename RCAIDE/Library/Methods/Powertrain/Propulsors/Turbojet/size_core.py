@@ -9,7 +9,7 @@
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet           import compute_thrust
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  size_core
@@ -99,13 +99,13 @@ def size_core(turbojet, conditions):
     compute_thrust(turbojet,conditions)
 
     #unpack results 
-    Fsp                         = turbojet_conditions.non_dimensional_thrust
-
-    #compute dimensional mass flow rates
-    mdot_core                   = turbojet.design_thrust/(Fsp*a0*throttle)  
-    mdhc                        = mdot_core/ (np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref))
+    Fsp       = turbojet_conditions.non_dimensional_thrust 
+    TSFC      = turbojet_conditions.thrust_specific_fuel_consumption
+    mdot_core = turbojet.design_thrust/(Fsp*a0*throttle)  
+    mdhc      = mdot_core/ (rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref))
 
     #pack outputs
+    turbojet.TSFC                                = TSFC
     turbojet.design_mass_flow_rate               = mdot_core
     turbojet.compressor_nondimensional_massflow  = mdhc
 

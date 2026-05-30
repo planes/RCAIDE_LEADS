@@ -10,7 +10,7 @@
 from RCAIDE.Library.Mission.Common.Update.atmosphere import atmosphere
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -96,29 +96,29 @@ def initialize_conditions(segment):
     alt = t_nondim * (altf-alt0) + alt0
     
     # pack conditions
-    conditions.freestream.altitude[:,0]             =  alt[:,0] # positive altitude in this context
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0]) # positive altitude in this context
 
 
     # check for initial velocity vector
     if eas is None:
         if not segment.state.initials: raise AttributeError('initial equivalent airspeed not set')
-        air_speed  = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1,:])  
+        air_speed  = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1,:])  
     else: 
         # determine airspeed from equivalent airspeed
         atmosphere(segment) # get density for airspeed
         density   = conditions.freestream.density[:,0]   
         MSL_data  = segment.analyses.atmosphere.compute_values(0.0,0.0)
-        air_speed = eas/np.sqrt(density/MSL_data.density[0])    
+        air_speed = eas/rp.sqrt(density/MSL_data.density[0])    
     
     # process velocity vector
     v_mag  = air_speed
     v_z    = -climb_rate # z points down
-    v_xy   = np.sqrt( v_mag**2 - v_z**2 )
-    v_x    = np.cos(beta)*v_xy
-    v_y    = np.sin(beta)*v_xy
+    v_xy   = rp.sqrt( v_mag**2 - v_z**2 )
+    v_x    = rp.cos(beta)*v_xy
+    v_y    = rp.sin(beta)*v_xy
     
     # pack conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = v_x
-    conditions.frames.inertial.velocity_vector[:,1] = v_y
-    conditions.frames.inertial.velocity_vector[:,2] = v_z
-    conditions.frames.inertial.position_vector[:,2] = -alt[:,0] # z points down
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0]) # z points down

@@ -14,14 +14,21 @@ from RCAIDE.Framework.Mission.Common                          import Conditions
 from RCAIDE.Library.Plots                                     import * 
 
 # package imports  
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 
 # local imports 
 import sys 
 import os
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Hydrogen_Fuel_Cell   import vehicle_setup , configs_setup  
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -37,7 +44,7 @@ def main():
     # PLot parameters 
     marker                = ['s' ,'o' ,'P']
     linestyles            = ['-','--',':']
-    linecolors            = cm.inferno(np.linspace(0.2,0.8,3))     
+    linecolors            = cm.inferno(rp.linspace(0.2,0.8,3))     
 
     fuel_cell_tpye     =  ['Larminie', 'PEM']
     
@@ -66,12 +73,12 @@ def main():
         results = missions.base_mission.evaluate()  
         
         # Hydrogen Mass Flow Rate Regression
-        fuel_cell_tag = list(results.segments[0].conditions.energy.bus.fuel_cell_stacks.keys())[0]
-        mdot_H2       = results.segments[0].conditions.energy.bus.fuel_cell_stacks[fuel_cell_tag].H2_mass_flow_rate
+        fuel_cell_tag = list(results.segments[0].conditions.energy.busses['bus'].fuel_cell_stacks.keys())[0]
+        mdot_H2       = results.segments[0].conditions.energy.busses['bus'].fuel_cell_stacks[fuel_cell_tag].H2_mass_flow_rate
         print('Mass Flow Rate: ' + str(mdot_H2[0,0]))
-        mdot_H2_diff   = np.abs(mdot_H2[0,0] - mdot_H2_true[i]) 
+        mdot_H2_diff   = rp.abs(mdot_H2[0,0] - mdot_H2_true[i]) 
         print(mdot_H2_diff) 
-        assert np.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6  
+        assert rp.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6  
 
         time     = results.segments[0].conditions.frames.inertial.time[:,0] 
         axes1.plot(time , mdot_H2 , marker= marker[i], linestyle = linestyles[i],  color= linecolors[i]  , markersize=marker_size   ,label = fuel_cell_tpye[i])             
@@ -99,11 +106,20 @@ def analyses_setup(configs):
 
 def base_analysis(vehicle):    
     #   Initialize the Analyses     
-    analyses = RCAIDE.Framework.Analyses.Vehicle()  
+    analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle =  vehicle
+
+    #  Weights
+    weights = RCAIDE.Framework.Analyses.Weights.Weights()
+    weights.settings.run_weights_analysis = True
+    analyses.append(weights)        
+
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry()
+    analyses.append(geometry)
     
     #  Energy
-    energy          = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy          = RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
  
     #  Planet Analysis
@@ -112,7 +128,6 @@ def base_analysis(vehicle):
  
     #  Atmosphere Analysis
     atmosphere                 = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
  
     return analyses     
@@ -130,6 +145,13 @@ def mission_setup(analyses):
     segment.tag                             = 'Discharge_1' 
     segment.time                            = 60  
     mission.append_segment(segment)
+
+    segment                                 = Segments.Ground.Battery_Discharge(base_segment) 
+    segment.analyses.extend(analyses.discharge)  
+    segment.tag                             = 'Discharge_2' 
+    segment.time                            = 60  
+    mission.append_segment(segment)
+        
      
     return mission 
 

@@ -20,7 +20,7 @@ from RCAIDE.Library.Methods.Powertrain.Propulsors.Turbojet           import size
 from RCAIDE.Library.Methods.Powertrain                               import setup_operating_conditions 
 
 # Python package imports   
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Design Turbojet
@@ -133,22 +133,22 @@ def design_turbojet(turbojet):
         conditions = RCAIDE.Framework.Mission.Common.Results()
     
         # freestream conditions    
-        conditions.freestream.altitude                    = np.atleast_1d(turbojet.design_altitude)
-        conditions.freestream.mach_number                 = np.atleast_1d(turbojet.design_mach_number)
-        conditions.freestream.pressure                    = np.atleast_1d(p)
-        conditions.freestream.temperature                 = np.atleast_1d(T)
-        conditions.freestream.density                     = np.atleast_1d(rho)
-        conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
-        conditions.freestream.gravity                     = np.atleast_1d(planet.compute_gravity(turbojet.design_altitude))
-        conditions.freestream.isentropic_expansion_factor = np.atleast_1d(turbojet.working_fluid.compute_gamma(T,p))
-        conditions.freestream.Cp                          = np.atleast_1d(turbojet.working_fluid.compute_cp(T,p))
-        conditions.freestream.R                           = np.atleast_1d(turbojet.working_fluid.gas_specific_constant)
-        conditions.freestream.speed_of_sound              = np.atleast_1d(a)
-        conditions.freestream.velocity                    = np.atleast_1d(a*turbojet.design_mach_number)
+        conditions.freestream.altitude                    = rp.atleast_1d(turbojet.design_altitude)
+        conditions.freestream.mach_number                 = rp.atleast_1d(turbojet.design_mach_number)
+        conditions.freestream.pressure                    = rp.atleast_1d(p)
+        conditions.freestream.temperature                 = rp.atleast_1d(T)
+        conditions.freestream.density                     = rp.atleast_1d(rho)
+        conditions.freestream.dynamic_viscosity           = rp.atleast_1d(mu)
+        conditions.freestream.gravity                     = rp.atleast_1d(planet.compute_gravity(turbojet.design_altitude))
+        conditions.freestream.isentropic_expansion_factor = rp.atleast_1d(turbojet.working_fluid.compute_gamma(T,p))
+        conditions.freestream.Cp                          = rp.atleast_1d(turbojet.working_fluid.compute_cp(T,p))
+        conditions.freestream.R                           = rp.atleast_1d(turbojet.working_fluid.gas_specific_constant)
+        conditions.freestream.speed_of_sound              = rp.atleast_1d(a)
+        conditions.freestream.velocity                    = rp.atleast_1d(a*turbojet.design_mach_number)
    
     segment                                        = RCAIDE.Framework.Mission.Segments.Segment()  
     segment.state.conditions                       = conditions 
-    turbojet.append_operating_conditions(segment,conditions.energy,conditions.noise)        
+    turbojet.append_operating_conditions(segment,conditions.energy,conditions.aeroacoustics)        
     
     ram                       = turbojet.ram
     inlet_nozzle              = turbojet.inlet_nozzle
@@ -280,8 +280,8 @@ def design_turbojet(turbojet):
     # Step 21: Static Sea Level Thrust 
     atmo_data_sea_level   = atmosphere.compute_values(0.0,0.0)   
     V                     = atmo_data_sea_level.speed_of_sound[0][0]*0.01 
-    operating_state       = setup_operating_conditions(turbojet, altitude = 0,velocity_range=np.array([V]))  
-    operating_state.conditions.energy.propulsors[turbojet.tag].throttle[:,0] = 1.0  
+    operating_state       = setup_operating_conditions(turbojet,velocity_range=rp.array([V]), altitude = 0, angle_of_attack=0, temperature_deviation=0)  
+    operating_state.conditions.energy.propulsors[turbojet.tag].throttle = operating_state.conditions.energy.propulsors[turbojet.tag].throttle.at[:,0].set(1.0)
     sls_T,_,sls_P,_,_,_                          = turbojet.compute_performance(operating_state) 
     turbojet.sealevel_static_thrust              = sls_T[0][0]
     turbojet.sealevel_static_power               = sls_P[0][0]

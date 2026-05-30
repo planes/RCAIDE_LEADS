@@ -1,24 +1,21 @@
-# US_Standard_1976.py
+#RCAIDE/Frameworks/Analyses/Atmospheric/US_Standard_1976.py
 #
-# Created: 
-# Modified: Feb 2016, Andrew Wendorff
-#           Jan 2018, W. Maier
+# Created: Dec 2024, M. Clarke
 
 # ----------------------------------------------------------------------
 #  Imports
 # ----------------------------------------------------------------------
-
-import numpy as np
-from warnings import warn
+# RCAIDE imports 
 import RCAIDE
-from RCAIDE.Framework.Analyses.Atmospheric import Atmospheric
-from RCAIDE.Framework.Mission.Common.Conditions import Conditions
-from RCAIDE.Framework.Core import Units
-from RCAIDE.Framework.Core.Arrays import atleast_2d_col
+from RCAIDE.Framework.Analyses.Atmospheric      import Atmospheric
+from RCAIDE.Framework.Mission.Common.Conditions import Conditions 
+from RCAIDE.Framework.Core.Arrays               import atleast_2d_col 
+from RCAIDE.Library.Attributes.Gases            import Air
+from RCAIDE.Library.Attributes.Planets          import Earth
 
-from RCAIDE.Library.Attributes.Gases import Air
-from RCAIDE.Library.Attributes.Planets import Earth
- 
+# pthon imports 
+import RNUMPY as rp
+from warnings import warn 
 
 # ----------------------------------------------------------------------
 #  Classes
@@ -52,10 +49,11 @@ class US_Standard_1976(Atmospheric):
 
         Properties Used:
         None
-        """     
-        
+        """      
         atmo_data = RCAIDE.Library.Attributes.Atmospheres.Earth.US_Standard_1976()
-        self.update(atmo_data)        
+        self.update(atmo_data)         
+        planet = RCAIDE.Framework.Analyses.Planets.Earth()
+        self.features.planet = planet.features
     
     def compute_values(self,altitude,temperature_deviation=0.0,var_gamma=False):
 
@@ -118,15 +116,16 @@ class US_Standard_1976(Atmospheric):
         zs = zs/(1 + zs/Rad)
         
         # check ranges
-        if np.amin(zs) < zmin:
+        if rp.amin(zs) < zmin:
             print("Warning: altitude requested below minimum for this atmospheric model; returning values for h = -2.0 km")
-            zs[zs < zmin] = zmin
-        if np.amax(zs) > zmax:
+        if rp.amax(zs) > zmax:
             print("Warning: altitude requested above maximum for this atmospheric model; returning values for h = 86.0 km")   
-            zs[zs > zmax] = zmax        
+        # Safely constrain zs between zmin and zmax in one pass
+        zs = rp.clip(zs, min=zmin, max=zmax)
+ 
 
         # initialize return data
-        zeros = np.zeros_like(zs)
+        zeros = rp.zeros_like(zs)
         p     = zeros * 0.0
         T     = zeros * 0.0
         rho   = zeros * 0.0
@@ -136,23 +135,36 @@ class US_Standard_1976(Atmospheric):
         T0    = zeros * 0.0
         p0    = zeros * 0.0
         alpha = zeros * 0.0
-        
+
         # populate the altitude breaks
-        # this uses >= and <= to capture both edges and because values should be the same at the edges
-        for i in range( len(self.breaks.altitude)-1 ): 
+        for i in range(len(self.breaks.altitude)-1): 
             i_inside = (zs >= self.breaks.altitude[i]) & (zs <= self.breaks.altitude[i+1])
-            z0[ i_inside ]    = self.breaks.altitude[i]
-            T0[ i_inside ]    = self.breaks.temperature[i]
-            p0[ i_inside ]    = self.breaks.pressure[i]
-            alpha[ i_inside ] = -(self.breaks.temperature[i+1] - self.breaks.temperature[i])/ \
-                                 (self.breaks.altitude[i+1]    - self.breaks.altitude[i])
+            
+            # Precompute the lapse rate for this layer
+            alpha_val = -(self.breaks.temperature[i+1] - self.breaks.temperature[i]) / \
+                         (self.breaks.altitude[i+1]    - self.breaks.altitude[i])
+            
+            z0    = rp.where(i_inside, self.breaks.altitude[i], z0)
+            T0    = rp.where(i_inside, self.breaks.temperature[i], T0)
+            p0    = rp.where(i_inside, self.breaks.pressure[i], p0)
+            alpha = rp.where(i_inside, alpha_val, alpha)
         
-        # interpolate the breaks
-        dz = zs-z0
-        i_isoth = (alpha == 0.)
-        i_adiab = (alpha != 0.)
-        p[i_isoth] = p0[i_isoth] * np.exp(-1.*dz[i_isoth]*grav/(R*T0[i_isoth]))
-        p[i_adiab] = p0[i_adiab] * ( (1.-alpha[i_adiab]*dz[i_adiab]/T0[i_adiab]) **(1.*grav/(alpha[i_adiab]*R)) )
+        # Interpolate the breaks
+        dz = zs - z0
+        
+        # Protect alpha for exponent and base calculation
+        safe_alpha = rp.where(alpha == 0., 1.0, alpha)
+        
+        # Protect base of the power function
+        base = 1. - alpha * dz / T0
+        safe_base = rp.where(alpha == 0., 1.0, rp.maximum(base, 1e-10))
+        
+        # Calculate BOTH full arrays safely
+        p_isoth = p0 * rp.exp(-1. * dz * grav / (R * T0))
+        p_adiab = p0 * ( safe_base ** (1. * grav / (safe_alpha * R)) )
+        
+        # Select the correct result
+        p = rp.where(alpha == 0., p_isoth, p_adiab)
         
         T     = T0 - dz*alpha + delta_isa
         rho   = gas.compute_density(T,p)
@@ -173,27 +185,3 @@ class US_Standard_1976(Atmospheric):
         atmo_data.prandtl_number               = Pr 
         
         return atmo_data
-
-
-# ----------------------------------------------------------------------
-#   Module Tests
-# ----------------------------------------------------------------------
-if __name__ == '__main__':
-    
-    import pylab as plt
-    
-    h = np.linspace(-1.,60.,200) * Units.km
-    delta_isa = 0.
-    h = 5000.
-    atmosphere = US_Standard_1976()
-    
-    data = atmosphere.compute_values(h,delta_isa)
-    p   = data.pressure
-    T   = data.temperature
-    rho = data.density
-    a   = data.speed_of_sound
-    mu  = data.dynamic_viscosity
-    K   = data.thermal_conductivity
-    
-    print(data)
-    

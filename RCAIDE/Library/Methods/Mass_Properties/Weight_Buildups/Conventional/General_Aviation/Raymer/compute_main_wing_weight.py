@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Weights/Correlation_Buildups/General_Aviation/compute_main_wing_weight.py
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/General_Aviation/Raymer/compute_main_wing_weight.py
 # 
 # 
 # Created:  Sep 2024, M. Clarke 
@@ -9,7 +9,7 @@
 
 # RCAIDE 
 from RCAIDE.Framework.Core import  Units
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Main Wing Weight 
@@ -54,7 +54,7 @@ def compute_main_wing_weight(wing, vehicle, m_fuel):
     q    = q_c /(Units.lbs/(Units.ft**2.))
 
     # Calculate weight of wing for traditional aircraft vertical tail without rudder
-    weight_English = .036 * (S_w**.758)*(W_fw**.0035)*((AR_w/(np.cos(sweep_w)**2))**.6)*(q**.006)*(taper_w**.04)*((100.*t_c_w/np.cos(sweep_w))**(-.3))*((Nult*W_0)**.49)
+    weight_English = .036 * (S_w**.758)*(W_fw**.0035)*((AR_w/(rp.cos(sweep_w)**2))**.6)*(q**.006)*(taper_w**.04)*((100.*t_c_w/rp.cos(sweep_w))**(-.3))*((Nult*W_0)**.49)
     
     # packup outputs    
     weight =  weight_English * Units.lbs # Convert from lbs to kg

@@ -6,12 +6,12 @@
 #  Imports
 # ----------------------------------------------------------------------------------------------------------------------
 # package imports 
-import numpy as np
+import RNUMPY as rp
 from copy import deepcopy
 import  RCAIDE
 
 from RCAIDE.Framework.Core import  Data
-from RCAIDE.Library.Components.Wings import All_Moving_Surface 
+from RCAIDE.Library.Components.Wings.All_Moving_Surface import All_Moving_Surface 
 from RCAIDE.Library.Components.Wings.Control_Surfaces import Aileron , Elevator , Slat , Flap , Rudder 
 from RCAIDE.Library.Methods.Geometry.Planform import populate_control_sections
 from RCAIDE.Library.Methods.Geometry.Planform.convert_sweep import convert_sweep_segments
@@ -53,16 +53,21 @@ def make_VLM_wings(geometry, settings):
                 span_fraction_start
                 span_fraction_end
                 deflection
-                chord_fraction
-                
-    settings.discretize_control_surfaces  --> set to True to generate control surface panels
+                chord_fraction 
     
     Properties Used:
     N/A
     """ 
-    # unpack inputs
-    discretize_cs = settings.discretize_control_surfaces
-    wings         = copy_wings(geometry.wings)
+    # unpack inputs 
+    wings         = copy_wings(geometry.wings) 
+
+    # ------------------------------------------------------------------
+    # Remove wings (necessary for some cases of vertical tails that intersect main body)
+    # ------------------------------------------------------------------
+    for wing in wings:
+        for segment in wing.segments: 
+            if segment.ignore_segment:
+                wing.segments.pop(segment.tag) 
     
     # ------------------------------------------------------------------
     # Reformat original wings to have at least 2 segments and additional values for processing later
@@ -77,7 +82,7 @@ def make_VLM_wings(geometry, settings):
         else:
             # check for invalid/unsupported/conflicting geometry input            
             if issubclass(wing.wing_type, All_Moving_Surface): # these cases unsupported due to the way the panelization loop is structured at the moment
-                if not (wing.hinge_vector == np.array([0.,0.,0.])).all() and wing.use_constant_hinge_fraction:
+                if not (wing.hinge_vector == rp.array([0.,0.,0.])).all() and wing.use_constant_hinge_fraction:
                     raise ValueError("A hinge_vector is specified, but the surface is set to use a constant hinge fraction")
                 if len(wing.control_surfaces) > 0:
                     raise ValueError('Input: control surfaces are not supported on all-moving surfaces at this time')
@@ -87,10 +92,10 @@ def make_VLM_wings(geometry, settings):
                                      'This function will move the control surfaces to wing segments itself.')  
         
         #move wing control surfaces to from wing to its segments
-        wing = populate_control_sections(wing) if discretize_cs else wing
+        wing = populate_control_sections(wing)  
         
         #ensure wing has attributes that will be needed later
-        wing_halfspan = wing.spans.projected * 0.5 if wing.symmetric else wing.spans.projected
+        wing_halfspan = wing.spans.projected * 0.5 if wing.xz_plane_symmetric else wing.spans.projected
         segment_list  = list(wing.segments.keys())
         for i in range(n_segments):   
             (ia, ib)       = (0, 0) if i==0 else (i-1, i)
@@ -106,8 +111,8 @@ def make_VLM_wings(geometry, settings):
                 
             #give segments offsets for giving cs_wings an origin later
             section_span     = (seg_b.percent_span_location - seg_a.percent_span_location) * wing_halfspan
-            seg_b.x_offset   = 0. if i==0 else seg_a.x_offset   + section_span*np.tan(seg_a.sweeps.leading_edge)
-            seg_b.dih_offset = 0. if i==0 else seg_a.dih_offset + section_span*np.tan(seg_a.dihedral_outboard)
+            seg_b.x_offset   = 0. if i==0 else seg_a.x_offset   + section_span*rp.tan(seg_a.sweeps.leading_edge)
+            seg_b.dih_offset = 0. if i==0 else seg_a.dih_offset + section_span*rp.tan(seg_a.dihedral_outboard)
         wing.segments[segment_list[-1]].sweeps.leading_edge = 1e-8
     
     # each control_surface-turned-wing will have its own unique ID number
@@ -205,13 +210,16 @@ def make_VLM_wings(geometry, settings):
                     if ID_j == ID_i: #found control surface end
                         break
                     elif ID_j == -1: #found a span_break within control surface. copy values
-                        span_breaks[j].cs_IDs[edge,:] = [ID_i, ID_i]
-                        span_breaks[j].cuts[edge,:]   = [cut, cut]
+                        span_breaks[j].cs_IDs = span_breaks[j].cs_IDs.at[edge,:].set(rp.array([ID_i, ID_i]))
+                        span_breaks[j].cuts = span_breaks[j].cuts.at[edge,:].set(rp.array([cut, cut]))
                     else:
                         raise ValueError('VLM does not support multiple control surfaces on the same edge at this time')
                 
+        
+        
         # pack span_breaks
         wing.span_breaks = reprocess_span_breaks(span_breaks)
+        wing.seg_breaks  = seg_breaks 
         
     # ------------------------------------------------------------------
     # Give cs_wings span_breaks arrays
@@ -226,6 +234,7 @@ def make_VLM_wings(geometry, settings):
         span_break  = make_span_break_from_segment(cs_wing.segments[cs_w_segs[1]])
         span_breaks.append(span_break) 
         cs_wing.span_breaks = span_breaks
+        cs_wing.seg_breaks  = cs_wing.segments
     
     return wings
   
@@ -327,10 +336,11 @@ def get_paths(type_str):
     if type_str == 'wings':
         paths = ['tag',
                 'origin',
-                'symmetric',
+                'xz_plane_symmetric',
                 'vertical',
                 'taper',
                 'dihedral',
+                'aspect_ratio',
                 'thickness_to_chord',
                 'spans.projected',
                 'chords.root',
@@ -339,7 +349,7 @@ def get_paths(type_str):
                 'sweeps.leading_edge',
                 'twists.root',
                 'twists.tip',
-                'vortex_lift',
+                'vortex_lift', 
                 'airfoil',
                 'segments',
                 'control_surfaces',
@@ -362,7 +372,8 @@ def get_paths(type_str):
                  'twist',
                  'root_chord_percent',  
                  'dihedral_outboard',     
-                 'thickness_to_chord',     
+                 'thickness_to_chord',
+                 'ignore_segment', 
                  'sweeps.quarter_chord',         
                  'sweeps.leading_edge', 
                  'airfoil', 
@@ -397,7 +408,7 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     Properties Used:
     N/A
     """      
-    hspan = wing.spans.projected*0.5 if wing.symmetric else wing.spans.projected
+    hspan = wing.spans.projected*0.5 if wing.xz_plane_symmetric else wing.spans.projected
     
     cs_wing                       = copy_data_from_paths(RCAIDE.Library.Components.Wings.Wing(), get_paths("wings"))
     
@@ -407,23 +418,23 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     span_b                        = seg_b.percent_span_location
     twist_a                       = seg_a.twist
     twist_b                       = seg_b.twist
-    cs_wing.twists.root           = np.interp(cs.span_fraction_start, [span_a, span_b], [twist_a, twist_b])
-    cs_wing.twists.tip            = np.interp(cs.span_fraction_end,   [span_a, span_b], [twist_a, twist_b])
+    cs_wing.twists.root           = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([twist_a, twist_b]))
+    cs_wing.twists.tip            = rp.interp(cs.span_fraction_end,   rp.array([span_a, span_b]), rp.array([twist_a, twist_b]))
     cs_wing.dihedral              = seg_a.dihedral_outboard
     cs_wing.thickness_to_chord    = (seg_a.thickness_to_chord + seg_b.thickness_to_chord)/2
-    cs_wing.origin                = np.array(wing.origin) *1.
+    cs_wing.origin                = rp.array(wing.origin) *1.
     
     span_fraction_tot             = cs.span_fraction_end - cs.span_fraction_start
     cs_wing.spans.projected       = wing.spans.projected * span_fraction_tot #includes 2x length if cs is on a symmetric wing 
     
-    wing_chord_local_at_cs_root   = np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.chord, seg_b.chord])
-    wing_chord_local_at_cs_tip    = np.interp(cs.span_fraction_end,   [span_a, span_b], [seg_a.chord, seg_b.chord])
+    wing_chord_local_at_cs_root   = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.chord, seg_b.chord]))
+    wing_chord_local_at_cs_tip    = rp.interp(cs.span_fraction_end,   rp.array([span_a, span_b]), rp.array([seg_a.chord, seg_b.chord]))
     cs_wing.chords.root           = wing_chord_local_at_cs_root * cs.chord_fraction  
     cs_wing.chords.tip            = wing_chord_local_at_cs_tip  * cs.chord_fraction             
     cs_wing.taper                 = cs_wing.chords.tip / cs_wing.chords.root
     cs_wing.sweeps.quarter_chord  = 0.  # leave at 0. VLM will use leading edge
 
-    cs_wing.symmetric             = wing.symmetric
+    cs_wing.xz_plane_symmetric             = wing.xz_plane_symmetric
     cs_wing.vertical              = wing.vertical
     cs_wing.vortex_lift           = wing.vortex_lift
 
@@ -445,11 +456,11 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     
     #adjustments---------------------------------------------------------------------------------------------------
     #adjust origin - may need to be adjusted later
-    wing_halfspan                 = wing.spans.projected * 0.5 if wing.symmetric else wing.spans.projected
+    wing_halfspan                 = wing.spans.projected * 0.5 if wing.xz_plane_symmetric else wing.spans.projected
     LE_TE_cs_offset               = 0. if cs_wing.is_slat else (1 - cs.chord_fraction)*wing_chord_local_at_cs_root
-    cs_wing.origin[0,0]          += np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.x_offset, seg_b.x_offset]) + LE_TE_cs_offset
-    cs_wing.origin[0,1]          += cs.span_fraction_start * wing_halfspan if not wing.vertical else np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset])
-    cs_wing.origin[0,2]          += np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset]) if not wing.vertical else cs.span_fraction_start * wing_halfspan
+    cs_wing.origin = cs_wing.origin.at[0,0].add(rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.x_offset, seg_b.x_offset])) + LE_TE_cs_offset)
+    cs_wing.origin = cs_wing.origin.at[0,1].add(cs.span_fraction_start * wing_halfspan if not wing.vertical else rp.interp(cs.span_fraction_start,  rp.array([span_a, span_b]),  rp.array([seg_a.dih_offset, seg_b.dih_offset])))
+    cs_wing.origin = cs_wing.origin.at[0,2].add(rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.dih_offset, seg_b.dih_offset])) if not wing.vertical else cs.span_fraction_start * wing_halfspan)
     
     # holds all required y-coords. Will be added to during discretization to ensure y-coords match up between wing and control surface.
     rel_offset                    = cs_wing.origin[0,1] - wing.origin[0][1] if not cs_wing.vertical else cs_wing.origin[0,2] - wing.origin[0][2]
@@ -478,8 +489,8 @@ def make_cs_wing_from_cs(cs, seg_a, seg_b, wing, cs_ID):
     cs_w_segs = list(cs_wing.segments.keys())    
     cs_wing.segments[cs_w_segs[0]].x_offset   = 0.
     cs_wing.segments[cs_w_segs[0]].dih_offset = 0.  
-    cs_wing.segments[cs_w_segs[1]].x_offset   = wing_halfspan * span_fraction_tot *np.tan(cs_wing.segments[cs_w_segs[0]].sweeps.leading_edge)
-    cs_wing.segments[cs_w_segs[1]].dih_offset = wing_halfspan * span_fraction_tot *np.tan(cs_wing.segments[cs_w_segs[0]].dihedral_outboard)    
+    cs_wing.segments[cs_w_segs[1]].x_offset   = wing_halfspan * span_fraction_tot *rp.tan(cs_wing.segments[cs_w_segs[0]].sweeps.leading_edge)
+    cs_wing.segments[cs_w_segs[1]].dih_offset = wing_halfspan * span_fraction_tot *rp.tan(cs_wing.segments[cs_w_segs[0]].dihedral_outboard)    
     
     #add airfoil
     cs_wing.segments[cs_w_segs[0]].airfoil     = seg_a.airfoil
@@ -580,9 +591,10 @@ def add_span_break(span_break, span_breaks):
         
         # else coincident: need to superimpose cs_IDs and cuts, not append
         else:
-            boolean = span_breaks[-1].cs_IDs==-1
-            span_breaks[-1].cs_IDs[boolean] = span_break.cs_IDs[boolean]
-            span_breaks[-1].cuts[boolean]   = span_break.cuts[boolean]
+            boolean = span_breaks[-1].cs_IDs == -1
+
+            span_breaks[-1].cs_IDs = rp.where(boolean, span_break.cs_IDs, span_breaks[-1].cs_IDs)
+            span_breaks[-1].cuts   = rp.where(boolean, span_break.cuts,   span_breaks[-1].cuts)
                 
     return
 
@@ -632,7 +644,7 @@ def make_span_break_from_segment(seg):
     span_break = make_span_break(-1, 0, 0, span_frac, 0., airfoil,
                                  dihedral_ob, sweep_ob_QC, sweep_ob_LE, twist, local_chord,
                                  x_offset, dih_offset)  
-    span_break.cuts = np.array([[0.,0.],  
+    span_break.cuts = rp.array([[0.,0.],  
                                 [1.,1.]])
     return span_break
 
@@ -671,8 +683,8 @@ def make_span_breaks_from_cs(cs, seg_a, seg_b, cs_wing, cs_ID):
     sweep_ob_LE    = seg_a.sweeps.leading_edge
     twist          = cs_wing.twists.root    
     local_chord    = cs_wing.chords.root / cs.chord_fraction
-    x_offset       = np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.x_offset, seg_b.x_offset])
-    dih_offset     = np.interp(cs.span_fraction_start, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset])
+    x_offset       = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.x_offset, seg_b.x_offset]))
+    dih_offset     = rp.interp(cs.span_fraction_start, rp.array([span_a, span_b]), rp.array([seg_a.dih_offset, seg_b.dih_offset]))
     inboard_span_break  = make_span_break(cs_ID, LE_TE, ib_ob, span_frac, ob_cut, airfoil,
                                           dihedral_ob, sweep_ob_QC, sweep_ob_LE, twist, local_chord,
                                           x_offset, dih_offset)
@@ -688,8 +700,8 @@ def make_span_breaks_from_cs(cs, seg_a, seg_b, cs_wing, cs_ID):
     sweep_ob_LE    = seg_b.sweeps.leading_edge   if is_coincident else seg_a.sweeps.leading_edge
     twist          = cs_wing.twists.tip    
     local_chord    = cs_wing.chords.tip  / cs.chord_fraction
-    x_offset       = np.interp(cs.span_fraction_end, [span_a, span_b], [seg_a.x_offset, seg_b.x_offset])
-    dih_offset     = np.interp(cs.span_fraction_end, [span_a, span_b], [seg_a.dih_offset, seg_b.dih_offset])    
+    x_offset       = rp.interp(cs.span_fraction_end, rp.array([span_a, span_b]), rp.array([seg_a.x_offset, seg_b.x_offset]))
+    dih_offset     = rp.interp(cs.span_fraction_end, rp.array([span_a, span_b]), rp.array([seg_a.dih_offset, seg_b.dih_offset]))    
     outboard_span_break = make_span_break(cs_ID, LE_TE, ib_ob, span_frac, ib_cut, airfoil,
                                           dihedral_ob, sweep_ob_QC, sweep_ob_LE, twist, local_chord,
                                           x_offset, dih_offset)    
@@ -743,18 +755,18 @@ cut from a non-slat control surface     |           |           .       fraction
     N/A
     """     
     span_break = Data()
-    span_break.cs_IDs               = np.array([[-1,-1],  #  [[inboard LE cs, outboard LE cs],
+    span_break.cs_IDs               = rp.array([[-1,-1],  #  [[inboard LE cs, outboard LE cs],
                                                 [-1,-1]]) #   [inboard TE cs, outboard TE cs]]
-    span_break.cs_IDs[LE_TE,ib_ob]  = cs_ID
+    span_break.cs_IDs = span_break.cs_IDs.at[LE_TE,ib_ob].set(cs_ID)
     span_break.span_fraction        = span_frac
     # The following 'cut' attributes are in terms of the local total chord and represent positions. 
     #    (an aileron with chord fraction 0.2 would have a cut value of 0.8)
     # For inboard_cut, -1 takes value of previous outboard cut value in a later function
     # For outboard_cut, -1 takes value of next inboard cut value.
     # If no break directly touching this one, cut becomes 0 (LE) or 1 (TE).
-    span_break.cuts                 = np.array([[0.,0.],   #  [[inboard LE cut, outboard LE cut],
+    span_break.cuts                 = rp.array([[0.,0.],   #  [[inboard LE cut, outboard LE cut],
                                                 [1.,1.]])  #   [inboard TE cut, outboard TE cut]]
-    span_break.cuts[LE_TE,ib_ob]    = chord_cut
+    span_break.cuts = span_break.cuts.at[LE_TE,ib_ob].set(chord_cut)
     span_break.airfoil              = airfoil
     span_break.dihedral_outboard    = dihedral_ob
     span_break.sweep_outboard_QC    = sweep_ob_QC
@@ -767,7 +779,7 @@ cut from a non-slat control surface     |           |           .       fraction
     return span_break
 
 def make_span_break_tag(span_break):
-    location   = round(span_break.span_fraction, 3)
+    location   = round(float(span_break.span_fraction), 3)
     cs_IDs_arr = span_break.cs_IDs.flatten()
     cs_IDs_str = '{}'.format(cs_IDs_arr).replace('[','').replace(']','').replace('-1', 'na').replace('  ', '_')
     

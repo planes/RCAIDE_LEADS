@@ -34,11 +34,10 @@ def append_avionics_conditions(avionics, segment, bus):
     based on the avionics power requirements.
     
     See Also
-    --------
-    RCAIDE.Library.Methods.Powertrain.Systems.append_payload_conditions
+    -------- 
     """
     ones_row    = segment.state.ones_row
-    segment.state.conditions.energy[bus.tag][avionics.tag]            = Conditions()
-    segment.state.conditions.energy[bus.tag][avionics.tag].power      = 0 * ones_row(1) 
+    segment.state.conditions.energy.busses[bus.tag][avionics.tag]            = Conditions()
+    segment.state.conditions.energy.busses[bus.tag][avionics.tag].power      = 0 * ones_row(1)
     
     return 

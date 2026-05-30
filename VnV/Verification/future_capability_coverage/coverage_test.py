@@ -13,7 +13,7 @@ from RCAIDE.Framework.Core import Units ,  Data
 from RCAIDE.Library.Plots             import *       
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
@@ -37,6 +37,13 @@ def main():
     material            = RCAIDE.Library.Attributes.Materials.Polyimide()  
     material            = RCAIDE.Library.Attributes.Materials.Polytetrafluoroethylene()
     material            = RCAIDE.Library.Attributes.Materials.CrossLinked_Polyethylene()
+    material            = RCAIDE.Library.Attributes.Materials.Stainless_Steel_304()
+    material            = RCAIDE.Library.Attributes.Materials.Aerogel()
+    material            = RCAIDE.Library.Attributes.Materials.Polyurethane_Foam()
+    material            = RCAIDE.Library.Attributes.Materials.Vacuum_Jacketed_Multilayer_Insulation()
+    material            = RCAIDE.Library.Attributes.Materials.Cycom_5320()
+    
+
       
     # gases 
     working_fluid                       = RCAIDE.Library.Attributes.Gases.CO2()        
@@ -63,8 +70,36 @@ def main():
     propellant  = RCAIDE.Library.Attributes.Propellants.Jet_A1()    
     propellant  = RCAIDE.Library.Attributes.Propellants.JP7()  
     propellant  = RCAIDE.Library.Attributes.Propellants.Rocket_LH2()  
-    propellant  = RCAIDE.Library.Attributes.Propellants.Rocket_RP1()  
+    propellant  = RCAIDE.Library.Attributes.Propellants.Rocket_RP1()
+    
+    # networks
+    network =  RCAIDE.Framework.Networks.Hydrogen()
+    
+    # booms
+    boom      = RCAIDE.Library.Components.Booms.Boom()
+    segment_1 = RCAIDE.Library.Components.Booms.Segments.Circle_Segment()
+    boom.append_segment(segment_1)
+    segment_2 = RCAIDE.Library.Components.Booms.Segments.Ellipse_Segment()
+    boom.append_segment(segment_2)
+    segment_3 = RCAIDE.Library.Components.Booms.Segments.Rounded_Rectangle_Segment()
+    boom.append_segment(segment_3)
+    segment_4 = RCAIDE.Library.Components.Booms.Segments.Super_Ellipse_Segment()
+    boom.append_segment(segment_4)
+    segment_5 = RCAIDE.Library.Components.Booms.Segments.Segment()
+    boom.append_segment(segment_5) 
 
+    # nacelles
+    nacelle      = RCAIDE.Library.Components.Nacelles.Stack_Nacelle()
+    segment_1 = RCAIDE.Library.Components.Nacelles.Segments.Circle_Segment()
+    nacelle.append_segment(segment_1)
+    segment_2 = RCAIDE.Library.Components.Nacelles.Segments.Ellipse_Segment()
+    nacelle.append_segment(segment_2)
+    segment_3 = RCAIDE.Library.Components.Nacelles.Segments.Rounded_Rectangle_Segment()
+    nacelle.append_segment(segment_3)
+    segment_4 = RCAIDE.Library.Components.Nacelles.Segments.Super_Ellipse_Segment()
+    nacelle.append_segment(segment_4)
+    segment_5 = RCAIDE.Library.Components.Nacelles.Segments.Segment()
+    nacelle.append_segment(segment_5)
     
     return
     

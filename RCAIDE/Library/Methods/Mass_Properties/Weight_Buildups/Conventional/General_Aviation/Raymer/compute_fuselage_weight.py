@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Weights/Correlation_Buildups/General_Aviation/compute_fuselage_weight.py
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/General_Aviation/Raymer/compute_fuselage_weight.py
 # 
 # 
 # Created:  Sep 2024, M. Clarke 
@@ -9,7 +9,7 @@
 
 # RCAIDE 
 from RCAIDE.Framework.Core import  Units
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Fuselage Weight 
@@ -45,7 +45,7 @@ def compute_fuselage_weight(fuselage, vehicle, l_ht):
     w_fus       = fuselage.width
     h_fus       = fuselage.heights.maximum 
     l_fus       = fuselage.lengths.total-fuselage.lengths.tail  
-    V_fuse      = fuselage.mass_properties.volume  
+    V_fuse      = fuselage.volume_properties.volume  
     Nult        = vehicle.flight_envelope.ultimate_load 
     TOW         = vehicle.mass_properties.max_takeoff
     q_c         = vehicle.flight_envelope.design_dynamic_pressure
@@ -57,7 +57,7 @@ def compute_fuselage_weight(fuselage, vehicle, l_ht):
     d_str    = .025*d_fus+1.*Units.inches
     
     diff_p   = diff_p_fus / (Units.force_pound / Units.ft**2.) # Convert Pascals to lbs/ square ft 
-    tail_arm = np.abs(l_ht)/Units.ft 
+    tail_arm = rp.abs(l_ht)/Units.ft 
     weight   = TOW / Units.lb    # Convert kg to lbs
     area     = S_fus / (Units.ft**2.) # Convert square meters to square ft 
     q        = q_c /(Units.force_pound / Units.ft**2.)

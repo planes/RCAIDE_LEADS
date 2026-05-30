@@ -1,5 +1,4 @@
-## @defgroup Library-Plots-Energy 
-# RCAIDE/Library/Plots/Energy/__init__.py
+# RCAIDE/Library/Plots/Emissions/__init__.py
 # 
 
 """
@@ -12,4 +11,4 @@ data from vehicle and mission simulations. It focuses on greenhouse gas emission
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 
-from .plot_CO2e_emissions      import  plot_CO2e_emissions
+from .plot_emissions      import  plot_emissions

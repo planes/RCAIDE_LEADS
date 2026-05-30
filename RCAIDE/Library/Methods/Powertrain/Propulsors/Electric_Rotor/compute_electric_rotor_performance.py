@@ -12,7 +12,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Motor.compute_motor_performanc
 from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.compute_rotor_performance                      import * 
 
 # pacakge imports  
-import numpy as np 
+import RNUMPY as rp 
 from copy import deepcopy
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -118,17 +118,17 @@ def compute_electric_rotor_performance(propulsor, state, center_of_gravity=[[0.0
     compute_motor_performance(motor,conditions) 
     
     # Spin the rotor 
-    conditions.energy.converters[rotor.tag].omega           = conditions.energy.converters[motor.tag].outputs.omega
-    conditions.energy.converters[rotor.tag].throttle        = conditions.energy.modulators[esc.tag].throttle      
-    conditions.energy.converters[rotor.tag].commanded_thrust_vector_angle =  conditions.energy.propulsors[propulsor.tag].commanded_thrust_vector_angle
+    conditions.energy.converters[rotor.tag].omega                         = conditions.energy.converters[motor.tag].outputs.omega
+    conditions.energy.converters[rotor.tag].throttle                      = conditions.energy.modulators[esc.tag].throttle      
+    conditions.energy.converters[rotor.tag].commanded_thrust_vector_angle = conditions.energy.propulsors[propulsor.tag].commanded_thrust_vector_angle
     compute_rotor_performance(rotor,conditions)
  
     # Compute moment 
     moment_vector           = 0*state.ones_row(3)
-    moment_vector[:,0]      = rotor.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = rotor.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = rotor.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  =  np.cross(moment_vector, conditions.energy.converters[rotor.tag].thrust)     
+    moment_vector = moment_vector.at[:,0].set(rotor.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(rotor.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(rotor.origin[0][2]  -  center_of_gravity[0][2])
+    moment                  =  rp.cross(moment_vector, conditions.energy.converters[rotor.tag].thrust)     
     
     # Detemine esc current 
     conditions.energy.modulators[esc.tag].outputs.current = conditions.energy.converters[motor.tag].inputs.current
@@ -187,10 +187,10 @@ def reuse_stored_electric_rotor_data(propulsor,state,network,stored_propulsor_ta
     P_elec                  = conditions.energy.modulators[esc.tag].inputs.power    
     
     moment_vector           = 0*state.ones_row(3) 
-    moment_vector[:,0]      = rotor.origin[0][0]  -  center_of_gravity[0][0] 
-    moment_vector[:,1]      = rotor.origin[0][1]  -  center_of_gravity[0][1] 
-    moment_vector[:,2]      = rotor.origin[0][2]  -  center_of_gravity[0][2]
-    moment                  =  np.cross(moment_vector, thrust_vector)
+    moment_vector = moment_vector.at[:,0].set(rotor.origin[0][0]  -  center_of_gravity[0][0])
+    moment_vector = moment_vector.at[:,1].set(rotor.origin[0][1]  -  center_of_gravity[0][1])
+    moment_vector = moment_vector.at[:,2].set(rotor.origin[0][2]  -  center_of_gravity[0][2])
+    moment                  =  rp.cross(moment_vector, thrust_vector)
      
     conditions.energy.propulsors[propulsor.tag].power             = P_mech  
     conditions.energy.propulsors[propulsor.tag].thrust            = thrust_vector  

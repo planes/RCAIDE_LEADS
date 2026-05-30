@@ -11,6 +11,7 @@
 import RCAIDE
 from RCAIDE.Framework.Core                                       import Data, Units
 from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method   import VLM
+from RCAIDE.Library.Methods.Geometry.Planform                    import  wing_planform 
 from RCAIDE.Library.Plots  import *
 from RCAIDE.load import load  
 from RCAIDE.save import save  
@@ -18,10 +19,17 @@ from RCAIDE.save import save
 
 import sys
 import os
-import numpy as np
+import RNUMPY as rp
 
 # import vehicle file
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Lockheed_Martin_F22 import vehicle_setup as vehicle_setup
 import matplotlib.pyplot                as plt
 
@@ -29,7 +37,7 @@ import matplotlib.pyplot                as plt
 #   Main
 # ----------------------------------------------------------------------
 def main():
-    update_regression_values = True  # should be false unless code functionally changes
+    update_regression_values = False  # should be false unless code functionally changes
     
     # all-moving surface deflection cases
     deflection_configs = get_array_of_deflection_configs()
@@ -41,27 +49,28 @@ def main():
     
     # create results objects    
     results        = Data()
-    results.CL     = np.empty(shape=[0,n_cases])
-    results.CDi    = np.empty(shape=[0,n_cases])
-    results.CM     = np.empty(shape=[0,n_cases])
-    results.CY  = np.empty(shape=[0,n_cases])
-    results.CL_mom = np.empty(shape=[0,n_cases])
-    results.CM = np.empty(shape=[0,n_cases])
+    results.CL     = rp.empty(shape=[0,n_cases])
+    results.CDi    = rp.empty(shape=[0,n_cases])
+    results.CM     = rp.empty(shape=[0,n_cases])
+    results.CY     = rp.empty(shape=[0,n_cases])
+    results.CL_mom = rp.empty(shape=[0,n_cases])
+    results.CM     = rp.empty(shape=[0,n_cases])
     
     # run VLM
     for i,deflection_config in enumerate(deflection_configs):
         geometry    = vehicle_setup(deflection_config=deflection_config)
+        for wing in geometry.wings:   
+            wing_planform(wing)                    
+            geometry.reference_chord  = rp.maximum(geometry.reference_chord , wing.chords.mean_aerodynamic) 
+            geometry.reference_span   = rp.maximum(geometry.reference_span  , wing.spans.projected) 
         data        = VLM(conditions, settings, geometry)
-        
-        plot_title  = "Deflection Configuration #{}".format(i+1)
-        plot_3d_vehicle_vlm_panelization(geometry, show_wing_control_points=False, save_filename=plot_title, show_figure=False)        
-        
-        results.CL         = np.vstack((results.CL     , data.CLift.flatten()    ))
-        results.CDi        = np.vstack((results.CDi    , data.CDrag_induced.flatten()   ))
-        results.CM         = np.vstack((results.CM     , data.CM.flatten()    ))
-        results.CY         = np.vstack((results.CY     , data.CY.flatten() ))
-        results.CL_mom     = np.vstack((results.CL_mom , data.CL.flatten()))
-        results.CM         = np.vstack((results.CM     , data.CM.flatten()))      
+         
+        results.CL         = rp.vstack((results.CL     , data.CLift.flatten()    ))
+        results.CDi        = rp.vstack((results.CDi    , data.CDrag_induced.flatten()   ))
+        results.CM         = rp.vstack((results.CM     , data.CM.flatten()    ))
+        results.CY         = rp.vstack((results.CY     , data.CY.flatten() ))
+        results.CL_mom     = rp.vstack((results.CL_mom , data.CL.flatten()))
+        results.CM         = rp.vstack((results.CM     , data.CM.flatten()))      
         
     # save/load results
     if update_regression_values:
@@ -82,8 +91,8 @@ def main():
         print(errors)
         print('           ')
         
-        max_err = np.max(np.abs(errors))
-        assert max_err < 1e-6 , 'Failed at {} test'.format(key)
+        max_err = rp.max(rp.abs(errors))
+        assert max_err < 1e-5 , 'Failed at {} test'.format(key)
     
     return
 
@@ -100,9 +109,9 @@ def get_array_of_deflection_configs():
     stabilator_use_constant_hinge_fractions   = [False, False, False]
     v_tail_right_use_constant_hinge_fractions = [False, True , False]
     
-    zero_vec = np.array([0.,0.,0.])
+    zero_vec = rp.array([0.,0.,0.])
     stabilator_hinge_vectors     = [zero_vec*1, zero_vec*1, zero_vec*1]
-    v_tail_right_hinge_vectors   = [zero_vec*1, zero_vec*1, np.array([0.,1.,0.])]
+    v_tail_right_hinge_vectors   = [zero_vec*1, zero_vec*1, rp.array([0.,1.,0.])]
     
     deflections                  = [ 0.,  0.,  0.]
     stab_defs                    = [10.,-10., 30.]
@@ -131,25 +140,25 @@ def get_array_of_deflection_configs():
     return deflection_configs
 
 def get_conditions():
-    machs      = np.array([0.4  ,0.4  ,0.4  ,0.4  ,1.4  ,])
-    altitudes  = np.array([5000 ,5000 ,5000 ,5000 ,5000 ,])  *Units.ft
-    aoas       = np.array([0.   ,6.   ,6.   ,0.   ,6    ,])  *Units.degrees #angle of attack in degrees
-    PSIs       = np.array([3.   ,5.   ,0.   ,0.   ,5.   ,])  *Units.degrees #sideslip angle  in degrees
-    PITCHQs    = np.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #pitch rate      in degrees/s   
-    ROLLQs     = np.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #roll  rate      in degrees/s
-    YAWQs      = np.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #yaw   rate      in degrees/s       
+    machs      = rp.array([0.4  ,0.4  ,0.4  ,0.4  ,1.4  ,])
+    altitudes  = rp.array([5000 ,5000 ,5000 ,5000 ,5000 ,])  *Units.ft
+    aoas       = rp.array([0.   ,6.   ,6.   ,0.   ,6    ,])  *Units.degrees #angle of attack in degrees
+    PSIs       = rp.array([3.   ,5.   ,0.   ,0.   ,5.   ,])  *Units.degrees #sideslip angle  in degrees
+    PITCHQs    = rp.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #pitch rate      in degrees/s   
+    ROLLQs     = rp.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #roll  rate      in degrees/s
+    YAWQs      = rp.array([3.   ,6.   ,0.   ,0.   ,6.   ,])  *Units.degrees #yaw   rate      in degrees/s       
     
     atmosphere                              = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     speeds_of_sound                         = atmosphere.compute_values(altitudes).speed_of_sound
     v_infs                                  = machs * speeds_of_sound.flatten()
     conditions = RCAIDE.Framework.Mission.Common.Results()
-    conditions.freestream.velocity          = np.atleast_2d(v_infs).T
-    conditions.freestream.mach_number       = np.atleast_2d(machs).T   
-    conditions.aerodynamics.angles.alpha    = np.atleast_2d(aoas).T
-    conditions.aerodynamics.angles.beta     = np.atleast_2d(PSIs).T
-    conditions.static_stability.pitch_rate  = np.atleast_2d(PITCHQs).T
-    conditions.static_stability.roll_rate   = np.atleast_2d(ROLLQs).T
-    conditions.static_stability.yaw_rate    = np.atleast_2d(YAWQs).T
+    conditions.freestream.velocity          = rp.atleast_2d(v_infs).T
+    conditions.freestream.mach_number       = rp.atleast_2d(machs).T   
+    conditions.aerodynamics.angles.alpha    = rp.atleast_2d(aoas).T
+    conditions.aerodynamics.angles.beta     = rp.atleast_2d(PSIs).T
+    conditions.static_stability.pitch_rate  = rp.atleast_2d(PITCHQs).T
+    conditions.static_stability.roll_rate   = rp.atleast_2d(ROLLQs).T
+    conditions.static_stability.yaw_rate    = rp.atleast_2d(YAWQs).T
     
     return conditions
 

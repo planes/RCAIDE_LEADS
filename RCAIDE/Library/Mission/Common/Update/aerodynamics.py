@@ -4,8 +4,13 @@
 # Created:  Jul 2023, M. Clarke 
 
 # ----------------------------------------------------------------------------------------------------------------------
-#  Update Aerodynamics
+#  Imports
+# ---------------------------------------------------------------------------------------------------------------------- 
+import RNUMPY as rp
+
 # ----------------------------------------------------------------------------------------------------------------------
+#  Update Aerodynamics
+# ---------------------------------------------------------------------------------------------------------------------- 
 def aerodynamics(segment):
     """ Gets aerodynamics conditions
     
@@ -32,53 +37,52 @@ def aerodynamics(segment):
     
     # unpack
     conditions         = segment.state.conditions
-    aerodynamics_model = segment.analyses.aerodynamics
     q                  = segment.state.conditions.freestream.dynamic_pressure
-    Sref               = aerodynamics_model.vehicle.reference_area
+    Sref               = segment.analyses.vehicle.reference_area
+    MAC                = segment.analyses.vehicle.wings.main_wing.chords.mean_aerodynamic
+    span               = segment.analyses.vehicle.wings.main_wing.spans.projected 
+    aerodynamics_model = segment.analyses.aerodynamics
     CLmax              = aerodynamics_model.settings.maximum_lift_coefficient 
-    MAC                = aerodynamics_model.vehicle.wings.main_wing.chords.mean_aerodynamic
-    span               = aerodynamics_model.vehicle.wings.main_wing.spans.projected 
     
     # call aerodynamics model
-    _ = aerodynamics_model(segment)     
+    _ = aerodynamics_model(segment, segment.analyses.vehicle)     
 
     # Forces 
     CL = conditions.aerodynamics.coefficients.lift.total
     CD = conditions.aerodynamics.coefficients.drag.total
     CY = conditions.static_stability.coefficients.Y
 
-    CL[q<=0.0] = 0.0
-    CD[q<=0.0] = 0.0
-    CL[CL>CLmax] = CLmax
-    CL[CL< -CLmax] = -CLmax
+    CL = rp.where(q <= 0.0, 0.0, CL)
+    CD = rp.where(q <= 0.0, 0.0, CD)
+    CL = rp.clip(CL, -CLmax, CLmax)
 
     # dimensionalize
     F      = segment.state.ones_row(3) * 0.0
-    F[:,2] = ( -CL * q * Sref )[:,0]
-    F[:,1] = ( -CY * q * Sref )[:,0]
-    F[:,0] = ( -CD * q * Sref )[:,0]
+    F = F.at[:,2].set(( -CL * q * Sref )[:,0])
+    F = F.at[:,1].set((  CY * q * Sref  )[:,0])
+    F = F.at[:,0].set(( -CD * q * Sref )[:,0])
 
     # rewrite aerodynamic CL and CD
     conditions.aerodynamics.coefficients.lift.total  = CL
     conditions.aerodynamics.coefficients.drag.total  = CD
-    conditions.frames.wind.force_vector[:,:]   = F[:,:]
+    conditions.frames.wind.force_vector              = F
 
     # -----------------------------------------------------------------
     # Moments
     # -----------------------------------------------------------------
-    C_M = conditions.static_stability.coefficients.M
     C_L = conditions.static_stability.coefficients.L
+    C_M = conditions.static_stability.coefficients.M
     C_N = conditions.static_stability.coefficients.N
 
-    C_M[q<=0.0] = 0.0
+    C_M = rp.where(q <= 0.0, 0.0, C_M)
 
     # dimensionalize
     M      = segment.state.ones_row(3) * 0.0
-    M[:,0] = (C_L[:,0] * q[:,0] * Sref * span)
-    M[:,1] = (C_M[:,0] * q[:,0] * Sref * MAC)
-    M[:,2] = (C_N[:,0] * q[:,0] * Sref * span)
+    M = M.at[:,0].set((C_L[:,0] * q[:,0] * Sref * span))
+    M = M.at[:,1].set((C_M[:,0] * q[:,0] * Sref * MAC))
+    M = M.at[:,2].set((C_N[:,0] * q[:,0] * Sref * span))
 
     # pack conditions
-    conditions.frames.wind.moment_vector[:,:] = M[:,:] 
+    conditions.frames.wind.moment_vector = M
 
     return

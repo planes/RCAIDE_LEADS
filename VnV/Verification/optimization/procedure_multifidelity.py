@@ -5,7 +5,7 @@
 # ---------------------------------------------------------------------- 
 from RCAIDE.Framework.Analyses.Process import Process
 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------        
 #   Setup
@@ -51,9 +51,9 @@ def post_process(nexus):
         nexus.fidelity_level = 1
 
     if nexus.fidelity_level == 2:
-        obj = np.array([x2**2+(x1+.1)**2])      
+        obj = x2**2+(x1+.1)**2   
     elif nexus.fidelity_level == 1:
-        obj = np.array([x2**2+x1**2])
+        obj = x2**2+x1**2
     else:
         raise ValueError('Selected fidelity level not supported')
     nexus.obj = obj

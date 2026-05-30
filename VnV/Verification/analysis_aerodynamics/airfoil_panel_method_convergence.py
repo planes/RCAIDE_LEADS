@@ -13,7 +13,7 @@ from RCAIDE.Library.Plots import *
 
 # Python imports
 import os 
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt    
  
 
@@ -29,9 +29,9 @@ def single_airfoil():
     # -----------------------------------------------
     # Batch analysis of single airfoil - NACA 4412 
     # -----------------------------------------------
-    AoA_deg              = np.linspace(-5,10,16)
-    Re_vals              = np.atleast_2d(np.ones(len(AoA_deg)))*1E5 
-    AoA_rad              = np.atleast_2d(AoA_deg*Units.degrees)   
+    AoA_deg              = rp.linspace(-5,10,16)
+    Re_vals              = rp.atleast_2d(rp.ones(len(AoA_deg)))*1E5 
+    AoA_rad              = rp.atleast_2d(AoA_deg*Units.degrees)   
     airfoil_file         = '4412'
     npoints1             = 101
     npoints2             = 201
@@ -40,7 +40,7 @@ def single_airfoil():
     npoints5             = 501
     
     # npoints vector
-    npoints = np.zeros(5)
+    npoints = rp.zeros(5)
     for i in range(5):
         npoints[i] = 101 + 100*i
     
@@ -125,32 +125,32 @@ def single_airfoil():
     
     # Convergence of net difference
     # Cl inviscid
-    conv_diff_cl_invisc = np.zeros(4)
-    conv_diff_cl_invisc[0] = np.average((airfoil_properties_2.cl_invisc - airfoil_properties_1.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)
-    conv_diff_cl_invisc[1] = np.average((airfoil_properties_3.cl_invisc - airfoil_properties_2.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)
-    conv_diff_cl_invisc[2] = np.average((airfoil_properties_4.cl_invisc - airfoil_properties_3.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)
-    conv_diff_cl_invisc[3] = np.average((airfoil_properties_5.cl_invisc - airfoil_properties_4.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)
+    conv_diff_cl_invisc = rp.zeros(4)
+    conv_diff_cl_invisc[0] = rp.average((airfoil_properties_2.cl_invisc - airfoil_properties_1.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)[0]
+    conv_diff_cl_invisc[1] = rp.average((airfoil_properties_3.cl_invisc - airfoil_properties_2.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)[0]
+    conv_diff_cl_invisc[2] = rp.average((airfoil_properties_4.cl_invisc - airfoil_properties_3.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)[0]
+    conv_diff_cl_invisc[3] = rp.average((airfoil_properties_5.cl_invisc - airfoil_properties_4.cl_invisc)/airfoil_properties_1.cl_invisc, axis=1)[0]
     
     # Cd inviscid
-    conv_diff_cd_invisc = np.zeros(4)
-    conv_diff_cd_invisc[0] = np.average((airfoil_properties_2.cd_invisc - airfoil_properties_1.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)
-    conv_diff_cd_invisc[1] = np.average((airfoil_properties_3.cd_invisc - airfoil_properties_2.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)
-    conv_diff_cd_invisc[2] = np.average((airfoil_properties_4.cd_invisc - airfoil_properties_3.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)
-    conv_diff_cd_invisc[3] = np.average((airfoil_properties_5.cd_invisc - airfoil_properties_4.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)
+    conv_diff_cd_invisc = rp.zeros(4)
+    conv_diff_cd_invisc[0] = rp.average((airfoil_properties_2.cd_invisc - airfoil_properties_1.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)[0]
+    conv_diff_cd_invisc[1] = rp.average((airfoil_properties_3.cd_invisc - airfoil_properties_2.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)[0]
+    conv_diff_cd_invisc[2] = rp.average((airfoil_properties_4.cd_invisc - airfoil_properties_3.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)[0]
+    conv_diff_cd_invisc[3] = rp.average((airfoil_properties_5.cd_invisc - airfoil_properties_4.cd_invisc)/airfoil_properties_1.cd_invisc, axis=1)[0]
     
     # Cd viscous
-    conv_diff_cd_visc = np.zeros(4)
-    conv_diff_cd_visc[0] = np.average((airfoil_properties_2.cd_visc - airfoil_properties_1.cd_visc)/airfoil_properties_1.cd_visc, axis=1)
-    conv_diff_cd_visc[1] = np.average((airfoil_properties_3.cd_visc - airfoil_properties_2.cd_visc)/airfoil_properties_1.cd_visc, axis=1)
-    conv_diff_cd_visc[2] = np.average((airfoil_properties_4.cd_visc - airfoil_properties_3.cd_visc)/airfoil_properties_1.cd_visc, axis=1)
-    conv_diff_cd_visc[3] = np.average((airfoil_properties_5.cd_visc - airfoil_properties_4.cd_visc)/airfoil_properties_1.cd_visc, axis=1)
+    conv_diff_cd_visc = rp.zeros(4)
+    conv_diff_cd_visc[0] = rp.average((airfoil_properties_2.cd_visc - airfoil_properties_1.cd_visc)/airfoil_properties_1.cd_visc, axis=1)[0]
+    conv_diff_cd_visc[1] = rp.average((airfoil_properties_3.cd_visc - airfoil_properties_2.cd_visc)/airfoil_properties_1.cd_visc, axis=1)[0]
+    conv_diff_cd_visc[2] = rp.average((airfoil_properties_4.cd_visc - airfoil_properties_3.cd_visc)/airfoil_properties_1.cd_visc, axis=1)[0]
+    conv_diff_cd_visc[3] = rp.average((airfoil_properties_5.cd_visc - airfoil_properties_4.cd_visc)/airfoil_properties_1.cd_visc, axis=1)[0]
     
     # Cm inviscid
-    conv_diff_cm_invisc = np.zeros(4)
-    conv_diff_cm_invisc[0] = np.average((airfoil_properties_2.cm_invisc - airfoil_properties_1.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)
-    conv_diff_cm_invisc[1] = np.average((airfoil_properties_3.cm_invisc - airfoil_properties_2.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)
-    conv_diff_cm_invisc[2] = np.average((airfoil_properties_4.cm_invisc - airfoil_properties_3.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)
-    conv_diff_cm_invisc[3] = np.average((airfoil_properties_5.cm_invisc - airfoil_properties_4.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)
+    conv_diff_cm_invisc = rp.zeros(4)
+    conv_diff_cm_invisc[0] = rp.average((airfoil_properties_2.cm_invisc - airfoil_properties_1.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)[0]
+    conv_diff_cm_invisc[1] = rp.average((airfoil_properties_3.cm_invisc - airfoil_properties_2.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)[0]
+    conv_diff_cm_invisc[2] = rp.average((airfoil_properties_4.cm_invisc - airfoil_properties_3.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)[0]
+    conv_diff_cm_invisc[3] = rp.average((airfoil_properties_5.cm_invisc - airfoil_properties_4.cm_invisc)/airfoil_properties_1.cm_invisc, axis=1)[0]
     
     print('\n\n\nConvergence of Difference')
     print('\nCl inviscid')
@@ -183,28 +183,28 @@ def single_airfoil():
     # ------------------------------------------------
     
     # Convergence at 0 deg AOA
-    cl_invisc_0_plt = np.zeros(5)
+    cl_invisc_0_plt = rp.zeros(5)
     cl_invisc_0_plt[0] = airfoil_properties_1.cl_invisc[0,5]
     cl_invisc_0_plt[1] = airfoil_properties_2.cl_invisc[0,5]
     cl_invisc_0_plt[2] = airfoil_properties_3.cl_invisc[0,5]
     cl_invisc_0_plt[3] = airfoil_properties_4.cl_invisc[0,5]
     cl_invisc_0_plt[4] = airfoil_properties_5.cl_invisc[0,5]
     
-    cd_invisc_0_plt = np.zeros(5)
+    cd_invisc_0_plt = rp.zeros(5)
     cd_invisc_0_plt[0] = airfoil_properties_1.cd_invisc[0,5]
     cd_invisc_0_plt[1] = airfoil_properties_2.cd_invisc[0,5]
     cd_invisc_0_plt[2] = airfoil_properties_3.cd_invisc[0,5]
     cd_invisc_0_plt[3] = airfoil_properties_4.cd_invisc[0,5]
     cd_invisc_0_plt[4] = airfoil_properties_5.cd_invisc[0,5]
     
-    cd_visc_0_plt = np.zeros(5)
+    cd_visc_0_plt = rp.zeros(5)
     cd_visc_0_plt[0] = airfoil_properties_1.cd_visc[0,5]
     cd_visc_0_plt[1] = airfoil_properties_2.cd_visc[0,5]
     cd_visc_0_plt[2] = airfoil_properties_3.cd_visc[0,5]
     cd_visc_0_plt[3] = airfoil_properties_4.cd_visc[0,5]
     cd_visc_0_plt[4] = airfoil_properties_5.cd_visc[0,5]
     
-    cm_invisc_0_plt = np.zeros(5)
+    cm_invisc_0_plt = rp.zeros(5)
     cm_invisc_0_plt[0] = airfoil_properties_1.cm_invisc[0,5]
     cm_invisc_0_plt[1] = airfoil_properties_2.cm_invisc[0,5]
     cm_invisc_0_plt[2] = airfoil_properties_3.cm_invisc[0,5]
@@ -229,28 +229,28 @@ def single_airfoil():
 
     
     # Convergence at 5 deg AOA
-    cl_invisc_5_plt = np.zeros(5)
+    cl_invisc_5_plt = rp.zeros(5)
     cl_invisc_5_plt[0] = airfoil_properties_1.cl_invisc[0,10]
     cl_invisc_5_plt[1] = airfoil_properties_2.cl_invisc[0,10]
     cl_invisc_5_plt[2] = airfoil_properties_3.cl_invisc[0,10]
     cl_invisc_5_plt[3] = airfoil_properties_4.cl_invisc[0,10]
     cl_invisc_5_plt[4] = airfoil_properties_5.cl_invisc[0,10]
     
-    cd_invisc_5_plt = np.zeros(5)
+    cd_invisc_5_plt = rp.zeros(5)
     cd_invisc_5_plt[0] = airfoil_properties_1.cd_invisc[0,10]
     cd_invisc_5_plt[1] = airfoil_properties_2.cd_invisc[0,10]
     cd_invisc_5_plt[2] = airfoil_properties_3.cd_invisc[0,10]
     cd_invisc_5_plt[3] = airfoil_properties_4.cd_invisc[0,10]
     cd_invisc_5_plt[4] = airfoil_properties_5.cd_invisc[0,10]
     
-    cd_visc_5_plt = np.zeros(5)
+    cd_visc_5_plt = rp.zeros(5)
     cd_visc_5_plt[0] = airfoil_properties_1.cd_visc[0,10]
     cd_visc_5_plt[1] = airfoil_properties_2.cd_visc[0,10]
     cd_visc_5_plt[2] = airfoil_properties_3.cd_visc[0,10]
     cd_visc_5_plt[3] = airfoil_properties_4.cd_visc[0,10]
     cd_visc_5_plt[4] = airfoil_properties_5.cd_visc[0,10]
     
-    cm_invisc_5_plt = np.zeros(5)
+    cm_invisc_5_plt = rp.zeros(5)
     cm_invisc_5_plt[0] = airfoil_properties_1.cm_invisc[0,10]
     cm_invisc_5_plt[1] = airfoil_properties_2.cm_invisc[0,10]
     cm_invisc_5_plt[2] = airfoil_properties_3.cm_invisc[0,10]
@@ -274,7 +274,7 @@ def single_airfoil():
     axis4.plot(npoints, cm_invisc_5_plt)
     
     # Convergence of differences
-    nums = np.zeros(4)
+    nums = rp.zeros(4)
     for i in range(4):
         nums[i] = 1 + i
     

@@ -7,7 +7,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 import RCAIDE
 from RCAIDE.Framework.Core import Data, Units  
-import numpy as np
+import RNUMPY as rp
 import  os 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Read Results 
@@ -110,26 +110,26 @@ def read_results(dfdc_analysis):
     
     results                                             = Data()
     results.geometry                                    = Data() 
-    results.geometry.rotor_twist_distribution           = np.zeros(Nr)
-    results.geometry.rotor_chord_distribution           = np.zeros(Nr)
-    results.geometry.rotor_radius_distribution          = np.zeros(Nr) 
-    results.geometry.rotor_non_dim_radius_distribution  = np.zeros(Nr) 
-    results.geometry.rotor_solidity_distribution        = np.zeros(Nr)
-    results.geometry.stator_twist_distribution          = np.zeros(Nr)
-    results.geometry.stator_chord_distribution          = np.zeros(Nr)
-    results.geometry.stator_radius_distribution         = np.zeros(Nr) 
-    results.geometry.stator_non_dim_radius_distribution = np.zeros(Nr) 
-    results.geometry.stator_solidity_distribution       = np.zeros(Nr)  
+    results.geometry.rotor_twist_distribution           = rp.zeros(Nr)
+    results.geometry.rotor_chord_distribution           = rp.zeros(Nr)
+    results.geometry.rotor_radius_distribution          = rp.zeros(Nr) 
+    results.geometry.rotor_non_dim_radius_distribution  = rp.zeros(Nr) 
+    results.geometry.rotor_solidity_distribution        = rp.zeros(Nr)
+    results.geometry.stator_twist_distribution          = rp.zeros(Nr)
+    results.geometry.stator_chord_distribution          = rp.zeros(Nr)
+    results.geometry.stator_radius_distribution         = rp.zeros(Nr) 
+    results.geometry.stator_non_dim_radius_distribution = rp.zeros(Nr) 
+    results.geometry.stator_solidity_distribution       = rp.zeros(Nr)  
     results.performance                                 = Data() 
-    results.performance.thrust                          = np.zeros((len_m,len_tm,len_a))  
-    results.performance.power                           = np.zeros((len_m,len_tm,len_a))  
-    results.performance.efficiency                      = np.zeros((len_m,len_tm,len_a)) 
-    results.performance.torque                          = np.zeros((len_m,len_tm,len_a)) 
-    results.performance.thrust_coefficient              = np.zeros((len_m,len_tm,len_a))  
-    results.performance.power_coefficient               = np.zeros((len_m,len_tm,len_a)) 
-    results.performance.advance_ratio                   = np.zeros((len_m,len_tm,len_a))
-    results.performance.figure_of_merit                 = np.zeros((len_m,len_tm,len_a))  
-    results.performance.converged_solution              = np.zeros((len_m,len_tm,len_a))    
+    results.performance.thrust                          = rp.zeros((len_m,len_tm,len_a))  
+    results.performance.power                           = rp.zeros((len_m,len_tm,len_a))  
+    results.performance.efficiency                      = rp.zeros((len_m,len_tm,len_a)) 
+    results.performance.torque                          = rp.zeros((len_m,len_tm,len_a)) 
+    results.performance.thrust_coefficient              = rp.zeros((len_m,len_tm,len_a))  
+    results.performance.power_coefficient               = rp.zeros((len_m,len_tm,len_a)) 
+    results.performance.advance_ratio                   = rp.zeros((len_m,len_tm,len_a))
+    results.performance.figure_of_merit                 = rp.zeros((len_m,len_tm,len_a))  
+    results.performance.converged_solution              = rp.zeros((len_m,len_tm,len_a))    
    
     # Read geometry 
     geometry_filename = os.path.join(run_folder, 'ducted_fan_geometry.txt')
@@ -178,23 +178,23 @@ def read_results(dfdc_analysis):
                     results_filename   = os.path.join(run_folder, string + '.txt')
                     with open(results_filename,'r') as case_results_file: 
                         case_lines                       = case_results_file.readlines() 
-                        results.performance.thrust[i,j,k]              = float(case_lines[8][13:26].strip())
-                        results.performance.power[i,j,k]               = float(case_lines[8][39:52].strip())
-                        results.performance.efficiency[i,j,k]          = float(case_lines[8][65:76].strip()) 
-                        results.performance.torque[i,j,k]              = float(case_lines[10][39:52].strip())        
-                        results.performance.thrust_coefficient[i,j,k]  = float(case_lines[13][7:20].strip())        
-                        results.performance.power_coefficient[i,j,k]   = float(case_lines[13][27:39].strip())   
-                        results.performance.advance_ratio[i,j,k]       = float(case_lines[13][45:57].strip())
+                        results.performance.thrust = results.performance.thrust.at[i,j,k].set(float(case_lines[8][13:26].strip()))
+                        results.performance.power = results.performance.power.at[i,j,k].set(float(case_lines[8][39:52].strip()))
+                        results.performance.efficiency = results.performance.efficiency.at[i,j,k].set(float(case_lines[8][65:76].strip()))
+                        results.performance.torque = results.performance.torque.at[i,j,k].set(float(case_lines[10][39:52].strip()))
+                        results.performance.thrust_coefficient = results.performance.thrust_coefficient.at[i,j,k].set(float(case_lines[13][7:20].strip()))
+                        results.performance.power_coefficient = results.performance.power_coefficient.at[i,j,k].set(float(case_lines[13][27:39].strip()))
+                        results.performance.advance_ratio = results.performance.advance_ratio.at[i,j,k].set(float(case_lines[13][45:57].strip()))
     
-                    results.performance.converged_solution[i,j,k]  =  True                        
+                    results.performance.converged_solution = results.performance.converged_solution.at[i,j,k].set(True)
                 except:
-                    results.performance.converged_solution[i,j,k]  = False
-                    results.performance.thrust[i,j,k]              = np.nan
-                    results.performance.power[i,j,k]               = np.nan
-                    results.performance.efficiency[i,j,k]          = np.nan
-                    results.performance.torque[i,j,k]              = np.nan       
-                    results.performance.thrust_coefficient[i,j,k]  = np.nan      
-                    results.performance.power_coefficient[i,j,k]   = np.nan  
-                    results.performance.advance_ratio[i,j,k]       = np.nan
+                    results.performance.converged_solution = results.performance.converged_solution.at[i,j,k].set(False)
+                    results.performance.thrust = results.performance.thrust.at[i,j,k].set(rp.nan)
+                    results.performance.power = results.performance.power.at[i,j,k].set(rp.nan)
+                    results.performance.efficiency = results.performance.efficiency.at[i,j,k].set(rp.nan)
+                    results.performance.torque = results.performance.torque.at[i,j,k].set(rp.nan)
+                    results.performance.thrust_coefficient = results.performance.thrust_coefficient.at[i,j,k].set(rp.nan)
+                    results.performance.power_coefficient = results.performance.power_coefficient.at[i,j,k].set(rp.nan)
+                    results.performance.advance_ratio = results.performance.advance_ratio.at[i,j,k].set(rp.nan)
 
     return results

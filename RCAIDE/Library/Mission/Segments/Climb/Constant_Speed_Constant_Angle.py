@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -84,7 +84,7 @@ def initialize_conditions(segment):
     # check for initial velocity
     if air_speed is None: 
         if not segment.state.initials: raise AttributeError('airspeed not set')
-        air_speed = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        air_speed = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
         
     # check for initial altitude
     if alt0 is None:
@@ -96,13 +96,13 @@ def initialize_conditions(segment):
     
     # process velocity vector
     v_mag = air_speed
-    v_x   = np.cos(beta)*v_mag * np.cos(climb_angle)
-    v_y   = np.sin(beta)*v_mag * np.cos(climb_angle)
-    v_z   = -v_mag * np.sin(climb_angle)
+    v_x   = rp.cos(beta)*v_mag * rp.cos(climb_angle)
+    v_y   = rp.sin(beta)*v_mag * rp.cos(climb_angle)
+    v_z   = -v_mag * rp.sin(climb_angle)
     
     # pack conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = v_x
-    conditions.frames.inertial.velocity_vector[:,1] = v_y
-    conditions.frames.inertial.velocity_vector[:,2] = v_z
-    conditions.frames.inertial.position_vector[:,2] = -alt[:,0] # z points down
-    conditions.freestream.altitude[:,0]             =  alt[:,0] # positive altitude in this context
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0]) # z points down
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0]) # positive altitude in this context

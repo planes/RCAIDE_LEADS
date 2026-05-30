@@ -7,7 +7,7 @@
 #  IMPORT
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Package imports 
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -99,11 +99,11 @@ def initialize_conditions(segment):
     
     # set the body angle
     body_angle = theta_dot*time + T0
-    segment.state.conditions.frames.body.inertial_rotations[:,1] = body_angle[:,0]    
+    segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,1].set(body_angle[:,0])
     
     # pack
-    segment.state.conditions.freestream.altitude[:,0]             = alt
-    segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
-    segment.state.conditions.frames.inertial.time[:,0]            = time[:,0]
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
+    segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,2].set(-alt) # z points down
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(time[:,0])
     
     

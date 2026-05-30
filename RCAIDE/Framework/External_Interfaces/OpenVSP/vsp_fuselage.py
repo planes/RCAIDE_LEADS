@@ -11,7 +11,8 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core import Units, Data  
-import numpy as np
+from RCAIDE.Library.Methods.Geometry.Planform  import  fuselage_planform 
+import RNUMPY as rp
 try:
     import vsp as vsp
 except ImportError:
@@ -178,13 +179,14 @@ def read_vsp_fuselage(fuselage_id,fux_idx,sym_flag, units_type='SI', fineness=Tr
     fuselage.width              = max(widths)           # Max segment width.
     fuselage.effective_diameter = max(eff_diams)        # Max segment effective diam.
 
-    fuselage.areas.front_projected  = np.pi*((fuselage.effective_diameter)/2)**2
+    fuselage.areas.front_projected  = rp.pi*((fuselage.effective_diameter)/2)**2
 
-    eff_diam_gradients_fwd = np.array(eff_diams[1:]) - np.array(eff_diams[:-1])		# Compute gradients of segment effective diameters.
-    eff_diam_gradients_fwd = np.multiply(eff_diam_gradients_fwd, lengths[:-1])
+    eff_diam_gradients_fwd = rp.array(eff_diams[1:]) - rp.array(eff_diams[:-1])		# Compute gradients of segment effective diameters.
+    eff_diam_gradients_fwd = rp.multiply(eff_diam_gradients_fwd, lengths[:-1])
 
     fuselage = compute_fuselage_fineness(fuselage, x_locs, eff_diams, eff_diam_gradients_fwd)	
 
+    fuselage_planform(fuselage)  
     return fuselage
 
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -287,7 +289,7 @@ def write_vsp_fuselage(fuselage,area_tags, main_wing, fuel_tank_set_ind, OML_set
         for seg in segs:
             widths.append(seg.width)
             heights.append(seg.height)
-            radii.append(seg.radius)
+            radii.append(seg.curvature)
             x_poses.append(seg.percent_x_location)
             z_poses.append(seg.percent_z_location)
 
@@ -302,8 +304,7 @@ def write_vsp_fuselage(fuselage,area_tags, main_wing, fuel_tank_set_ind, OML_set
     # set fuselage relative location and rotation
     vsp.SetParmVal( fuse_id,'X_Rel_Rotation','XForm',fuse_x_rotation)
     vsp.SetParmVal( fuse_id,'Y_Rel_Rotation','XForm',fuse_y_rotation)
-    vsp.SetParmVal( fuse_id,'Z_Rel_Rotation','XForm',fuse_z_rotation)
-
+    vsp.SetParmVal( fuse_id,'Z_Rel_Rotation','XForm',fuse_z_rotation) 
     vsp.SetParmVal( fuse_id,'X_Rel_Location','XForm',fuse_x)
     vsp.SetParmVal( fuse_id,'Y_Rel_Location','XForm',fuse_y)
     vsp.SetParmVal( fuse_id,'Z_Rel_Location','XForm',fuse_z)
@@ -311,8 +312,7 @@ def write_vsp_fuselage(fuselage,area_tags, main_wing, fuel_tank_set_ind, OML_set
 
     if 'OpenVSP_values' in fuselage:        
         vals = fuselage.OpenVSP_values
-
-        # for wave drag testing
+ 
         fuselage.OpenVSP_ID = fuse_id
 
         # Nose
@@ -412,7 +412,15 @@ def write_vsp_fuselage(fuselage,area_tags, main_wing, fuel_tank_set_ind, OML_set
 
     
         vsp.SetParmVal(fuse_id,"TopLAngle","XSec_"+str(0),90)
-        vsp.SetParmVal(fuse_id,"RightLAngle","XSec_"+str(0),90)
+        vsp.SetParmVal(fuse_id,"RightLAngle","XSec_"+str(0),90) 
+        if fuselage.supersonic: 
+            vsp.SetParmVal(fuse_id,"TopRStrength","XSec_"+str(0), 0.)
+            vsp.SetParmVal(fuse_id,"RightRStrength","XSec_"+str(0), 0.)
+            vsp.SetParmVal(fuse_id,"BottomRStrength","XSec_"+str(0), 0.)
+            vsp.SetParmVal(fuse_id,"TopLStrength","XSec_"+str(0), 0.)
+            vsp.SetParmVal(fuse_id,"RightLStrength","XSec_"+str(0), 0.)
+            vsp.SetParmVal(fuse_id,"AllSym","XSec_"+str(0),1) 
+        
         vsp.SetParmVal(fuse_id, "XLocPercent", "XSec_"+str(0),x_poses[0])
         vsp.SetParmVal(fuse_id, "ZLocPercent", "XSec_"+str(0),z_poses[0])
         vsp.SetParmVal(fuse_id, "XLocPercent", "XSec_"+str(end_ind),x_poses[-1])
@@ -477,8 +485,8 @@ def set_section_angles(i,nose_z,tail_z,x_poses,z_poses,heights,widths,length,end
 
     Inputs:  
     nose_z   [-] # 0.1 is 10% of the fuselage length
-    widths   np.array of [m]
-    heights  np.array of [m]
+    widths   rp.array of [m]
+    heights  rp.array of [m]
     tail_z   [-] # 0.1 is 10% of the fuselage length
 
     Outputs:
@@ -508,9 +516,9 @@ def set_section_angles(i,nose_z,tail_z,x_poses,z_poses,heights,widths,length,end
     y_diff     = w2/2-w0/2
     x_diff     = x2-x0
 
-    top_angle  = np.tan(top_z_diff/x_diff)/Units.deg / divider
-    bot_angle  = np.tan(-bot_z_diff/x_diff)/Units.deg / divider
-    side_angle = np.tan(y_diff/x_diff)/Units.deg/ divider
+    top_angle  = rp.tan(top_z_diff/x_diff)/Units.deg / divider
+    bot_angle  = rp.tan(-bot_z_diff/x_diff)/Units.deg / divider
+    side_angle = rp.tan(y_diff/x_diff)/Units.deg/ divider
 
     vsp.SetParmVal(fuse_id,"TBSym","XSec_"+str(i+1),0)
     vsp.SetParmVal(fuse_id,"TopLAngle","XSec_"+str(i+1),top_angle)
@@ -551,9 +559,9 @@ def compute_fuselage_fineness(fuselage, x_locs, eff_diams, eff_diam_gradients_fw
     segment_list       = list(fuselage.segments.keys())
     
     # Compute nose fineness.    
-    x_locs                 = np.array(x_locs)					# Make numpy arrays.
-    eff_diams              = np.array(eff_diams)
-    min_val                = np.min(eff_diam_gradients_fwd[x_locs[:-1]<=0.5])	# Computes smallest eff_diam gradient value in front 50% of fuselage.
+    x_locs                 = rp.array(x_locs)					# Make numpy arrays.
+    eff_diams              = rp.array(eff_diams)
+    min_val                = rp.min(eff_diam_gradients_fwd[x_locs[:-1]<=0.5])	# Computes smallest eff_diam gradient value in front 50% of fuselage.
     x_loc                  = x_locs[:-1][eff_diam_gradients_fwd==min_val][0]		# Determines x-location of the first instance of that value (if gradient=0, gets frontmost x-loc).
     fuselage.lengths.nose  = (x_loc-fuselage.segments[segment_list[0]].percent_x_location)*fuselage.lengths.total	# Subtracts first segment x-loc in case not at global origin.
     fuselage.fineness.nose = fuselage.lengths.nose/(eff_diams[x_locs==x_loc][0])
@@ -561,8 +569,8 @@ def compute_fuselage_fineness(fuselage, x_locs, eff_diams, eff_diam_gradients_fw
     # Compute tail fineness.
     x_locs_tail	                = x_locs>=0.5						# Searches aft 50% of fuselage.
     eff_diam_gradients_fwd_tail = eff_diam_gradients_fwd[x_locs_tail[1:]]			# Smaller array of tail gradients.
-    min_val 		        = np.min(-eff_diam_gradients_fwd_tail)			# Computes min gradient, where fuselage tapers (minus sign makes positive).
-    x_loc                       = x_locs[np.hstack([False,-eff_diam_gradients_fwd==min_val])][-1]			# Saves aft-most value (useful for straight fuselage with multiple zero gradients.)
+    min_val 		        = rp.min(-eff_diam_gradients_fwd_tail)			# Computes min gradient, where fuselage tapers (minus sign makes positive).
+    x_loc                       = x_locs[rp.hstack([False,-eff_diam_gradients_fwd==min_val])][-1]			# Saves aft-most value (useful for straight fuselage with multiple zero gradients.)
     fuselage.lengths.tail       = (1.-x_loc)*fuselage.lengths.total
     fuselage.fineness.tail      = fuselage.lengths.tail/(eff_diams[x_locs==x_loc][0])	# Minus sign converts tail fineness to positive value.
 
@@ -632,7 +640,7 @@ def find_fuse_u_coordinate(x_target,fuse_id,fuel_tank_tag):
     diff  = 1000    
     u_min = 0
     u_max = 1    
-    while np.abs(diff) > tol:
+    while rp.abs(diff) > tol:
         u_current = (u_max+u_min)/2
         probe_id = vsp.AddProbe(fuse_id,0,u_current,0,fuel_tank_tag+'_probe')
         vsp.Update()

@@ -16,7 +16,7 @@ import numpy    as np
 # ----------------------------------------------------------------------------------------------------------------------
 #  Train Cantera Model 
 # ----------------------------------------------------------------------------------------------------------------------
-def train_CRN_EI_surrogates(emissions): 
+def train_CRN_EI_surrogates(emissions, vehicle): 
     """
     Generates training data for emission index surrogate models using Chemical Reactor Network simulations.
 
@@ -30,7 +30,7 @@ def train_CRN_EI_surrogates(emissions):
                         Array of pressure values to evaluate [Pa]
                     - temperature : ndarray
                         Array of temperature values to evaluate [K]
-                    - air_mass_flowrate : ndarray
+                    - air_mass_flow_rate : ndarray
                         Array of air mass flow rates to evaluate [kg/s]
                     - fuel_to_air_ratio : ndarray
                         Array of fuel-to-air ratios to evaluate [-]
@@ -98,16 +98,15 @@ def train_CRN_EI_surrogates(emissions):
     # unpack data 
     P              = emissions.training.pressure         
     T              = emissions.training.temperature      
-    mdot           = emissions.training.air_mass_flowrate
-    FAR            = emissions.training.fuel_to_air_ratio
-    
-    vehicle        = emissions.vehicle
+    mdot           = emissions.training.air_mass_flow_rate
+    FAR            = emissions.training.fuel_to_air_ratio 
     for network in vehicle.networks:   
         for propulsor in  network.propulsors:
             if  isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or \
                 isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet) or \
-                isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Turboshaft) or \
-                isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.ICE_Propeller):            
+                isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop) or \
+                isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Internal_Combustion_Engine) or\
+                isinstance(propulsor,RCAIDE.Library.Components.Powertrain.Propulsors.Constant_Speed_Internal_Combustion_Engine):           
                 combustor = propulsor.combustor    
             else:
                 combustor = False 
@@ -117,10 +116,10 @@ def train_CRN_EI_surrogates(emissions):
     len_mdot = len(mdot)
     len_far  = len(FAR) 
     
-    EI_CO2 = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_CO  = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_H2O = np.zeros((len_P,len_T,len_mdot,len_far))
-    EI_NOx = np.zeros((len_P,len_T,len_mdot,len_far))
+    EI_CO2 = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_CO  = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_H2O = rp.zeros((len_P,len_T,len_mdot,len_far))
+    EI_NOx = rp.zeros((len_P,len_T,len_mdot,len_far))
     
     if combustor == False:
         emissions.no_combustor = True
@@ -134,10 +133,10 @@ def train_CRN_EI_surrogates(emissions):
                     # Call cantera 
                     results = evaluate_cantera(combustor,T[t_i],P[p_i],mdot[mdot_i],FAR[far_i]) 
                     
-                    EI_CO2[p_i, t_i, mdot_i, far_i]  = results.final.EI.CO2
-                    EI_CO [p_i, t_i, mdot_i, far_i]  = results.final.EI.CO 
-                    EI_H2O[p_i, t_i, mdot_i, far_i]  = results.final.EI.H2O
-                    EI_NOx [p_i, t_i, mdot_i, far_i] = results.final.EI.NOx 
+                    EI_CO2 = EI_CO2.at[p_i, t_i, mdot_i, far_i].set(results.final.EI.CO2)
+                    EI_CO  = EI_CO .at[p_i, t_i, mdot_i, far_i].set(results.final.EI.CO)
+                    EI_H2O = EI_H2O.at[p_i, t_i, mdot_i, far_i].set(results.final.EI.H2O)
+                    EI_NOx  = EI_NOx .at[p_i, t_i, mdot_i, far_i].set(results.final.EI.NOx)
     
     emissions.training.EI_CO2 = EI_CO2
     emissions.training.EI_CO =  EI_CO

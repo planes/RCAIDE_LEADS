@@ -11,15 +11,18 @@
 import RCAIDE
 from RCAIDE.Framework.Core import Units , Data  
 from RCAIDE.Library.Plots.Common import set_axes, plot_style    
+from RCAIDE.Library.Mission.Common.Pre_Process import mass_properties,geometry
+from RCAIDE.Library.Plots import *
  
 # Pacakge imports 
-import numpy as np
+import RNUMPY as rp
 from matplotlib import pyplot as plt
+import os,sys
  
 # ----------------------------------------------------------------------
 #  Calculate vehicle Payload Range Diagram
 # ----------------------------------------------------------------------  
-def compute_payload_range_diagram(mission = None, cruise_segment_tag = "cruise", fuel_reserve_percentage=0., plot_diagram = True, fuel_name=None):  
+def compute_payload_range_diagram(mission = None, cruise_segment_tag = "cruise", fuel_reserve_percentage=0.05, plot_diagram = True, fuel_name=None, delete_training_data=True):  
     """
     Calculate and plot the payload range diagram for an aircraft by modifying the cruise segment and weights.
     
@@ -94,19 +97,62 @@ def compute_payload_range_diagram(mission = None, cruise_segment_tag = "cruise",
             
     if mission == None:
         raise AssertionError('Mission not specifed!')
+    mission.tag = "payload_range_mission"
     
     initial_segment =  list(mission.segments.keys())[0]
     
-    # perform inital weights analysis 
-    weights_analysis   = mission.segments[initial_segment].analyses.weights 
-    weights_analysis.evaluate() # evaluate weights to make sure mass variables are defined 
-    vehicle = weights_analysis.vehicle 
-    
+    # remove takeoff weight from aircraft if defined
+    geometry(mission)
+    for segment in  mission.segments:
+        # perform inital weights analysis
+        segment.analyses.vehicle.mass_properties.takeoff      = None
+        segment.analyses.weights.print_weight_analysis_report = True
+        segment.analyses.weights.print_weight_analysis_report = True
+    mass_properties(mission)
+    vehicle = mission.segments[initial_segment].analyses.vehicle 
+  
+    [setattr(seg.analyses.aerodynamics.settings, "store_training_data", True) for seg in mission.segments]
+    file_name = [(seg.analyses.aerodynamics.tag) for seg in mission.segments][0]
     for network in vehicle.networks:
         if type(network) == RCAIDE.Framework.Networks.Fuel:  
             payload_range  =  conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_reserve_percentage,plot_diagram,fuel_name) 
         else:
             payload_range  =  electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagram)
+    
+    if delete_training_data:
+        for fname in os.listdir(os.path.dirname(os.path.abspath(sys.argv[0]))):
+            if fname.endswith(".pkl") and "payload_range_mission" in fname and file_name in fname:
+                os.remove(os.path.join(os.path.dirname(os.path.abspath(sys.argv[0])), fname))
+
+    print("\n============== Payload Range Report ==============\n")            
+    try:
+        reserve_pct = payload_range.pop('fuel_reserve_percentage')
+        print("\nFuel Reserve Percentage:", f"{reserve_pct * 100:.0f}%")
+    except: pass
+    keys = list(payload_range.keys())
+    values = [payload_range[key] for key in keys]
+
+    # Header
+    print(f"{'Parameter':<20} {'Point 1':>12} {'Point 2':>12} {'Point 3':>12} {'Point 4':>12}")
+    print("-" * 70)
+    # Rows
+    for key, val in zip(keys, values):
+        if key == 'range':
+            row = f"{'Range [nmi]':<20}"
+            val = [v / Units.nmi for v in val] 
+        elif key == 'payload':
+            row = f"{'Payload [kg]':<20}"
+        elif key == 'oew_plus_payload':
+            row = f"{'OEW + Payload [kg]':<20}"
+        elif key == 'fuel':
+            row = f"{'Fuel [kg]':<20}"
+        elif key == 'takeoff_weight':
+            row = f"{'TO Weight [kg]':<20}"
+        else:
+            row = f"{key:<20}"
+        row += "".join([f"{v:12.2f}" for v in val])
+        print(row)
+    print("\n===============================\n")
     return payload_range 
              
 def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_reserve_percentage,plot_diagram, fuel_name): 
@@ -128,25 +174,33 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
         Outputs: 
             payload_range       data structure of payload range properties   [m/s]
     """ 
-    #unpack
+    # unpack
     mass = vehicle.mass_properties
+    if not mass.max_payload:
+        raise AttributeError("Error calculating Payload Range Diagram: vehicle Maximum Payload Weight is undefined.") 
+    else:
+        MaxPLD = mass.max_payload
+
     if not mass.operating_empty:
-        raise AttributeError("Error calculating Payload Range Diagram: Vehicle Operating Empty not defined") 
+        if not mass.max_zero_fuel:
+            raise AttributeError("Error calculating Payload Range Diagram: vehicle Operating Empty Weight and Max Zero Fuel Weight is undefined.") 
+        else:
+            OEW = mass.max_zero_fuel - MaxPLD
+            MZFW = mass.max_zero_fuel
     else:
         OEW = mass.operating_empty
-
-    if not mass.max_zero_fuel:
-        raise AttributeError("Error calculating Payload Range Diagram: Vehicle MZFW not defined") 
-    else:
-        MZFW = vehicle.mass_properties.max_zero_fuel
+        if not mass.max_zero_fuel:
+            MZFW = OEW + MaxPLD
+        else:
+            MZFW = mass.max_zero_fuel
 
     if not mass.max_takeoff:
-        raise AttributeError("Error calculating Payload Range Diagram: Vehicle MTOW not defined") 
+        raise AttributeError("Error calculating Payload Range Diagram: Vehicle MTOW not defined")
     else:
         MTOW = vehicle.mass_properties.max_takeoff
 
     if mass.max_payload == 0:
-        MaxPLD = MZFW - OEW  
+        MaxPLD = MZFW - OEW
     else:
         MaxPLD = vehicle.mass_properties.max_payload
         MaxPLD = min(MaxPLD , MZFW - OEW) #limit in structural capability
@@ -157,29 +211,38 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
         MaxFuel = vehicle.mass_properties.max_fuel  # If max fuel capacity not defined
         MaxFuel = min(MaxFuel, MTOW - OEW)
 
-
     # Define payload range points
     #Point  = [ RANGE WITH MAX. PLD   , RANGE WITH MAX. FUEL , FERRY RANGE   ]
     TOW     = [ MTOW                               , MTOW                   , OEW + MaxFuel ]
-    FUEL    = [ min(TOW[1] - OEW - MaxPLD,MaxFuel) , MaxFuel                , MaxFuel       ]
+    FUEL    = [ min(TOW[0] - OEW - MaxPLD,MaxFuel) , MaxFuel                , MaxFuel       ]
     PLD     = [ MaxPLD                             , MTOW - MaxFuel - OEW   , 0.   ]
     OEW_PLD = [  OEW + MaxPLD                      , MTOW - MaxFuel         , OEW  ]
     
     # allocating Range array
     R       = [0,0,0]
+    
+    for segment in  mission.segments:
+        segment.analyses.weights.settings.run_weights_analysis = False
+        segment.analyses.weights.settings.run_center_of_gravity_analysis = False
+        segment.analyses.weights.settings.run_moments_of_inertia_analysis = False
+        segment.analyses.geometry.settings.compute_fuel_volume = False
+        segment.analyses.geometry.settings.update_max_fuel  = False
+
 
     # loop for each point of Payload Range Diagram
     for i in range(len(TOW)):
-        ##    for i in [2]: 
         # Define takeoff weight
-        mission.segments[0].analyses.weights.vehicle.mass_properties.takeoff  = TOW[i]
-        mission.segments[0].analyses.weights.vehicle.mass_properties.payload  = PLD[i]
-        mission.segments[0].analyses.weights.vehicle.mass_properties.fuel     = FUEL[i]
+        mission.segments[0].analyses.vehicle.mass_properties.takeoff  = TOW[i]
+        mission.segments[0].analyses.vehicle.mass_properties.payload  = PLD[i]
+        mission.segments[0].analyses.vehicle.mass_properties.fuel     = FUEL[i] 
 
         # Evaluate mission with current TOW
         results = mission.evaluate()
         segment = results.segments[cruise_segment_tag]
-
+        
+        # This ensures that after the first mission, we reuse the surrogate 
+        mission.segments[0].analyses.aerodynamics.settings.reuse_stored_surrogate_model     = True        
+        
         # Distance convergency in order to have total fuel equal to target fuel
         #
         # User don't have the option of run a mission for a given fuel. So, we
@@ -203,8 +266,8 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
             missingFuel = FUEL[i] - TotalFuel - reserve_fuel
 
             # Current distance and fuel consuption in the cruise segment
-            CruiseDist = np.diff( segment.conditions.frames.inertial.position_vector[[0,-1],0] )[0]        # Distance [m]
-            CruiseFuel = segment.conditions.weights.total_mass[0,0] - segment.conditions.weights.total_mass[-1,0]    # [kg]
+            CruiseDist = rp.diff( segment.conditions.frames.inertial.position_vector[[0,-1],0] )[0]        # Distance [m]
+            CruiseFuel = segment.conditions.weights.vehicle.mass[0,0] - segment.conditions.weights.vehicle.mass[-1,0]    # [kg]
             
             # Current specific range (m/kg)
             CruiseSR    = CruiseDist / CruiseFuel        # [m/kg]
@@ -218,15 +281,15 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
             segment = results.segments[cruise_segment_tag]
 
             # Difference between burned fuel and target fuel
-            err = ( TOW[i] - results.segments[-1].conditions.weights.total_mass[-1,0] ) - FUEL[i] + reserve_fuel
+            err = ( TOW[i] - results.segments[-1].conditions.weights.vehicle.mass[-1,0] ) - FUEL[i] + reserve_fuel
 
             if iter == maxIter:
                 print(f"Did not converge.")
                 break
-
+        if (CruiseDist + DeltaDist) <=0: # This raise exception can be reworked but it is good to have this here
+            raise Exception('Negative Cruise distance not enough fuel for fixed portions of flight (To -> Climb)')
         # Allocating resulting range in ouput array.
-        R[i] =  results.segments[-1].conditions.frames.inertial.position_vector[-1,0]   
-
+        R[i] =  results.segments[-1].conditions.frames.inertial.position_vector[-1,0]
     # Inserting point (0,0) in output arrays
     R.insert(0,0)
     PLD.insert(0,MaxPLD) 
@@ -236,13 +299,12 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
 
     # packing results
     payload_range                          = Data()
-    payload_range.range                    = np.array(R)
-    payload_range.payload                  = np.array(PLD)
-    payload_range.oew_plus_payload         = np.array(OEW_PLD)
-    payload_range.fuel                     = np.array(FUEL)
-    payload_range.takeoff_weight           = np.array(TOW)
+    payload_range.range                    = rp.array(R)
+    payload_range.payload                  = rp.array(PLD)
+    payload_range.oew_plus_payload         = rp.array(OEW_PLD)
+    payload_range.fuel                     = rp.array(FUEL)
+    payload_range.takeoff_weight           = rp.array(TOW)
     payload_range.fuel_reserve_percentage  = fuel_reserve_percentage
-     
     if plot_diagram:  
         # get plotting style 
         ps      = plot_style()  
@@ -270,7 +332,7 @@ def conventional_payload_range_diagram(vehicle,mission,cruise_segment_tag,fuel_r
         set_axes(axis_2) 
         fig.tight_layout()
 
-    return payload_range 
+    return payload_range
  
 def electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagram):
     """Calculates and plots the payload range diagram for an electric aircraft by modifying the
@@ -292,15 +354,19 @@ def electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagr
             payload_range       data structure of payload range properties   [m/s]
     """ 
     mass = vehicle.mass_properties
-    if not mass.operating_empty:
-        raise AttributeError("Error calculating Payload Range Diagram: vehicle Operating Empty Weight is undefined.") 
-    else:
-        OEW = mass.operating_empty
-
     if not mass.max_payload:
         raise AttributeError("Error calculating Payload Range Diagram: vehicle Maximum Payload Weight is undefined.") 
     else:
         MaxPLD = mass.max_payload
+
+   
+    if not mass.operating_empty:
+        if not mass.max_zero_fuel:
+            raise AttributeError("Error calculating Payload Range Diagram: vehicle Operating Empty Weight is undefined.") 
+        else:
+            OEW = mass.max_zero_fuel - MaxPLD
+    else:
+        OEW = mass.operating_empty
 
     if not mass.max_takeoff:
         raise AttributeError("Error calculating Payload Range Diagram: vehicle Maximum Payload Weight is undefined.") 
@@ -313,26 +379,26 @@ def electric_payload_range_diagram(vehicle,mission,cruise_segment_tag,plot_diagr
     PLD =   [MaxPLD,    0.]     # Payload Weights
 
     # Initialize Range Array
-    R = np.zeros(2)
+    R = rp.zeros(2)
 
     # Calculate Vehicle Range for Max Payload and Ferry Conditions
     for i in range(2):
-        mission.segments[0].analyses.weights.vehicle.mass_properties.takeoff = TOW[i]
+        mission.segments[0].analyses.vehicle.mass_properties.takeoff = TOW[i]
         results = mission.evaluate()
         segment = results.segments[cruise_segment_tag]
         R[i]    = segment.conditions.frames.inertial.position_vector[-1,0] 
 
     # Insert Starting Point for Diagram Construction
-    R   = np.insert(R, 0, 0)
-    PLD = np.insert(PLD, 0, MaxPLD)
-    TOW = np.insert(TOW, 0, 0)
+    R   = rp.insert(R, 0, 0)
+    PLD = rp.insert(PLD, 0, MaxPLD)
+    TOW = rp.insert(TOW, 0, 0)
 
     # Pack Results
     payload_range = Data()
-    payload_range.range             = np.array(R)
-    payload_range.payload           = np.array(PLD)
-    payload_range.takeoff_weight    = np.array(TOW)
-
+    payload_range.range             = rp.array(R)
+    payload_range.payload           = rp.array(PLD)
+    payload_range.takeoff_weight    = rp.array(TOW)
+    
     if plot_diagram: 
         # get plotting style 
         ps      = plot_style()  

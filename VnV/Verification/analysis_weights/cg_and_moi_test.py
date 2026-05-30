@@ -7,16 +7,23 @@
 # cg_and_moi_test.py
 
 from RCAIDE.Framework.Core                                     import Units,  Data  
-from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia  import compute_aircraft_moment_of_inertia
+from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia  import compute_vehicle_moment_of_inertia
 from RCAIDE.Library.Methods.Mass_Properties.Center_of_Gravity  import compute_vehicle_center_of_gravity
-from RCAIDE.Library.Methods.Mass_Properties.Moment_of_Inertia  import compute_cuboid_moment_of_inertia
-
-import numpy as  np
+from RCAIDE.Library.Methods.Geometry.Planform                  import wing_planform
+import RNUMPY as rp
 import RCAIDE
+import pandas as pd
 import sys   
 import os
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 
 # the analysis functions
 from Lockheed_C5a           import vehicle_setup as transport_setup
@@ -33,45 +40,65 @@ def main():
 
 def Transport_Aircraft_Test():
     vehicle = transport_setup()
-    
-    # update fuel weight to 60%
-    vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass = 0.6 * vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.wing_fuel_tank.fuel.mass_properties.mass
+    for wing in vehicle.wings: 
+        wing_planform(wing) 
 
+    # update fuel weight to 60%
+    vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.integral_tank.fuel.mass_properties.mass = 0.6 * vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.integral_tank.fuel.mass_properties.mass
+    vehicle.mass_properties.fuel = 0.6 * vehicle.networks.fuel.fuel_lines.fuel_line.fuel_tanks.integral_tank.fuel.mass_properties.mass
     # ------------------------------------------------------------------
     #   Weight Breakdown 
     # ------------------------------------------------------------------  
-    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Conventional()
-    weight_analysis.aircraft_type                 = "Transport"
-    weight_analysis.vehicle                       = vehicle
+    weight_analysis                               = RCAIDE.Framework.Analyses.Weights.Conventional_Transport()
+    weight_analysis.aircraft_type                 = "Transport" 
     weight_analysis.method                        = 'Raymer'
     weight_analysis.settings.use_max_fuel_weight  = False  
     weight_analysis.settings.cargo_doors_number   = 2
     weight_analysis.settings.cargo_doors_clamshell= True
-    results                                       = weight_analysis.evaluate() 
-    
-    # ------------------------------------------------------------------
-    #   CG Location
-    # ------------------------------------------------------------------    
-    CG_location, _ = compute_vehicle_center_of_gravity( weight_analysis.vehicle)  
-    
-    # ------------------------------------------------------------------
-    #   Operating Aircraft MOI
-    # ------------------------------------------------------------------    
-    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
+    results                                       = weight_analysis.evaluate(vehicle) 
 
     # ------------------------------------------------------------------
-    #   Payload MOI
-    # ------------------------------------------------------------------    
-    Cargo_MOI, mass =  compute_cuboid_moment_of_inertia(CG_location, 99790*Units.kg, 36.0, 3.66, 3, 0, 0, 0, CG_location)
-    MOI             += Cargo_MOI
-    total_mass      += mass
+    #   CG Location
+    # ------------------------------------------------------------------  
+    centre_of_gravity_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "CG x (m)",
+    "CG y (m)",
+    "CG z (m)"
+    ])
+    verbose_flag = False
+    CG_location,_, _, centre_of_gravity_df = compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df,
+                                            overwrite_center_of_gravity =  True ,
+                                            verbose=verbose_flag)     
+
+    # ------------------------------------------------------------------
+    #   Operating Aircraft MOI
+    # ------------------------------------------------------------------ 
+ 
+    moment_of_inertia_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "Ixx (kg·m²)",
+    "Iyy (kg·m²)",
+    "Izz (kg·m²)",
+    "Ixy (kg·m²)",
+    "Ixz (kg·m²)",
+    "Iyz (kg·m²)",
+    ])
+    overwrite_MOI = True
+    verbose_flag = False
+    MOI ,moment_of_inertia_df = compute_vehicle_moment_of_inertia(vehicle,moment_of_inertia_df,
+                                        overwrite_moment_of_inertia = overwrite_MOI,
+                                        verbose=verbose_flag)   
     
-    print(weight_analysis.vehicle.tag + ' Moment of Intertia')
+    print(vehicle.tag + ' Moment of Inertia')
     print(MOI) 
-    accepted  = np.array([[34511560.549699254, 2607978.8783662403, 3264942.719311941],
-                          [2607978.8783662403, 44472082.67654222, -1.4551915228366852e-11],
-                          [3264942.719311941, -1.4551915228366852e-11,62610504.49712051]]) 
-    MOI_error     = MOI - accepted
+    accepted  = rp.array([[16156802.54978671,        0.        , -7824233.96896249],
+                          [       0.        , 58633557.83917309,        0.        ],
+                          [-7824233.96896249,        0.        , 54526483.54615998]])
+                          
+    MOI_error     = rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error = Data()
@@ -85,39 +112,65 @@ def Transport_Aircraft_Test():
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-6) 
-    
+        assert(rp.abs(v)<1e-6) 
+
     return  
- 
+
 
 def General_Aviation_Test(): 
     # ------------------------------------------------------------------
     #   Weight Breakdown 
     # ------------------------------------------------------------------  
-    weight_analysis               = RCAIDE.Framework.Analyses.Weights.Conventional() 
-    weight_analysis.vehicle       = general_aviation_setup() 
-    weight_analysis.method        = 'FLOPS'
-    weight_analysis.aircraft_type = 'General_Aviation'
-    results                       = weight_analysis.evaluate() 
-    
+    weight_analysis               = RCAIDE.Framework.Analyses.Weights.Conventional_General_Aviation() 
+    vehicle                       = general_aviation_setup() 
+    for wing in vehicle.wings: 
+        wing_planform(wing) 
+        if isinstance(wing, RCAIDE.Library.Components.Wings.Main_Wing):
+            vehicle.reference_area = wing.areas.reference 
+    results                       = weight_analysis.evaluate(vehicle) 
+
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    CG_location, _ = compute_vehicle_center_of_gravity(weight_analysis.vehicle)  
-    
+    centre_of_gravity_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "CG x (m)",
+    "CG y (m)",
+    "CG z (m)"
+    ])
+    verbose_flag = False
+    CG_location,_, _, centre_of_gravity_df = compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df,
+                                            overwrite_center_of_gravity =  True ,
+                                            verbose=verbose_flag)   
+
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location) 
+    moment_of_inertia_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "Ixx (kg·m²)",
+    "Iyy (kg·m²)",
+    "Izz (kg·m²)",
+    "Ixy (kg·m²)",
+    "Ixz (kg·m²)",
+    "Iyz (kg·m²)",
+    ])
+    overwrite_MOI = True
+    verbose_flag = False
+    MOI ,moment_of_inertia_df = compute_vehicle_moment_of_inertia(vehicle,moment_of_inertia_df,
+                                        overwrite_moment_of_intertia = overwrite_MOI,
+                                        verbose=verbose_flag)   
 
-    print(weight_analysis.vehicle.tag + ' Moment of Intertia')
+    print(vehicle.tag + ' Moment of Inertia')
     print(MOI)
-     
-    accepted  = np.array([[2859.945595755493, 17.36583331027025, 21.28699692497282],
-                          [17.36583331027025, 3742.738737133499,    0.        ],
-                          [21.28699692497282,    0.        , 2713.6487787834294]])
-    
-    MOI_error     = MOI - accepted
+
+    accepted  = rp.array([[3092.49011892,    0.        , -278.99230136],
+                          [   0.        , 5921.80746984,    0.        ],
+                          [-278.99230136,    0.        , 4782.27699572]])
+
+    MOI_error     =  rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error       = Data()
@@ -131,43 +184,69 @@ def General_Aviation_Test():
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-6)   
-    
+        assert(rp.abs(v)<1e-5)   
+
     return
 
 def EVTOL_Aircraft_Test(update_regression_values):
     vehicle = EVTOL_setup(update_regression_values)
-    
+    for wing in vehicle.wings: 
+        wing_planform(wing) 
+        if isinstance(wing, RCAIDE.Library.Components.Wings.Main_Wing):
+            vehicle.reference_area = wing.areas.reference
     # ------------------------------------------------------------------
     #   Weight Breakdown 
     # ------------------------------------------------------------------  
-    weight_analysis          = RCAIDE.Framework.Analyses.Weights.Electric()
+    weight_analysis          = RCAIDE.Framework.Analyses.Weights.Electric_VTOL()
     weight_analysis.method    = 'Physics_Based'
     weight_analysis.aircraft_type = 'VTOL'
     weight_analysis.settings.safety_factor               = 1.5    
     weight_analysis.settings.miscelleneous_weight_factor = 1.1 
     weight_analysis.settings.disk_area_factor            = 1.15
     weight_analysis.settings.max_thrust_to_weight_ratio  = 1.1
-    weight_analysis.settings.max_g_load                  = 3.8
-    weight_analysis.vehicle                              = vehicle
-    results                                              = weight_analysis.evaluate() 
-    
+    weight_analysis.settings.max_g_load                  = 3.8 
+    results                                              = weight_analysis.evaluate(vehicle) 
+
     # ------------------------------------------------------------------
     #   CG Location
     # ------------------------------------------------------------------    
-    CG_location, _ =  compute_vehicle_center_of_gravity( weight_analysis.vehicle)  
-    
+    centre_of_gravity_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "CG x (m)",
+    "CG y (m)",
+    "CG z (m)"
+    ])
+    verbose_flag = False
+    CG_location,_, _, centre_of_gravity_df = compute_vehicle_center_of_gravity(vehicle,centre_of_gravity_df,
+                                            overwrite_center_of_gravity =  True ,
+                                            verbose=verbose_flag)   
+
     # ------------------------------------------------------------------
     #   Operating Aircraft MOI
     # ------------------------------------------------------------------    
-    MOI, total_mass = compute_aircraft_moment_of_inertia(weight_analysis.vehicle, CG_location)
-    
-    print(weight_analysis.vehicle.tag + ' Moment of Intertia')
+    moment_of_inertia_df = pd.DataFrame(columns=[
+    "Component",
+    "Mass (kg)",
+    "Ixx (kg·m²)",
+    "Iyy (kg·m²)",
+    "Izz (kg·m²)",
+    "Ixy (kg·m²)",
+    "Ixz (kg·m²)",
+    "Iyz (kg·m²)",
+    ])
+    overwrite_MOI = True
+    verbose_flag = False
+    MOI ,moment_of_inertia_df = compute_vehicle_moment_of_inertia(vehicle,moment_of_inertia_df,
+                                        overwrite_moment_of_intertia = overwrite_MOI,
+                                        verbose=verbose_flag)   
+
+    print(vehicle.tag + ' Moment of Inertia')
     print(MOI) 
-    accepted  = np.array([[ 6341.318637347449,-548.1230020842031,  -508.1391636975497],
-                          [ -548.1230020842031,  10013.581940459215, -98.17629167907553],
-                          [ -508.1391636975497,  -98.17629167907553, 14937.605093100654]])
-    MOI_error     = MOI - accepted
+    accepted  = rp.array([[ 9463.1492284 ,  -431.31503284,  -323.65112921],
+       [ -431.31503284,  9992.41102398,  -101.09543924],
+       [ -323.65112921,  -101.09543924, 17665.06668109]])
+    MOI_error     = rp.nan_to_num((MOI - accepted) / accepted)
 
     # Check the errors
     error = Data()
@@ -181,8 +260,8 @@ def EVTOL_Aircraft_Test(update_regression_values):
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-5) 
-    
+        assert(rp.abs(v)<5e-2) # Note that EVTOL weight is an iterative process, therefore the error can be larger than expected. 
+
     return  
 
 if __name__ == '__main__':

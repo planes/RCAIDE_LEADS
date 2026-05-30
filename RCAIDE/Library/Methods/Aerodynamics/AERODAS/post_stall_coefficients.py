@@ -9,7 +9,7 @@
 from RCAIDE.Framework.Core import Data, Units
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Post Stall Coefficients
@@ -55,15 +55,15 @@ def post_stall_coefficients(state,settings,geometry):
     alpha  = state.conditions.aerodynamics.angle_of_attack
     
     if wing.vertical == True:
-        alpha = 0. * np.ones_like(alpha)    
+        alpha = 0. * rp.ones_like(alpha)    
             
     # Equation 9a and b
     F1        = 1.190*(1.0-(t_c*t_c))
-    F2        = 0.65 + 0.35*np.exp(-(9.0/AR)**2.3)
+    F2        = 0.65 + 0.35*rp.exp(-(9.0/AR)**2.3)
     
     # Equation 10b and c
-    G1        = 2.3*np.exp(-(0.65*t_c)**0.9)
-    G2        = 0.52 + 0.48*np.exp(-(6.5/AR)**1.1)
+    G1        = 2.3*rp.exp(-(0.65*t_c)**0.9)
+    G2        = 0.52 + 0.48*rp.exp(-(6.5/AR)**1.1)
     
     # Equation 8a and b
     CL2max    = F1*F2
@@ -76,36 +76,36 @@ def post_stall_coefficients(state,settings,geometry):
     N2        = 1 + CL2max/RCL2
     
     # Equation 11a,b,c
-    con1      = np.logical_and(0<alpha,alpha<ACL1)
-    con2      = np.logical_and(ACL1<=alpha,alpha<=(92.0*Units.deg))
+    con1      = rp.logical_and(0<alpha,alpha<ACL1)
+    con2      = rp.logical_and(ACL1<=alpha,alpha<=(92.0*Units.deg))
     con3      = alpha>=(92.0*Units.deg)
-    CL2       = np.zeros_like(alpha)
-    CL2[con1] =  0
-    CL2[con2] = -0.032*(alpha[con2]/Units.deg-92.0) - RCL2*((92.*Units.deg-alpha[con2])/(51.0*Units.deg))**N2
-    CL2[con3] = -0.032*(alpha[con3]/Units.deg-92.0) + RCL2*((alpha[con3]-92.*Units.deg)/(51.0*Units.deg))**N2
+    CL2       = rp.zeros_like(alpha)
+    CL2 = rp.where(con1, 0, CL2)
+    CL2 = rp.where(con2, -0.032 * (alpha / Units.deg - 92.0) - RCL2 * ((92.0 * Units.deg - alpha) / (51.0 * Units.deg)) ** N2, CL2)
+    CL2 = rp.where(con3, -0.032 * (alpha / Units.deg - 92.0) + RCL2 * ((alpha - 92.0 * Units.deg) / (51.0 * Units.deg)) ** N2, CL2)
     
     # If alpha is negative flip things for lift
     alphan    = - alpha+2*A0
-    con1      = np.logical_and(0<alphan, alphan<ACL1)
-    con2      = np.logical_and(ACL1<=alphan, alphan<=(92.0*Units.deg))
+    con1      = rp.logical_and(0<alphan, alphan<ACL1)
+    con2      = rp.logical_and(ACL1<=alphan, alphan<=(92.0*Units.deg))
     con3      = alphan>=(92.0*Units.deg)
-    CL2[con1] = 0.
-    CL2[con2] = 0.032*(alphan[con2]/Units.deg-92.0) + RCL2*((92.*Units.deg-alphan[con2])/(51.0*Units.deg))**N2
-    CL2[con3] = 0.032*(alphan[con3]/Units.deg-92.0) - RCL2*((alphan[con3]-92.*Units.deg)/(51.0*Units.deg))**N2
+    CL2 = rp.where(con1, 0.0, CL2)
+    CL2 = rp.where(con2, 0.032 * (alphan / Units.deg - 92.0) + RCL2 * ((92.0 * Units.deg - alphan) / (51.0 * Units.deg)) ** N2, CL2)
+    CL2 = rp.where(con3, 0.032 * (alphan / Units.deg - 92.0) - RCL2 * ((alphan - 92.0 * Units.deg) / (51.0 * Units.deg)) ** N2, CL2)
     
     # Equation 12a 
-    con1      = np.logical_and((2*A0-ACL1)<alpha, alpha<ACL1)
+    con1      = rp.logical_and((2*A0-ACL1)<alpha, alpha<ACL1)
     con2      = alpha>ACD1
-    CD2       = 0.0 * np.ones_like(alpha)
-    CD2[con1] = 0.
-    CD2[con2] = CD1max[con2] + (CD2max - CD1max[con2]) * np.sin((alpha[con2]-ACD1[con2])/(np.pi/2-ACD1[con2]))
+    CD2       = 0.0 * rp.ones_like(alpha)
+    CD2 = rp.where(con1, 0.0, CD2)
+    CD2 = rp.where(con2, CD1max + (CD2max - CD1max) * rp.sin((alpha - ACD1) / (rp.pi / 2 - ACD1)), CD2)
     
     # If alpha is negative flip things for drag
     alphan    = -alpha + 2*A0
-    con1      = np.logical_and((2*A0-ACL1)<alphan,alphan<ACL1)
+    con1      = rp.logical_and((2*A0-ACL1)<alphan,alphan<ACL1)
     con2      = alphan>=ACD1
-    CD2[con1] = 0.
-    CD2[con2] = CD1max[con2] + (CD2max - CD1max[con2]) * np.sin((alphan[con2]-ACD1[con2])/(np.pi/2-ACD1[con2]))        
+    CD2 = rp.where(con1, 0.0, CD2)
+    CD2 = rp.where(con2, CD1max + (CD2max - CD1max) * rp.sin((alphan - ACD1) / (rp.pi / 2 - ACD1)), CD2)       
         
     # Pack outputs
     wing_result = Data(

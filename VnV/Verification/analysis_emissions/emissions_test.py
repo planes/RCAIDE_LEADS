@@ -12,13 +12,20 @@ from RCAIDE.Framework.Core                          import Units , Data
 from RCAIDE.Library.Plots                           import *        
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys
 import os
 import matplotlib.pyplot as plt  
 
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Boeing_737    import vehicle_setup as vehicle_setup
 from Boeing_737    import configs_setup as configs_setup 
 
@@ -39,9 +46,9 @@ def main():
         emissions_methods = ['Emission_Index_Correlation_Method', 'Emission_Index_CRN_Method']
     except:
         pass 
-    
+       
     true_EI_CO2s =  [3.16, 3.0996295865239563, 3.1371106320136155]
-    true_EI_H2Os =  [1.34, 1.1911420639654764, 1.2053455595806213]
+    true_EI_H2Os =  [1.23, 1.1911420639654764, 1.2053455595806213]
     i =  0
     for em in  range(len(emissions_methods)):
         for sur in  range(len(use_surrogate)):
@@ -71,8 +78,8 @@ def main():
                 EI_H2O         = results.segments.cruise.conditions.emissions.index.H2O[0,0]  
                 true_EI_CO2    = true_EI_CO2s[i]
                 true_EI_H2O    = true_EI_H2Os[i]   
-                diff_EI_CO2    = np.abs(EI_CO2 - true_EI_CO2)
-                diff_EI_H2O    = np.abs(EI_H2O - true_EI_H2O)
+                diff_EI_CO2    = rp.abs(EI_CO2 - true_EI_CO2)
+                diff_EI_H2O    = rp.abs(EI_H2O - true_EI_H2O)
                 
                 if cantera_installation == False and  i > 0:
                     pass
@@ -105,21 +112,21 @@ def base_analysis(vehicle,emissions_method, use_surrogate):
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
-    analyses = RCAIDE.Framework.Analyses.Vehicle() 
+    analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle = vehicle
+
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry()
+    analyses.append(geometry)
     
     # ------------------------------------------------------------------
     #  Weights
-    weights         = RCAIDE.Framework.Analyses.Weights.Conventional()
-    weights.aircraft_type  =  "Transport"
-    weights.vehicle = vehicle
+    weights         = RCAIDE.Framework.Analyses.Weights.Conventional_Transport() 
     analyses.append(weights)
     
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis 
-    aerodynamics                                       = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()
-    aerodynamics.vehicle                               = vehicle
-    aerodynamics.settings.number_of_spanwise_vortices  = 5
-    aerodynamics.settings.number_of_chordwise_vortices = 2       
+    aerodynamics                                       = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
     aerodynamics.settings.model_fuselage               = True 
     analyses.append(aerodynamics)
 
@@ -130,18 +137,16 @@ def base_analysis(vehicle,emissions_method, use_surrogate):
     elif emissions_method == "Emission_Index_CRN_Method":
         emissions = RCAIDE.Framework.Analyses.Emissions.Emission_Index_CRN_Method() 
         emissions.settings.use_surrogate     = use_surrogate 
-        emissions.training.pressure          = np.linspace(2.5,5, 1) *1E6
-        emissions.training.temperature       = np.linspace(710, 800, 1) 
-        emissions.training.air_mass_flowrate = np.linspace(40, 50, 1) 
-        emissions.training.fuel_to_air_ratio = np.linspace(0.025, 0.03, 1)             
-    emissions.vehicle = vehicle          
+        emissions.training.pressure          = rp.linspace(2.5,5, 1) *1E6
+        emissions.training.temperature       = rp.linspace(710, 800, 1) 
+        emissions.training.air_mass_flowrate = rp.linspace(40, 50, 1) 
+        emissions.training.fuel_to_air_ratio = rp.linspace(0.025, 0.03, 1)     
     analyses.append(emissions)
         
     
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy= RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
     
     # ------------------------------------------------------------------
@@ -152,7 +157,6 @@ def base_analysis(vehicle,emissions_method, use_surrogate):
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
     
     # done!
@@ -193,7 +197,7 @@ def mission_setup(analyses):
     
     # define flight controls 
     segment.assigned_control_variables.throttle.active               = True           
-    segment.assigned_control_variables.throttle.assigned_propulsors  = [['starboard_propulsor','port_propulsor']] 
+    segment.assigned_control_variables.throttle.assigned_propulsors = [['propulsor_1','propulsor_2']] 
     segment.assigned_control_variables.body_angle.active             = True                
     
     mission.append_segment(segment)    

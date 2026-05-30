@@ -9,7 +9,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
  
 # Python package imports
-import numpy                               as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_power
@@ -131,15 +131,15 @@ def compute_power(turboshaft,conditions):
     Psp                                        =  Cp*total_temperature_reference*tau_lambda*tau_tH*(1 - tau_tL)*eta_c     
         
     if turboshaft.inverse_calculation == False: 
-        m_dot_air   = m_dot_compressor*turboshaft_conditions.throttle*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)     
+        m_dot_air   = m_dot_compressor*turboshaft_conditions.throttle*rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)     
         Power       = Psp*m_dot_air
     else:
         m_dot_air = Power / Psp
-        turboshaft_conditions.throttle =  m_dot_air / (m_dot_compressor*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref) )
+        turboshaft_conditions.throttle =  m_dot_air / (m_dot_compressor*rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref) )
          
     #fuel to air ratio
     f                                          = (Cp*total_temperature_reference/LHV)*(tau_lambda - tau_r*tau_c)                                                                              
-    fuel_flow_rate                             = (1 - SFC_adjustment) *f*m_dot_air
+    m_dot_fuel                                 = (1 - SFC_adjustment) *f*m_dot_air
     
     #Computing the PSFC                        
     PSFC                                       = f/Psp                                                                                                
@@ -149,7 +149,7 @@ def compute_power(turboshaft,conditions):
 
     #pack outputs
     turboshaft_conditions.power_specific_fuel_consumption   = PSFC
-    turboshaft_conditions.fuel_flow_rate                    = fuel_flow_rate                                                                              
+    turboshaft_conditions.fuel_mass_flow_rate               = m_dot_fuel                                                                              
     turboshaft_conditions.power                             = Power
     turboshaft_conditions.non_dimensional_power             = Psp
     turboshaft_conditions.non_dimensional_thrust            = Tsp

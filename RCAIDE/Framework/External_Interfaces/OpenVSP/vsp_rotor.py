@@ -9,8 +9,7 @@
 # RCAIDE imports 
 import RCAIDE
 from RCAIDE.Framework.Core import Units , Data
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
 import string
 try:
     import vsp as vsp
@@ -139,7 +138,7 @@ def read_vsp_rotor(prop_id, units_type='SI',write_airfoil_file=True):
     rotor.number_of_blades             = int(vsp.GetParmVal(parm_id[parm_names.index('NumBlade')]))
 
     rotor.tip_radius                   = vsp.GetDoubleResults(rid, "Diameter" )[0] / 2 * units_factor
-    rotor.radius_distribution          = np.array(vsp.GetDoubleResults(rid, "Radius" )) * rotor.tip_radius
+    rotor.radius_distribution          = rp.array(vsp.GetDoubleResults(rid, "Radius" )) * rotor.tip_radius
 
     rotor.radius_distribution[-1]      = 0.99 * rotor.tip_radius # BEMT requires max nondimensional radius to be less than 1.0
     if rotor.radius_distribution[0] == 0.:
@@ -150,24 +149,24 @@ def read_vsp_rotor(prop_id, units_type='SI',write_airfoil_file=True):
 
     rotor.hub_radius                   = rotor.radius_distribution[0]
 
-    rotor.chord_distribution           = np.array(vsp.GetDoubleResults(rid, "Chord" ))[start:]  * rotor.tip_radius # vsp gives c/R
-    rotor.twist_distribution           = np.array(vsp.GetDoubleResults(rid, "Twist" ))[start:]  * Units.degrees
-    rotor.sweep_distribution           = np.array(vsp.GetDoubleResults(rid, "Sweep" ))[start:]
-    rotor.mid_chord_alignment          = np.tan(rotor.sweep_distribution*Units.degrees)  * rotor.radius_distribution
-    rotor.thickness_to_chord           = np.array(vsp.GetDoubleResults(rid, "Thick" ))[start:]
+    rotor.chord_distribution           = rp.array(vsp.GetDoubleResults(rid, "Chord" ))[start:]  * rotor.tip_radius # vsp gives c/R
+    rotor.twist_distribution           = rp.array(vsp.GetDoubleResults(rid, "Twist" ))[start:]  * Units.degrees
+    rotor.sweep_distribution           = rp.array(vsp.GetDoubleResults(rid, "Sweep" ))[start:]
+    rotor.mid_chord_alignment          = rp.tan(rotor.sweep_distribution*Units.degrees)  * rotor.radius_distribution
+    rotor.thickness_to_chord           = rp.array(vsp.GetDoubleResults(rid, "Thick" ))[start:]
     rotor.max_thickness_distribution   = rotor.thickness_to_chord*rotor.chord_distribution * units_factor
-    rotor.Cl_distribution              = np.array(vsp.GetDoubleResults(rid, "CLi" ))[start:]
+    rotor.Cl_distribution              = rp.array(vsp.GetDoubleResults(rid, "CLi" ))[start:]
 
     # Extra data from VSP BEM for future use in BEVW
     rotor.beta34                       = vsp.GetDoubleResults(rid, "Beta34" )[0]  # pitch at 3/4 radius
     rotor.pre_cone                     = vsp.GetDoubleResults(rid, "Pre_Cone")[0]
-    rotor.rake                         = np.array(vsp.GetDoubleResults(rid, "Rake"))[start:]
-    rotor.skew                         = np.array(vsp.GetDoubleResults(rid, "Skew"))[start:]
-    rotor.axial                        = np.array(vsp.GetDoubleResults(rid, "Axial"))[start:]
-    rotor.tangential                   = np.array(vsp.GetDoubleResults(rid, "Tangential"))[start:]
+    rotor.rake                         = rp.array(vsp.GetDoubleResults(rid, "Rake"))[start:]
+    rotor.skew                         = rp.array(vsp.GetDoubleResults(rid, "Skew"))[start:]
+    rotor.axial                        = rp.array(vsp.GetDoubleResults(rid, "Axial"))[start:]
+    rotor.tangential                   = rp.array(vsp.GetDoubleResults(rid, "Tangential"))[start:]
 
     # Set rotor rotation
-    rotor.rotation = 1
+    rotor.clockwise_rotation = True
 
     # ---------------------------------------------
     # Rotor Airfoil
@@ -243,16 +242,16 @@ Normal: {8}, {9}, {10}
     name      = rotor.tag
     N         = len(rotor.radius_distribution)
     B         = int(rotor.number_of_blades)
-    D         = np.round(rotor.tip_radius*2,5)
-    beta      = np.round(rotor.twist_distribution/Units.degrees,5)
-    X         = np.round(rotor.origin[0][0],5)
-    Y         = np.round(rotor.origin[0][1],5)
-    Z         = np.round(rotor.origin[0][2],5) 
-    Xn        = np.round(rotor.orientation_euler_angles[2],5) / Units.degrees
-    Yn        = np.round(rotor.orientation_euler_angles[0],5) / Units.degrees 
-    Zn        = np.round(rotor.orientation_euler_angles[1],5) / Units.degrees
+    D         = rp.round(rotor.tip_radius*2,5)
+    beta      = rp.round(rotor.twist_distribution/Units.degrees,5)
+    X         = rp.round(rotor.origin[0][0],5)
+    Y         = rp.round(rotor.origin[0][1],5)
+    Z         = rp.round(rotor.origin[0][2],5) 
+    Xn        = rp.round(rotor.orientation_euler_angles[2],5) / Units.degrees
+    Yn        = rp.round(rotor.orientation_euler_angles[0],5) / Units.degrees 
+    Zn        = rp.round(rotor.orientation_euler_angles[1],5) / Units.degrees
 
-    beta_3_4  = np.interp(rotor.tip_radius*0.75,rotor.radius_distribution,beta)
+    beta_3_4  = rp.interp(rotor.tip_radius*0.75,rotor.radius_distribution,beta)
 
     # Insert inputs into the template
     header_text = header_base.format(name,N,B,D,beta_3_4,X,Y,Z,Xn,Yn,Zn)
@@ -283,25 +282,25 @@ def make_section_text(vsp_bem,rotor):
         '''Radius/R, Chord/R, Twist (deg), Rake/R, Skew/R, Sweep, t/c, CLi, Axial, Tangential\n'''
 
     N          = len(rotor.radius_distribution)
-    r_R        = np.zeros(N)
-    c_R        = np.zeros(N)
+    r_R        = rp.zeros(N)
+    c_R        = rp.zeros(N)
     r_R        = rotor.radius_distribution/rotor.tip_radius
     c_R        = rotor.chord_distribution/rotor.tip_radius
     beta_deg   = rotor.twist_distribution/Units.degrees
-    Rake_R     = np.zeros(N)
-    Skew_R     = np.zeros(N)
-    Sweep      = np.arctan(rotor.mid_chord_alignment/rotor.radius_distribution)
+    Rake_R     = rp.zeros(N)
+    Skew_R     = rp.zeros(N)
+    Sweep      = rp.arctan(rotor.mid_chord_alignment/rotor.radius_distribution)
     t_c        = rotor.thickness_to_chord
     
     if type(rotor) == RCAIDE.Library.Components.Powertrain.Converters.Lift_Rotor: 
-        CLi        = np.ones(N)*rotor.hover.design_Cl  
+        CLi        = rp.ones(N)*rotor.hover.design_Cl  
     elif type(rotor) == RCAIDE.Library.Components.Powertrain.Converters.Propeller:
-        CLi        = np.ones(N)*rotor.cruise.design_Cl   
+        CLi        = rp.ones(N)*rotor.cruise.design_Cl   
     elif type(rotor) == RCAIDE.Library.Components.Powertrain.Converters.Prop_Rotor: 
-        CLi        = np.ones(N)*rotor.hover.design_Cl  
+        CLi        = rp.ones(N)*rotor.hover.design_Cl  
     
-    Axial      = np.zeros(N)
-    Tangential = np.zeros(N)
+    Axial      = rp.zeros(N)
+    Tangential = rp.zeros(N)
 
     # Write rotor station imformation
     vsp_bem.write(header)

@@ -13,7 +13,7 @@ from RCAIDE.Framework.Optimization.Common             import Nexus
 from RCAIDE.Framework.Optimization.Packages.scipy     import scipy_setup
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
 import time
 import os
 import sys
@@ -108,12 +108,12 @@ def crossflow_heat_exchanger_design_problem_setup(HEX,coolant_line,print_iterati
     inputs.append([ 'm_dot_h' ,   0.1       ,  0.1       , 1             , 1.0       ,  1*Units.less])  
    
         
-    problem.inputs = np.array(inputs,dtype=object)   
+    problem.inputs = rp.array(inputs,dtype=object)   
 
     # ----------------------------------------------------------------------------------------------------------
     # Objective
     # ---------------------------------------------------------------------------------------------------------- 
-    problem.objective = np.array([  
+    problem.objective = rp.array([  
                                  [  'P_hex'  ,  100000   ,    1*Units.less] 
     ],dtype=object)
             
@@ -129,7 +129,7 @@ def crossflow_heat_exchanger_design_problem_setup(HEX,coolant_line,print_iterati
     constraints.append([ 'W'         ,  '>'  ,  0.1 ,   1.0   , 1*Units.less])  
     constraints.append([ 'H'         ,  '>'  ,  0.1 ,   1.0   , 1*Units.less])
     constraints.append([ 'Q_res'     ,  '<'  ,  5,   1.0   , 1*Units.less])
-    problem.constraints =  np.array(constraints,dtype=object)                
+    problem.constraints =  rp.array(constraints,dtype=object)                
     
     # -------------------------------------------------------------------
     #  Aliases

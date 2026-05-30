@@ -4,7 +4,7 @@
 # ----------------------------------------------------------------------
 from   RCAIDE import  * 
 from   RCAIDE.Framework.Core import Units
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  compute_slat_lift
@@ -35,7 +35,7 @@ def compute_slat_lift(slat_angle,sweep_angle):
     sw = sweep_angle
 
     # AA241 Method from adg.stanford.edu
-    dcl_slat = (sa/23.)*(np.cos(sw))**1.4 * np.cos(sa * Units.deg)**2
+    dcl_slat = (sa/23.)*(rp.cos(sw))**1.4 * rp.cos(sa * Units.deg)**2
 
     #returning dcl_slat
     return dcl_slat

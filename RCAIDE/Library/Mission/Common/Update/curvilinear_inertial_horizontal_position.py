@@ -6,10 +6,13 @@
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
+# RCAIDE imports 
+import RCAIDE
+from RCAIDE.Framework.Core import Units
 
 # Package imports 
-import numpy as np
-from RCAIDE.Framework.Core import Units   
+import RNUMPY as rp
+
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Integrate Position
@@ -43,22 +46,35 @@ def curvilinear_inertial_horizontal_position(segment):
     vx          = conditions.frames.inertial.velocity_vector[:,0:1+1]
     I           = segment.state.numerics.time.integrate 
     R           = segment.turn_radius
-    sign        = np.sign(segment.turn_angle)
+    sign        = rp.sign(segment.turn_angle)
     
     # integrate
-    speed       = np.sqrt(vx[:, 0]**2+vx[:, 1]**2)
-    arc_length  = np.dot(I,speed)
+    speed       = rp.sqrt(vx[:, 0]**2+vx[:, 1]**2)
+    arc_length  = rp.dot(I,speed)
     
     theta       = psi - sign * 90 * Units.degrees         # Angle from circle center to the flight trajectory
     beta        =  psi[0, 0] + sign * 90 * Units.degrees  # Angle to the center of the circle from the initial position
     
-    delta_x     = R * np.cos(beta) + R * np.cos(theta) # vector addition with a vector from the starting point to the center and then from the center to the position
-    delta_y     = R * np.sin(beta) + R * np.sin(theta)
+    delta_x     = R * rp.cos(beta) + R * rp.cos(theta) # vector addition with a vector from the starting point to the center and then from the center to the position
+    delta_y     = R * rp.sin(beta) + R * rp.sin(theta)
     x_position  = x0 + delta_x
     y_position  = y0 + delta_y
     
     # pack
-    conditions.frames.inertial.position_vector[:,0] = x_position[:,0]
-    conditions.frames.inertial.position_vector[:,1] = y_position[:,0] 
-    conditions.frames.inertial.aircraft_range[:,0]  = R0 + arc_length
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,0].set(x_position[:,0])
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,1].set(y_position[:,0])
+
+    # do not apply apply range credit for loiter  
+    if type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Dynamic_Pressure_Constant_Altitude_Loiter or  \
+       type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Mach_Constant_Altitude_Loiter or \
+       type(segment) ==  RCAIDE.Framework.Mission.Segments.Cruise.Constant_Speed_Constant_Altitude_Loiter:
+        
+        conditions.frames.inertial.aircraft_range = conditions.frames.inertial.aircraft_range.at[:,0].set(R0[0])
+    else:
+
+        conditions.frames.inertial.aircraft_range = conditions.frames.inertial.aircraft_range.at[:,0].set(R0 + arc_length)
+    
+    # compute climb rate 
+    conditions.frames.inertial.climb_rate = conditions.frames.inertial.climb_rate.at[:,0].set(rp.gradient(conditions.frames.inertial.position_vector[:,2],conditions.frames.inertial.time[:,0] ))
+                
     return

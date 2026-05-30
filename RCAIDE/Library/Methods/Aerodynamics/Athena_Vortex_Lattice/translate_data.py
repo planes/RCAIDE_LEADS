@@ -11,12 +11,12 @@ from RCAIDE.Framework.Core import Units
 from .AVL_Objects.Run_Case import Run_Case
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  translate_data
 # ---------------------------------------------------------------------------------------------------------------------- 
-def translate_conditions_to_cases(avl ,conditions):
+def translate_conditions_to_cases(avl ,conditions, vehicle):
     """ Takes RCAIDE Conditions() data structure and translates to a Container of
     avl Run_Case()s.
 
@@ -39,18 +39,17 @@ def translate_conditions_to_cases(avl ,conditions):
         N/A
     """    
     # set up aerodynamic Conditions object
-    aircraft = avl.vehicle
     cases    = Run_Case.Container()
     for i in range(len(conditions.aerodynamics.angles.alpha)):      
         case                                                  = Run_Case()
         case.tag                                              = avl.settings.filenames.case_template.format(avl.current_status.batch_index,i+1)
-        case.mass                                             = conditions.weights.total_mass
+        case.mass                                             = conditions.weights.vehicle.mass
         case.conditions.freestream.mach                       = conditions.freestream.mach_number[i, 0]
         case.conditions.freestream.density                    = conditions.freestream.density[i, 0]
         case.conditions.freestream.gravitational_acceleration = conditions.freestream.gravity[i, 0]      
         case.conditions.aerodynamics.angles.alpha             = conditions.aerodynamics.angles.alpha[i, 0]/Units.deg
         case.conditions.aerodynamics.angles.beta              = conditions.aerodynamics.angles.beta[i, 0]/Units.deg 
-        if type(conditions.aerodynamics.coefficients.lift.total) == np.ndarray: 
+        if type(conditions.aerodynamics.coefficients.lift.total) == rp.ndarray: 
             case.conditions.aerodynamics.coefficients.lift.total= conditions.aerodynamics.coefficients.lift.total[i, 0]        
         else:      
             case.conditions.aerodynamics.coefficients.lift.total = None
@@ -59,9 +58,9 @@ def translate_conditions_to_cases(avl ,conditions):
         
         # determine the number of wings 
         n_wings = 0 
-        for wing in aircraft.wings:
+        for wing in vehicle.wings:
             n_wings += 1
-            if wing.symmetric == True:
+            if wing.xz_plane_symmetric == True:
                 n_wings += 1                
         case.num_wings                                        = n_wings
         case.n_sw                                             = avl.settings.number_of_spanwise_vortices  
@@ -95,17 +94,17 @@ def translate_results_to_conditions(cases,res,results):
     dim       = len(cases)
          
     # aero results 1: total surface forces and coefficeints
-    res.aerodynamics.coefficients.lift.total       = np.zeros((dim,1))
-    res.aerodynamics.wing_areas                    = np.zeros((dim,num_wings)) 
-    res.aerodynamics.wing_CLs                      = np.zeros_like(res.aerodynamics.wing_areas) 
-    res.aerodynamics.wing_CDs                      = np.zeros_like(res.aerodynamics.wing_areas) 
+    res.aerodynamics.coefficients.lift.inviscid.total = rp.zeros((dim,1))
+    res.aerodynamics.wing_areas                       = rp.zeros((dim,num_wings)) 
+    res.aerodynamics.wing_CLs                         = rp.zeros_like(res.aerodynamics.wing_areas) 
+    res.aerodynamics.wing_CDs                         = rp.zeros_like(res.aerodynamics.wing_areas) 
 
     # aero results 2 : sectional forces and coefficients 
-    res.aerodynamics.wing_local_spans              = np.zeros((dim,num_wings,n_sw))
-    res.aerodynamics.wing_section_chords           = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_cls              = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_induced_angle    = np.zeros_like(res.aerodynamics.wing_local_spans)
-    res.aerodynamics.wing_section_cds              = np.zeros_like(res.aerodynamics.wing_local_spans) 
+    res.aerodynamics.wing_local_spans              = rp.zeros((dim,num_wings,n_sw))
+    res.aerodynamics.wing_section_chords           = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_cls              = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_induced_angle    = rp.zeros_like(res.aerodynamics.wing_local_spans)
+    res.aerodynamics.wing_section_cds              = rp.zeros_like(res.aerodynamics.wing_local_spans) 
     res.static_stability.control_surfaces_cases   = {}
     
     mach_case = list(results.keys())[0][5:9]   
@@ -114,13 +113,7 @@ def translate_results_to_conditions(cases,res,results):
         tag = 'case_' + mach_case + '_' + aoa_case
         case_res = results[tag]       
         
-        # stability file 
-        res.S_ref[i][0]                                                     = case_res.S_ref 
-        res.c_ref[i][0]                                                     = case_res.c_ref 
-        res.b_ref[i][0]                                                     = case_res.b_ref
-        res.X_ref[i][0]                                                     = case_res.X_ref 
-        res.Y_ref[i][0]                                                     = case_res.Y_ref 
-        res.Z_ref[i][0]                                                     = case_res.Z_ref       
+        # stability file       
         res.aerodynamics.angles.alpha[i][0]                                 = case_res.aerodynamics.AoA * Units.degree
         res.aerodynamics.angles.beta[i][0]                                  = case_res.aerodynamics.beta * Units.degree
         res.static_stability.coefficients.X[i][0]                           = case_res.aerodynamics.CX 
@@ -132,7 +125,7 @@ def translate_results_to_conditions(cases,res,results):
         res.static_stability.coefficients.roll[i][0]                        = case_res.aerodynamics.roll_moment_coefficient
         res.static_stability.coefficients.pitch[i][0]                       = case_res.aerodynamics.pitch_moment_coefficient
         res.static_stability.coefficients.yaw[i][0]                         = case_res.aerodynamics.yaw_moment_coefficient
-        res.aerodynamics.coefficients.lift.total[i][0]                      = case_res.aerodynamics.total_lift_coefficient
+        res.aerodynamics.coefficients.lift.inviscid.total[i][0]             = case_res.aerodynamics.total_lift_coefficient
         res.aerodynamics.coefficients.drag.induced.inviscid[i][0]           = case_res.aerodynamics.induced_drag_coefficient 
         res.aerodynamics.coefficients.drag.induced.efficiency_factor[i][0]  = case_res.aerodynamics.oswald_efficiency 
         res.aerodynamics.oswald_efficiency[i][0]                            = case_res.aerodynamics.oswald_efficiency
@@ -195,20 +188,20 @@ def translate_results_to_conditions(cases,res,results):
         res.static_stability.spiral_criteria[i][0]                          = case_res.stability.spiral_criteria
         
         # aero surface forces file 
-        res.aerodynamics.wing_areas[i][:]                   = case_res.aerodynamics.wing_areas   
-        res.aerodynamics.wing_CLs[i][:]                     = case_res.aerodynamics.wing_CLs    
-        res.aerodynamics.wing_CDs[i][:]                     = case_res.aerodynamics.wing_CDs    
+        res.aerodynamics.wing_areas[i] = res.aerodynamics.wing_areas[i].at[:].set(case_res.aerodynamics.wing_areas)
+        res.aerodynamics.wing_CLs[i] = res.aerodynamics.wing_CLs[i].at[:].set(case_res.aerodynamics.wing_CLs)
+        res.aerodynamics.wing_CDs[i] = res.aerodynamics.wing_CDs[i].at[:].set(case_res.aerodynamics.wing_CDs)
         
         # aero sectional forces file
-        res.aerodynamics.wing_local_spans[i][:]             = case_res.aerodynamics.wing_local_spans
-        res.aerodynamics.wing_section_chords[i][:]          = case_res.aerodynamics.wing_section_chords  
-        res.aerodynamics.wing_section_cls[i][:]             = case_res.aerodynamics.wing_section_cls    
-        res.aerodynamics.wing_section_induced_angle[i][:]   = case_res.aerodynamics.wing_section_aoa_i
-        res.aerodynamics.wing_section_cds[i][:]             = case_res.aerodynamics.wing_section_cds   
+        res.aerodynamics.wing_local_spans[i] = res.aerodynamics.wing_local_spans[i].at[:].set(case_res.aerodynamics.wing_local_spans)
+        res.aerodynamics.wing_section_chords[i] = res.aerodynamics.wing_section_chords[i].at[:].set(case_res.aerodynamics.wing_section_chords)
+        res.aerodynamics.wing_section_cls[i] = res.aerodynamics.wing_section_cls[i].at[:].set(case_res.aerodynamics.wing_section_cls)
+        res.aerodynamics.wing_section_induced_angle[i] = res.aerodynamics.wing_section_induced_angle[i].at[:].set(case_res.aerodynamics.wing_section_aoa_i)
+        res.aerodynamics.wing_section_cds[i] = res.aerodynamics.wing_section_cds[i].at[:].set(case_res.aerodynamics.wing_section_cds)
         
         res.static_stability.control_surfaces_cases[tag]    = case_res.stability.control_surfaces
         
     if len(res.static_stability.coefficients.X) > 1:
-        res.static_stability.derivatives.CX_alpha[:, 0] =  np.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] )
-        res.static_stability.derivatives.CZ_alpha[:, 0] =  np.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] )
+        res.static_stability.derivatives.CX_alpha = res.static_stability.derivatives.CX_alpha.at[:, 0].set(rp.gradient( res.static_stability.coefficients.X[:, 0],res.aerodynamics.angles.alpha[:, 0] ))
+        res.static_stability.derivatives.CZ_alpha = res.static_stability.derivatives.CZ_alpha.at[:, 0].set(rp.gradient( res.static_stability.coefficients.Z[:, 0],res.aerodynamics.angles.alpha[:, 0] ))
     return  

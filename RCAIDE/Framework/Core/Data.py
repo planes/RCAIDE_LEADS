@@ -12,8 +12,8 @@
 #   Imports
 # ----------------------------------------------------------------------
 
-import numpy as np
-from .Arrays import atleast_2d_col, array_type, matrix_type 
+import RNUMPY as rp
+from .Arrays import atleast_2d_col, array_type
 
 from copy import copy
 
@@ -261,19 +261,28 @@ class Data(dict):
                 continue
             
             # recurse into other dict types
-            if isinstance(value,dict):
+            if isinstance(value, dict):
                 if not value:
                     val = '\n'
                 else:
                     try:
-                        val = value.__str2(indent+new_indent)
+                        # This works if 'value' is another custom Data object
+                        val = value.__str2(indent + new_indent)
                     except RuntimeError: # recursion limit
                         val = ''
-                    except:
-                        val = value.__str__(indent+new_indent)
+                    except AttributeError:
+                        # If 'value' is a standard dict, it won't have __str2.
+                        # Standard dicts don't take indent arguments, so we cast directly.
+                        val = str(value) + '\n'
+                    except TypeError:
+                        # Catch-all just in case another type issue arises
+                        val = str(value) + '\n'
                                                 
             # everything else
             else:
+                # if not isinstance(value,str):
+                    # value = float(value)
+
                 val = str(value) + '\n'
                 
             # this key-value, indented
@@ -490,11 +499,20 @@ class Data(dict):
         if keys[-1][-1] ==']':
             splitkey = keys[-1].split('[')
             thing = data[splitkey[0]]
-            for ii in range(1,len(splitkey)-1):
-                index    = int(splitkey[ii][:-1])
-                thing = thing[index]
-            index    = int(splitkey[-1][:-1])
-            thing[index] = val
+            
+            # Extract all indices
+            indices = []
+            for ii in range(1, len(splitkey)):
+                indices.append(int(splitkey[ii][:-1]))
+                
+            if hasattr(thing, 'at'):
+                # For RNUMPY/JAX immutable arrays, use .at[] and update the parent dictionary
+                data[splitkey[0]] = thing.at[tuple(indices)].set(val)
+            else:
+                # For standard mutable lists/arrays
+                for i in range(len(indices)-1):
+                    thing = thing[indices[i]]
+                thing[indices[-1]] = val
         else:
             data[ keys[-1] ] = val
             
@@ -536,7 +554,7 @@ class Data(dict):
         """ maps the data dict to a 1D vector or 2D column array
         
             Assumptions:
-                will only pack int, float, np.array and np.matrix (max rank 2)
+                will only pack int, float, rp.array and rp.matrix (max rank 2)
                 if using output = 'matrix', all data values must have 
                 same length (if 1D) or number of rows (if 2D), otherwise is skipped
     
@@ -566,8 +584,7 @@ class Data(dict):
         
         # valid types for output
         valid_types = ( int, float,
-                        array_type,
-                        matrix_type )
+                        array_type )
         
         # initialize array row size (for array output)
         size = [False]
@@ -607,13 +624,13 @@ class Data(dict):
         
         # pack into final array
         if M:
-            M = np.hstack(M)
+            M = rp.hstack(M)
         else:
             # empty result
             if vector:
-                M = np.array([])
+                M = rp.array([])
             else:
-                M = np.array([[]])
+                M = rp.array([[]])
         
         # done!
         return M
@@ -641,16 +658,15 @@ class Data(dict):
 
         
         # dont require dict to have numpy
-        import numpy as np
-        from .Arrays import atleast_2d_col, array_type, matrix_type
+        import RNUMPY as rp
+        from .Arrays import atleast_2d_col, array_type
         
         # check input type
         vector = M.ndim  == 1
         
         # valid types for output
         valid_types = ( int, float,
-                        array_type,
-                        matrix_type )
+                        array_type )
         
         # counter for unpacking
         _index = [0]
@@ -688,20 +704,20 @@ class Data(dict):
                 elif rank == 1:
                     n = len(v)
                     if vector:
-                        D[k][:] = M[index:(index+n)]
+                        D[k] = M[index:(index+n)].reshape(v.shape)
                         index += n
                     else:#array
-                        D[k][:] = M[:,index]
+                        D[k] = M[:,index].reshape(v.shape)
                         index += 1
                     
                 # 2d arrays
                 elif rank == 2:
                     n,m = v.shape
                     if vector:
-                        D[k][:,:] = np.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
+                        D[k] = rp.reshape( M[index:(index+(n*m))] ,[n,m], order='F')
                         index += n*m 
                     else:#array
-                        D[k][:,:] = M[:,index:(index+m)]
+                        D[k] = M[:,index:(index+m)].reshape(v.shape)
                         index += m
                 
                 #: switch rank

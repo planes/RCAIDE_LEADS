@@ -19,7 +19,7 @@ chars = string.punctuation + string.whitespace
 t_table = str.maketrans( chars          + string.ascii_uppercase , 
                             '_'*len(chars) + string.ascii_lowercase )
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #   Property Class
@@ -200,7 +200,7 @@ class DataOrdered(OrderedDict):
             Properties Used:
             N/A    
         """          
-        if not (isinstance(k,int) or isinstance(k,np.int64)):
+        if not isinstance(k,int):
             return super(DataOrdered,self).__getattribute__(k)
         else:
             return super(DataOrdered,self).__getattribute__(self.keys()[k])
@@ -679,7 +679,7 @@ class DataOrdered(OrderedDict):
             for node in self._map.values():
                 del node[:]
             root = self._root
-            root[:] = [root, root, None]
+            root = root.at[:].set([root, root, None])
             self._map.clear()
         except AttributeError:
             pass

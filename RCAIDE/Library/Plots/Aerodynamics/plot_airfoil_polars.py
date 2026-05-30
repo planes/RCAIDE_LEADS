@@ -12,9 +12,7 @@ import matplotlib.pyplot as plt
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  PLOTS
-# ----------------------------------------------------------------------------------------------------------------------     
-
-## @ingroup Library-Plots-Performance-Aerodynamics   
+# ----------------------------------------------------------------------------------------------------------------------       
 def plot_airfoil_polars(polar_data,
                         save_figure = False,
                         save_filename = "Airfoil_Polars",
@@ -81,9 +79,9 @@ def plot_airfoil_polars(polar_data,
     CD           = polar_data.cd_invisc[0]
     CM           = polar_data.cm_invisc[0]
     alpha        = polar_data.AoA[0]/Units.degrees
-    Re_raw       = polar_data.Re[0]  
+    Re_raw       = polar_data.Re[0]
        
-    Re_val = str(round(Re_raw[0])/1e6)+'e6' 
+    Re_val = str(round(float(Re_raw[0]))/1e6)+'e6' 
     
     # get plotting style 
     ps      = plot_style()  

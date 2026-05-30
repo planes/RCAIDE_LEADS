@@ -6,7 +6,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 # Imports 
 # ----------------------------------------------------------------------------------------------------------------------
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Fan 
@@ -132,17 +132,18 @@ def compute_fan_performance(fan, conditions):
     P_out     = Pt_out/((1.+(gamma-1.)/2.*M0*M0)**(gamma/(gamma-1.))) 
     ht_out    = Tt_out*Cp   
     ht_in     = Tt_in*Cp 
-    M_out     = np.sqrt( (((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.) )     
+    M_out     = rp.sqrt( rp.maximum((((Pt_out/P_out)**((gamma-1.)/gamma))-1.) *2./(gamma-1.),1e-12))     
     
     # Compute the work done by the fan (normalized by mass flow i.e. J/(kg/s)
     work_done = ht_out - ht_in
+    phi       =  conditions.energy.hybrid_power_split_ratio 
     
     # Store computed quantities into outputs
     fan_conditions.outputs.stagnation_temperature  = Tt_out
     fan_conditions.outputs.stagnation_pressure     = Pt_out
     fan_conditions.outputs.static_temperature      = T_out
     fan_conditions.outputs.static_pressure         = P_out    
-    fan_conditions.outputs.work_done               = work_done
+    fan_conditions.outputs.work_done               = (1-phi)*work_done
     fan_conditions.outputs.stagnation_enthalpy     = ht_out
     fan_conditions.outputs.mach_number             = M_out
     

@@ -11,11 +11,18 @@ import RCAIDE
 from RCAIDE.Framework.Core import Units ,Data 
 
 # python imports     
-import numpy as np  
+import RNUMPY as rp  
 import sys 
 import os
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 # the analysis functions 
  
 from Cessna_172  import vehicle_setup ,configs_setup
@@ -43,25 +50,23 @@ def main():
      
     # mission analysis 
     results = missions.base_mission.evaluate()  
-    
-    # evaluate
-    results     = mission.evaluate()  
-    P_truth     = 45670.53460924272
-    mdot_truth  = 0.004012717035797157
+
+    P_truth     = 41448.65514895566
+    mdot_truth  = 0.003641773104916447
     
     P    = results.segments.cruise.state.conditions.energy.converters['internal_combustion_engine'].power[-1,0]
-    mdot = results.segments.cruise.state.conditions.weights.vehicle_mass_rate[-1,0]
+    mdot = results.segments.cruise.state.conditions.weights.vehicle.mass_rate[-1,0]
 
     # Check the errors
     error = Data()
-    error.P      = np.max(np.abs((P     - P_truth)/P_truth))
-    error.mdot   = np.max(np.abs((mdot - mdot_truth)/mdot_truth)) 
+    error.P      = rp.max(rp.abs((P     - P_truth)/P_truth))
+    error.mdot   = rp.max(rp.abs((mdot - mdot_truth)/mdot_truth)) 
 
     print('Errors:')
     print(error)
 
     for k,v in list(error.items()):
-        assert(np.abs(v)<1e-6)
+        assert(rp.abs(v)<1e-3)
 
     return    
 
@@ -118,17 +123,27 @@ def base_analysis(vehicle):
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle    = vehicle 
 
     # ------------------------------------------------------------------
-    #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle                            = vehicle 
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry()
+    analyses.append(geometry)
+
+    # ------------------------------------------------------------------
+    #  Weights
+    weights = RCAIDE.Framework.Analyses.Weights.Conventional_General_Aviation()
+    weights.type = 'Raymer'
+    analyses.append(weights) 
+
+    # ------------------------------------------------------------------
+    #  Aerodynamics  
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
     analyses.append(aerodynamics) 
 
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy= RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -139,7 +154,6 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
     # done!

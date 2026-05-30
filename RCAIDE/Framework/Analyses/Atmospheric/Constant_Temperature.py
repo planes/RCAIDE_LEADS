@@ -1,15 +1,21 @@
-import numpy as np
-from warnings import warn
- 
-import RCAIDE
-from RCAIDE.Framework.Core import Units
-from RCAIDE.Framework.Analyses.Atmospheric import Atmospheric
+#RCAIDE/Frameworks/Analyses/Atmospheric/Constant_Temperature.py
+#
+# Created: Dec 2024, M. Clarke
+
+# ----------------------------------------------------------------------
+#  Imports
+# ----------------------------------------------------------------------
+# RCAIDE imports 
+import RCAIDE 
+from RCAIDE.Framework.Analyses.Atmospheric      import Atmospheric
 from RCAIDE.Framework.Mission.Common.Conditions import Conditions 
-from RCAIDE.Framework.Core.Arrays import atleast_2d_col 
-from RCAIDE.Library.Attributes.Gases import Air
-from RCAIDE.Library.Attributes.Planets import Earth
+from RCAIDE.Framework.Core.Arrays               import atleast_2d_col 
+from RCAIDE.Library.Attributes.Gases            import Air
+from RCAIDE.Library.Attributes.Planets          import Earth
 
-
+# python imports
+import RNUMPY as rp
+from warnings import warn
 
 # ----------------------------------------------------------------------
 #  Classes
@@ -44,7 +50,9 @@ class Constant_Temperature(Atmospheric):
         """
         
         atmo_data = RCAIDE.Library.Attributes.Atmospheres.Earth.Constant_Temperature()
-        self.update(atmo_data)
+        self.update(atmo_data) 
+        planet = RCAIDE.Framework.Analyses.Planets.Earth()
+        self.features.planet = planet.features
     
     def compute_values(self,altitude,temperature=288.15):
         """
@@ -103,15 +111,15 @@ class Constant_Temperature(Atmospheric):
         zs = zs/(1 + zs/Rad)
         
         # check ranges
-        if np.amin(zs) < zmin:
+        if rp.amin(zs) < zmin:
             print("Warning: altitude requested below minimum for this atmospheric model; returning values for h = -2.0 km")
             zs[zs < zmin] = zmin
-        if np.amax(zs) > zmax:
+        if rp.amax(zs) > zmax:
             print("Warning: altitude requested above maximum for this atmospheric model; returning values for h = 86.0 km")   
             zs[zs > zmax] = zmax        
 
         # initialize return data
-        zeros = np.zeros_like(zs)
+        zeros = rp.zeros_like(zs)
         p     = zeros * 0.0
         T     = zeros * 0.0
         rho   = zeros * 0.0
@@ -137,7 +145,7 @@ class Constant_Temperature(Atmospheric):
         dz = zs-z0
         i_isoth = (alpha == 0.)
 
-        p = p0* np.exp(-1.*dz*grav/(R*T0))
+        p = p0* rp.exp(-1.*dz*grav/(R*T0))
        
         T   = temperature
         rho = gas.compute_density(T,p)

@@ -8,7 +8,7 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 from RCAIDE.Framework.Core                       import Units 
-import numpy as np
+import RNUMPY as rp
 from copy import  deepcopy
  
 # ----------------------------------------------------------------------------------------------------------------------
@@ -164,18 +164,17 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
     # ---------------------------------------------------------------------------------
     # Compute Bus electrical properties 
     # ---------------------------------------------------------------------------------    
-    bus_conditions              = state.conditions.energy[bus.tag]
+    bus_conditions              = state.conditions.energy.busses[bus.tag]
     bus_config                  = bus.battery_module_electric_configuration
-    phi                         = state.conditions.energy.hybrid_power_split_ratio
     psi                         = state.conditions.energy.battery_fuel_cell_power_split_ratio
     E_bus                       = bus_conditions.energy
-    P_bus                       = bus_conditions.power_draw*phi * psi
-    I_bus                       = bus_conditions.current_draw*phi * psi
+    P_bus                       = bus_conditions.power_draw*psi
+    I_bus                       = bus_conditions.current_draw*psi 
     
     # ---------------------------------------------------------------------------------
     # Compute battery_module Conditions
     # -------------------------------------------------------------------------    
-    battery_module_conditions = state.conditions.energy[bus.tag].battery_modules[battery_module.tag]  
+    battery_module_conditions = state.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag]  
    
     E_module_max       = battery_module.maximum_energy * battery_module_conditions.cell.capacity_fade_factor
     
@@ -226,24 +225,23 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
                 for sub_tag, sub_item in item.items():
                     if sub_tag == battery_module.tag:
                         for btms in  sub_item:
-                            HAS = btms    
-
-
+                            HAS = btms     
     # ---------------------------------------------------------------------------------------------------
     # Current State 
     # ---------------------------------------------------------------------------------------------------
     if bus_config == 'Series':
-        I_module[t_idx]      = I_bus[t_idx]
+        I_module = I_module.at[t_idx].set(I_bus[t_idx])
     elif bus_config  == 'Parallel':
-        I_module[t_idx]      = I_bus[t_idx] /len(bus.battery_modules)
+        I_module = I_module.at[t_idx].set(I_bus[t_idx] /len(bus.battery_modules))
 
-    I_cell[t_idx] = I_module[t_idx] / n_parallel   
+    I_cell = I_cell.at[t_idx].set(I_module[t_idx] / n_parallel)
        
     # ---------------------------------------------------------------------------------
     # Compute battery_module cell temperature 
     # ---------------------------------------------------------------------------------
-    R_0_cell[t_idx]                     =  (0.01483*(SOC_cell[t_idx]**2) - 0.02518*SOC_cell[t_idx] + 0.1036) *battery_module_conditions.cell.resistance_growth_factor  
+    R_0_cell = R_0_cell.at[t_idx].set((0.01483*(SOC_cell[t_idx]**2) - 0.02518*SOC_cell[t_idx] + 0.1036) *battery_module_conditions.cell.resistance_growth_factor)  
     R_0_cell[t_idx][R_0_cell[t_idx]<0]  = 0. 
+    
 
     # Determine temperature increase         
     sigma                 = 139 # Electrical conductivity
@@ -263,7 +261,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
     V_oc_cell[t_idx]      = V_ul_cell[t_idx] + (abs(I_cell[t_idx]) * R_0_cell[t_idx])              
 
     # Effective Power flowing through battery_module 
-    P_module[t_idx]       = P_bus[t_idx] /no_modules  - np.abs(Q_heat_module[t_idx]) 
+    P_module[t_idx]       = P_bus[t_idx] /no_modules  + rp.abs(Q_heat_module[t_idx]) 
 
     # store remaining variables 
     V_oc_module[t_idx]     = V_oc_cell[t_idx]*n_series 
@@ -288,7 +286,7 @@ def compute_nmc_cell_performance(battery_module, state, bus, coolant_lines, t_id
             
         # Compute state of charge and depth of discarge of the battery_module
         E_module[t_idx+1]                                     = (E_module[t_idx]) -P_module[t_idx]*delta_t[t_idx]
-        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = np.float32(E_module_max)
+        E_module[t_idx+1][E_module[t_idx+1] > E_module_max]   = E_module_max
         SOC_cell[t_idx+1]                                     = E_module[t_idx+1]/E_module_max 
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]>1]                = 1.
         SOC_cell[t_idx+1][SOC_cell[t_idx+1]<0]                = 0. 
@@ -323,7 +321,7 @@ def reuse_stored_nmc_cell_data(battery_module,state,bus,stored_results_flag, sto
     N.A.        
     '''
    
-    state.conditions.energy[bus.tag].battery_modules[battery_module.tag] = deepcopy(state.conditions.energy[bus.tag].battery_modules[stored_battery_module_tag])
+    state.conditions.energy.busses[bus.tag].battery_modules[battery_module.tag] = deepcopy(state.conditions.energy.busses[bus.tag].battery_modules[stored_battery_module_tag])
     
         
     return
@@ -376,14 +374,14 @@ def compute_nmc_cell_state(battery_module_data, SOC, T, I):
     SOC[SOC > 1.]   = 1.    
     DOD             = 1 - SOC 
     
-    T[np.isnan(T)] = 302.65
+    T[rp.isnan(T)] = 302.65
     T[T<272.65]    = 272.65 # model does not fit for below 0  degrees
     T[T>322.65]    = 322.65 # model does not fit for above 50 degrees
      
     I[I<0.0]       = 0.0
     I[I>8.0]       = 8.0   
      
-    pts            = np.hstack((np.hstack((I, T)),DOD  )) # amps, temp, SOC   
-    V_ul           = np.atleast_2d(battery_module_data.Voltage(pts)[:,1]).T  
+    pts            = rp.hstack((rp.hstack((I, T)),DOD  )) # amps, temp, SOC   
+    V_ul           = rp.atleast_2d(battery_module_data.Voltage(pts)[:,1]).T  
     
     return V_ul

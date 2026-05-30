@@ -16,12 +16,12 @@ def rotor_aerodynamic_analysis(rotor,
                            altitude = 0,
                            design_flag=False):
        
-    operating_state = setup_operating_conditions(rotor, altitude = altitude,velocity_range=velocity_range, angle_of_attack=angle_of_attack)
+    operating_state = setup_operating_conditions(rotor,velocity_range=velocity_range, altitude = altitude, angle_of_attack=angle_of_attack, temperature_deviation=0)
          
     rotor_conditions                             = operating_state.conditions.energy.converters[rotor.tag]
     rotor_conditions.design_flag                 = design_flag
-    rotor_conditions.omega[:,0]                  = angular_velocity
-    rotor_conditions.blade_pitch_command[:,0]    = blade_pitch_command  
+    rotor_conditions.omega = rotor_conditions.omega.at[:,0].set(angular_velocity)
+    rotor_conditions.blade_pitch_command = rotor_conditions.blade_pitch_command.at[:,0].set(blade_pitch_command)
     RCAIDE.Library.Methods.Powertrain.Converters.Rotor.compute_rotor_performance(rotor,operating_state.conditions)
      
     results = operating_state.conditions.energy.converters[rotor.tag] 

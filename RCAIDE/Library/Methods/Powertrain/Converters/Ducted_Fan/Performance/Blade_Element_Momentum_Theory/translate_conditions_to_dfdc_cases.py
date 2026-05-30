@@ -91,8 +91,8 @@ def translate_conditions_to_dfdc_cases(dfdc_analysis):
                 case            = Data() 
                 atmosphere      = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
                 atmo_data       = atmosphere.compute_values(altitude[k])  
-                velocity        = mach[i] * atmo_data.speed_of_sound[0,0]
-                tip_speed       = tip_mach[j]*atmo_data.speed_of_sound[0,0]
+                velocity        = mach[i] * atmo_data.speed_of_sound[0]
+                tip_speed       = tip_mach[j]*atmo_data.speed_of_sound[0]
                 omega           = tip_speed /ducted_fan.tip_radius
                 rpm             = omega / Units.rpm
                 case.tag        = template.format(velocity,rpm,altitude[k])  

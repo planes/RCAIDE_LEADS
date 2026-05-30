@@ -1,5 +1,4 @@
-
-# 
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/General_Aviation/FLOPS/compute_wing_weight.py
 # 
 # Created:  Sep 2024, M. Clarke
 
@@ -12,13 +11,13 @@ import  RCAIDE
 from RCAIDE.Framework.Core    import Units
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
 import  copy 
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Main Wing Weight 
 # ----------------------------------------------------------------------------------------------------------------------
-def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wings):
+def compute_wing_weight(vehicle, wing, WPOD, fidelity  , settings, num_main_wings):
     """
     Calculate the wing weight using FLOPS methodology for general aviation aircraft. The wing weight consists of:
         - Bending Material Weight
@@ -61,7 +60,7 @@ def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wing
                 Flap area to wing area ratio
     WPOD : float
         Weight of engine pod including nacelle [kg]
-    complexity : str
+    fidelity   : str
         Wing weight method, either "simple" or "complex"
     settings : Data()
         Settings containing:
@@ -205,18 +204,20 @@ def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wing
     NEW  = 0
     for network in  vehicle.networks:
         for propulsor in network.propulsors:
-            if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or  isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet):
+            if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or\
+               isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet) or \
+               isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop): 
                 NENG += 1  
                 if propulsor.wing_mounted: 
                     NEW += 1
                         
     DG              = vehicle.mass_properties.max_takeoff / Units.lbs  # Design gross weight in lb
 
-    if complexity == 'Simple':
+    if fidelity   == 'Simple':
         EMS  = 1 - 0.25 * FSTRT  # Wing strut bracing factor
-        TLAM = np.tan(wing.sweeps.quarter_chord) \
+        TLAM = rp.tan(wing.sweeps.quarter_chord) \
                - 2 * (1 - TR) / (AR * (1 + TR))  # Tangent of the 3/4 chord sweep angle
-        SLAM = TLAM / np.sqrt(1 + TLAM ** 2)  # sine of 3/4 chord wing sweep angle
+        SLAM = TLAM / rp.sqrt(1 + TLAM ** 2)  # sine of 3/4 chord wing sweep angle
         C6   = 0.5 * FAERT - 0.16 * FSTRT
         C4   = 1 - 0.5 * FAERT
         CAYL = (1.0 - SLAM ** 2) * \
@@ -249,10 +250,10 @@ def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wing
         
         # Replaced FOR LOOP
         # Reverse Order
-        Y  = np.flip(Y)
+        Y  = rp.flip(Y)
         
         # DY distance
-        DY = np.diff(Y)
+        DY = rp.diff(Y)
         
         # Trim the vectors away from the tip and center
         Y  = Y[1:-2]
@@ -260,71 +261,71 @@ def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wing
         
         # Get normalized pressure loading across the wing
         P1     = calculate_load(Y)
-        P0     = np.zeros_like(P1)
-        P0[1:] = P1[0:-1]
+        P0     = rp.zeros_like(P1)
+        P0 = P0.at[1:].set(P1[0:-1])
         
         # Get local chord length
-        C1     = np.interp(Y, ETA, C)
-        C0     = np.zeros_like(C1)
+        C1     = rp.interp(Y, ETA, C)
+        C0     = rp.zeros_like(C1)
         C0[0]  = C[-1]
-        C0[1:] = C1[0:-1]
+        C0 = C0.at[1:].set(C1[0:-1])
         
         # Calculate local pressure load and moments (DELP and DELM)
-        T1   = np.interp(Y, ETA, T)
+        T1   = rp.interp(Y, ETA, T)
         SWP1 = find_sweep(Y,ETA,SWP)
         DELP = DY / 6 * (C0 * (2 * P0 + P1) + C1 * (2 * P1 + P0))
         DELM = DY ** 2 * (C0 * (3.0 * P0 + P1) + C1 * (P1 + P0)) / 12.
         
         # Sum loads
-        EL     = np.zeros_like(DELP) 
-        EL[1:] = np.cumsum(DELP[0:-1])
+        EL     = rp.zeros_like(DELP) 
+        EL = EL.at[1:].set(rp.cumsum(DELP[0:-1]))
         
         # Sum moments
-        EM     = np.cumsum((DELM + DY * EL) * 1 / np.cos(SWP1))
+        EM     = rp.cumsum((DELM + DY * EL) * 1 / rp.cos(SWP1))
         
         # Calculate required bending material area
-        BMA1     = EM * 1 / np.cos(SWP1) * 1 / (C1 * T1)
+        BMA1     = EM * 1 / rp.cos(SWP1) * 1 / (C1 * T1)
         
-        BMA0     = np.zeros_like(BMA1)
-        BMA0[1:] = BMA1[0:-1]
+        BMA0     = rp.zeros_like(BMA1)
+        BMA0 = BMA0.at[1:].set(BMA1[0:-1])
         
         # Compute segment values
-        ASW  = np.cumsum((DY + 2 * Y) * DY * SWP1)
-        PM   = np.cumsum((BMA0 + BMA1) * DY / 2.)
-        S    = np.cumsum((C0 + C1) * DY / 2.)
+        ASW  = rp.cumsum((DY + 2 * Y) * DY * SWP1)
+        PM   = rp.cumsum((BMA0 + BMA1) * DY / 2.)
+        S    = rp.cumsum((C0 + C1) * DY / 2.)
 
 
         # Adjust for engine loads
         if N2>0: # If there are engines
-            EEL   = np.zeros_like(Y)
-            DELM2 = np.zeros_like(Y)
+            EEL   = rp.zeros_like(Y)
+            DELM2 = rp.zeros_like(Y)
             
             # Do a for loop over engine stations
             for ii in range(len(EETA)):
                 # Find the station closest to the engine but inboard
                 distances              = EETA[ii]-Y
-                distances[distances<0] = np.inf
-                distance               = np.min(distances)
-                loc                    = np.argmin(distances)
+                distances[distances<0] = rp.inf
+                distance               = rp.min(distances)
+                loc                    = rp.argmin(distances)
                 DELM2[loc]             = DELM2[loc] + distance
-                EEL[loc+1:]            = EEL[loc+1:] + 1
+                EEL = EEL.at[loc+1:].set(EEL[loc+1:] + 1)
 
             DELM2 = DELM2 + EEL*DY
 
-            EEM = np.cumsum(DELM2/np.cos(SWP1))
-            EA1 = EEM * 1 / np.cos(SWP1) * 1 / (C1 * T1)
+            EEM = rp.cumsum(DELM2/rp.cos(SWP1))
+            EA1 = EEM * 1 / rp.cos(SWP1) * 1 / (C1 * T1)
             
-            EA0 = np.zeros_like(Y)
-            EA0[1:] = EA1[0:-1]
+            EA0 = rp.zeros_like(Y)
+            EA0 = EA0.at[1:].set(EA1[0:-1])
             
-            EW  = np.sum((EA0 + EA1) * DY / 2)
+            EW  = rp.sum((EA0 + EA1) * DY / 2)
             
         # Finalize properties
         EL = EL[-1] + DELP[-1]    
         EM = EM[-1] / EL
         PM = 4. * PM[-1] / EL
         EW = 8. * EW
-        SA = np.sin(ASW[-1])
+        SA = rp.sin(ASW[-1])
         AR = 2 / S[-1]       
                 
         if AR <= 5:
@@ -343,15 +344,13 @@ def compute_wing_weight(vehicle, wing, WPOD, complexity, settings, num_main_wing
     # Composite utilization factor [0 no composite, 1 full composite]
     FCOMP   = composite_utilization_factor  
     ULF     = vehicle.flight_envelope.ultimate_load
-    if len(vehicle.fuselages) == 1:
+    if len(vehicle.fuselages) <= 1:
         CAYF    = 1  # Multiple fuselage factor [1 one fuselage, 0.5 multiple fuselages]
-    elif len(vehicle.fuselage) > 1:
-        CAYF    = 0.5
-    else:
-        raise NotImplementedError
+    elif len(vehicle.fuselages) > 1:
+        CAYF    = 0.5 
     VFACT   = 1  # Variable sweep factor, TODO: add equation to allow variable sweep penalty
     PCTL    = 1/num_main_wings  # Fraction of load carried by this wing
-    W1NIR   = A[0] * BT * (1 + np.sqrt(A[1] / SPAN)) * ULF * SPAN * (1 - 0.4 * FCOMP) * (
+    W1NIR   = A[0] * BT * (1 + rp.sqrt(A[1] / SPAN)) * ULF * SPAN * (1 - 0.4 * FCOMP) * (
                 1 - 0.1 * FAERT) * CAYF * VFACT * PCTL / 10.0 ** 6  # Wing bending material weight lb
     SFLAP   = wing.flap_ratio * SX
 
@@ -421,10 +420,10 @@ def generate_wing_stations(fuselage_width, wing):
         wing.segments.append(segment)
         num_seg = len(wing.segments.keys())
         
-    ETA    = np.zeros(num_seg + 1)
-    C      = np.zeros(num_seg + 1)
-    T      = np.zeros(num_seg + 1)
-    SWP    = np.zeros(num_seg + 1)
+    ETA    = rp.zeros(num_seg + 1)
+    C      = rp.zeros(num_seg + 1)
+    T      = rp.zeros(num_seg + 1)
+    SWP    = rp.zeros(num_seg + 1)
 
     segment_keys  = list(wing.segments.keys())     
     ETA[0] = wing.segments[segment_keys[0]].percent_span_location
@@ -449,8 +448,8 @@ def generate_wing_stations(fuselage_width, wing):
             T[i + 1] = wing.segments[segment_keys[i]].thickness_to_chord
         else:
             T[i + 1] = wing.thickness_to_chord
-        SWP[i] = np.arctan(np.tan(wing.segments[segment_keys[i-1]].sweeps.quarter_chord) - (C[i - 1] - C[i]))
-    SWP[-1] = np.arctan(np.tan(wing.segments[segment_keys[-2]].sweeps.quarter_chord) - (C[-2] - C[-1]))
+        SWP[i] = rp.arctan(rp.tan(wing.segments[segment_keys[i-1]].sweeps.quarter_chord) - (C[i - 1] - C[i]))
+    SWP[-1] = rp.arctan(rp.tan(wing.segments[segment_keys[-2]].sweeps.quarter_chord) - (C[-2] - C[-1]))
     return ETA, C, T, SWP
 
 
@@ -504,7 +503,7 @@ def calculate_load(ETA):
         Properties Used:
             N/A
     """
-    PS = np.sqrt(1. - ETA ** 2)
+    PS = rp.sqrt(1. - ETA ** 2)
     return PS
 
 
@@ -529,7 +528,7 @@ def find_sweep(y, lst_y, swp):
     """
     
     # All initial sweeps are the root chord sweep
-    swps = np.ones_like(y)*swp[0]
+    swps = rp.ones_like(y)*swp[0]
     
     for i in range(len(lst_y)-1):
         e       = lst_y[i]
@@ -562,10 +561,12 @@ def get_spanwise_engine(networks, SEMISPAN):
     EETA =  []
     for network in  networks:
         for propulsor in network.propulsors:
-            if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or  isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet):
+            if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or\
+               isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet) or \
+               isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop): 
                 if propulsor.wing_mounted and propulsor.origin[0][1] > 0:  
                     EETA.append((propulsor.origin[0][1] / Units.ft) * 1 / SEMISPAN) 
-    EETA =  np.array(EETA)
+    EETA =  rp.array(EETA)
     return EETA
 
 

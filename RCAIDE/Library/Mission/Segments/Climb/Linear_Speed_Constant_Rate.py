@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -90,7 +90,7 @@ def initialize_conditions(segment):
     # check for initial velocity
     if v0 is None: 
         if not segment.state.initials: raise AttributeError('airspeed not set')
-        v0 = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
+        v0 = rp.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])
         
     # check for initial altitude
     if alt0 is None:
@@ -103,13 +103,13 @@ def initialize_conditions(segment):
     # process velocity vector
     v_mag = (vf-v0)*t_nondim + v0
     v_z   = -climb_rate # z points down
-    v_xy  = np.sqrt( v_mag**2 - v_z**2 )
-    v_x   = np.cos(beta)*v_xy
-    v_y   = np.sin(beta)*v_xy
+    v_xy  = rp.sqrt( v_mag**2 - v_z**2 )
+    v_x   = rp.cos(beta)*v_xy
+    v_y   = rp.sin(beta)*v_xy
     
     # pack conditions    
-    conditions.frames.inertial.velocity_vector[:,0] = v_x[:,0]
-    conditions.frames.inertial.velocity_vector[:,1] = v_y[:,0]
-    conditions.frames.inertial.velocity_vector[:,2] = v_z
-    conditions.frames.inertial.position_vector[:,2] = -alt[:,0] # z points down
-    conditions.freestream.altitude[:,0]             =  alt[:,0] # positive altitude in this context
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z)
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0]) # z points down
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0]) # positive altitude in this context

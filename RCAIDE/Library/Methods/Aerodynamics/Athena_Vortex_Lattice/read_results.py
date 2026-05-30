@@ -10,12 +10,12 @@ from RCAIDE.Framework.Core import Data
 from RCAIDE.Library.Methods.Aerodynamics.Athena_Vortex_Lattice.AVL_Objects.Wing import Control_Surface_Data ,  Control_Surface_Results
 
 # package imports 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  read_results
 # ----------------------------------------------------------------------------------------------------------------------  
-def read_results(avl_object):
+def read_results(avl_object, vehicle):
     """ This functions reads the results from the results text file created 
     at the end of an AVL function call
 
@@ -35,7 +35,6 @@ def read_results(avl_object):
         N/A
     """    
     # unpack
-    aircraft = avl_object.vehicle
     results  = Data() 
     for case in avl_object.current_status.cases:
         num_ctrl =  case.stability_and_control.number_of_control_surfaces
@@ -123,23 +122,23 @@ def read_results(avl_object):
         # get number of wings, spanwise discretization for surface and strip force result extraction
         n_sw    = avl_object.settings.number_of_spanwise_vortices
         n_wings = 0 
-        for wing in aircraft.wings:
+        for wing in vehicle.wings:
             n_wings += 1
-            if wing.symmetric:
+            if wing.xz_plane_symmetric:
                 n_wings += 1   
         n_fus_sec = 0
-        for fuselage in aircraft.fuselages: 
+        for fuselage in vehicle.fuselages: 
             if avl_object.settings.model_fuselage:          
                 n_fus_sec += 2
         
-        wing_area            = np.zeros(n_wings)
-        wing_CL              = np.zeros(n_wings)
-        wing_CD              = np.zeros(n_wings)  
-        wing_local_span      = np.zeros((n_wings,n_sw))
-        wing_sectional_chord = np.zeros((n_wings,n_sw))
-        wing_cl              = np.zeros((n_wings,n_sw))
-        alpha_i              = np.zeros((n_wings,n_sw))
-        wing_cd              = np.zeros((n_wings,n_sw))   
+        wing_area            = rp.zeros(n_wings)
+        wing_CL              = rp.zeros(n_wings)
+        wing_CD              = rp.zeros(n_wings)  
+        wing_local_span      = rp.zeros((n_wings,n_sw))
+        wing_sectional_chord = rp.zeros((n_wings,n_sw))
+        wing_cl              = rp.zeros((n_wings,n_sw))
+        alpha_i              = rp.zeros((n_wings,n_sw))
+        wing_cd              = rp.zeros((n_wings,n_sw))   
         
         # Extract resulst from surface forces result file
         with open(case.aero_result_filename_2,'r') as aero_res_file:
@@ -164,16 +163,16 @@ def read_results(avl_object):
             
             for i in range(n_wings): 
                 for j in range(n_sw):
-                    wing_local_span[i,j]      = float(aero_lines_2[header + j + line_idx][8:16].strip())
-                    wing_sectional_chord[i,j] = float(aero_lines_2[header + j + line_idx][16:24].strip()) 
-                    wing_cl[i,j]              = float(aero_lines_2[header + j + line_idx][61:69].strip())  
+                    wing_local_span = wing_local_span.at[i,j].set(float(aero_lines_2[header + j + line_idx][8:16].strip()))
+                    wing_sectional_chord = wing_sectional_chord.at[i,j].set(float(aero_lines_2[header + j + line_idx][16:24].strip()))
+                    wing_cl = wing_cl.at[i,j].set(float(aero_lines_2[header + j + line_idx][61:69].strip()))
                     # At high angle of attacks, AVL does not give an answer 
                     try:
-                        alpha_i[i,j]              = float(aero_lines_2[header + j + line_idx][43:51].strip())
-                        wing_cd[i,j]              = float(aero_lines_2[header + j + line_idx][70:78].strip())
+                        alpha_i = alpha_i.at[i,j].set(float(aero_lines_2[header + j + line_idx][43:51].strip()))
+                        wing_cd = wing_cd.at[i,j].set(float(aero_lines_2[header + j + line_idx][70:78].strip()))
                     except:
-                        alpha_i[i,j]              = 0.
-                        wing_cd[i,j]              = 0.
+                        alpha_i = alpha_i.at[i,j].set(0.)
+                        wing_cd = wing_cd.at[i,j].set(0.)
                 line_idx = divider_header +  n_sw + line_idx            
             case_res.aerodynamics.wing_local_spans         = wing_local_span
             case_res.aerodynamics.wing_section_chords      = wing_sectional_chord 

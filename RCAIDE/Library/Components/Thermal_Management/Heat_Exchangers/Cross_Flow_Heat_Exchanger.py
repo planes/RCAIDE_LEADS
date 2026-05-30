@@ -6,15 +6,15 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE Imports
+import RCAIDE
 from RCAIDE.Framework.Core                                                                import Data, Units 
 from RCAIDE.Library.Components                                                            import Component  
 from RCAIDE.Library.Attributes.Coolants.Glycol_Water                                      import Glycol_Water  
-from RCAIDE.Library.Attributes.Gases                                                      import Air
 from RCAIDE.Library.Methods.Thermal_Management.Heat_Exchangers.Cross_Flow_Heat_Exchanger  import  cross_flow_hex_rating_model, append_cross_flow_heat_exchanger_conditions, append_cross_flow_hex_segment_conditions
 from RCAIDE.Library.Plots.Thermal_Management.plot_cross_flow_heat_exchanger_conditions    import plot_cross_flow_heat_exchanger_conditions 
 
 import os
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Cross Flow Heat Exchanger 
@@ -150,7 +150,7 @@ class Cross_Flow_Heat_Exchanger(Component):
         """         
         self.tag                                                    = 'cross_flow_heat_exchanger'
         self.coolant                                                = Glycol_Water() 
-        self.air                                                    = Air() 
+        self.air                                                    = RCAIDE.Library.Attributes.Gases.Air()
         self.design_heat_removed                                    = 0.0
         self.minimum_air_speed                                      = 105 * Units.knots 
         
@@ -243,7 +243,7 @@ class Cross_Flow_Heat_Exchanger(Component):
         append_cross_flow_heat_exchanger_conditions(self, segment, coolant_line)
         return
   
-    def append_segment_conditions(self, segment, bus, coolant_line, conditions):
+    def append_segment_conditions(self, segment, bus, coolant_line):
         """
         Adds specific segment conditions to the heat exchanger analysis.
 
@@ -258,7 +258,7 @@ class Cross_Flow_Heat_Exchanger(Component):
         conditions : Data
             Operating conditions for the segment
         """
-        append_cross_flow_hex_segment_conditions(self, segment, bus, coolant_line, conditions)
+        append_cross_flow_hex_segment_conditions(self, segment, bus, coolant_line)
         return
        
     def compute_heat_exchanger_performance(self, state, bus, coolant_line, delta_t, t_idx):
@@ -321,7 +321,7 @@ class Cross_Flow_Heat_Exchanger(Component):
         ospath    = os.path.abspath(__file__)
         separator = os.path.sep
         rel_path  = os.path.dirname(ospath) + separator   
-        x         = np.loadtxt(rel_path + 'rectangular_passage_Kc.csv', dtype=float, 
+        x         = rp.loadtxt(rel_path + 'rectangular_passage_Kc.csv', dtype=float, 
                              delimiter=',', comments='Kc') 
         return x 
     
@@ -337,6 +337,6 @@ class Cross_Flow_Heat_Exchanger(Component):
         ospath    = os.path.abspath(__file__)
         separator = os.path.sep
         rel_path  = os.path.dirname(ospath) + separator 
-        x         = np.loadtxt(rel_path +'rectangular_passage_Ke.csv', dtype=float, 
+        x         = rp.loadtxt(rel_path +'rectangular_passage_Ke.csv', dtype=float, 
                              delimiter=',', comments='Ke')
         return x 

@@ -9,7 +9,7 @@
  
 from RCAIDE.Framework.Analyses.Process import Process
 
-import numpy as np 
+import RNUMPY as rp 
  
 # ----------------------------------------------------------------------        
 #   Setup
@@ -50,7 +50,7 @@ def post_process(nexus):
     x1 = nexus.vehicle_configurations.base.x1
     x2 = nexus.vehicle_configurations.base.x2
     
-    obj = np.array([x2**2 + x1**2]) 
+    obj = x2**2 + x1**2 
     nexus.obj = obj
     
     return nexus

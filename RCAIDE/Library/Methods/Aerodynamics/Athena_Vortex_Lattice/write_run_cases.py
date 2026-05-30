@@ -13,7 +13,7 @@ from RCAIDE.Library.Components.Wings.Control_Surfaces import Aileron , Elevator 
 # ----------------------------------------------------------------------------------------------------------------------
 #  write_run_cases
 # ---------------------------------------------------------------------------------------------------------------------- 
-def write_run_cases(avl_object,trim_aircraft):
+def write_run_cases(avl_object,trim_aircraft, vehicle):
     """ This function writes the run cases used in the AVL batch analysis
 
     Assumptions:
@@ -24,7 +24,7 @@ def write_run_cases(avl_object,trim_aircraft):
    
     Inputs:
         avl_object.current_status.batch_file                    [-]
-        avl_object.vehicle.mass_properties.center_of_gravity   [meters]
+        vehicle.mass_properties.center_of_gravity   [meters]
    
     Outputs:
         None
@@ -34,8 +34,7 @@ def write_run_cases(avl_object,trim_aircraft):
     """       
     
 
-    # unpack avl_inputs
-    aircraft       = avl_object.vehicle
+    # unpack avl_inputs 
     batch_filename = avl_object.current_status.batch_file
 
     base_case_text = \
@@ -86,13 +85,13 @@ def write_run_cases(avl_object,trim_aircraft):
     # Open the vehicle file after purging if it already exists
     purge_files([batch_filename]) 
     with open(batch_filename,'w') as runcases:
-        # extract C.G. coordinates and moment of intertia tensor
+        # extract C.G. coordinates and moment of inertia tensor
 
-        x_cg = aircraft.mass_properties.center_of_gravity[0][0]
-        y_cg = aircraft.mass_properties.center_of_gravity[0][1]
-        z_cg = aircraft.mass_properties.center_of_gravity[0][2]
-        mass = aircraft.mass_properties.mass
-        moments_of_inertia = aircraft.mass_properties.moments_of_inertia.tensor
+        x_cg = vehicle.mass_properties.center_of_gravity[0][0]
+        y_cg = vehicle.mass_properties.center_of_gravity[0][1]
+        z_cg = vehicle.mass_properties.center_of_gravity[0][2]
+        mass = vehicle.mass_properties.mass
+        moments_of_inertia = vehicle.mass_properties.moments_of_inertia.tensor
         Ixx  = moments_of_inertia[0][0]
         Iyy  = moments_of_inertia[1][1]
         Izz  = moments_of_inertia[2][2]
@@ -106,20 +105,20 @@ def write_run_cases(avl_object,trim_aircraft):
             name  = case.tag
             CL    = case.conditions.aerodynamics.coefficients.lift.total
             CDp   = 0.
-            AoA   = round(case.conditions.aerodynamics.angles.alpha,4)
-            beta  = round(case.conditions.aerodynamics.angles.beta,4)
-            pb_2V = round(case.conditions.static_stability.coefficients.roll,4)
-            qc_2V = round(case.conditions.static_stability.coefficients.pitch,4)
-            mach  = round(case.conditions.freestream.mach,4)
-            vel   = round(case.conditions.freestream.velocity,4)
-            rho   = round(case.conditions.freestream.density,4)
+            AoA   = round(float(case.conditions.aerodynamics.angles.alpha),4)
+            beta  = round(float(case.conditions.aerodynamics.angles.beta),4)
+            pb_2V = round(float(case.conditions.static_stability.coefficients.roll),4)
+            qc_2V = round(float(case.conditions.static_stability.coefficients.pitch),4)
+            mach  = round(float(case.conditions.freestream.mach),4)
+            vel   = round(float(case.conditions.freestream.velocity),4)
+            rho   = round(float(case.conditions.freestream.density),4)
             g     = case.conditions.freestream.gravitational_acceleration
             
             if trim_aircraft == False: # this flag sets up a trim analysis if one is declared by the boolean "trim_aircraft"
                 controls_text = ''  
                 if CL is not None: # if flight lift coefficient is specified without trim, the appropriate fields are filled 
                     toggle_idx = 'CL   '
-                    toggle_val = round(CL,4)
+                    toggle_val = round(float(CL),4)
                     alpha_val  = '0.00000     deg'
                     CL_val     = '0.00000'
                 else: # if angle of attack is specified without trim, the appropriate fields are filled 
@@ -129,13 +128,13 @@ def write_run_cases(avl_object,trim_aircraft):
                     CL_val     = '0.00000'
                 if case.stability_and_control.number_of_control_surfaces != 0 :
                     # write control surface text in .run file if there is any
-                    controls = make_controls_case_text(case.stability_and_control.control_surface_names,avl_object.vehicle)
+                    controls = make_controls_case_text(case.stability_and_control.control_surface_names,vehicle)
                     controls_text = ''.join(controls)
  
             elif trim_aircraft: # trim is specified  
                 if CL is not None:  # if flight lift coefficient is specified with trim, the appropriate fields are filled with the trim CL
                     toggle_idx = 'CL'
-                    toggle_val = round(CL,4)
+                    toggle_val = round(float(CL),4)
                     alpha_val  = '0.00000     deg'
                     CL_val     = CL
                 else: # if angle of attack is specified with trim, the appropriate fields are filled with the trim AoA
@@ -147,7 +146,7 @@ def write_run_cases(avl_object,trim_aircraft):
                 controls = []
                 if case.stability_and_control.number_of_control_surfaces != 0 :
                     # write control surface text in .run file if there is any
-                    controls = make_controls_case_text(case.stability_and_control.control_surface_names,avl_object.vehicle)
+                    controls = make_controls_case_text(case.stability_and_control.control_surface_names,vehicle)
                 controls_text = ''.join(controls)
                 
             # write the .run file using template and the extracted vehicle properties and flight condition
@@ -157,13 +156,13 @@ def write_run_cases(avl_object,trim_aircraft):
 
     return
 
-def make_controls_case_text(cs_names,avl_aircraft):
+def make_controls_case_text(cs_names,vehicle):
     """ This function writes the text of the control surfaces in the AVL batch analysis.
     This tells AVL what control surface you want use to control a particular response.
     """ 
     control_surface_text = []
     
-    for wing in avl_aircraft.wings: 
+    for wing in vehicle.wings: 
         for ctrl_surf in wing.control_surfaces: 
             if (type(ctrl_surf) ==  Slat):
                 pass

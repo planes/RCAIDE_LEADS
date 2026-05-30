@@ -7,7 +7,7 @@
 #  Initialize Inertial Position
 # ----------------------------------------------------------------------------------------------------------------------
 def inertial_position(segment): 
-    """ Initializes intertial positon of vehicle
+    """ Initializes inertial positon of vehicle
     
         Assumptions:  
             Only used if there is an initial condition
@@ -32,13 +32,13 @@ def inertial_position(segment):
         R_current = segment.state.conditions.frames.inertial.aircraft_range
         
         if 'altitude' in segment.keys() and segment.altitude is not None:
-            r_initial[-1,None,-1] = -segment.altitude
+            r_initial = r_initial.at[-1,None,-1].set(-segment.altitude)
         elif 'altitude_start' in segment.keys() and segment.altitude_start is not None:
-            r_initial[-1,None,-1] = -segment.altitude_start
+            r_initial = r_initial.at[-1,None,-1].set(-segment.altitude_start)
         else:
             assert('Altitude not set')
             
-        segment.state.conditions.frames.inertial.position_vector[:,:] = r_current + (r_initial[-1,None,:] - r_current[0,None,:])
-        segment.state.conditions.frames.inertial.aircraft_range[:,:]  = R_current + (R_initial[-1,None,:] - R_current[0,None,:])
+        segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,:].set(r_current + (r_initial[-1,None,:] - r_current[0,None,:]))
+        segment.state.conditions.frames.inertial.aircraft_range = segment.state.conditions.frames.inertial.aircraft_range.at[:,:].set(R_current + (R_initial[-1,None,:] - R_current[0,None,:]))
         
     return 

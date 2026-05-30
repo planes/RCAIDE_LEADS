@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core import Data   
 
 # python package imports 
-import numpy as np  
+import RNUMPY as rp  
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Wavy Channel Rating Model
@@ -52,9 +52,9 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
  
     # Inlet Properties from mission solver.
     for reservoir in  coolant_line.reservoirs:
-        T_inlet = state.conditions.energy[coolant_line.tag][reservoir.tag].coolant_temperature[t_idx, 0]  
+        T_inlet = state.conditions.energy.coolant_lines[coolant_line.tag][reservoir.tag].coolant_temperature[t_idx, 0]
     #turndown_ratio           = battery_conditions.thermal_management_system.HAS.percent_operation[t_idx,0] 
-    T_cell                   = state.conditions.energy[bus.tag].battery_modules[battery.tag].cell.temperature[t_idx, 0]  
+    T_cell                   = state.conditions.energy.busses[bus.tag].battery_modules[battery.tag].cell.temperature[t_idx, 0]
     heat_transfer_efficiency = HAS.heat_transfer_efficiency   
 
     # Coolant Properties
@@ -69,7 +69,7 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     # Battery Properties
     d_cell                      = battery.cell.diameter                    
     h_cell                      = battery.cell.height                      
-    A_cell                      = np.pi*d_cell*h_cell 
+    A_cell                      = rp.pi*d_cell*h_cell 
     N_cells_geometric_config    = battery.geometrtic_configuration.parallel_count*battery.geometrtic_configuration.normal_count  
     cell_mass                   = battery.cell.mass 
     Nn_module_cells             = battery.electrical_configuration.series            
@@ -125,15 +125,15 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     NTU = U_total*A_chan/(m_coolant*cp)
     
     # Effectiveness of the Channel 
-    eff_HAS = 1 - np.exp(-NTU) 
+    eff_HAS = 1 - rp.exp(-NTU) 
     
     if T_inlet  < T_cell:
     
         # Calculate Outlet Temparture To ( eq 8)
-        T_o = ((T_cell-T_inlet)*(1-np.exp(-NTU)))+T_inlet   
+        T_o = ((T_cell-T_inlet)*(1-rp.exp(-NTU)))+T_inlet   
 
         # Calculate the Log mean temperature 
-        T_lm = ((T_cell-T_inlet)-(T_cell-T_o))/(np.log((T_cell-T_inlet)/(T_cell-T_o)))
+        T_lm = ((T_cell-T_inlet)-(T_cell-T_o))/(rp.log((T_cell-T_inlet)/(T_cell-T_o)))
         
         # Calculated Heat Convected 
         Q_convec = U_total*A_chan*T_lm*eff_HAS
@@ -151,10 +151,10 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
         # Reverse Heat Transfer
         
         # Calculate Outlet Temparture To ( eq 8)
-        T_o =  T_inlet - ((T_inlet - T_cell)*(1-np.exp(-NTU)))   
+        T_o =  T_inlet - ((T_inlet - T_cell)*(1-rp.exp(-NTU)))   
     
         # Calculate the Log mean temperature 
-        T_lm = ((T_inlet - T_cell)-(T_o - T_cell))/(np.log((T_inlet - T_cell)/(T_o - T_cell)))
+        T_lm = ((T_inlet - T_cell)-(T_o - T_cell))/(rp.log((T_inlet - T_cell)/(T_o - T_cell)))
             
         # Calculated Heat Convected 
         Q_convec = U_total*A_chan*T_lm*eff_HAS     
@@ -179,14 +179,14 @@ def  wavy_channel_rating_model(HAS,battery,bus,coolant_line,Q_heat_gen,T_cell,st
     dT_dt                   = P_net/(cell_mass*N_cells_geometric_config*Cp_bat)
     T_cell_new              = T_cell + dT_dt*delta_t 
    
-    state.conditions.energy[coolant_line.tag][HAS.tag].heat_removed[t_idx+1]               = Q_convec
-    state.conditions.energy[coolant_line.tag][HAS.tag].outlet_coolant_temperature[t_idx+1] = T_o
-    state.conditions.energy[coolant_line.tag][HAS.tag].coolant_mass_flow_rate[t_idx+1]     = m_coolant
-    state.conditions.energy[coolant_line.tag][HAS.tag].effectiveness[t_idx+1]              = heat_transfer_efficiency
-    state.conditions.energy[coolant_line.tag][HAS.tag].power[t_idx+1]                      = Power
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].heat_removed[t_idx+1]               = Q_convec
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].outlet_coolant_temperature[t_idx+1] = T_o
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].coolant_mass_flow_rate[t_idx+1]     = m_coolant
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].effectiveness[t_idx+1]              = heat_transfer_efficiency
+    state.conditions.energy.coolant_lines[coolant_line.tag][HAS.tag].power[t_idx+1]                      = Power
     
     if not state.conditions.energy.recharging:
-        state.conditions.energy[bus.tag].power_draw[t_idx+1]                                  += Power 
+        state.conditions.energy.busses[bus.tag].power_draw[t_idx+1]                                  += Power
  
     return T_cell_new
 

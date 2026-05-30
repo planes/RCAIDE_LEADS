@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------     
 
 # package imports
-import numpy as np   
+import RNUMPY as rp   
 from RCAIDE.Library.Methods.Gas_Dynamics.fm_id import fm_id
 
 # ---------------------------------------------------------------------------------------------------------------------- 
@@ -99,7 +99,7 @@ def compute_supersonic_nozzle_performance(supersonic_nozzle,conditions):
     
     
     #compute the output Mach number, static quantities and the output velocity
-    Mach          = np.sqrt((((Pt_out/Po)**((gamma-1)/gamma))-1)*2/(gamma-1))
+    Mach          = rp.sqrt((((Pt_out/Po)**((gamma-1)/gamma))-1)*2/(gamma-1))
     
     #Remove check on mach numbers fromn expansion nozzle
     i_low         = Mach < 1.0
@@ -109,16 +109,16 @@ def compute_supersonic_nozzle_performance(supersonic_nozzle,conditions):
     
     #Computing output pressure and Mach number for the case Mach <1.0
     P_out[i_low]  = Po[i_low]
-    Mach[i_low]   = np.sqrt((((Pt_out[i_low]/Po[i_low])**((gamma[i_low]-1.)/gamma[i_low]))-1.)*2./(gamma[i_low]-1.))
+    Mach[i_low]   = rp.sqrt((((Pt_out[i_low]/Po[i_low])**((gamma[i_low]-1.)/gamma[i_low]))-1.)*2./(gamma[i_low]-1.))
     
     #Computing the output temperature,enthalpy, velocity and density
     T_out         = Tt_out/(1.+(gamma-1.)/2.*Mach*Mach)
     h_out         = Cp*T_out
-    u_out         = np.sqrt(2.*(ht_out-h_out))
+    u_out         = rp.sqrt(2.*(ht_out-h_out))
     rho_out       = P_out/(R*T_out)
     
     #Computing the freestream to nozzle area ratio (mainly from thrust computation)
-    area_ratio    = (fm_id(Mo,gamma)/fm_id(Mach,gamma)*(1/(Pt_out/Pto))*(np.sqrt(Tt_out/Tto)))
+    area_ratio    = (fm_id(Mo,gamma)/fm_id(Mach,gamma)*(1/(Pt_out/Pto))*(rp.sqrt(Tt_out/Tto)))
     
     #pack computed quantities into outputs
     s_nozzle_conditions.outputs.stagnation_temperature  = Tt_out

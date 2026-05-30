@@ -4,7 +4,7 @@
 #  IMPORT
 # --- ------------------------------------------------------------------------------------------------------------- 
   
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------- 
 #  Set Values
@@ -35,7 +35,7 @@ def set_values(dictionary,input_dictionary,converted_values,aliases):
     N/A
     """      
     
-    provided_names = input_dictionary[:,0]
+    provided_names = input_dictionary.name
         
     # Correspond aliases to inputs
     pointer = []
@@ -133,9 +133,14 @@ def scale_input_values(inputs,x):
     N/A
     """    
     
-    provided_scale = inputs[:,-2]
-    inputs[:,1] =  x*provided_scale
+    provided_scale = rp.array(inputs.value[:,-2])
     
+    # Safely reconstruct the arrays using hstack
+    col_0     = (x * provided_scale).reshape(-1, 1)
+    cols_rest = inputs.value[:, 1:]
+    
+    inputs.value = rp.hstack((col_0, cols_rest))
+
     return inputs
 
 def limit_input_values(inputs):
@@ -162,14 +167,14 @@ def limit_input_values(inputs):
     lower_bounds    = inputs[:,2]
     upper_bounds    = inputs[:,3]
     
-    # Fix if the input is too low
-    provided_values[provided_values<lower_bounds] = lower_bounds[provided_values<lower_bounds] 
+    # Avoid in-place update for autograd using rp.where and cloning
+    provided_values = rp.where(provided_values < lower_bounds, lower_bounds, provided_values)
+    provided_values = rp.where(provided_values > upper_bounds, upper_bounds, provided_values)
     
-    # Fix if the input is too high
-    provided_values[provided_values>upper_bounds] = upper_bounds[provided_values>upper_bounds]
-
+    new_inputs = inputs * 1.0
+    new_inputs = new_inputs.at[:, 1].set(provided_values)
     
-    return inputs
+    return new_inputs
     
 
 
@@ -192,11 +197,15 @@ def convert_values(inputs):
     N/A
     """    
     
-    provided_values  = inputs[:,1] 
+    provided_values  = inputs.value[:,0]
     
     # Most important 2 lines of these functions
-    provided_units   = inputs[:,-1]*1.0
-    inputs[:,-1]     = provided_units
+    provided_units   = rp.array(inputs.value[:,-1]*1.0)
+    
+    # Avoid in-place update for autograd
+    new_val = inputs.value * 1.0
+    new_val = new_val.at[:,-1].set(provided_units)
+    inputs.value = new_val
     
     converted_values = provided_values*provided_units
     
@@ -228,9 +237,10 @@ def get_values(dictionary,outputs,aliases):
     Properties Used:
     N/A
     """     
-    
-    npoutputs   = np.array(outputs)
-    output_names = npoutputs[:,0]
+    try:
+        output_names = outputs.name_signs[:,0]
+    except:
+        output_names = outputs.name[:,0]
         
     # Correspond aliases to outputs
     pointer = []
@@ -239,8 +249,8 @@ def get_values(dictionary,outputs,aliases):
             if output_names[ii] == aliases[jj][0]:
                 pointer.append(aliases[jj][1])    
                 
-    values = np.zeros(len(outputs))
-    for ii in range(0,len(outputs)):
+    values_list = []
+    for ii in range(0,len(outputs.value)):
         
         if isinstance(pointer[ii], str) and not ('*' in pointer[ii]) :
             splitstring = pointer[ii].split('.')
@@ -248,7 +258,10 @@ def get_values(dictionary,outputs,aliases):
         else :
             raise TypeError("Pointers for Objectives and Constraints must be unique path (str), not list or contain asterisk")
             
-        values[ii]  = eval('dictionary.'+'.'.join(splitstring[0:]))
+        val  = eval('dictionary.'+'.'.join(splitstring[0:]))
+        values_list.append(val)
+    
+    values = rp.array(values_list)
     
     return values
 
@@ -273,9 +286,12 @@ def scale_obj_values(inputs,x):
     N/A
     """     
     
-    provided_scale = inputs[:,1]
-    provided_units = inputs[:,-1]*1.0
-    inputs[:,-1]   = provided_units
+    # Avoid in-place update for autograd
+    provided_scale = inputs.value[:,0]
+    provided_units = inputs.value[:,-1]*1.0
+    new_val = inputs.value * 1.0
+    new_val = new_val.at[:,-1].set(provided_units)
+    inputs.value = new_val
     
     scaled =  x/(provided_scale*provided_units)
     
@@ -302,7 +318,7 @@ def scale_const_values(inputs,x):
     N/A
     """        
     
-    provided_scale = np.array(inputs[:,3],dtype = float)
+    provided_scale = inputs.value[:,1]
     scaled =  x/provided_scale
     
     return scaled
@@ -327,11 +343,13 @@ def scale_const_bnds(inputs):
     N/A
     """     
     
-    provided_bounds = np.array(inputs[:,2],dtype = float)
+    provided_bounds = inputs.value[:,0]
     
-    # Most important 2 lines of these functions
-    provided_units  = inputs[:,-1]*1.0
-    inputs[:,-1]    = provided_units
+    # Avoid in-place update for autograd
+    provided_units  = inputs.value[:,-1]*1.0
+    new_val = inputs.value * 1.0
+    new_val = new_val.at[:,-1].set(provided_units)
+    inputs.value = new_val
     
     converted_values = provided_bounds*provided_units
     
@@ -359,7 +377,7 @@ def unscale_const_values(inputs,x):
     """     
     
     provided_units   = inputs[:,-1]*1.0
-    provided_scale = np.array(inputs[:,-2],dtype = float)
+    provided_scale = rp.array(inputs[:,-2],dtype = float)
     scaled =  x*provided_scale/provided_units
     
     return scaled

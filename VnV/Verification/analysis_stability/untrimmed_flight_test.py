@@ -11,14 +11,21 @@ from RCAIDE.Library.Plots       import *
 
 # python imports  
 import pylab as plt
-import numpy as np 
+import RNUMPY as rp 
 
 
 # local imports 
 import sys 
 import os
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Navion    import vehicle_setup, configs_setup     
 # ----------------------------------------------------------------------
 #   Main
@@ -45,10 +52,10 @@ def main():
     results = missions.base_mission.evaluate() 
 
     CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[0][0]
-    CL_true   = 0.5470776980723923
-    CL_diff   = np.abs(CL - CL_true)
+    CL_true   = 0.5809553607569893
+    CL_diff   = rp.abs(CL - CL_true)
     print('Error: ',CL_diff)
-    assert np.abs(CL_diff/CL_true) < 1e-6
+    assert rp.abs(CL_diff/CL_true) < 1e-6
      
     return  
 # ----------------------------------------------------------------------
@@ -73,21 +80,33 @@ def base_analysis(vehicle, configs):
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle =  vehicle
+
+    # ------------------------------------------------------------------
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry() 
+    analyses.append(geometry)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle                               = vehicle
-    aerodynamics.settings.use_surrogate                = False
-    aerodynamics.settings.number_of_spanwise_vortices  = 30 
-    aerodynamics.settings.model_fuselage               = True                
-    aerodynamics.settings.model_nacelle                = True
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
+    aerodynamics.settings.use_surrogate                = False 
     analyses.append(aerodynamics) 
-       
+
+    # ------------------------------------------------------------------
+    #  Weights
+    weights = RCAIDE.Framework.Analyses.Weights.Electric_General_Aviation() 
+    analyses.append(weights) 
+
+    # ------------------------------------------------------------------
+    #  Stability Analysis
+    stability = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()  
+    stability.settings.use_surrogate                = False 
+    analyses.append(stability)
+    
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy= RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -98,7 +117,6 @@ def base_analysis(vehicle, configs):
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
     # done!

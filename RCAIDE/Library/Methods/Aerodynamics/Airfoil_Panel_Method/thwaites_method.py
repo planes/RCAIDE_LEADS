@@ -10,12 +10,14 @@
 from RCAIDE.Framework.Core import Data 
 
 # pacakge imports  
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Thwaites Method
 # ----------------------------------------------------------------------------------------------------------------------
-def thwaites_method(npanel,ncases,ncpts,NU,L,RE_L,X_I,VE_I, DVE_I,tol,wrong_columns,THETA_0):
+
+def thwaites_method(npanel, ncases, ncpts, NU, L, RE_L, X_I, VE_I, DVE_I,
+                    tol, wrong_columns, THETA_0):
     """ Computes the boundary layer characteristics in laminar 
     flow pressure gradients
     
@@ -53,106 +55,238 @@ def thwaites_method(npanel,ncases,ncpts,NU,L,RE_L,X_I,VE_I, DVE_I,tol,wrong_colu
     Properties Used:
     N/A
     """ 
-    # Initialize vectors
-    X_T          = np.zeros((npanel,ncases,ncpts))
-    THETA_T      = np.zeros_like(X_T)
-    DELTA_STAR_T = np.zeros_like(X_T)
-    H_T          = np.zeros_like(X_T)
-    CF_T         = np.zeros_like(X_T)
-    RE_THETA_T   = np.zeros_like(X_T)
-    RE_X_T       = np.zeros_like(X_T)
-    DELTA_T      = np.zeros_like(X_T)  
-      
+
+    X_T          = rp.zeros((npanel, ncases, ncpts))
+    THETA_T      = rp.zeros_like(X_T)
+    DELTA_STAR_T = rp.zeros_like(X_T)
+    H_T          = rp.zeros_like(X_T)
+    CF_T         = rp.zeros_like(X_T)
+    RE_THETA_T   = rp.zeros_like(X_T)
+    RE_X_T       = rp.zeros_like(X_T)
+    DELTA_T      = rp.zeros_like(X_T)
+
     for case in range(ncases):
         for cpt in range(ncpts):
-            
-            def dy_by_dx(index, X, Y):
-                return 0.45*nu*Ve_i[index]**5
 
+            # Skip high-AOA columns
             if case in wrong_columns:
-                continue           
+                continue
+
+            # Extract valid (non-NaN) entries
+            x_full   = X_I[:, case, cpt]
+            ve_full  = VE_I[:, case, cpt]
+            dve_full = DVE_I[:, case, cpt]
+
+            valid_mask = ~rp.isnan(x_full)
+
+            x_i   = x_full[valid_mask]
+            Ve_i  = ve_full[valid_mask]
+            dVe_i = dve_full[valid_mask]
+
+            nu    = NU[case, cpt]
+            n     = x_i.shape[0]
+
+            dx_i = rp.diff(x_i)
+
+            theta2_Ve6 = rp.zeros(n)
+            theta2_Ve6 = theta2_Ve6.at[0].set((THETA_0**2) * Ve_i[0]**6)
+
+            # RK4 integration
+            def dy_by_dx(idx, X, Y):
+                return 0.45 * nu * Ve_i[idx]**5
+
+            for i in range(1, n):
+                theta2_Ve6 = theta2_Ve6.at[i].set(
+                    RK4(i-1, dx_i, x_i, theta2_Ve6, dy_by_dx)
+                )
+
+            theta = rp.sqrt(theta2_Ve6 / Ve_i**6)
+
+            # Fix non-converged theta
+            idx_bad = rp.nonzero(rp.abs((theta[1:] - theta[:-1]) / theta[:-1]) > tol)[0]
+            if idx_bad.size > 1:
+                theta = theta.at[idx_bad + 1].set(theta[idx_bad])
+
+            lambda_val = theta**2 * dVe_i / nu
+
+            H = getH(lambda_val)
+            H = rp.where(H < 0, 1e-6, H)
+
+            idx_bad = rp.nonzero(rp.abs((H[1:] - H[:-1]) / H[:-1]) > tol)[0]
+            if idx_bad.size > 1:
+                H = H.at[idx_bad + 1].set(H[idx_bad])
+
+            Re_theta = Ve_i * theta / nu
+            Re_x     = Ve_i * x_i / nu
+            Re_x     = Re_x.at[0].set(1e-5)
+
+            cf       = rp.abs(getcf(lambda_val, Re_theta))
+            del_star = H * theta
+            delta    = 5.2 * x_i / rp.sqrt(Re_x)
+            delta    = delta.at[0].set(0.0)
+
+            # Scatter back into full-size arrays
+            valid_idx = rp.nonzero(valid_mask)[0]
+
+            X_T          = X_T.at[valid_idx, case, cpt].set(x_i)
+            THETA_T      = THETA_T.at[valid_idx, case, cpt].set(theta)
+            DELTA_STAR_T = DELTA_STAR_T.at[valid_idx, case, cpt].set(del_star)
+            H_T          = H_T.at[valid_idx, case, cpt].set(H)
+            CF_T         = CF_T.at[valid_idx, case, cpt].set(cf)
+            RE_THETA_T   = RE_THETA_T.at[valid_idx, case, cpt].set(Re_theta)
+            RE_X_T       = RE_X_T.at[valid_idx, case, cpt].set(Re_x)
+            DELTA_T      = DELTA_T.at[valid_idx, case, cpt].set(delta)
+
+    return Data(
+        X_T=X_T,
+        THETA_T=THETA_T,
+        DELTA_STAR_T=DELTA_STAR_T,
+        H_T=H_T,
+        CF_T=CF_T,
+        RE_THETA_T=RE_THETA_T,
+        RE_X_T=RE_X_T,
+        DELTA_T=DELTA_T,
+    )
+
+
+# def thwaites_method(npanel,ncases,ncpts,NU,L,RE_L,X_I,VE_I, DVE_I,tol,wrong_columns,THETA_0):
+#     """ Computes the boundary layer characteristics in laminar 
+#     flow pressure gradients
+    
+#     Source:
+#     Thwaites, Bryan. "Approximate calculation of the laminar boundary layer." 
+#     Aeronautical Quarterly 1.3 (1949): 245-280.
+    
+#     Assumptions:
+#     None  
+
+#     Inputs:  
+#     npanel         - number of points on surface                                                 [unitless]
+#     ncases         - number of cases                                                             [unitless]
+#     ncpts          - number of control points                                                    [unitless]
+#     batch_analysis - flag for batch analysis                                                     [boolean]
+#     THETA_0        - initial momentum thickness                                                  [m]
+#     L              - normalized length of surface                                                [unitless]
+#     RE_L           - Reynolds number                                                             [unitless]
+#     X_I            - x coordinate on surface of airfoil                                          [unitless]
+#     VE_I           - boundary layer velocity at transition location                              [m/s] 
+#     DVE_I          - initial derivative value of boundary layer velocity at transition location  [m/s-m] 
+#     tol            - boundary layer error correction tolerance                                   [unitless]
+
+#     Outputs: 
+#     RESULTS.
+#       X_T          - reshaped distance along airfoil surface             [unitless]
+#       THETA_T      - momentum thickness                                  [m]
+#       DELTA_STAR_T - displacement thickness                              [m] 
+#       H_T          - shape factor                                        [unitless]
+#       CF_T         - friction coefficient                                [unitless]
+#       RE_THETA_T   - Reynolds number as a function of momentum thickness [unitless]
+#       RE_X_T       - Reynolds number as a function of distance           [unitless]
+#       DELTA_T      - boundary layer thickness                            [m]
+
+#     Properties Used:
+#     N/A
+#     """ 
+#     # Initialize vectors
+#     X_T          = rp.zeros((npanel,ncases,ncpts))
+#     THETA_T      = rp.zeros_like(X_T)
+#     DELTA_STAR_T = rp.zeros_like(X_T)
+#     H_T          = rp.zeros_like(X_T)
+#     CF_T         = rp.zeros_like(X_T)
+#     RE_THETA_T   = rp.zeros_like(X_T)
+#     RE_X_T       = rp.zeros_like(X_T)
+#     DELTA_T      = rp.zeros_like(X_T)  
+      
+#     for case in range(ncases):
+#         for cpt in range(ncpts):
             
-            l              = L[case,cpt]
-            theta_0        = THETA_0 
-            Re_L           = RE_L[case,cpt]
-            x_i            = X_I.data[:,case,cpt][X_I.mask[:,case,cpt] ==False]
-            x_mask         = X_I.mask[:,case,cpt]    # debug step
-            Ve_i           = VE_I.data[:,case,cpt][VE_I.mask[:,case,cpt] ==False]
-            V_mask         = VE_I.mask[:,case,cpt]   # debug step
-            dVe_i          = DVE_I.data[:,case,cpt][DVE_I.mask[:,case,cpt] ==False]
-            nu             = NU[case,cpt]
-            n              = len(x_i)
-            dx_i           = np.diff(x_i)
-            theta2_Ve6     = np.zeros(n)
-            theta2_Ve6[0]  = (theta_0**2)*Ve_i[0]**6
+#             def dy_by_dx(index, X, Y):
+#                 return 0.45*nu*Ve_i[index]**5
+
+#             if case in wrong_columns:
+#                 continue           
             
-            # determine (Theta**2)*(Ve**6)
-            for i in range(1,n):
-                theta2_Ve6[i] = RK4(i-1, dx_i, x_i, theta2_Ve6, dy_by_dx)
+#             l              = L[case,cpt]
+#             theta_0        = THETA_0 
+#             Re_L           = RE_L[case,cpt]
+#             x_i            = X_I.data[:,case,cpt][X_I.mask[:,case,cpt] ==False]
+#             x_mask         = X_I.mask[:,case,cpt]    # debug step
+#             Ve_i           = VE_I.data[:,case,cpt][VE_I.mask[:,case,cpt] ==False]
+#             V_mask         = VE_I.mask[:,case,cpt]   # debug step
+#             dVe_i          = DVE_I.data[:,case,cpt][DVE_I.mask[:,case,cpt] ==False]
+#             nu             = NU[case,cpt]
+#             n              = len(x_i)
+#             dx_i           = rp.diff(x_i)
+#             theta2_Ve6     = rp.zeros(n)
+#             theta2_Ve6[0]  = (theta_0**2)*Ve_i[0]**6
             
-            # Compute momentum thickness
-            theta       = np.sqrt(theta2_Ve6/Ve_i**6)
+#             # determine (Theta**2)*(Ve**6)
+#             for i in range(1,n):
+#                 theta2_Ve6[i] = RK4(i-1, dx_i, x_i, theta2_Ve6, dy_by_dx)
             
-            # find theta values that do not converge and replace them with neighbor
-            idx1        = np.where(abs((theta[1:] - theta[:-1])/theta[:-1]) > tol)[0] 
-            if len(idx1)> 1:  
-                np.put(theta,idx1 + 1, theta[idx1])
+#             # Compute momentum thickness
+#             theta       = rp.sqrt(theta2_Ve6/Ve_i**6)
+            
+#             # find theta values that do not converge and replace them with neighbor
+#             idx1        = rp.where(abs((theta[1:] - theta[:-1])/theta[:-1]) > tol)[0] 
+#             if len(idx1)> 1:  
+#                 rp.put(theta,idx1 + 1, theta[idx1])
                 
-            # Thwaites separation criteria 
-            lambda_val  = theta**2*dVe_i/nu 
+#             # Thwaites separation criteria 
+#             lambda_val  = theta**2*dVe_i/nu 
             
-            # Compute H 
-            H           = getH(lambda_val)
-            H[H<0]      = 1E-6   # H cannot be negative 
-            # find H values that do not converge and replace them with neighbor
-            idx1        = np.where(abs((H[1:] - H[:-1])/H[:-1]) > tol)[0]
-            if len(idx1)> 1: 
-                np.put(H,idx1 + 1, H[idx1]) 
+#             # Compute H 
+#             H           = getH(lambda_val)
+#             H[H<0]      = 1E-6   # H cannot be negative 
+#             # find H values that do not converge and replace them with neighbor
+#             idx1        = rp.where(abs((H[1:] - H[:-1])/H[:-1]) > tol)[0]
+#             if len(idx1)> 1: 
+#                 rp.put(H,idx1 + 1, H[idx1]) 
             
-            # Compute Reynolds numbers based on momentum thickness  
-            Re_theta    = Ve_i*theta/nu
+#             # Compute Reynolds numbers based on momentum thickness  
+#             Re_theta    = Ve_i*theta/nu
             
-            # Compute Reynolds numbers based on distance along airfoil
-            Re_x        = Ve_i*x_i/nu
+#             # Compute Reynolds numbers based on distance along airfoil
+#             Re_x        = Ve_i*x_i/nu
             
-            # Compute skin friction 
-            cf          = abs(getcf(lambda_val, Re_theta)) 
+#             # Compute skin friction 
+#             cf          = abs(getcf(lambda_val, Re_theta)) 
             
-            # Compute displacement thickness
-            del_star    = H*theta   
+#             # Compute displacement thickness
+#             del_star    = H*theta   
             
-            # Compute boundary layer thickness 
-            delta       = 5.2*x_i/np.sqrt(Re_x)
-            delta[0]    = 0   
+#             # Compute boundary layer thickness 
+#             delta       = 5.2*x_i/rp.sqrt(Re_x)
+#             delta[0]    = 0   
             
-            # Reynolds number at x=0 cannot be negative 
-            Re_x[0]     = 1E-5
+#             # Reynolds number at x=0 cannot be negative 
+#             Re_x[0]     = 1E-5
             
-            # Find where matrices are not masked 
-            indices = np.where(X_I.mask[:,case,cpt] == False)
+#             # Find where matrices are not masked 
+#             indices = rp.where(X_I.mask[:,case,cpt] == False)
             
-            # Store results 
-            np.put(X_T[:,case,cpt],indices,x_i)
-            np.put(THETA_T[:,case,cpt],indices,theta)
-            np.put(DELTA_STAR_T[:,case,cpt],indices,del_star)
-            np.put(H_T[:,case,cpt],indices,H)
-            np.put(CF_T[:,case,cpt],indices ,cf)
-            np.put(RE_THETA_T[:,case,cpt],indices,Re_theta)
-            np.put(RE_X_T[:,case,cpt],indices,Re_x)
-            np.put(DELTA_T[:,case,cpt],indices,delta)
+#             # Store results 
+#             rp.put(X_T[:,case,cpt],indices,x_i)
+#             rp.put(THETA_T[:,case,cpt],indices,theta)
+#             rp.put(DELTA_STAR_T[:,case,cpt],indices,del_star)
+#             rp.put(H_T[:,case,cpt],indices,H)
+#             rp.put(CF_T[:,case,cpt],indices ,cf)
+#             rp.put(RE_THETA_T[:,case,cpt],indices,Re_theta)
+#             rp.put(RE_X_T[:,case,cpt],indices,Re_x)
+#             rp.put(DELTA_T[:,case,cpt],indices,delta)
     
-    RESULTS = Data(
-        X_T          = X_T,      
-        THETA_T      = THETA_T,   
-        DELTA_STAR_T = DELTA_STAR_T,
-        H_T          = H_T,       
-        CF_T         = CF_T,      
-        RE_THETA_T   = RE_THETA_T,   
-        RE_X_T       = RE_X_T,    
-        DELTA_T      = DELTA_T,  
-    )    
+#     RESULTS = Data(
+#         X_T          = X_T,      
+#         THETA_T      = THETA_T,   
+#         DELTA_STAR_T = DELTA_STAR_T,
+#         H_T          = H_T,       
+#         CF_T         = CF_T,      
+#         RE_THETA_T   = RE_THETA_T,   
+#         RE_X_T       = RE_X_T,    
+#         DELTA_T      = DELTA_T,  
+#     )    
     
-    return RESULTS
+#     return RESULTS
             
 
 
@@ -177,7 +311,7 @@ def getH(lambda_val ):
     """       
     H       = 0.0731/(0.14 + lambda_val ) + 2.088 
     idx1    = (lambda_val>0.0)  
-    H[idx1] = 2.61 - 3.75*lambda_val[idx1]  + 5.24*lambda_val[idx1]**2   
+    H = rp.where(idx1, 2.61 - 3.75 * lambda_val + 5.24 * lambda_val ** 2, H) 
     return H
 
 
@@ -202,7 +336,7 @@ def getcf(lambda_val , Re_theta):
     """        
     l       = 0.22 + 1.402*lambda_val  + (0.018*lambda_val)/(0.107 + lambda_val ) 
     idx1    = (lambda_val>0.0)   
-    l[idx1] = 0.22 + 1.57*lambda_val[idx1] - 1.8*lambda_val[idx1]**2 
+    l = rp.where(idx1, 0.22 + 1.57 * lambda_val - 1.8 * lambda_val ** 2, l)
     cf      = 2*l/Re_theta  
     return cf
 

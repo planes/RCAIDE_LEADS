@@ -9,7 +9,7 @@
 import  RCAIDE
 from RCAIDE.Framework.Core import Units
 
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt
 
 
@@ -26,7 +26,7 @@ def main():
     atm = RCAIDE.Framework.Analyses.Atmospheric.Constant_Temperature()
     
     # test elevations -3 km <= z <= 90 km
-    z = np.linspace(-3,90,10) * Units.km
+    z = rp.linspace(-3,90,10) * Units.km
 
     # compute values from each model
     conditions = atm.compute_values(z)
@@ -39,8 +39,8 @@ def main():
     p_truth, rho_truth = get_truth()
     
     # difference
-    p_err   = np.max( p_truth   - p   )
-    rho_err = np.max( rho_truth - rho )
+    p_err   = rp.max( p_truth   - p   )
+    rho_err = rp.max( rho_truth - rho )
    
     print('Max Pressure Difference       = %.4e' % p_err)
     print('Max Density Difference        = %.4e' % rho_err)   
@@ -80,12 +80,12 @@ def main():
 # ---------------------------------------------------------------------- 
 
 def get_truth():
-    p_truth = np.array([[  1.27774000e+05],[  4.25163568e+04],[  1.03269587e+04],
+    p_truth = rp.array([[  1.27774000e+05],[  4.25163568e+04],[  1.03269587e+04],
                         [  2.15160449e+03],[  4.20949197e+02],[  9.50899534e+01],
                         [  2.76459966e+01],[  8.32002187e+00],[  1.59116434e+00],
                         [  7.65702963e-01]])
    
-    rho_truth = np.array([[  1.54476339e+00],[  5.14014677e-01],[  1.24850969e-01],
+    rho_truth = rp.array([[  1.54476339e+00],[  5.14014677e-01],[  1.24850969e-01],
                           [  2.60124895e-02],[  5.08919582e-03],[  1.14961947e-03],
                           [  3.34234847e-04],[  1.00587484e-04],[  1.92368746e-05],
                           [  9.25720336e-06]])

@@ -15,7 +15,7 @@ from .AVL_Objects.Wing                                                          
 from .AVL_Objects.Body                                                                     import Body
 
 # package imports
-import  numpy as  np
+import RNUMPY as rp
 
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -32,7 +32,7 @@ def translate_avl_wing(rcaide_wing):
 
     Inputs:
         rcaide_wing.tag                                                          [-]
-        rcaide_wing.symmetric                                                    [boolean]
+        rcaide_wing.xz_plane_symmetric                                                    [boolean]
         rcaide_wing.verical                                                      [boolean]
         rcaide_wing - passed into the populate_wing_sections function            [data stucture]
 
@@ -42,11 +42,11 @@ def translate_avl_wing(rcaide_wing):
     Properties Used:
         N/A
     """         
-    w                 = Wing()
-    w.tag             = rcaide_wing.tag
-    w.symmetric       = rcaide_wing.symmetric
-    w.vertical        = rcaide_wing.vertical
-    w                 = populate_wing_sections(w,rcaide_wing)
+    w                     = Wing()
+    w.tag                 = rcaide_wing.tag
+    w.xz_plane_symmetric  = rcaide_wing.xz_plane_symmetric
+    w.vertical            = rcaide_wing.vertical
+    w                     = populate_wing_sections(w,rcaide_wing)
 
     return w
 
@@ -60,8 +60,7 @@ def translate_avl_body(rcaide_body):
         None
 
     Inputs:
-        body.tag                                                       [-]
-        rcaide_wing.lengths.total                                       [meters]    
+        body.tag                                                       [-]  
         rcaide_body.lengths.nose                                        [meters]
         rcaide_body.lengths.tail                                        [meters]
         rcaide_wing.verical                                             [meters]
@@ -75,15 +74,15 @@ def translate_avl_body(rcaide_body):
     Properties Used:
         N/A
     """  
-    b                 = Body()
-    b.tag             = rcaide_body.tag
-    b.symmetric       = True
-    b.lengths.total   = rcaide_body.lengths.total
-    b.lengths.nose    = rcaide_body.lengths.nose
-    b.lengths.tail    = rcaide_body.lengths.tail
-    b.widths.maximum  = rcaide_body.width
-    b.heights.maximum = rcaide_body.heights.maximum
-    b                 = populate_body_sections(b,rcaide_body)
+    b                          = Body()
+    b.tag                      = rcaide_body.tag
+    b.xz_plane_symmetric       = True
+    b.lengths.total            = rcaide_body.lengths.total
+    b.lengths.nose             = rcaide_body.lengths.nose
+    b.lengths.tail             = rcaide_body.lengths.tail
+    b.widths.maximum           = rcaide_body.width
+    b.heights.maximum          = rcaide_body.heights.maximum
+    b                          = populate_body_sections(b,rcaide_body)
 
     return b
 
@@ -97,7 +96,7 @@ def populate_wing_sections(avl_wing,rcaide_wing):
         None
 
     Inputs:
-        avl_wing.symmetric                         [boolean]
+        avl_wing.xz_plane_symmetric                         [boolean]
         rcaide_wing.spans.projected                 [meters]
         rcaide_wing.origin                          [meters]
         rcaide_wing.dihedral                        [radians]
@@ -115,7 +114,7 @@ def populate_wing_sections(avl_wing,rcaide_wing):
     """           
         
     # obtain the geometry for each segment in a loop                                            
-    symm                 = avl_wing.symmetric
+    symm                 = avl_wing.xz_plane_symmetric
     semispan             = rcaide_wing.spans.projected*0.5 * (2 - symm)
     avl_wing.semispan    = semispan   
     root_chord           = rcaide_wing.chords.root
@@ -143,7 +142,7 @@ def populate_wing_sections(avl_wing,rcaide_wing):
                     segment_root_chord  = root_chord*segments[current_seg].root_chord_percent
                     segment_tip_chord   = root_chord*segments[next_seg].root_chord_percent
                     segment_span        = semispan*(segments[next_seg].percent_span_location - segments[current_seg].percent_span_location )
-                    sweep               = np.arctan(((segment_root_chord*chord_fraction) + (np.tan(sweep_quarter_chord )*segment_span - chord_fraction*segment_tip_chord)) /segment_span) 
+                    sweep               = rp.arctan(((segment_root_chord*chord_fraction) + (rp.tan(sweep_quarter_chord )*segment_span - chord_fraction*segment_tip_chord)) /segment_span) 
             dihedral       = segments[current_seg].dihedral_outboard   
     
             # append section 
@@ -182,21 +181,21 @@ def populate_wing_sections(avl_wing,rcaide_wing):
             # update origin for next segment 
             segment_percent_span =    segments[next_seg].percent_span_location - segments[current_seg].percent_span_location     
             if avl_wing.vertical:
-                inverted_wing = -np.sign(abs(dihedral) - np.pi/2)
+                inverted_wing = -rp.sign(abs(dihedral) - rp.pi/2)
                 if inverted_wing  == 0:
                     inverted_wing  = 1
                 dz = inverted_wing*semispan*segment_percent_span
-                dy = dz*np.tan(dihedral)
-                l  = dz/np.cos(dihedral)
-                dx = l*np.tan(sweep)
+                dy = dz*rp.tan(dihedral)
+                l  = dz/rp.cos(dihedral)
+                dx = l*rp.tan(sweep)
             else:
-                inverted_wing = np.sign(dihedral)
+                inverted_wing = rp.sign(dihedral)
                 if inverted_wing  == 0:
                     inverted_wing  = 1
                 dy = inverted_wing*semispan*segment_percent_span
-                dz = dy*np.tan(dihedral)
-                l  = dy/np.cos(dihedral)
-                dx = l*np.tan(sweep)
+                dz = dy*rp.tan(dihedral)
+                l  = dy/rp.cos(dihedral)
+                dx = l*rp.tan(sweep)
             origin= [[origin[0][0] + dx , origin[0][1] + dy, origin[0][2] + dz]]  
         
     else:    
@@ -209,7 +208,7 @@ def populate_wing_sections(avl_wing,rcaide_wing):
             segment_root_chord  = rcaide_wing.chords.root
             segment_tip_chord   = rcaide_wing.chords.tip
             segment_span        = semispan 
-            sweep       = np.arctan(((segment_root_chord*chord_fraction) + (np.tan(sweep_quarter_chord )*segment_span - chord_fraction*segment_tip_chord)) /segment_span)  
+            sweep       = rp.arctan(((segment_root_chord*chord_fraction) + (rp.tan(sweep_quarter_chord )*segment_span - chord_fraction*segment_tip_chord)) /segment_span)  
         avl_wing.semispan     = semispan 
         
         # define root section 
@@ -233,12 +232,12 @@ def populate_wing_sections(avl_wing,rcaide_wing):
 
         # assign location of wing tip         
         if avl_wing.vertical:
-            tip_section.origin    = [[origin[0][0]+semispan*np.tan(sweep), origin[0][1]+semispan*np.tan(dihedral), origin[0][2]+semispan]]
+            tip_section.origin    = [[origin[0][0]+semispan*rp.tan(sweep), origin[0][1]+semispan*rp.tan(dihedral), origin[0][2]+semispan]]
         else: 
-            tip_section.origin    = [[origin[0][0]+semispan*np.tan(sweep), origin[0][1]+semispan,origin[0][2]+semispan*np.tan(dihedral)]]
+            tip_section.origin    = [[origin[0][0]+semispan*rp.tan(sweep), origin[0][1]+semispan,origin[0][2]+semispan*rp.tan(dihedral)]]
 
         # assign wing airfoil
-        if  (rcaide_wing.airfoil !=  None) and (isinstance(rcaide_wing.airfoil) == RCAIDE.Library.Components.Airfoils.Airfoil) :
+        if  (rcaide_wing.airfoil !=  None) and (isinstance(rcaide_wing.airfoil, RCAIDE.Library.Components.Airfoils.Airfoil)) :
             root_section.airfoil_coord_file  = rcaide_wing.airfoil.coordinate_file          
             tip_section.airfoil_coord_file   = rcaide_wing.airfoil.coordinate_file     
 
@@ -308,26 +307,26 @@ def append_avl_wing_control_surfaces(rcaide_wing,avl_wing,semispan,root_chord_pe
         root_section_chord        = root_chord*root_chord_percent
         tip_section_chord         = root_chord*tip_chord_percent
         semispan_section_fraction = (ordered_section_spans[section_count] - semispan*root_percent_span)/(semispan*(tip_percent_span - root_percent_span ))   
-        section.chord             = np.interp(semispan_section_fraction,[0.,1.],[root_section_chord,tip_section_chord])
+        section.chord             = rp.interp(semispan_section_fraction,[0.,1.],[root_section_chord,tip_section_chord])
         root_section_twist        = root_twist/Units.degrees 
         tip_section_twist         = root_chord*tip_twist/Units.degrees  
-        section.twist             = np.interp(semispan_section_fraction,[0.,1.],[root_section_twist,tip_section_twist]) 
+        section.twist             = rp.interp(semispan_section_fraction,[0.,1.],[root_section_twist,tip_section_twist]) 
 
         # if wing is a vertical wing, the y and z coordinates are swapped 
         if avl_wing.vertical:
-            inverted_wing = -np.sign(abs(dihedral) - np.pi/2)
+            inverted_wing = -rp.sign(abs(dihedral) - rp.pi/2)
             if inverted_wing  == 0: inverted_wing  = 1
             dz = ordered_section_spans[section_count] -  inverted_wing*semispan*root_percent_span
-            dy = dz*np.tan(dihedral)
-            l  = dz/np.cos(dihedral)
-            dx = l*np.tan(sweep)                                                            
+            dy = dz*rp.tan(dihedral)
+            l  = dz/rp.cos(dihedral)
+            dx = l*rp.tan(sweep)                                                            
         else:
-            inverted_wing = np.sign(dihedral)
+            inverted_wing = rp.sign(dihedral)
             if inverted_wing  == 0: inverted_wing  = 1
             dy = ordered_section_spans[section_count] - inverted_wing*semispan*root_percent_span
-            dz = dy*np.tan(dihedral)
-            l  = dy/np.cos(dihedral)
-            dx = l*np.tan(sweep)
+            dz = dy*rp.tan(dihedral)
+            l  = dy/rp.cos(dihedral)
+            dx = l*rp.tan(sweep)
         section.origin = [[origin[0][0] + dx , origin[0][1] + dy, origin[0][2] + dz]]              
 
         # this loop appends all the control surfaces within a particular wing section
@@ -413,7 +412,7 @@ def populate_body_sections(avl_body,rcaide_body):
         None
 
     Inputs:
-        avl_wing.symmetric                       [boolean]
+        avl_wing.xz_plane_symmetric                       [boolean]
         avl_body.widths.maximum                  [meters]
         avl_body.heights.maximum                 [meters]
         rcaide_body.fineness.nose                 [meters]
@@ -429,7 +428,7 @@ def populate_body_sections(avl_body,rcaide_body):
         N/A
     """  
 
-    symm = avl_body.symmetric   
+    symm = avl_body.xz_plane_symmetric   
     semispan_h = avl_body.widths.maximum * 0.5 * (2 - symm)
     semispan_v = avl_body.heights.maximum * 0.5
     origin = rcaide_body.origin[0]
@@ -438,14 +437,14 @@ def populate_body_sections(avl_body,rcaide_body):
     # This method relates the fineness ratio to the quadratic curve formula via a spline fit interpolation
     vec1 = [2 , 1.5, 1.2 , 1]
     vec2 = [1  ,1.57 , 3.2,  8]
-    x = np.linspace(0,1,4)
-    fuselage_nose_curvature =  np.interp(np.interp(rcaide_body.fineness.nose,vec2,x), x , vec1)
-    fuselage_tail_curvature =  np.interp(np.interp(rcaide_body.fineness.tail,vec2,x), x , vec1) 
+    x = rp.linspace(0,1,4)
+    fuselage_nose_curvature =  rp.interp(rp.interp(rcaide_body.fineness.nose,vec2,x), x , vec1)
+    fuselage_tail_curvature =  rp.interp(rp.interp(rcaide_body.fineness.tail,vec2,x), x , vec1) 
 
 
     # Horizontal Sections of Fuselage
     if semispan_h != 0.0:                
-        width_array = np.linspace(-semispan_h, semispan_h, num=11,endpoint=True)
+        width_array = rp.linspace(-semispan_h, semispan_h, num=11,endpoint=True)
         for section_width in width_array:
             fuselage_h_section               = Section()
             fuselage_h_section_cabin_length  = avl_body.lengths.total - (avl_body.lengths.nose + avl_body.lengths.tail)
@@ -459,7 +458,7 @@ def populate_body_sections(avl_body,rcaide_body):
 
     # Vertical Sections of Fuselage 
     if semispan_v != 0:               
-        height_array = np.linspace(-semispan_v, semispan_v, num=11,endpoint=True)
+        height_array = rp.linspace(-semispan_v, semispan_v, num=11,endpoint=True)
         for section_height in height_array :
             fuselage_v_section               = Section()
             fuselage_v_section_cabin_length  = avl_body.lengths.total - (avl_body.lengths.nose + avl_body.lengths.tail)

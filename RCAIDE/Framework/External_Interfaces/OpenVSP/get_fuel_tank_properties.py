@@ -16,7 +16,7 @@ except ImportError:
     except ImportError:
         # This allows RCAIDE to build without OpenVSP
         pass
-import numpy as np
+import RNUMPY as rp
 from RCAIDE.Framework.Core import Data
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -80,12 +80,12 @@ def get_fuel_tank_properties(vehicle,tag,fuel_tank_set_index=3,slices_for_calcul
                 mass = float(prop_list[1])
                 vol  = float(prop_list[-1])
                 if 'center_of_gravity' not in fuel_tanks[prop_list[0]]: # assumes at most two identical tank names
-                    fuel_tanks[prop_list[0]].center_of_gravity   = np.array([cg_x,cg_y,cg_z])
+                    fuel_tanks[prop_list[0]].center_of_gravity   = rp.array([cg_x,cg_y,cg_z])
                     fuel_tanks[prop_list[0]].fuel_mass_when_full = mass
                     fuel_tanks[prop_list[0]].volume              = vol
                 else:
                     fuel_tanks[prop_list[0]].center_of_gravity = \
-                        (fuel_tanks[prop_list[0]].center_of_gravity+np.array([cg_x,cg_y,cg_z]))/2.
+                        (fuel_tanks[prop_list[0]].center_of_gravity+rp.array([cg_x,cg_y,cg_z]))/2.
                     fuel_tanks[prop_list[0]].fuel_mass_when_full  += mass
                     fuel_tanks[prop_list[0]].volume               += vol                    
                     

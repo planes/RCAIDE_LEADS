@@ -11,7 +11,7 @@ import  RCAIDE
 from RCAIDE.Framework.Core import  Units
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_omega_and_Q_from_Cp_and_V
@@ -78,15 +78,15 @@ def compute_motor_performance(motor,conditions):
             V              = motor_conditions.inputs.voltage
             I_turn         = I/motor.number_of_turns                                                             # [A]            current in each turn
             omega          = (motor.speed_constant*(V - I*Res)*Units.rpm) /G                                     # [RPM -> rad/s] rotor angular velocity
-            A              = np.pi * ((motor.stator_outer_diameter**2 - motor.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
+            A              = rp.pi * ((motor.stator_outer_diameter**2 - motor.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
             MMF_coil       = motor.number_of_turns*I_turn                                                        # [A*turns]      magnetomotive force applied to the reluctance path for a coil (Eq.14)  
             R              = motor.length_of_path/(A*motor.mu_0*motor.mu_r)                                      # [A*turn/Wb]    reluctance of a given path or given reluctant element (Eq.16) 
             phi            = MMF_coil/R                                                                          # [Wb]           magnetic flux through the reluctance path (Eq.12)
             B_sign         = phi/A                                                                               # [V*s/m**2]     ranges from 0.5 to 1.2, average magnitude of the radial flux density produced by the rotor
-            A_sign         = (motor.winding_factor*I)/(np.pi*motor.stator_inner_diameter)                        # [-]            stator electrical loading (Eq.2)        
-            TQ             = (np.pi/2)*(B_sign*A_sign)*(motor.stator_inner_diameter**2)*motor.motor_stack_length # [Nm]           torque (Eq.1)
+            A_sign         = (motor.winding_factor*I)/(rp.pi*motor.stator_inner_diameter)                        # [-]            stator electrical loading (Eq.2)        
+            TQ             = (rp.pi/2)*(B_sign*A_sign)*(motor.stator_inner_diameter**2)*motor.motor_stack_length # [Nm]           torque (Eq.1)
             P              = omega*TQ                                                                            # [W]            power (Eq.1)        
-            A              = np.pi * ((motor.stator_outer_diameter**2 - motor.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
+            A              = rp.pi * ((motor.stator_outer_diameter**2 - motor.stator_inner_diameter**2) / 4)     # [m**2]         cross-sectional area of the reluctance path perpendicular to length 𝑙    
             R_cond_path    = motor.length_of_conductive_path/(motor.thermal_conductivity*A)                      # [K/W]          Conductive Path Thermal Resistance (Eq.68)
     
             if motor.Conduction_laminar_flow == True:   
@@ -97,14 +97,14 @@ def compute_motor_performance(motor,conditions):
             R_conv_path    = 1/(h*A)                                                                       # [K/W]          Fluid Flow Thermal Resistance (Eq.69)
     
             if motor.Re_cooling_flow < 3000:
-                Nu_cooling_flow     = 1.051*np.log(motor.height_of_duct/motor.width_of_duct) + 2.89         # Nusselt number for cooling flow in rectangular ducts and Re_d < 3000 (Eq.72)
+                Nu_cooling_flow     = 1.051*rp.log(motor.height_of_duct/motor.width_of_duct) + 2.89         # Nusselt number for cooling flow in rectangular ducts and Re_d < 3000 (Eq.72)
                 h_cooling_flow      = motor.characteristic_length_of_flow*Nu_cooling_flow*motor.thermal_conductivity_fluid                   # [W/m**2*K]     convection coefficient of the flow at a liquid to solid interfaced
                 R_conv_path_cooling_flow    = 1/(h_cooling_flow*A)                             # [K/W]          Fluid Flow Thermal Resistance (Eq.69)
             else:
                 if motor.Convection_laminar_flow == True:
                     f = 64/motor.Re_cooling_flow
                 else:
-                    f = (0.79*np.log(motor.Re_cooling_flow) - 1.64)**(-2)                                   # Turbulent Moody friction factor (Eq.73)
+                    f = (0.79*rp.log(motor.Re_cooling_flow) - 1.64)**(-2)                                   # Turbulent Moody friction factor (Eq.73)
                 Nu_cooling_flow   = ((f/8)*(motor.Re_cooling_flow - 1000)*motor.Prandtl_number)/(1 + 12.7*((f/8)**0.5)*(motor.Prandtl_number**(2/3) - 1)) # Nusselt number for cooling flow in rectangular ducts and Re_d >= 3000 (Eq.72)
                 h_cooling_flow    = motor.characteristic_length_of_flow*Nu_cooling_flow*motor.thermal_conductivity_fluid                     # [W/m**2*K]     convection coefficient of the flow at a liquid to solid interfaced
                 R_conv_path_cooling_flow    = 1/(h_cooling_flow*A)                                                                             # [K/W]          Fluid Flow Thermal Resistance (Eq.69)
@@ -128,9 +128,9 @@ def compute_motor_performance(motor,conditions):
                     Nu_G        = 0.044*motor.Re_airgap**(0.75)                                # Nusselt number for turbulent flow and G = 0.01 (Eq.78)  
             elif motor.axial_gap_to_radius_of_rotor> 0.02 and motor.axial_gap_to_radius_of_rotor < 0.06:
                 if motor.Re_airgap < 1e5:
-                    Nu_G     = 0.5*(1 + 5.47*(10**-4)*np.exp(112*motor.axial_gap_to_radius_of_rotor))*(motor.Re_airgap**0.5) # Nusselt number for laminar flow and G = 0.02 - 0.06 (Eq.77)
+                    Nu_G     = 0.5*(1 + 5.47*(10**-4)*rp.exp(112*motor.axial_gap_to_radius_of_rotor))*(motor.Re_airgap**0.5) # Nusselt number for laminar flow and G = 0.02 - 0.06 (Eq.77)
                 else:    
-                    Nu_G  = 0.5*(12.57*np.exp(-33.18*motor.axial_gap_to_radius_of_rotor))*(motor.Re_airgap**(0.6 + 25*motor.axial_gap_to_radius_of_rotor**(12/7))) # Nusselt number for turbulent flow and G = 0.02 - 0.06 (Eq.78)    
+                    Nu_G  = 0.5*(12.57*rp.exp(-33.18*motor.axial_gap_to_radius_of_rotor))*(motor.Re_airgap**(0.6 + 25*motor.axial_gap_to_radius_of_rotor**(12/7))) # Nusselt number for turbulent flow and G = 0.02 - 0.06 (Eq.78)    
             elif motor.axial_gap_to_radius_of_rotor > 0.06:
                 if motor.Re_airgap < 1e5:
                     Nu_G = 0.35*(motor.Re_airgap**0.5)                                         # Nusselt number for laminar flow and G > 0.06 (Eq.77)
@@ -172,7 +172,7 @@ def compute_motor_performance(motor,conditions):
             mu_0            = motor.mu_0                            
             mu_r            = motor.mu_r   
             Q               = power/omega                                      
-            i               = np.sqrt((2*(Q)*l)/(D_in*mu_0*mu_r*L*kw))    
+            i               = rp.sqrt((2*(Q)*l)/(D_in*mu_0*mu_r*L*kw))    
             v               = omega/Kv   + ((Q*Kv) + io) * Res  
             etam            = (1-io/i)*(1-i*Res/v)     
 

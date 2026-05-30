@@ -9,7 +9,7 @@
 from RCAIDE.Library.Methods.Powertrain.Propulsors.Turboprop          .compute_thrust import compute_thrust 
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  size_core
@@ -100,7 +100,7 @@ def size_core(turboprop, conditions):
     TSFC        = turboprop_conditions.thrust_specific_fuel_consumption
     Fsp         = turboprop_conditions.non_dimensional_thrust  
     mdot_core   = turboprop.design_thrust*turboprop_conditions.throttle/(Fsp) 
-    mdhc        = mdot_core/ (np.sqrt(Tref/Tt_ref)*(Pt_ref/Pref))   
+    mdhc        = mdot_core/ (rp.sqrt(Tref/Tt_ref)*(Pt_ref/Pref))   
     
     turboprop.TSFC                                = TSFC
     turboprop.design_mass_flow_rate               = mdot_core 

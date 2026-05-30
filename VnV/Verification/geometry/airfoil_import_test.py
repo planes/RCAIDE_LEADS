@@ -13,11 +13,10 @@ from RCAIDE.Library.Methods.Geometry.Airfoil import import_airfoil_geometry, com
 from RCAIDE.Library.Plots import *
 
 import os
-import sys
+
+import RNUMPY as rp
 import numpy as np
 import matplotlib.pyplot as plt
-
-#sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles' + os.path.sep + 'Airfoils')) 
 
 # ----------------------------------------------------------------------
 #   Main
@@ -28,10 +27,9 @@ def main():
     #  Define airfoil geometry and polar files 
     # ---------------------------------------------------------------------------------------------------------------- 
     separator     = os.path.sep
-    if  os.path.split(sys.path[0])[1] == 'geometry':
-        airfoils_path =  os.path.split(os.path.split(sys.path[0])[0])[0] + separator +  'Vehicles' + os.path.sep + 'Airfoils' + os.path.sep
-    else:
-        airfoils_path = sys.path[0] + separator +  'Vehicles' + os.path.sep + 'Airfoils' + os.path.sep
+    airfoils_path = os.path.abspath(
+        os.path.join(os.path.dirname(os.path.abspath(__file__)), "..", "..", "Vehicles", "Airfoils")
+    ) + separator
     airfoil_geometry_with_selig =  [airfoils_path + 'NACA_4412.txt','airfoil_geometry_2.txt', 'airfoil_geometry_2-selig.txt']        
     airfoil_geometry_files      = airfoils_path + 'NACA_4412.txt'
     airfoil_polar_files         =  [airfoils_path + 'Polars' + separator + 'NACA_4412_polar_Re_50000.txt',
@@ -61,13 +59,13 @@ def main():
     airfoil_tc_actual = [0.12031526401402462, 0.11177619218206997, 0.11177619218206997] 
 
     # Check t/c calculation against previously calculated values  
-    assert(np.abs(airfoil_tc_actual[0]-airfoil_geometry_2.thickness_to_chord) < 1E-8 ) 
-    assert(np.abs(airfoil_tc_actual[1]-airfoil_geometry_3.thickness_to_chord) < 1E-8 ) 
-    assert(np.abs(airfoil_tc_actual[2]-airfoil_geometry_4.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[0]-airfoil_geometry_2.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[1]-airfoil_geometry_3.thickness_to_chord) < 1E-8 ) 
+    assert(rp.abs(airfoil_tc_actual[2]-airfoil_geometry_4.thickness_to_chord) < 1E-8 ) 
 
     # Check that camber line comes back the same for the Lednicer and Selig formats 
     for j in range(0, len(airfoil_geometry_3.camber_coordinates)):
-        assert( np.abs(airfoil_geometry_3.camber_coordinates[j] - airfoil_geometry_4.camber_coordinates[j]) < 1E-8 )
+        assert( rp.abs(airfoil_geometry_3.camber_coordinates[j] - airfoil_geometry_4.camber_coordinates[j]) < 1E-8 )
 
     # Multiple meshes use too much memory on AppVeyor 
     A_MASK_1 = convert_airfoil_to_meshgrid(airfoil_geometry_1) 

@@ -13,7 +13,7 @@ from RCAIDE.Framework.Optimization.Common                                       
 from RCAIDE.Framework.Optimization.Packages.scipy                                                                  import scipy_setup
 
 # Python package imports  
-import numpy as np  
+import RNUMPY as rp  
 import time 
 import os
 import sys
@@ -131,12 +131,12 @@ def wavy_channel_design_problem_setup(HAS,battery,print_iterations):
     inputs.append([ 'd'     ,  d_0         ,   0.001        ,  0.01               , 1E-3       ,  1*Units.less])  
     inputs.append([ 'b'     ,  b_0         ,   0.001        ,  0.002              , 1E-3       ,  1*Units.less]) 
     inputs.append([ 'theta' ,  theta_0     ,48*Units.degrees, 70*Units.degrees    , 1.0        ,  1*Units.less])         
-    problem.inputs = np.array(inputs,dtype=object)    
+    problem.inputs = rp.array(inputs,dtype=object)    
 
     # ----------------------------------------------------------------------------------------------------------
     # Objective
     # ---------------------------------------------------------------------------------------------------------- 
-    problem.objective = np.array([  
+    problem.objective = rp.array([  
         [  'Obj'  ,  10   ,    1*Units.less] ],dtype=object)
 
 
@@ -147,7 +147,7 @@ def wavy_channel_design_problem_setup(HAS,battery,print_iterations):
     constraints.append([ 'Q_con'         ,  '>'  ,  0.0 ,   1.0   , 1*Units.less]) 
     constraints.append([ 'thick_con'     ,  '>'  ,  0.0 ,   1.0   , 1*Units.less]) 
     
-    problem.constraints =  np.array(constraints,dtype=object)                
+    problem.constraints =  rp.array(constraints,dtype=object)                
 
     # ----------------------------------------------------------------------------------------------------------
     #  Aliases

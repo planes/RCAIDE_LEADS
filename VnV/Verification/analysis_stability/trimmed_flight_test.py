@@ -11,14 +11,21 @@ from RCAIDE.Library.Plots       import *
 
 # python imports  
 import pylab as plt
-import numpy as np 
+import RNUMPY as rp 
 
 
 # local imports 
 import sys 
 import os
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Navion    import vehicle_setup, configs_setup
 # ----------------------------------------------------------------------
 #   Main
@@ -27,7 +34,7 @@ from Navion    import vehicle_setup, configs_setup
 def main(): 
     
     # vehicle data
-    vehicle  = vehicle_setup() 
+    vehicle  = vehicle_setup()
 
     # Set up vehicle configs
     configs  = configs_setup(vehicle)
@@ -45,24 +52,22 @@ def main():
     results = missions.base_mission.evaluate() 
 
     elevator_deflection        = results.segments.climb.conditions.control_surfaces.elevator.deflection[0,0] / Units.deg
-    elevator_deflection_true   = -1.4955770038888654
-    elevator_deflection_diff   = np.abs(elevator_deflection - elevator_deflection_true)
+    elevator_deflection_true   = 1.1867020154776333
+    elevator_deflection_diff   = rp.abs(elevator_deflection - elevator_deflection_true)
     print('Error1: ',elevator_deflection_diff)
-    # There is assertion error somehow, not related to any dimension error pertaining to numpy
-    assert np.abs(elevator_deflection_diff/elevator_deflection_true) < 5e-3
+    assert rp.abs(elevator_deflection_diff/elevator_deflection_true) < 5e-3
 
     aileron_deflection        = results.segments.climb.conditions.control_surfaces.aileron.deflection[0,0] / Units.deg
-    aileron_deflection_true   = 0.9617397873236034
-    aileron_deflection_diff   = np.abs(aileron_deflection - aileron_deflection_true)
+    aileron_deflection_true   = 0.4464677904245477
+    aileron_deflection_diff   = rp.abs(aileron_deflection - aileron_deflection_true)
     print('Error2: ',aileron_deflection_diff)
-    assert np.abs(aileron_deflection_diff/aileron_deflection_true) < 5e-3
-
+    assert rp.abs(aileron_deflection_diff/aileron_deflection_true) < 5e-3
 
     rudder_deflection        = results.segments.climb.conditions.control_surfaces.rudder.deflection[0,0] / Units.deg
-    rudder_deflection_true   = 1.5251273567099943
-    rudder_deflection_diff   = np.abs(rudder_deflection - rudder_deflection_true)
+    rudder_deflection_true   = 1.4210433998443548
+    rudder_deflection_diff   = rp.abs(rudder_deflection - rudder_deflection_true)
     print('Error3: ',rudder_deflection_diff)
-    assert np.abs(rudder_deflection_diff/rudder_deflection_true) < 5e-3    
+    assert rp.abs(rudder_deflection_diff/rudder_deflection_true) < 5e-3    
 
     # plt results
     plot_mission(results)
@@ -78,38 +83,47 @@ def analyses_setup(configs):
 
     # build a base analysis for each config
     for tag,config in configs.items():
-        analysis = base_analysis(config, configs)
+        analysis = base_analysis(config)
         analyses[tag] = analysis
 
     return analyses
 
 
-def base_analysis(vehicle, configs):
+def base_analysis(vehicle):
 
     # ------------------------------------------------------------------
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Framework.Analyses.Vehicle()  
+    analyses.vehicle =  vehicle
+
+    # ------------------------------------------------------------------
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry() 
+    analyses.append(geometry) 
+
+    # ------------------------------------------------------------------
+    #  Weights
+    weights = RCAIDE.Framework.Analyses.Weights.Conventional_General_Aviation() 
+    weights.settings.run_weights_analysis = True
+    weights.settings.run_moments_of_inertia_analysis = True
+    weights.settings.run_center_of_gravity_analysis = True
+    analyses.append(weights) 
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis
-    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle                                = vehicle
+    aerodynamics = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
     aerodynamics.settings.number_of_spanwise_vortices   = 30 
     analyses.append(aerodynamics) 
-      
-    stability                                           = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method() 
-    stability.settings.discretize_control_surfaces      = True
-    stability.settings.model_fuselage                   = True
-    stability.settings.model_nacelle                    = True
-    stability.configuration                             = configs
-    stability.vehicle                                   = vehicle
+
+    # ------------------------------------------------------------------
+    #  Stability Analysis      
+    stability   = RCAIDE.Framework.Analyses.Stability.Vortex_Lattice_Method()   
     analyses.append(stability)
 
     # ------------------------------------------------------------------
     #  Energy
-    energy= RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy= RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
 
     # ------------------------------------------------------------------
@@ -120,20 +134,22 @@ def base_analysis(vehicle, configs):
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
 
     # done!
     return analyses  
 
 def plot_mission(results): 
-
-    # Plot Aircraft Stability 
+ 
     plot_longitudinal_stability(results)  
     
     plot_lateral_stability(results) 
     
-    plot_flight_forces_and_moments(results) 
+    plot_flight_forces_and_moments(results)
+    
+    plot_center_of_gravity_drift(results)
+    
+    plot_moment_of_intertia_drift(results)
       
     return
  
@@ -162,14 +178,14 @@ def mission_setup(analyses):
     #   Climb Segment : Constant Speed Constant Rate
     # ------------------------------------------------------------------ 
     segment = Segments.Climb.Constant_Speed_Constant_Rate(base_segment)
-    segment.tag = "climb"
+    segment.tag = "climb"  
     segment.analyses.extend( analyses.base )
     segment.altitude_start                                                      = 0.0 * Units.feet
     segment.altitude_end                                                        = 12000 * Units.feet
     segment.air_speed                                                           = 120 * Units['mph']
     segment.climb_rate                                                          = 1000* Units['ft/min']
     segment.sideslip_angle                                                      = 1 * Units.degrees
-                          
+                     
     # define flight dynamics to model                       
     segment.flight_dynamics.force_x                                             = True    
     segment.flight_dynamics.force_z                                             = True    
@@ -183,7 +199,8 @@ def mission_setup(analyses):
     segment.flight_dynamics.moment_y                                            = True 
     segment.assigned_control_variables.elevator_deflection.active               = True    
     segment.assigned_control_variables.elevator_deflection.assigned_surfaces    = [['elevator']]
-    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0]]
+    segment.assigned_control_variables.elevator_deflection.initial_guess_values = [[0.02]]
+    segment.assigned_control_variables.elevator_deflection.bounds               = [[-90 *Units.degree, 90 *Units.degree]]
    
     # Lateral Flight Mechanics 
     segment.flight_dynamics.force_y                                             = True     
@@ -192,11 +209,19 @@ def mission_setup(analyses):
     segment.assigned_control_variables.aileron_deflection.active                = True
     segment.assigned_control_variables.aileron_deflection.assigned_surfaces     = [['aileron']]
     segment.assigned_control_variables.aileron_deflection.initial_guess_values  = [[0]]
+    segment.assigned_control_variables.aileron_deflection.bounds               = [[-90 *Units.degree, 90 *Units.degree]]
     segment.assigned_control_variables.rudder_deflection.active                 = True
     segment.assigned_control_variables.rudder_deflection.assigned_surfaces      = [['rudder']]
     segment.assigned_control_variables.rudder_deflection.initial_guess_values   = [[0]]
+    segment.assigned_control_variables.rudder_deflection.bounds               = [[-90 *Units.degree, 90 *Units.degree]]
     segment.assigned_control_variables.bank_angle.active                        = True    
     segment.assigned_control_variables.bank_angle.initial_guess_values          = [[0]]
+    segment.assigned_control_variables.bank_angle.bounds                        = [[-90 *Units.degree, 90 *Units.degree]]
+
+    segment.assigned_control_variables.acceleration.active                      = True
+    segment.assigned_control_variables.acceleration.bounds                      = [[-20, 60]]
+    
+
     mission.append_segment(segment) 
 
     return mission 

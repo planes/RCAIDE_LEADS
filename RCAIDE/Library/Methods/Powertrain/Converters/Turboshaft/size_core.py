@@ -10,7 +10,7 @@
 from RCAIDE.Library.Methods.Powertrain.Converters.Turboshaft import compute_power
 
 # Python package imports
-import numpy                                                       as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  size_core
@@ -121,7 +121,7 @@ def size_core(turboshaft, conditions):
     
     #compute dimensional mass flow rates
     mdot_air                                       = turboshaft.design_power/Psp
-    mdot_compressor                                = mdot_air/ (np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref))
+    mdot_compressor                                = mdot_air/ (rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref))
 
     #pack outputs
     turboshaft.mass_flow_rate                      = mdot_air

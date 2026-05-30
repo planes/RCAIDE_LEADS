@@ -1,4 +1,4 @@
-# RCAIDE/Framework/Analyses/Mission/Segments/Conditions/Conditions.py
+# RCAIDE/Framework/Mission/Common/Conditions.py
 # 
 # 
 # Created:  Jul 2023, M. Clarke
@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core                    import Data 
 
 # python imports 
-import numpy as np 
+import RNUMPY as rp 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Conditions
 # ----------------------------------------------------------------------------------------------------------------------
@@ -46,7 +46,7 @@ class Conditions(Data):
             Properties Used:
             None
         """     
-        return np.ones([self._size,cols])
+        return rp.ones([self._size,cols])
     
     def ones_row_m1(self,cols):
         """ returns an N-1 row vector of ones with given number of columns
@@ -130,7 +130,7 @@ class Conditions(Data):
             elif rank == 2:
                 #Check if it's already expanded
                 if v.shape[0]<=1 or override:
-                    self[k] = np.resize(v,[rows,v.shape[1]])
+                    self[k] = rp.resize(v,[rows,v.shape[1]])
         
         return
                 
@@ -169,7 +169,7 @@ class expanded_array(Data):
         
         self._adjustment = adjustment
         self._cols       = cols
-        self._array      = np.array([[1]])
+        self._array      = rp.array([[1]])
         
         
     def resize(self,rows):
@@ -188,7 +188,7 @@ class expanded_array(Data):
             v          - values (really self)             [int]
         
             Outputs:
-            np.array   - properly sized                   [array]
+            rp.array   - properly sized                   [array]
             
             Properties Used:
             N/A
@@ -200,7 +200,7 @@ class expanded_array(Data):
         self._size = rows
         value      = self._array
         
-        return np.resize(value,[rows-adjustment,value.shape[1]])
+        return rp.resize(value,[rows-adjustment,value.shape[1]])
     
     def __call__(self):
         """ This returns the value and shape of the array as is
@@ -215,7 +215,7 @@ class expanded_array(Data):
             self
 
             Outputs:
-            np.array   - properly sized                   [array]
+            rp.array   - properly sized                   [array]
             
             Properties Used:
             N/A
@@ -243,7 +243,7 @@ class expanded_array(Data):
             N/A
         """          
         
-        self._array = np.resize(other,[1,1])
+        self._array = rp.resize(other,[1,1])
         
         return self
 
@@ -267,7 +267,7 @@ class expanded_array(Data):
             N/A
         """                 
         
-        self._array = np.resize(other,[1,1])
+        self._array = rp.resize(other,[1,1])
         
         return self    
         

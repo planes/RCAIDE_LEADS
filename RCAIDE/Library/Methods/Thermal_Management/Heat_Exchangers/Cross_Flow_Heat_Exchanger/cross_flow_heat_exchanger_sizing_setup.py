@@ -10,7 +10,7 @@ from RCAIDE.Framework.Analyses.Process                                      impo
 
 # Python package imports 
 from scipy.optimize import fsolve 
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Cross Flow Heat Exchanger Geometry Setup 
@@ -206,8 +206,8 @@ def modify_crossflow_hex_size(nexus):
     ntu_h   = NTU*2    
     
     # Inital Compute Core Mass Velcoity
-    G_h        = np.sqrt(2 * rho_h_m * delta_p_h / (Pr_h**(2/3)) * (eta_o_h * j_f_h) / ntu_h)
-    G_c        = np.sqrt(2 * rho_c_m * delta_p_c / (Pr_c**(2/3)) * (eta_o_c * j_f_c) / ntu_c)
+    G_h        = rp.sqrt(2 * rho_h_m * delta_p_h / (Pr_h**(2/3)) * (eta_o_h * j_f_h) / ntu_h)
+    G_c        = rp.sqrt(2 * rho_c_m * delta_p_c / (Pr_c**(2/3)) * (eta_o_c * j_f_c) / ntu_c)
     
     # While Loop tracker
     check=0
@@ -233,16 +233,16 @@ def modify_crossflow_hex_size(nexus):
         h_h = j_h * G_h * c_p_h / (Pr_h**(2/3))
         h_c = j_c * G_c * c_p_c / (Pr_c**(2/3))
 
-        m_f_h = (np.sqrt((2*h_h)/(fin_conductivity*delta_h)))*np.sqrt(1+(delta_h/l_s_h))
-        m_f_c = (np.sqrt((2*h_c)/(fin_conductivity*delta_c)))*np.sqrt(1+(delta_c/l_s_c))
+        m_f_h = (rp.sqrt((2*h_h)/(fin_conductivity*delta_h)))*rp.sqrt(1+(delta_h/l_s_h))
+        m_f_c = (rp.sqrt((2*h_c)/(fin_conductivity*delta_c)))*rp.sqrt(1+(delta_c/l_s_c))
 
 
         l_f_h = b_h / 2 - delta_h
         l_f_c = b_c / 2 - delta_c
 
         # Fin Efficiency
-        eta_f_h = np.tanh(m_f_h * l_f_h) / (m_f_h * l_f_h)
-        eta_f_c = np.tanh(m_f_c * l_f_c) / (m_f_c * l_f_c)
+        eta_f_h = rp.tanh(m_f_h * l_f_h) / (m_f_h * l_f_h)
+        eta_f_c = rp.tanh(m_f_c * l_f_c) / (m_f_c * l_f_c)
 
         eta_o_h = 1 - (1 - eta_f_h) * Af_A_h
         eta_o_c = 1 - (1 - eta_f_c) * Af_A_c
@@ -300,20 +300,20 @@ def modify_crossflow_hex_size(nexus):
         T_w = (T_m_h + (R_h / R_c) * T_m_c) / (1 + R_h / R_c)
 
         # Considering temperature at wall effecting f value of 0.81 changes
-        f_h_wall = f_h * np.power(((T_w + 273) / (273 + T_m_h)), 0.81)
-        f_c_wall = f_c * np.power(((T_w + 273) / (273 + T_m_c)), 0.81)
+        f_h_wall = f_h * rp.power(((T_w + 273) / (273 + T_m_h)), 0.81)
+        f_c_wall = f_c * rp.power(((T_w + 273) / (273 + T_m_c)), 0.81)
 
         # Calculate Pressure Drop
 
-        delta_p_c_updated = np.power(G_c, 2) / (2 * rho_c_i) * ((1 - np.power(sigma_c, 2) + k_c_c)
+        delta_p_c_updated = rp.power(G_c, 2) / (2 * rho_c_i) * ((1 - rp.power(sigma_c, 2) + k_c_c)
                                                               + 2 * (rho_c_i / rho_c_o - 1) + f_c_wall * 4 * L_c / d_h_c *
                                                       rho_c_i / rho_c_m
-                                                       - (1 - np.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o)
+                                                       - (1 - rp.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o)
 
-        delta_p_h_updated = np.power(G_h, 2) / (2 * rho_h_i) * ((1 - np.power(sigma_h, 2) + k_c_h)
+        delta_p_h_updated = rp.power(G_h, 2) / (2 * rho_h_i) * ((1 - rp.power(sigma_h, 2) + k_c_h)
                                                               + 2 * (rho_h_i / rho_h_o - 1) + f_h_wall * 4 * L_h / d_h_h *
                                                       rho_h_i / rho_h_m
-                                                       - (1 - np.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o)
+                                                       - (1 - rp.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o)
 
         # Check if the pressure delta calculated is less than the threshold 
 
@@ -327,15 +327,15 @@ def modify_crossflow_hex_size(nexus):
         else:
             # Calculate the new core mass velocity
 
-            G_h = np.sqrt((2 * rho_h_i * delta_p_h) / ((1 - np.power(sigma_h, 2) + k_c_h)
+            G_h = rp.sqrt((2 * rho_h_i * delta_p_h) / ((1 - rp.power(sigma_h, 2) + k_c_h)
                                                     + 2 * (rho_h_i / rho_h_o - 1) + f_h_wall * 4 * L_h / d_h_h *
                                                           rho_h_i / rho_h_m
-                                                              - (1 - np.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o))
+                                                              - (1 - rp.power(sigma_h, 2) - k_e_h) * rho_h_i / rho_h_o))
 
-            G_c = np.sqrt((2 * rho_c_i * delta_p_c) / ((1 - np.power(sigma_c, 2) + k_c_c)
+            G_c = rp.sqrt((2 * rho_c_i * delta_p_c) / ((1 - rp.power(sigma_c, 2) + k_c_c)
                                                     + 2 * (rho_c_i / rho_c_o - 1) + f_c_wall * 4 * L_c / d_h_c *
                                                           rho_c_i / rho_c_m
-                                                              - (1 - np.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o))      
+                                                              - (1 - rp.power(sigma_c, 2) - k_e_c) * rho_c_i / rho_c_o))      
 
         #Calculate the inlet and outlet velocity
         P_o_c    = (delta_p_c_updated+P_i_c)
@@ -387,7 +387,7 @@ def equation(NTU,*data):
              None
     """               
     C_r,eff_hex = data 
-    return(1 - np.exp(((NTU**0.22)/C_r)*(np.exp(-C_r*(NTU**(0.78))) - 1 ))) - eff_hex
+    return(1 - rp.exp(((NTU**0.22)/C_r)*(rp.exp(-C_r*(NTU**(0.78))) - 1 ))) - eff_hex
 
 # ----------------------------------------------------------------------
 #   Post Process Results to give back to the optimizer

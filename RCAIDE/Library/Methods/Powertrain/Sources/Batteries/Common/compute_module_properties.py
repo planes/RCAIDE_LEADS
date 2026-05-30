@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------
 
 from RCAIDE.Framework.Core import Units 
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  METHOD
@@ -118,15 +118,15 @@ def compute_module_properties(battery_module):
     width  = x2
     height = x3 *stacking_rows     
     
-    if  euler_angles[0] == (np.pi / 2):
+    if  euler_angles[0] == (rp.pi / 2):
         x1prime      = x2
         x2prime      = -x1
         x3prime      = x3 
-    if euler_angles[1] == (np.pi / 2):
+    if euler_angles[1] == (rp.pi / 2):
         x1primeprime = -x3prime
         x2primeprime = x2prime
         x3primeprime = x1prime
-    if euler_angles[2] == (np.pi / 2):
+    if euler_angles[2] == (rp.pi / 2):
         length       = x1primeprime
         width        = x3primeprime
         height       = -x2primeprime

@@ -13,12 +13,12 @@ from RCAIDE.Framework.Mission.Common import Results, Residuals
 from RCAIDE.Library.Mission.Common.Update.orientations import orientations
 
 # Python package imports
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Operating Test Conditions Set-up
 # ---------------------------------------------------------------------------------------------------------------------- 
-def setup_operating_conditions(component, altitude=0, velocity_range=np.array([10]), angle_of_attack=0):
+def setup_operating_conditions(component, velocity_range=rp.array([10]), altitude=0, angle_of_attack=0, temperature_deviation=0):
     """
     Sets up operating conditions for single component analysis.
     
@@ -33,7 +33,7 @@ def setup_operating_conditions(component, altitude=0, velocity_range=np.array([1
         Default: 0 (sea level)
     velocity_range : numpy.ndarray, optional
         Array of velocities to analyze [m/s]
-        Default: np.array([10])
+        Default: rp.array([10])
     angle_of_attack : float, optional
         Angle of attack for analysis [deg]Default: 0
     
@@ -111,7 +111,7 @@ def setup_operating_conditions(component, altitude=0, velocity_range=np.array([1
     component.working_fluid                           = working_fluid     
     
     atmosphere_sls                                    = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmo_data                                         = atmosphere_sls.compute_values(altitude,0.0) 
+    atmo_data                                         = atmosphere_sls.compute_values(altitude,temperature_deviation) 
     p                                                 = atmo_data.pressure          
     T                                                 = atmo_data.temperature       
     rho                                               = atmo_data.density          
@@ -119,34 +119,36 @@ def setup_operating_conditions(component, altitude=0, velocity_range=np.array([1
     mu                                                = atmo_data.dynamic_viscosity 
                                                       
     conditions                                        = Results() 
-    conditions.freestream.altitude                    = np.atleast_2d(altitude)
-    conditions.freestream.mach_number                 = np.atleast_2d(velocity_range/a)
-    conditions.freestream.pressure                    = np.atleast_2d(p)
-    conditions.freestream.temperature                 = np.atleast_2d(T)
-    conditions.freestream.density                     = np.atleast_2d(rho)
-    conditions.freestream.dynamic_viscosity           = np.atleast_2d(mu)
-    conditions.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
-    conditions.freestream.isentropic_expansion_factor = np.atleast_2d(working_fluid.compute_gamma(T,p))
-    conditions.freestream.Cp                          = np.atleast_2d(working_fluid.compute_cp(T,p))
-    conditions.freestream.R                           = np.atleast_2d(working_fluid.gas_specific_constant)
-    conditions.freestream.speed_of_sound              = np.atleast_2d(a)
-
+    conditions.freestream.altitude                    = rp.atleast_2d(altitude)
+    conditions.freestream.mach_number                 = rp.atleast_2d(velocity_range/a)
+    conditions.freestream.pressure                    = rp.atleast_2d(p)
+    conditions.freestream.temperature                 = rp.atleast_2d(T)
+    conditions.freestream.density                     = rp.atleast_2d(rho)
+    conditions.freestream.dynamic_viscosity           = rp.atleast_2d(mu)
+    conditions.freestream.gravity                     = rp.atleast_2d(planet.sea_level_gravity)
+    conditions.freestream.isentropic_expansion_factor = rp.atleast_2d(working_fluid.compute_gamma(T,p))
+    conditions.freestream.Cp                          = rp.atleast_2d(working_fluid.compute_cp(T,p))
+    conditions.freestream.R                           = rp.atleast_2d(working_fluid.gas_specific_constant)
+    conditions.freestream.speed_of_sound              = rp.atleast_2d(a)
+    conditions.freestream.delta_ISA                   = rp.atleast_2d(temperature_deviation)
+    
     num_ctrl_pts      = len(velocity_range)    
     conditions._size  = num_ctrl_pts
     conditions.expand_rows(num_ctrl_pts)
      
-    conditions.freestream.velocity                    = np.atleast_2d(velocity_range) 
-    conditions.frames.body.inertial_rotations[:, 1]   = angle_of_attack
-    conditions.frames.inertial.velocity_vector[:, 0]  = np.atleast_2d(velocity_range)
+    conditions.freestream.velocity                    = rp.atleast_2d(velocity_range) 
+    conditions.frames.body.inertial_rotations = conditions.frames.body.inertial_rotations.at[:, 1].set(angle_of_attack)
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:, 0].set(velocity_range)
 
     # setup conditions   
-    segment                                          = RCAIDE.Framework.Mission.Segments.Segment()  
+    segment                                          = RCAIDE.Framework.Mission.Segments.Segment()
+    segment.sideslip_angle                           = 0 
     segment.state.conditions                         = conditions    
     orientations(segment) 
     segment.state.residuals.network                  = Residuals()
     
     # append component-specific operating conditions 
-    component.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)    
+    component.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.aeroacoustics)    
     segment.state.conditions.expand_rows(num_ctrl_pts)              
     return segment.state
  

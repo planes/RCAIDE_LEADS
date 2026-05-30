@@ -13,16 +13,23 @@ from RCAIDE.Library.Plots    import *
 from RCAIDE.Library.Methods.Performance.estimate_stall_speed  import estimate_stall_speed 
  
 # package imports  
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
 import matplotlib.cm as cm
 
 # local imports 
 import sys 
 import os
-import numpy as np
+import RNUMPY as rp
 import matplotlib.pyplot as plt 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Hydrogen_Fuel_Cell_Twin_Otter   import vehicle_setup , configs_setup  
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -31,15 +38,15 @@ from Hydrogen_Fuel_Cell_Twin_Otter   import vehicle_setup , configs_setup
 
 def main():  
  
-    mdot_H2_true         = [0.01779982742755738,0.017409875126932674]
-    fuel_cell_models     = ['PEM', 'Larminie', ]
+    mdot_H2_true         = [0.016750563112746693 , 0.016563286022628142 ]
+    fuel_cell_models     = ['PEM', 'Larminie']
     
     for i in range(2): 
     
         vehicle  = vehicle_setup(fuel_cell_models[i]) 
         
         # Set up vehicle configs
-        configs  = configs_setup(vehicle)
+        configs  = configs_setup(vehicle)   
     
         # create analyses
         analyses = analyses_setup(configs)
@@ -54,11 +61,11 @@ def main():
         results = missions.base_mission.evaluate()  
         
         # Voltage Cell Regression
-        mdot_H2        = results.segments[0].conditions.energy.bus.cryogenic_tank.mass_flow_rate[0,0]
+        mdot_H2        = results.segments[0].conditions.energy.busses['bus'].fuel_tanks['non_integral_tank'].mass_flow_rate[0,0] + results.segments[0].conditions.energy.busses['bus'].fuel_tanks['integral_tank'].mass_flow_rate[0,0] 
         print('Mass Flow Rate: ' + str(mdot_H2))
-        mdot_H2_diff   = np.abs(mdot_H2 - mdot_H2_true[i]) 
+        mdot_H2_diff   = rp.abs(mdot_H2 - mdot_H2_true[i]) 
         print(mdot_H2_diff) 
-        assert np.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6
+        assert rp.abs((mdot_H2_diff)/mdot_H2_true[i]) < 1e-6
         
         if i == 0: 
             plot_results(results)
@@ -83,27 +90,29 @@ def base_analysis(vehicle):
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle =  vehicle
+
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry()
+    geometry.settings.overwrite_reference        = False
+    geometry.settings.compute_fuel_volume        = True
+    geometry.settings.update_max_fuel = True
+    analyses.append(geometry)
  
     # ------------------------------------------------------------------
     #  Weights
-    weights          = RCAIDE.Framework.Analyses.Weights.Electric()
-    weights.aircraft_type   = 'General_Aviation'
-    weights.settings.update_mass_properties         = False
-    weights.settings.update_center_of_gravity       = False
-    weights.settings.update_moment_of_inertia       = False 
-    weights.vehicle  = vehicle
+    weights          = RCAIDE.Framework.Analyses.Weights.Electric_General_Aviation()  
+    weights.settings.overwrite_center_of_gravity       = True
     analyses.append(weights)
 
     # ------------------------------------------------------------------
     #  Aerodynamics Analysis  
-    aerodynamics                   = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method() 
-    aerodynamics.vehicle           = vehicle
+    aerodynamics                   = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method()  
     analyses.append(aerodynamics)
 
     # ------------------------------------------------------------------
     #  Energy
-    energy          = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle  = vehicle 
+    energy          = RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
     
     # ------------------------------------------------------------------
@@ -114,7 +123,6 @@ def base_analysis(vehicle):
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet = planet.features
     analyses.append(atmosphere)   
  
     return analyses
@@ -138,7 +146,7 @@ def mission_setup(analyses):
     base_segment.state.numerics.number_of_control_points  = 16
     
     # VSTALL Calculation  
-    vehicle        = analyses.base.aerodynamics.vehicle
+    vehicle        = analyses.base.vehicle
     vehicle_mass   = vehicle.mass_properties.max_takeoff
     reference_area = vehicle.reference_area 
     Vstall         = estimate_stall_speed(vehicle_mass,reference_area,altitude = 0.0,maximum_lift_coefficient = 1.2)
@@ -183,8 +191,7 @@ def missions_setup(mission):
 
 def plot_results(results):
     # Plots fligh conditions 
-    plot_flight_conditions(results)
-    plot_fuel_consumption(results)
+    plot_flight_conditions(results) 
     return
 
 

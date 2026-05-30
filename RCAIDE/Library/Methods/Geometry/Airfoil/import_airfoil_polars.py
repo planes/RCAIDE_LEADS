@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------    
 
 from RCAIDE.Framework.Core import Data , Units   
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  import_airfoil_polars
@@ -37,13 +37,13 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
     
     # create empty data structures 
     airfoil_data = Data() 
-    AoA          = np.zeros((num_polars,angel_of_attack_discretization))
-    CL           = np.zeros((num_polars,angel_of_attack_discretization))
-    CD           = np.zeros((num_polars,angel_of_attack_discretization)) 
-    Re           = np.zeros(num_polars)
-    Ma           = np.zeros(num_polars)
+    AoA          = rp.zeros((num_polars,angel_of_attack_discretization))
+    CL           = rp.zeros((num_polars,angel_of_attack_discretization))
+    CD           = rp.zeros((num_polars,angel_of_attack_discretization)) 
+    Re           = rp.zeros(num_polars)
+    Ma           = rp.zeros(num_polars)
     
-    AoA_interp = np.linspace(-6,16,angel_of_attack_discretization)  
+    AoA_interp = rp.linspace(-6,16,angel_of_attack_discretization)  
     
     for j in range(len(airfoil_polar_files)):   
         # Open file and read column names and data block
@@ -55,9 +55,9 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
         for header_line in range(len(data_block)):
             line = data_block[header_line]   
             if 'Re =' in line:    
-                Re[j] = float(line[25:40].strip().replace(" ", ""))
+                Re = Re.at[j].set(float(line[25:40].strip().replace(' ', '')))
             if 'Mach =' in line:    
-                Ma[j] = float(line[7:20].strip().replace(" ", ""))    
+                Ma = Ma.at[j].set(float(line[7:20].strip().replace(' ', '')))  
             if '---' in line:
                 data_block = data_block[header_line+1:]
                 break
@@ -71,19 +71,19 @@ def  import_airfoil_polars(airfoil_polar_files,angel_of_attack_discretization = 
                 last_line = True
         
         data_len = len(data_block)
-        airfoil_aoa= np.zeros(data_len)
-        airfoil_cl = np.zeros(data_len)
-        airfoil_cd = np.zeros(data_len)     
+        airfoil_aoa= rp.zeros(data_len)
+        airfoil_cl = rp.zeros(data_len)
+        airfoil_cd = rp.zeros(data_len)     
     
         # Loop through each value: append to each column
         for line_count , line in enumerate(data_block):
-            airfoil_aoa[line_count] = float(data_block[line_count][0:8].strip())
-            airfoil_cl[line_count]  = float(data_block[line_count][10:17].strip())
-            airfoil_cd[line_count]  = float(data_block[line_count][20:27].strip())   
+            airfoil_aoa = airfoil_aoa.at[line_count].set(float(data_block[line_count][0:8].strip()))
+            airfoil_cl = airfoil_cl.at[line_count].set(float(data_block[line_count][10:17].strip()))
+            airfoil_cd = airfoil_cd.at[line_count].set(float(data_block[line_count][20:27].strip()))   
       
-        AoA[j,:] = AoA_interp
-        CL[j,:]  = np.interp(AoA_interp,airfoil_aoa,airfoil_cl)
-        CD[j,:]  = np.interp(AoA_interp,airfoil_aoa,airfoil_cd)  
+        AoA = AoA.at[j,:].set(AoA_interp)
+        CL = CL.at[j,:].set(rp.interp(AoA_interp,airfoil_aoa,airfoil_cl))
+        CD = CD.at[j,:].set(rp.interp(AoA_interp,airfoil_aoa,airfoil_cd))
     
     airfoil_data.aoa_from_polar               = AoA*Units.degrees
     airfoil_data.re_from_polar                = Re   

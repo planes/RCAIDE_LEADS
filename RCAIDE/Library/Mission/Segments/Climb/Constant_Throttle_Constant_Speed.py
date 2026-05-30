@@ -8,7 +8,7 @@
 # ---------------------------------------------------------------------------------------------------------------------- 
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -51,16 +51,21 @@ def unpack_body_angle(segment):
 
     # Body Angle Control    
     if ctrls.body_angle.active: 
-        segment.state.conditions.frames.body.inertial_rotations[:,1] = segment.state.unknowns.body_angle[:,0] 
+        segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,1].set(segment.state.unknowns.body_angle[:,0])
     else:
-        segment.state.conditions.frames.body.inertial_rotations[:,1] = segment.angle_of_attack            
-
+        segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,1].set(segment.angle_of_attack)
+        
+    # Bank Angle 
     if ctrls.bank_angle.active: 
-        segment.state.conditions.frames.body.inertial_rotations[:,0] = segment.state.unknowns.bank_angle[:,0]
+        segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,0].set(segment.state.unknowns.bank_angle[:,0])
     else:
-        segment.state.conditions.frames.body.inertial_rotations[:,0] = segment.bank_angle
-            
-    segment.state.conditions.frames.body.inertial_rotations[:,2] =  segment.state.conditions.frames.planet.true_heading[:,0]     
+        segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,0].set(segment.bank_angle)
+    
+    # Sideslip Angle  
+    segment.state.conditions.frames.wind.body_rotations = segment.state.conditions.frames.wind.body_rotations.at[:,2].set(segment.sideslip_angle)
+       
+    # Heading Angle  
+    segment.state.conditions.frames.body.inertial_rotations = segment.state.conditions.frames.body.inertial_rotations.at[:,2].set(segment.state.conditions.frames.planet.true_heading[:,0])
          
 # ----------------------------------------------------------------------
 #  Initialize Conditions
@@ -106,14 +111,14 @@ def initialize_conditions(segment):
     gamma = theta-alpha
 
     # process
-    v_x =   np.cos(beta) *v_mag * np.cos(gamma)
-    v_y =   np.sin(beta) *v_mag * np.cos(gamma)
-    v_z = -v_mag * np.sin(gamma) # z points down
+    v_x =   rp.cos(beta) *v_mag * rp.cos(gamma)
+    v_y =   rp.sin(beta) *v_mag * rp.cos(gamma)
+    v_z = -v_mag * rp.sin(gamma) # z points down
 
     # pack
-    conditions.frames.inertial.velocity_vector[:,0] = v_x[:,0]
-    conditions.frames.inertial.velocity_vector[:,1] = v_y[:,0]
-    conditions.frames.inertial.velocity_vector[:,2] = v_z[:,0]
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z[:,0])
  
 
 def update_differentials_altitude(segment):
@@ -158,19 +163,19 @@ def update_differentials_altitude(segment):
     # get overall time step
     vz = -v[:,2,None] # Inertial velocity is z down
     dz = altf- alt0    
-    dt = dz / np.dot(I[-1,:],vz)[-1] # maintain column array
+    dt = dz / rp.dot(I[-1,:],vz)[-1] # maintain column array
     
     # Integrate vz to get altitudes
-    alt = alt0 + np.dot(I*dt,vz)
+    alt = alt0 + rp.dot(I*dt,vz)
 
     # rescale operators
     t = t * dt
 
     # pack
     t_initial = segment.state.conditions.frames.inertial.time[0,0]
-    segment.state.conditions.frames.inertial.time[:,0] = t_initial + t[:,0]
-    conditions.frames.inertial.position_vector[:,2]    = -alt[:,0] # z points down
-    conditions.freestream.altitude[:,0]                =  alt[:,0] # positive altitude in this context    
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(t_initial + t[:,0])
+    conditions.frames.inertial.position_vector = conditions.frames.inertial.position_vector.at[:,2].set(-alt[:,0]) # z points down
+    conditions.freestream.altitude = conditions.freestream.altitude.at[:,0].set(alt[:,0]) # positive altitude in this context    
 
     return
 
@@ -191,13 +196,13 @@ def update_velocity_vector_from_wind_angle(segment):
     gamma = theta-alpha
 
     # process
-    v_x =   np.cos(beta) *v_mag * np.cos(gamma)
-    v_y =   np.sin(beta) *v_mag * np.cos(gamma)
-    v_z = -v_mag * np.sin(gamma) # z points down
+    v_x =   rp.cos(beta) *v_mag * rp.cos(gamma)
+    v_y =   rp.sin(beta) *v_mag * rp.cos(gamma)
+    v_z = -v_mag * rp.sin(gamma) # z points down
 
     # pack
-    conditions.frames.inertial.velocity_vector[:,0] = v_x[:,0]
-    conditions.frames.inertial.velocity_vector[:,1] = v_y[:,0]
-    conditions.frames.inertial.velocity_vector[:,2] = v_z[:,0]
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    conditions.frames.inertial.velocity_vector = conditions.frames.inertial.velocity_vector.at[:,2].set(v_z[:,0])
 
     return conditions

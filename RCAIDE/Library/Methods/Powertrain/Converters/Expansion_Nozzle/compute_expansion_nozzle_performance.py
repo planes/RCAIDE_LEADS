@@ -7,11 +7,10 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------    
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 from RCAIDE.Library.Methods.Gas_Dynamics.fm_id import fm_id
 
 # exceptions/warnings
-from warnings import warn
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_expansion_nozzle_performance
@@ -146,37 +145,35 @@ def compute_expansion_nozzle_performance(expansion_nozzle, conditions):
     ht_out   = Cp*Tt_out
     
     # A cap so pressure doesn't go negative
-    Pt_out[Pt_out<P0] = P0[Pt_out<P0]
+    Pt_out = rp.where(Pt_out < P0, P0, Pt_out)
     
-    # Compute the output Mach number, static quantities and the output velocity
-    Mach          = np.sqrt((((Pt_out/P0)**((gamma-1)/gamma))-1)*2/(gamma-1)) 
+    # Compute the unconstrained output Mach number. 
+    Mach_unc = rp.sqrt(rp.maximum((((Pt_out / P0)**((gamma - 1.) / gamma)) - 1.) * 2. / (gamma - 1.),1E-12)) 
     
-    #initializing the Pout array
-    P_out         = np.ones_like(Mach)
+    # Define the choked flow condition
+    is_choked = Mach_unc >= 1.0
     
-    # Computing output pressure and Mach number for the case Mach <1.0
-    i_low         = Mach < 1.0
-    P_out[i_low]  = P0[i_low]
-    Mach[i_low]   = np.sqrt((((Pt_out[i_low]/P0[i_low])**((gamma[i_low]-1.)/gamma[i_low]))-1.)*2./(gamma[i_low]-1.))
+    # If choked, Mach is exactly 1.0. Otherwise, use unconstrained Mach.
+    Mach = rp.where(is_choked, 1.0, Mach_unc)
     
-    # Computing output pressure and Mach number for the case Mach >=1.0     
-    i_high        = Mach >=1.0   
-    Mach[i_high]  = Mach[i_high]/Mach[i_high]
-    P_out[i_high] = Pt_out[i_high]/(1.+(gamma[i_high]-1.)/2.*Mach[i_high]*Mach[i_high])**(gamma[i_high]/(gamma[i_high]-1.))
+    # Compute output pressure arrays unconditionally, then blend them
+    # For choked flow, Mach is 1.0, so the denominator simplifies to just (1 + (gamma-1)/2)
+    P_out_choked = Pt_out / (1. + (gamma - 1.) / 2.)**(gamma / (gamma - 1.))
     
-    # A cap to make sure Mach doesn't go to zero:
-    if np.any(Mach<=0.0):
-        warn('Pressures Result in Negative Mach Number, making positive',RuntimeWarning)
-        Mach[Mach<=0.0] = 0.001
+    # Blend P0 (un-choked) and P_out_choked based on the condition
+    P_out = rp.where(is_choked, P_out_choked, P0)
+    
+    # Cap Mach at 0.001 to prevent zeros
+    Mach = rp.where(Mach <= 0.0, 0.001, Mach)
     
     # Compute the output temperature,enthalpy,velocity and density
     T_out         = Tt_out/(1+(gamma-1)/2*Mach*Mach)
     h_out         = T_out * Cp
-    u_out         = np.sqrt(2*(ht_out-h_out))
+    u_out         = rp.sqrt(rp.maximum(2*(ht_out-h_out),1E-12))
     #rho_out       = P_out/(R*T_out)
     
     # Compute the freestream to nozzle area ratio  
-    area_ratio    = (fm_id(M0,gamma)/fm_id(Mach,gamma)*(1/(Pt_out/Pt0))*(np.sqrt(Tt_out/Tt0)))
+    area_ratio    = (fm_id(M0,gamma)/fm_id(Mach,gamma)*(1/(Pt_out/Pt0))*(rp.sqrt(Tt_out/Tt0)))
     
     #pack computed quantities into outputs
     nozzle_conditions.outputs.area_ratio              = area_ratio

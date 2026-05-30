@@ -8,7 +8,7 @@
 # ----------------------------------------------------------------------------------------------------------------------    
 
 from RCAIDE.Library.Methods.Geometry.Airfoil.import_airfoil_geometry import import_airfoil_geometry 
-import numpy as np
+import RNUMPY as rp
 import os
 
 # ----------------------------------------------------------------------------------------------------------------------
@@ -36,7 +36,7 @@ def generate_interpolated_airfoils(a1, a2, nairfoils, npoints=200, save_filename
     a_geo_2           = import_airfoil_geometry(a2,npoints)
     
     # for each point around the airfoil, interpolate between the two given airfoil coordinates
-    z = np.linspace(0,1,nairfoils)
+    z = rp.linspace(0,1,nairfoils)
     
     y_u_lb = a_geo_1.y_upper_surface 
     y_u_ub = a_geo_2.y_upper_surface 
@@ -66,14 +66,14 @@ def generate_interpolated_airfoils(a1, a2, nairfoils, npoints=200, save_filename
         new_files[file] = open(save_filename + str(k+1) +".txt", "w+")
         new_files[file].write(title_block)
         
-        y_n_u = np.reshape(y_n_upper[k+1],(npoints//2,1))
-        y_n_l = np.reshape(y_n_lower[k+1],(npoints//2,1))
-        x_n_u = np.reshape(x_n_upper[k+1],(npoints//2,1))
-        x_n_l = np.reshape(x_n_lower[k+1],(npoints//2,1))
+        y_n_u = rp.reshape(y_n_upper[k+1],(npoints//2,1))
+        y_n_l = rp.reshape(y_n_lower[k+1],(npoints//2,1))
+        x_n_u = rp.reshape(x_n_upper[k+1],(npoints//2,1))
+        x_n_l = rp.reshape(x_n_lower[k+1],(npoints//2,1))
         
         airfoil_files.append(new_files[file].name)
-        upper_data = np.append(x_n_u, y_n_u,axis=1)
-        lower_data = np.append(x_n_l, y_n_l,axis=1)
+        upper_data = rp.append(x_n_u, y_n_u,axis=1)
+        lower_data = rp.append(x_n_l, y_n_l,axis=1)
 
         # write lines to files
         for lines in upper_data: #upper_data[file]:

@@ -4,11 +4,12 @@
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  IMPORT
-# ---------------------------------------------------------------------------------------------------------------------- 
-from    RCAIDE.Framework.Core import Data 
+# ----------------------------------------------------------------------------------------------------------------------
+import RCAIDE
+from   RCAIDE.Framework.Core import Data
  
 # package imports
-import  numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  evaluate_correlation_emissions_indices
@@ -160,50 +161,71 @@ def evaluate_correlation_emissions_indices(segment,settings,vehicle):
     I          = state.numerics.time.integrate
     NOx_total  = 0 * state.ones_row(1)  
     CO2_total  = 0 * state.ones_row(1) 
+    CO_total   = 0 * state.ones_row(1) 
     SO2_total  = 0 * state.ones_row(1) 
     H2O_total  = 0 * state.ones_row(1) 
     Soot_total = 0 * state.ones_row(1) 
 
-    for network in vehicle.networks:  
-        for fuel_line in network.fuel_lines:
-            if fuel_line.active: 
-                for fuel_tank in fuel_line.fuel_tanks:
-                    mdot = 0. * state.ones_row(1)    
-                    fuel =  fuel_tank.fuel 
-             
+
+    for network in vehicle.networks:
+        for p_i ,  propulsor in enumerate(network.propulsors):
+            if propulsor.active == True:
+                if (type(propulsor) == RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or \
+                    type(propulsor) == RCAIDE.Library.Components.Powertrain.Converters.Turboshaft or \
+                    type(propulsor) == RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop or \
+                    type(propulsor) == RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet:
+
+                    # unpack component conditions
+                    combustor = propulsor.combustor
+                    propulsor_conditions = state.conditions.energy.propulsors[propulsor.tag]
+
+                    fuel =  combustor.fuel_data
+
                     EI_NOx  = fuel.emission_indices.NOx
                     EI_CO2  = fuel.emission_indices.CO2 
+                    EI_CO   = fuel.emission_indices.CO
                     EI_H2O  = fuel.emission_indices.H2O
                     EI_SO2  = fuel.emission_indices.SO2
                     EI_Soot = fuel.emission_indices.Soot  
-                    
-                    mdot = segment.conditions.energy[fuel_line.tag][fuel_tank.tag].mass_flow_rate
+
+                    mdot_fuel = propulsor_conditions.fuel_mass_flow_rate
                      
                     # Integrate them over the entire segment
-                    NOx_total  += np.dot(I,mdot*EI_NOx)
-                    CO2_total  += np.dot(I,mdot*EI_CO2)
-                    SO2_total  += np.dot(I,mdot*EI_SO2)
-                    H2O_total  += np.dot(I,mdot*EI_H2O) 
-                    Soot_total += np.dot(I,mdot*EI_Soot)
+                    NOx_total  += rp.dot(I,mdot_fuel*EI_NOx)
+                    CO2_total  += rp.dot(I,mdot_fuel*EI_CO2)
+                    CO_total   += rp.dot(I,mdot_fuel*EI_CO)
+                    SO2_total  += rp.dot(I,mdot_fuel*EI_SO2)
+                    H2O_total  += rp.dot(I,mdot_fuel*EI_H2O)
+                    Soot_total += rp.dot(I,mdot_fuel*EI_Soot)
                                      
          
     flight_range    =  state.conditions.frames.inertial.aircraft_range 
-    Contrails_total =  (flight_range -   flight_range[0]) /1000 * fuel.global_warming_potential_100.Contrails
+    Contrails_total =  (flight_range -   flight_range[0]) /1000 
 
-    emissions                 = Data()
-    emissions.total           = Data()
-    emissions.index           = Data() 
-    emissions.total.NOx       = NOx_total   * fuel.global_warming_potential_100.NOx 
-    emissions.total.CO2       = CO2_total   * fuel.global_warming_potential_100.CO2
-    emissions.total.H2O       = H2O_total   * fuel.global_warming_potential_100.H2O  
-    emissions.total.SO2       = SO2_total   * fuel.global_warming_potential_100.SO2  
-    emissions.total.Soot      = Soot_total  * fuel.global_warming_potential_100.Soot 
-    emissions.total.Contrails = Contrails_total   
-    emissions.index.NOx       = EI_NOx   * state.ones_row(1)
-    emissions.index.CO2       = EI_CO2   * state.ones_row(1)
-    emissions.index.H2O       = EI_H2O   * state.ones_row(1)
-    emissions.index.SO2       = EI_SO2   * state.ones_row(1)
-    emissions.index.Soot      = EI_Soot  * state.ones_row(1)
+    emissions                       = Data()
+    emissions.GWP_100               = Data()
+    emissions.mass                  = Data()
+    emissions.index                 = Data() 
+    emissions.GWP_100.NOx           = NOx_total   * fuel.global_warming_potential_100.NOx 
+    emissions.GWP_100.CO2           = CO2_total   * fuel.global_warming_potential_100.CO2
+    emissions.GWP_100.CO            = CO_total    * fuel.global_warming_potential_100.CO
+    emissions.GWP_100.H2O           = H2O_total   * fuel.global_warming_potential_100.H2O  
+    emissions.GWP_100.SO2           = SO2_total   * fuel.global_warming_potential_100.SO2  
+    emissions.GWP_100.Soot          = Soot_total  * fuel.global_warming_potential_100.Soot 
+    emissions.GWP_100.Contrails     = Contrails_total * fuel.global_warming_potential_100.Contrails  
+    emissions.mass.NOx              = NOx_total    
+    emissions.mass.CO2              = CO2_total    
+    emissions.mass.CO               = CO_total     
+    emissions.mass.H2O              = H2O_total    
+    emissions.mass.SO2              = SO2_total    
+    emissions.mass.Soot             = Soot_total   
+    emissions.mass.Contrails        = Contrails_total
+    emissions.index.NOx             = EI_NOx   * state.ones_row(1)
+    emissions.index.CO2             = EI_CO2   * state.ones_row(1)
+    emissions.index.CO              = EI_CO    * state.ones_row(1)
+    emissions.index.H2O             = EI_H2O   * state.ones_row(1)
+    emissions.index.SO2             = EI_SO2   * state.ones_row(1)
+    emissions.index.Soot            = EI_Soot  * state.ones_row(1)
     
     state.conditions.emissions = emissions
     return   

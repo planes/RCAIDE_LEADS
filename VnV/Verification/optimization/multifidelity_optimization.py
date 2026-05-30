@@ -12,14 +12,14 @@ from RCAIDE.Framework.Optimization.Packages.trmm.Trust_Region import Trust_Regio
 import vehicle_multifidelity
 import procedure_multifidelity
 
-import numpy as np 
+import RNUMPY as rp 
 import os
 
 # ----------------------------------------------------------------------        
 #   Run the whole thing
 # ----------------------------------------------------------------------  
 def main():
-    np.random.seed(0)
+    rp.random.seed(0)
     
     problem = setup()
     tol = 1e-8
@@ -38,7 +38,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>', -50., 1., 1*Units.less],
     ],dtype=object)    
@@ -52,9 +52,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  0, atol=1e-6) )
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  0, atol=1e-2) )      
+    assert( rp.isclose(obj,  0, atol=1e-6) )
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  0, atol=1e-2) )      
     
     # ------------------------------------------------------------------
     #   Active constraint
@@ -62,7 +62,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
     ],dtype=object)    
@@ -76,9 +76,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  1, atol=1e-6) )
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  1, atol=1e-2) )     
+    assert( rp.isclose(obj,  1, atol=1e-6) )
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  1, atol=1e-2) )     
     
     # ------------------------------------------------------------------
     #   Other active constraints
@@ -86,7 +86,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '=',   2., 1., 1*Units.less],
         [ 'x2' , '<',  -1., 1., 1*Units.less],
     ],dtype=object)    
@@ -100,9 +100,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,5.41, atol=1e-6) )
-    assert( np.isclose(x1 ,   2, atol=1e-2) )
-    assert( np.isclose(x2 ,  -1, atol=1e-2) )  
+    assert( rp.isclose(obj,5.41, atol=1e-6) )
+    assert( rp.isclose(x1 ,   2, atol=1e-2) )
+    assert( rp.isclose(x2 ,  -1, atol=1e-2) )  
     
     ################# Additive MEI ##################################################
     
@@ -112,7 +112,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>', -50., 1., 1*Units.less],
     ],dtype=object)    
@@ -126,9 +126,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  0, atol=1e-6) )
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  0, atol=1e-2) )      
+    assert( rp.isclose(obj,  0, atol=1e-6) )
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  0, atol=1e-2) )      
     
     # ------------------------------------------------------------------
     #   Active constraint
@@ -136,7 +136,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
     ],dtype=object)    
@@ -150,9 +150,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  1, atol=1e-4) ) # optimizer does not reach exactly optimum here
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  1, atol=1e-2) )     
+    assert( rp.isclose(obj,  1, atol=1e-4) ) # optimizer does not reach exactly optimum here
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  1, atol=1e-2) )     
     
     #------------------------------------------------------------------
     #   Other active constraints
@@ -160,7 +160,7 @@ def main():
     
     solver = set_add_solver()
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '=',   2., 1., 1*Units.less],
         [ 'x2' , '<',  -1., 1., 1*Units.less],
     ],dtype=object)    
@@ -174,9 +174,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,5.41, atol=1e-6) )
-    assert( np.isclose(x1 ,   2, atol=1e-6) )
-    assert( np.isclose(x2 ,  -1, atol=1e-6) )     
+    assert( rp.isclose(obj,5.41, atol=1e-6) )
+    assert( rp.isclose(x1 ,   2, atol=1e-6) )
+    assert( rp.isclose(x2 ,  -1, atol=1e-6) )     
     
     ################# TRMM ##################################################
     
@@ -186,7 +186,7 @@ def main():
     #   Inactive constraints
     # ------------------------------------------------------------------     
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>', -50., 1., 1*Units.less],
     ],dtype=object)    
@@ -205,15 +205,15 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  0, atol=1e-6) )
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  0, atol=1e-2) )       
+    assert( rp.isclose(obj,  0, atol=1e-6) )
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  0, atol=1e-2) )       
     
     # ------------------------------------------------------------------
     #   Active constraint
     # ------------------------------------------------------------------     
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>',   1., 1., 1*Units.less],
     ],dtype=object)   
@@ -232,15 +232,15 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,  1, atol=1e-6) )
-    assert( np.isclose(x1 ,-.1, atol=1e-2) )
-    assert( np.isclose(x2 ,  1, atol=1e-2) )  
+    assert( rp.isclose(obj,  1, atol=1e-6) )
+    assert( rp.isclose(x1 ,-.1, atol=1e-2) )
+    assert( rp.isclose(x2 ,  1, atol=1e-2) )  
     
     # ------------------------------------------------------------------
     #   Other constraints
     # ------------------------------------------------------------------     
     
-    problem.optimization_problem.constraints = np.array([
+    problem.optimization_problem.constraints = rp.array([
         [ 'x1' , '=',   2., 1., 1*Units.less],
         [ 'x2' , '<',  -1., 1., 1*Units.less],
     ],dtype=object)     
@@ -264,9 +264,9 @@ def main():
     #   Check Results
     # ------------------------------------------------------------------    
 
-    assert( np.isclose(obj,5.41, atol=1e-6) )
-    assert( np.isclose(x1 ,   2, atol=1e-2) )
-    assert( np.isclose(x2 ,  -1, atol=1e-2) )      
+    assert( rp.isclose(obj,5.41, atol=1e-6) )
+    assert( rp.isclose(x1 ,   2, atol=1e-2) )
+    assert( rp.isclose(x2 ,  -1, atol=1e-2) )      
      
     return
 
@@ -285,7 +285,7 @@ def setup():
     # -------------------------------------------------------------------
 
     #   [ tag                            , initial, (lb,ub)             , scaling , units ]
-    problem.inputs = np.array([
+    problem.inputs = rp.array([
         [ 'x1'  ,  1.  , (   -2.   ,   2.   )  ,   1.   , 1*Units.less],
         [ 'x2'  ,  1.  , (   -2.   ,   2.   )  ,   1.   , 1*Units.less],
     ],dtype=object)
@@ -296,7 +296,7 @@ def setup():
 
     # throw an error if the user isn't specific about wildcards
     # [ tag, scaling, units ]
-    problem.objective = np.array([
+    problem.objective = rp.array([
         ['y',1.,1*Units.less]
     ],dtype=object)
     
@@ -305,7 +305,7 @@ def setup():
     # -------------------------------------------------------------------
     
     # [ tag, sense, edge, scaling, units ]
-    problem.constraints = np.array([
+    problem.constraints = rp.array([
         [ 'x1' , '>', -10., 1., 1*Units.less],
         [ 'x2' , '>', -50., 1., 1*Units.less],
     ],dtype=object)

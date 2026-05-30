@@ -6,7 +6,7 @@ from RCAIDE.Framework.Core                              import Units
 from RCAIDE.Framework.Mission.Common                    import Results  
 from RCAIDE.Framework.Mission.Segments.Segment          import Segment
  
-import numpy as np
+import RNUMPY as rp
 
 # ------------------------------------------------------------------------------
 #   Propeller Analysis
@@ -30,29 +30,29 @@ def propeller_aerodynamic_analysis(propeller,
  
     segment                                                = Segment()  
     conditions                                             = Results()  
-    conditions.aerodynamics.angle_of_attack                = np.array([[angle_of_attack]])
+    conditions.aerodynamics.angle_of_attack                = rp.array([[angle_of_attack]])
     conditions.freestream.density                          = atmosphere_conditions.density 
     conditions.freestream.dynamic_viscosity                = atmosphere_conditions.dynamic_viscosity 
     conditions.freestream.speed_of_sound                   = atmosphere_conditions.speed_of_sound 
     conditions.freestream.temperature                      = atmosphere_conditions.temperature 
-    conditions.frames.planet.true_course                   = np.zeros((ctrl_pts,3,3)) 
-    conditions.frames.planet.true_course[:,0,0]            = np.cos(0.0),
-    conditions.frames.planet.true_course[:,0,1]            = - np.sin(0.0)
-    conditions.frames.planet.true_course[:,1,0]            = np.sin(0.0)
-    conditions.frames.planet.true_course[:,1,1]            = np.cos(0.0) 
-    conditions.frames.planet.true_course[:,2,2]            = 1 
-    conditions.frames.wind.transform_to_inertial           = np.zeros((ctrl_pts,3,3))   
-    conditions.frames.wind.transform_to_inertial[:,0,0]    = np.cos(0.0) 
-    conditions.frames.wind.transform_to_inertial[:,0,2]    = np.sin(0.0) 
-    conditions.frames.wind.transform_to_inertial[:,1,1]    = 1 
-    conditions.frames.wind.transform_to_inertial[:,2,0]    = -np.sin(0.0) 
-    conditions.frames.wind.transform_to_inertial[:,2,2]    = np.cos(0.0)  
-    conditions.frames.body.transform_to_inertial           = np.zeros((ctrl_pts,3,3))
-    conditions.frames.body.transform_to_inertial[:,0,0]    = np.cos(angle_of_attack)
-    conditions.frames.body.transform_to_inertial[:,0,2]    = np.sin(angle_of_attack)
-    conditions.frames.body.transform_to_inertial[:,1,1]    = 1
-    conditions.frames.body.transform_to_inertial[:,2,0]    = -np.sin(angle_of_attack)
-    conditions.frames.body.transform_to_inertial[:,2,2]    = np.cos(angle_of_attack)  
+    conditions.frames.planet.true_course                   = rp.zeros((ctrl_pts,3,3)) 
+    conditions.frames.planet.true_course = conditions.frames.planet.true_course.at[:,0,0].set(rp.cos(0.0),)
+    conditions.frames.planet.true_course = conditions.frames.planet.true_course.at[:,0,1].set(- rp.sin(0.0))
+    conditions.frames.planet.true_course = conditions.frames.planet.true_course.at[:,1,0].set(rp.sin(0.0))
+    conditions.frames.planet.true_course = conditions.frames.planet.true_course.at[:,1,1].set(rp.cos(0.0))
+    conditions.frames.planet.true_course = conditions.frames.planet.true_course.at[:,2,2].set(1)
+    conditions.frames.wind.transform_to_inertial           = rp.zeros((ctrl_pts,3,3))   
+    conditions.frames.wind.transform_to_inertial = conditions.frames.wind.transform_to_inertial.at[:,0,0].set(rp.cos(0.0))
+    conditions.frames.wind.transform_to_inertial = conditions.frames.wind.transform_to_inertial.at[:,0,2].set(rp.sin(0.0))
+    conditions.frames.wind.transform_to_inertial = conditions.frames.wind.transform_to_inertial.at[:,1,1].set(1)
+    conditions.frames.wind.transform_to_inertial = conditions.frames.wind.transform_to_inertial.at[:,2,0].set(-rp.sin(0.0))
+    conditions.frames.wind.transform_to_inertial = conditions.frames.wind.transform_to_inertial.at[:,2,2].set(rp.cos(0.0))
+    conditions.frames.body.transform_to_inertial           = rp.zeros((ctrl_pts,3,3))
+    conditions.frames.body.transform_to_inertial = conditions.frames.body.transform_to_inertial.at[:,0,0].set(rp.cos(angle_of_attack))
+    conditions.frames.body.transform_to_inertial = conditions.frames.body.transform_to_inertial.at[:,0,2].set(rp.sin(angle_of_attack))
+    conditions.frames.body.transform_to_inertial = conditions.frames.body.transform_to_inertial.at[:,1,1].set(1)
+    conditions.frames.body.transform_to_inertial = conditions.frames.body.transform_to_inertial.at[:,2,0].set(-rp.sin(angle_of_attack))
+    conditions.frames.body.transform_to_inertial = conditions.frames.body.transform_to_inertial.at[:,2,2].set(rp.cos(angle_of_attack))
     segment.state.conditions                               = conditions 
  
 

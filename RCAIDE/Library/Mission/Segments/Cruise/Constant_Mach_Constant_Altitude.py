@@ -10,7 +10,7 @@
 import RCAIDE  
 
 # Package imports  
-import numpy as np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Initialize Conditions
@@ -90,7 +90,7 @@ def initialize_conditions(segment):
     if alt is None:
         if not segment.state.initials: raise AttributeError('altitude not set')
         alt = -1.0 * segment.state.initials.conditions.frames.inertial.position_vector[-1,2]    
-    segment.state.conditions.freestream.altitude[:,0] = alt
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
     
     # Update freestream to get speed of sound
     RCAIDE.Library.Mission.Common.Update.atmosphere(segment)
@@ -99,22 +99,22 @@ def initialize_conditions(segment):
     # check for initial velocity
     if mach is None: 
         if not segment.state.initials: raise AttributeError('airspeed not set')
-        air_speed = np.linalg.norm(segment.state.initials.conditions.frames.inertial.velocity_vector[-1])    
-    else:# compute speed, constant with constant altitude
-        air_speed = mach * a
+        mach = segment.state.initials.conditions.freestream.mach_number[-1]    
+     
+    air_speed = mach * a
     
     # dimensionalize time
     t_initial = conditions.frames.inertial.time[0,0]
     t_final   = xf / air_speed + t_initial
     t_nondim  = segment.state.numerics.dimensionless.control_points
     time      =  t_nondim * (t_final-t_initial) + t_initial
-    v_x       = np.cos(beta)*air_speed 
-    v_y       = np.sin(beta)*air_speed 
+    v_x       = rp.cos(beta)*air_speed 
+    v_y       = rp.sin(beta)*air_speed 
     
     # pack
-    segment.state.conditions.freestream.altitude[:,0]             = alt
-    segment.state.conditions.frames.inertial.position_vector[:,2] = -alt # z points down
-    segment.state.conditions.frames.inertial.velocity_vector[:,0] = v_x[:,0]
-    segment.state.conditions.frames.inertial.velocity_vector[:,1] = v_y[:,0]
-    segment.state.conditions.frames.inertial.time[:,0]            = time[:,0]
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(alt)
+    segment.state.conditions.frames.inertial.position_vector = segment.state.conditions.frames.inertial.position_vector.at[:,2].set(-alt) # z points down
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,0].set(v_x[:,0])
+    segment.state.conditions.frames.inertial.velocity_vector = segment.state.conditions.frames.inertial.velocity_vector.at[:,1].set(v_y[:,0])
+    segment.state.conditions.frames.inertial.time = segment.state.conditions.frames.inertial.time.at[:,0].set(time[:,0])
     

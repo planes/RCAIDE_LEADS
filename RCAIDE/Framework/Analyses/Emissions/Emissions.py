@@ -9,7 +9,7 @@
 
 from RCAIDE.Framework.Core import Data
 from RCAIDE.Framework.Analyses import Analysis
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Emissions
@@ -26,8 +26,7 @@ class Emissions(Analysis):
             Source:
             None 
             """                   
-        self.tag      = 'Emissions'    
-        self.vehicle  = Data()
+        self.tag      = 'Emissions'     
         self.settings = Data() 
     
         

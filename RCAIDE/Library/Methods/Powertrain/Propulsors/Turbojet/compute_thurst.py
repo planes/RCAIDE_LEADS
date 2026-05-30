@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core      import Units 
 
 # Python package imports
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  compute_thrust
@@ -80,7 +80,7 @@ def compute_thrust(turbojet,conditions):
               Non-dimensional thrust
           - core_mass_flow_rate : numpy.ndarray
               Core mass flow rate [kg/s]
-          - fuel_flow_rate : numpy.ndarray
+          - fuel_mass_flow_rate : numpy.ndarray
               Fuel flow rate [kg/s]
           - power : numpy.ndarray
               Power output [W]
@@ -164,24 +164,28 @@ def compute_thrust(turbojet,conditions):
     TSFC             = f*g/(Fsp*a0)*(1.-SFC_adjustment) * Units.hour # 1/s is converted to 1/hr here
 
     # Computing the core mass flow
-    mdot_core        = mdhc*np.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
+    mdot_core        = mdhc*rp.sqrt(Tref/total_temperature_reference)*(total_pressure_reference/Pref)
 
     # Computing the dimensional thrust
     FD2              = Fsp*a0*mdot_core* turbojet_conditions.throttle
 
     # Fuel flow rate
-    a = np.array([0.])        
-    fuel_flow_rate   = np.fmax(FD2*TSFC/g,a)*1./Units.hour
+    a = rp.array([0.])        
+    m_dot_fuel   = rp.fmax(FD2*TSFC/g,a)*1./Units.hour
 
     # Computing the power 
     power            = FD2*u0
 
     # pack outputs 
-    turbojet_conditions.thrust                            = FD2 
+    thrust_vector              = rp.zeros((len(FD2), 3))
+    thrust_vector = thrust_vector.at[:,0].set(FD2[:,0])
+    
+    # Pack turbofan outouts  
+    turbojet_conditions.thrust                            = thrust_vector  
     turbojet_conditions.thrust_specific_fuel_consumption  = TSFC
     turbojet_conditions.non_dimensional_thrust            = Fsp 
     turbojet_conditions.core_mass_flow_rate               = mdot_core
-    turbojet_conditions.fuel_flow_rate                    = fuel_flow_rate    
+    turbojet_conditions.fuel_mass_flow_rate               = m_dot_fuel    
     turbojet_conditions.power                             = power   
     turbojet_conditions.specific_impulse                  = Isp
 

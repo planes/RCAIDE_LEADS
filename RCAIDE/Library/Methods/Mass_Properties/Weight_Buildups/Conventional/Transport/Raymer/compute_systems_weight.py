@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Weights/Correlation_Buildups/Raymer/compute_systems_weight.py
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/Transport/Raymer/compute_systems_weight.py
 # 
 # 
 # Created:  Sep 2024, M. Clarke
@@ -11,9 +11,10 @@
 # RCAIDE
 import RCAIDE 
 from RCAIDE.Framework.Core    import Units, Data 
+from RCAIDE.Library.Components import Component
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 # Systems Weight 
@@ -106,23 +107,20 @@ def compute_systems_weight(vehicle):
     L              = ref_fuselage.lengths.total / Units.ft
     Bw             = ref_wing.spans.projected / Units.ft
     DG             = vehicle.mass_properties.max_takeoff / Units.lbs
-    Scs            = flap_ratio * vehicle.reference_area / Units.ft**2
-    design_mach    = vehicle.flight_envelope.design_mach_number
-    num_pax        = vehicle.passengers 
+    Scs            = flap_ratio * vehicle.reference_area / Units.ft**2 
+    num_pax        = vehicle.number_of_passengers 
     NENG = 0 
     for network in  vehicle.networks:
-        for propulsor in network.propulsors:
-            if isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan) or  isinstance(propulsor, RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet):
-                NENG += 1  
+        for _ in network.propulsors: 
+            NENG += 1  
     fuse_w         = ref_fuselage.width / Units.ft
     fuse_h         = ref_fuselage.heights.maximum / Units.ft   
-    cargo_weight   = vehicle.payload.cargo.mass_properties.mass / Units.lbs
+    cargo_weight   = vehicle.mass_properties.payload / Units.lbs
     
-    if vehicle.passengers >= 150:
+    if vehicle.number_of_passengers >= 150:
         flight_crew = 3 # number of flight crew
     else:
-        flight_crew = 2
-    Ns      = 4  # Number of flight control systems (typically 4)
+        flight_crew = 2 
     Kr      = 1  # assuming not a reciprocating engine
     Ktp     = 1  # assuming not a turboprop
     Nf      = 7  # number of functions performed by controls (typically 4-7)
@@ -139,15 +137,52 @@ def compute_systems_weight(vehicle):
     WAVONCG  = 0.09 * DG**0.8  # Avionics Group from Commercial Airplane Design Principles by Pasquale Sforza eq. 8.35. Which is an improvment from Kroo's estimation
 
     D       = (fuse_w + fuse_h) / 2.
-    Sf      = np.pi * (L / D - 1.7) * D ** 2  # Fuselage wetted area, ft**2
+    Sf      = rp.pi * (L / D - 1.7) * D ** 2  # Fuselage wetted area, ft**2
     WFURN   = 0.0577 * flight_crew ** 0.1 * (cargo_weight) ** 0.393 * Sf ** 0.75 + 46 * num_pax
     WFURN  += 75 * flight_crew
     WFURN  += 2.5 * num_pax**1.33
 
-    Vpr = D ** 2 * np.pi / 4 * L
+    Vpr = D ** 2 * rp.pi / 4 * L
     WAC = 62.36 * num_pax ** 0.25 * (Vpr / 1000) ** 0.604 * Wuav ** 0.1
 
     WAI = 0.002 * DG
+
+    # Update system component masses if not user defined. If user defined than update the outputs
+    for system in vehicle.systems:
+        if isinstance(system,Component):
+            if system.mass_properties.mass == 0 or system.mass_properties.calculated_flag:
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Avionics:
+                    system.mass_properties.mass = WAVONCG * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Flight_Controls:
+                    system.mass_properties.mass = WSC * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Auxillary_Power_Unit: 
+                    system.mass_properties.mass = WAPUG * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Electrical: 
+                    system.mass_properties.mass = WELEC * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Hydraulics: 
+                    system.mass_properties.mass = WHYD * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Environmental_Controls: 
+                    system.mass_properties.mass = WAC * Units.lbs + WAC * Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Instruments:
+                    system.mass_properties.mass = WIN * Units.lbs
+                system.mass_properties.calculated_flag = True
+            else:
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Avionics:
+                    WAVONCG = system.mass_properties.mass / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Flight_Controls:
+                    WSC    = system.mass_properties.mass / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Auxillary_Power_Unit: 
+                    WAPUG   = system.mass_properties.mass / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Electrical: 
+                    WELEC  = system.mass_properties.mass / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Hydraulics: 
+                    WHYD   = system.mass_properties.mass / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Environmental_Controls: 
+                    WAI    = system.mass_properties.mass * 0.5 / Units.lbs
+                    WAC    = system.mass_properties.mass * 0.5 / Units.lbs
+                if type(system) == RCAIDE.Library.Components.Powertrain.Systems.Instruments:
+                    WIN    = system.mass_properties.mass / Units.lbs
+
 
     output                     = Data()
     output.W_flight_control    = WSC * Units.lbs
@@ -159,5 +194,5 @@ def compute_systems_weight(vehicle):
     output.W_ac                = WAC * Units.lbs
     output.W_furnish           = WFURN * Units.lbs
     output.W_anti_ice          = WAI * Units.lbs
-    output.W_systems           = WSC + WAPUG + WIN + WHYD + WELEC + WAVONCG + WFURN + WAC + WAI
+    output.W_systems           = (WSC + WAPUG + WIN + WHYD + WELEC + WAVONCG + WFURN + WAC + WAI)*Units.lbs
     return output

@@ -13,12 +13,19 @@ from RCAIDE.Framework.Core import Units ,  Data
 from RCAIDE.Library.Plots             import *       
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 import pylab as plt 
 import sys
 import os
 
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Navion    import vehicle_setup, configs_setup 
 
 # ----------------------------------------------------------------------
@@ -65,15 +72,15 @@ def AVL_Surrogate_Mission(use_surrogate,trim_aircraft,keep_regression_files,new_
  
     # Extract sample values from computation   
     cruise_CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[2][0] 
-    cruise_CL_thruth = 0.46795223576170475
+    cruise_CL_thruth = 0.4207404923969484
     # Truth values  
     error = Data()  
-    error.cruise_CL   = np.max(np.abs(cruise_CL     - cruise_CL_thruth))   
+    error.cruise_CL   = rp.max(rp.abs(cruise_CL - cruise_CL_thruth))   
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
          
     return
 
@@ -99,16 +106,16 @@ def AVL_Single_Point_Trim_Mission(use_surrogate,trim_aircraft,keep_regression_fi
  
     # Extract sample values from computation   
     cruise_CL        = results.segments.cruise.conditions.aerodynamics.coefficients.lift.total[0][0]
-    cruise_CL_thruth = 0.45599999999999996
+    cruise_CL_truth = 0.48
     
     # Truth values  
     error = Data()  
-    error.cruise_CL   = np.max(np.abs(cruise_CL     - cruise_CL_thruth))   
+    error.cruise_CL   = rp.max(rp.abs(cruise_CL     - cruise_CL_truth))   
     print('Errors:')
     print(error)
      
     for k,v in list(error.items()): 
-        assert(np.abs(v)<1e-3)
+        assert(rp.abs(v)<1e-3)
          
     return
 
@@ -135,37 +142,34 @@ def base_analysis(vehicle,use_surrogate,trim_aircraft,keep_regression_files,new_
     #   Initialize the Analyses
     # ------------------------------------------------------------------     
     analyses = RCAIDE.Framework.Analyses.Vehicle()
+    analyses.vehicle =  vehicle
+
+    #  Weights
+    weights = RCAIDE.Framework.Analyses.Weights.Electric_General_Aviation() 
+    analyses.append(weights)    
+
+    #  Geometry
+    geometry = RCAIDE.Framework.Analyses.Geometry.Geometry() 
+    analyses.append(geometry)
 
     #  Aerodynamics Analysis
-    aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice()
-    aerodynamics.vehicle                             = vehicle 
+    aerodynamics                                     = RCAIDE.Framework.Analyses.Aerodynamics.Athena_Vortex_Lattice() 
     aerodynamics.settings.filenames.avl_bin_name     = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
-    aerodynamics.settings.filenames.run_folder       = 'avl_files' +  folder_name
+    aerodynamics.settings.filenames.run_folder       = os.path.join(os.path.dirname(__file__),'avl_files' +  folder_name)
     aerodynamics.settings.use_surrogate              = use_surrogate
     aerodynamics.settings.trim_aircraft              = trim_aircraft 
     aerodynamics.settings.model_fuselage             = False 
     aerodynamics.settings.print_output               = False 
     aerodynamics.settings.keep_files                 = keep_regression_files          
     aerodynamics.settings.new_regression_results     = new_regression_results
-    analyses.append(aerodynamics)
-    
+    analyses.append(aerodynamics) 
 
     # Stability Analysis
-    stability                                        = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice()
-    stability.vehicle                                = vehicle 
-    stability.settings.filenames.avl_bin_name        = '/Users/matthewclarke/Documents/LEADS/CODES/AVL/avl3.35'
-    stability.settings.filenames.run_folder          = 'avl_files' +  folder_name
-    stability.settings.use_surrogate                 = use_surrogate
-    stability.settings.trim_aircraft                 = trim_aircraft 
-    stability.settings.model_fuselage                = False 
-    stability.settings.print_output                  = False 
-    stability.settings.keep_files                    = keep_regression_files        
-    stability.settings.new_regression_results        = new_regression_results
+    stability                                        = RCAIDE.Framework.Analyses.Stability.Athena_Vortex_Lattice() 
     analyses.append(stability)    
   
     #  Energy
-    energy                                           = RCAIDE.Framework.Analyses.Energy.Energy()
-    energy.vehicle                                   = vehicle 
+    energy                                           = RCAIDE.Framework.Analyses.Energy.Energy() 
     analyses.append(energy)
  
     #  Planet Analysis
@@ -175,7 +179,6 @@ def base_analysis(vehicle,use_surrogate,trim_aircraft,keep_regression_files,new_
     # ------------------------------------------------------------------
     #  Atmosphere Analysis
     atmosphere                                       = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
-    atmosphere.features.planet                       = planet.features
     analyses.append(atmosphere)   
 
     # done!

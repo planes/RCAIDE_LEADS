@@ -13,7 +13,7 @@ import RCAIDE
 from RCAIDE.Library.Methods.Geometry.Airfoil  import compute_airfoil_properties, compute_naca_4series, import_airfoil_geometry
 
 # Python package imports   
-import numpy as np  
+import RNUMPY as rp  
     
 # ----------------------------------------------------------------------------------------------------------------------  
 #  Blade Geometry Setup 
@@ -106,7 +106,7 @@ def blade_geometry_setup(rotor, number_of_stations):
     design_thrust_hover   = rotor.hover.design_thrust
     design_power_hover    = rotor.hover.design_power
     chi0                  = Rh/R  
-    chi                   = np.linspace(chi0,1,N+1)  
+    chi                   = rp.linspace(chi0,1,N+1)  
     chi                   = chi[0:N]
     airfoils              = rotor.airfoils      
     a_loc                 = rotor.airfoil_polar_stations  
@@ -132,12 +132,18 @@ def blade_geometry_setup(rotor, number_of_stations):
                 airfoil.polars = compute_airfoil_properties(airfoil.geometry, airfoil_polar_files= airfoil.polar_files) 
                      
     # thickness to chord         
-    t_c           = np.zeros(N)    
-    if num_airfoils>0:
-        for j,airfoil in enumerate(airfoils): 
-            a_geo         = airfoil.geometry
-            locs          = np.where(np.array(a_loc) == j ) 
-            t_c[locs]     = a_geo.thickness_to_chord 
+    t_c = rp.zeros(N)
+
+    if num_airfoils > 0:
+        for j, airfoil in enumerate(airfoils):
+            a_geo = airfoil.geometry
+
+            # Boolean mask of locations belonging to this airfoil
+            mask = (rp.array(a_loc) == j)
+
+            # Scatter update
+            t_c = t_c.at[mask].set(a_geo.thickness_to_chord)
+
             
     # append additional prop-rotor  properties for optimization  
     rotor.number_of_blades             = int(B)  
@@ -168,12 +174,12 @@ def blade_geometry_setup(rotor, number_of_stations):
     
     config                              = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag                          = 'hover' 
-    config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,np.pi/2,0.0]    
+    config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,rp.pi/2,0.0]    
     configs.append(config)        
 
     config                              = RCAIDE.Library.Components.Configs.Config(base_config)
     config.tag                          = 'oei' 
-    config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,np.pi/2,0.0]    
+    config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,rp.pi/2,0.0]    
     configs.append(config)       
     
     if type(rotor) == RCAIDE.Library.Components.Powertrain.Converters.Prop_Rotor:  
@@ -186,6 +192,6 @@ def blade_geometry_setup(rotor, number_of_stations):
         
         config                          = RCAIDE.Library.Components.Configs.Config(base_config)
         config.tag                      = 'cruise'
-        config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,np.pi/2,0.0] 
+        config.networks.electric.propulsors.electric_rotor.rotor.orientation_euler_angles = [0.0,rp.pi/2,0.0] 
         configs.append(config)
     return configs 

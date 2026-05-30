@@ -9,7 +9,7 @@ from RCAIDE.Library.Methods.Geometry.Airfoil  import compute_airfoil_properties
 from RCAIDE.Library.Methods.Geometry.Airfoil  import import_airfoil_geometry    
 from scipy.interpolate import interp1d
 import os
-import numpy as np   
+import RNUMPY as rp   
 
 # design propeller                                       
 def F8745_D4_Propeller():  
@@ -21,12 +21,12 @@ def F8745_D4_Propeller():
     prop.tip_radius                 = 2.03/2
     prop.hub_radius                 = prop.tip_radius*0.20
     prop.number_of_blades           = 2  
-    r_R_data                        = np.array([ 0.2,0.300,0.450,0.601,0.747,0.901,0.950,0.975,0.998   ])    
-    t_c_data                        = np.array([ 0.3585,0.1976,0.1148,0.0834,0.0648,0.0591,0.0562,0.0542,0.0533    ])    
-    b_R_data                        = np.array([0.116,0.143,0.163,0.169,0.166,0.148,0.135,0.113,0.075  ])    
-    beta_data                       = np.array([  0.362,0.286,0.216,0.170,0.135,0.112,0.105,0.101,0.098  ])* 100  
+    r_R_data                        = rp.array([ 0.2,0.300,0.450,0.601,0.747,0.901,0.950,0.975,0.998   ])    
+    t_c_data                        = rp.array([ 0.3585,0.1976,0.1148,0.0834,0.0648,0.0591,0.0562,0.0542,0.0533    ])    
+    b_R_data                        = rp.array([0.116,0.143,0.163,0.169,0.166,0.148,0.135,0.113,0.075  ])    
+    beta_data                       = rp.array([  0.362,0.286,0.216,0.170,0.135,0.112,0.105,0.101,0.098  ])* 100  
     num_sec = 30          
-    new_radius_distribution         = np.linspace(0.2,0.98 ,num_sec)
+    new_radius_distribution         = rp.linspace(0.2,0.98 ,num_sec)
     func_twist_distribution         = interp1d(r_R_data, (beta_data)* Units.degrees , kind='cubic')
     func_chord_distribution         = interp1d(r_R_data, b_R_data * prop.tip_radius , kind='cubic')
     func_radius_distribution        = interp1d(r_R_data, r_R_data * prop.tip_radius , kind='cubic')
@@ -49,8 +49,8 @@ def F8745_D4_Propeller():
     airfoil.geometry                 = import_airfoil_geometry(airfoil.coordinate_file,airfoil.number_of_points)
     airfoil.polars                   = compute_airfoil_properties(airfoil.geometry,airfoil.polar_files)
     prop.append_airfoil(airfoil) 
-    prop.airfoil_polar_stations      = list(np.zeros(num_sec).astype(int))  
-    prop.mid_chord_alignment         = np.zeros_like(prop.chord_distribution)  
+    prop.airfoil_polar_stations      = list(rp.zeros(num_sec,dtype=rp.int))  
+    prop.mid_chord_alignment         = rp.zeros_like(prop.chord_distribution)  
         
     return prop
 

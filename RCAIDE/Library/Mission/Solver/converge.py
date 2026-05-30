@@ -12,9 +12,9 @@ from RCAIDE.Framework.Optimization.Packages.scipy import scipy_setup
 from RCAIDE.Framework.Optimization.Common         import Nexus
 from RCAIDE.Framework.Analyses.Process            import Process
 
-import scipy 
-import scipy.optimize
-import numpy as np 
+import RNUMPY as rp 
+
+import numpy as np
 import sys 
 import os 
 
@@ -69,13 +69,22 @@ def converge(segment):
     elif segment.state.numerics.solver.type  == "root_finder": 
         unknowns = segment.state.unknowns.pack_array() 
          
-        unknowns,infodict,ier,error_message = scipy.optimize.fsolve(iterate_root_finder,
-                                             unknowns,
-                                             args   = segment,
-                                             xtol   = segment.state.numerics.solver.tolerance_solution,
-                                             maxfev = segment.state.numerics.solver.max_evaluations,
-                                             epsfcn = segment.state.numerics.solver.step_size,
-                                             full_output = 1)
+        if segment.state.number_of_unknowns != segment.state.number_of_residuals:
+            raise AttributeError('\n The system of equations representing the mission is not square. The number of unknowns (' + str(segment.state.number_of_unknowns) + \
+                                 ') is not equal to the number of residuals (equations) (' + str(segment.state.number_of_residuals) + '). Either enforce of unknowns '+\
+                                 ' to be equal to the number of residuals (equations) to use fsolve or switch RCAIDE solver type to "optimize" when defining the segment.'+ \
+                                 '\n i.e. segment.state.numerics.solver.type  = "optimize" ') 
+        else:
+            unknowns,infodict,ier,error_message = rp.scipy.optimize.fsolve(iterate_root_finder,
+                                                 unknowns,
+                                                 args   = segment,
+                                                 xtol   = segment.state.numerics.solver.tolerance_solution,
+                                                 maxfev = segment.state.numerics.solver.max_evaluations,
+                                                 epsfcn = segment.state.numerics.solver.step_size,
+                                                 full_output = 1)
+            
+            # Run the mission again to reset the unknowns to the final ones
+            residuals = iterate_root_finder(unknowns,segment)
         
         if ier !=1:
             mission_converge = False
@@ -119,7 +128,7 @@ def iterate_root_finder(unknowns, segment):
     Properties Used:
     N/A
     """       
-    if isinstance(unknowns,np.ndarray):
+    if isinstance(unknowns,rp.ndarray):
         segment.state.unknowns.unpack_array(unknowns)
     else:
         segment.state.unknowns = unknowns
@@ -160,78 +169,86 @@ def add_mission_variables(segment):
     # Step 2 : Get segment type 
     ground_seg_flag =  (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Landing) or\
                        (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Takeoff) or \
-                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Ground) 
-    constant_throttle_seg = type(segment) == RCAIDE.Framework.Mission.Segments.Cruise.Constant_Throttle_Constant_Altitude 
+                       (type(segment) == RCAIDE.Framework.Mission.Segments.Ground.Ground)  
     single_pt_seg = (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
                     (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_AVL_Trimmed) or \
                     (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude_No_Propulsion) or \
-                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle) 
-
-
+                    (type(segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle)  
     
     # Step 2: Optimizer Inputs 
     # Step 2.1: Extract inputs
-    input_count  = 0
-    unknown_keys = list(segment.state.unknowns.keys())
+    input_count   = 0
+    unknown_keys  = list(segment.state.unknowns.keys())  
     unknown_keys.remove('tag') 
     if ground_seg_flag: 
-        n_points     = segment.state.numerics.number_of_control_points
-        len_inputs = n_points 
-    elif constant_throttle_seg:
-        n_points     = segment.state.numerics.number_of_control_points  
-        len_inputs = n_points*(len(unknown_keys)-1) + 1
+        n_points      = segment.state.numerics.number_of_control_points
+        len_inputs    = n_points
+        len_residuals = n_points
     elif single_pt_seg:
-        n_points   = 1
-        len_inputs = len(unknown_keys)
+        n_points      = 1
+        len_inputs    = segment.state.number_of_unknowns
+        len_residuals = segment.state.number_of_residuals
     else:
-        n_points     = segment.state.numerics.number_of_control_points  
-        len_inputs = n_points*len(unknown_keys)
-        
-    unknown_value  = Data()
-    full_unkn_vals = Data()
-    for unkn in unknown_keys:
-        unknown_value[unkn]  = segment.state.unknowns[unkn]
-        full_unkn_vals[unkn] = unknown_value[unkn] 
+        n_points      = segment.state.numerics.number_of_control_points  
+        len_inputs    = n_points*segment.state.number_of_unknowns
+        len_residuals = n_points*segment.state.number_of_residuals
+          
+            
+    full_unkn_vals        = Data()
+    full_upper_bound_vals = Data()
+    full_lower_bound_vals = Data()
+    for unkn in unknown_keys: 
+        full_unkn_vals[unkn]  = segment.state.unknowns[unkn]
+        full_lower_bound_vals[unkn] = rp.atleast_2d(segment.state.numerics.solver.lower_bounds[unkn])
+        full_upper_bound_vals[unkn] = rp.atleast_2d(segment.state.numerics.solver.upper_bounds[unkn])
 
-    # Step 2.2: Construct nexus format  : [Variable_###, initial, -np.inf, np.inf , scaling, Units.less]
+    # Step 2.2: Construct nexus format  : [Variable_###, initial, -rp.inf, rp.inf , scaling, Units.less]
     initial_values    = full_unkn_vals.pack_array()
     input_len_strings = np.tile('Variable_', len_inputs)
-    input_numbers     = np.linspace(1,len_inputs,len_inputs,dtype=np.int16)
+    input_numbers     = rp.linspace(1,len_inputs,len_inputs,dtype=rp.int16)
     input_names       = np.core.defchararray.add(input_len_strings,np.array(input_numbers+input_count).astype(str))
-    bounds            = np.broadcast_to((-np.inf,np.inf),(len_inputs,2))
-    units             = np.broadcast_to(Units.less,(len_inputs,))
-    new_inputs        = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None,None])),len_inputs), (-1, 6))
-    
+    lower_bounds      = full_lower_bound_vals.pack_array()
+    upper_bounds      = full_upper_bound_vals.pack_array()     
+    units             = rp.broadcast_to(rp.array(Units.less),(len_inputs,))
     # scaling factor for optimizer 
-    factor = np.ceil(np.log10(abs(initial_values)))
-    factor[np.isinf(factor)] = 0
+    factor = rp.ceil(rp.log10(abs(initial_values)))
+    factor = rp.where(rp.isinf(factor), 0, factor)
     scale  = 10 ** (factor)
     
     # Step 2.4 Add in the inputs 
-    new_inputs[:,0]     = input_names   
-    new_inputs[:,1]     = initial_values 
-    new_inputs[:,2:4]   = bounds   
-    new_inputs[:,4]     = scale
-    new_inputs[:,5]     = units 
-    optimization_problem.inputs = np.array(new_inputs,dtype=object)
+    optimization_problem.inputs = Data()
+    optimization_problem.inputs.name = input_names
+    
+    new_inputs_value = rp.zeros((len_inputs, 5))
+    new_inputs_value = new_inputs_value.at[:,0].set(rp.ravel(initial_values))
+    new_inputs_value = new_inputs_value.at[:,1].set(rp.ravel(lower_bounds))
+    new_inputs_value = new_inputs_value.at[:,2].set(rp.ravel(upper_bounds))
+    new_inputs_value = new_inputs_value.at[:,3].set(rp.ravel(scale))
+    new_inputs_value = new_inputs_value.at[:,4].set(rp.ravel(units))
+    optimization_problem.inputs.value = rp.array(new_inputs_value, dtype=rp.float32)
     
     # Step 3: Constraints 
     # Step 3.1 : Create the equality constraints to the beginning of the constraints all equality constraints are 0, scale 1, and unitless
-    new_con = np.reshape(np.tile(np.atleast_2d(np.array([None,None,None,None,None])),len_inputs), (-1, 5))
-
-    con_len_strings = np.tile('Residual_', len_inputs)
-    con_names       = np.core.defchararray.add(con_len_strings,np.array(input_numbers+input_count).astype(str))
-    equals          = np.broadcast_to('=',(len_inputs,))
-    zeros           = np.zeros(len_inputs)
-    ones            = np.ones(len_inputs)
+    con_count       = 0
+    con_len_strings = np.tile('Residual_', len_residuals)
+    con_numbers     = rp.linspace(1,len_residuals,len_residuals,dtype=rp.int16)
+    con_names       = np.core.defchararray.add(con_len_strings,np.array(con_numbers+con_count).astype(str))
+    equals          = np.broadcast_to('=',(len_residuals,))
+    zeros           = rp.zeros(len_residuals)
+    ones            = rp.ones(len_residuals)
     
     # Step 3.2 Add in the new constraints
-    new_con[:,0]    = con_names
-    new_con[:,1]    = equals
-    new_con[:,2]    = zeros  
-    new_con[:,3]    = ones
-    new_con[:,4]    = 1*Units.less
-    optimization_problem.constraints =  np.array(new_con,dtype=object)            
+    optimization_problem.constraints = Data()
+    new_con_name_signs = np.empty((len_residuals, 2), dtype=object)
+    new_con_name_signs[:,0] = con_names
+    new_con_name_signs[:,1] = equals
+    optimization_problem.constraints.name_signs = new_con_name_signs
+    
+    new_con_value = rp.zeros((len_residuals, 3))
+    new_con_value = new_con_value.at[:,0].set(zeros)
+    new_con_value = new_con_value.at[:,1].set(ones)
+    new_con_value = new_con_value.at[:,2].set(1*Units.less)
+    optimization_problem.constraints.value = rp.array(new_con_value, dtype=rp.float32)            
     
     # Step 4. Aliases 
     # Step 4.1: Setup the aliases for the inputs
@@ -247,19 +264,7 @@ def add_mission_variables(segment):
         input_aliases       = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0]  = input_names
         input_aliases[0,1]  = 'segment.state.unknowns.'+unknown_keys[0] 
-        input_aliases[1:,1] = input_string
-        
-    elif constant_throttle_seg: 
-        output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16)        
-        for unkn in unknown_keys[:-1]:
-            basic_string_con[unkn] = np.tile('segment.state.unknowns.'+unkn+'[', n_points)
-            input_string.append(np.core.defchararray.add(basic_string_con[unkn],np.array(output_numbers).astype(str)))
-        input_string         = np.ravel(input_string)
-        input_string         = np.core.defchararray.add(input_string, np.tile(']',len_inputs-1)) 
-        input_aliases        = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
-        input_aliases[:,0]   = input_names   
-        input_aliases[:-1,1] = input_string 
-        input_aliases[-1,1]  = 'segment.state.unknowns.'+unknown_keys[-1]
+        input_aliases[1:,1] = input_string 
         
     elif single_pt_seg:  
         for unkn in unknown_keys:
@@ -269,7 +274,7 @@ def add_mission_variables(segment):
         input_string       = np.core.defchararray.add(input_string, np.tile(']',len_inputs))
         input_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
         input_aliases[:,0] = input_names
-        input_aliases[:,1] = input_string    
+        input_aliases[:,1] = input_string
     else:  
         output_numbers = np.linspace(0,n_points-1,n_points,dtype=np.int16) 
         for unkn in unknown_keys:
@@ -282,29 +287,36 @@ def add_mission_variables(segment):
         input_aliases[:,1] = input_string
     
     # Step 4.2: Setup the aliases for the residuals
-    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_inputs)
-    residual_string       = np.core.defchararray.add(basic_string_res,np.array(input_numbers-1).astype(str))
-    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_inputs))
-    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_inputs), (-1, 2)) 
+    basic_string_res      = np.tile('segment.state.residuals.pack_array()[', len_residuals)
+    residual_string       = np.core.defchararray.add(basic_string_res,np.array(con_numbers-1).astype(str))
+    residual_string       = np.core.defchararray.add(residual_string, np.tile(']',len_residuals))
+    residual_aliases      = np.reshape(np.tile(np.atleast_2d(np.array((None,None))),len_residuals), (-1, 2)) 
     residual_aliases[:,0] = con_names
     residual_aliases[:,1] = residual_string
         
     # Step 4.3: Append Aliases
     aliases = []
     for ii in range(len_inputs):
-        aliases.append(input_aliases[ii].tolist()) 
-        aliases.append(residual_aliases[ii].tolist())
+        aliases.append(input_aliases[ii].tolist())
+    for jj in range(len_residuals):   
+        aliases.append(residual_aliases[jj].tolist())
     
     # Step 5: Objective function
     if segment.state.numerics.solver.objective == None:     
         aliases.append([ 'nothing'                   , 'postprocess.nothing']) 
-        optimization_problem.objective = np.array([ [  'nothing'  ,  1   ,    1*Units.less]  ],dtype=object)            
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = np.array([['nothing']], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "energy":
         aliases.append([ 'energy_consumed'          , 'postprocess.energy_consumed']) 
-        optimization_problem.objective = np.array([ [  'energy_consumed'  ,  1   ,    1*Units.less]  ],dtype=object)            
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = np.array([['energy_consumed']], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     elif segment.state.numerics.solver.objective == "power":
         aliases.append([ 'maximum_power'          , 'postprocess.maximum_power'])
-        optimization_problem.objective = np.array([ [  'maximum_power'  ,  1   ,    1*Units.less]  ],dtype=object)   
+        optimization_problem.objective = Data()
+        optimization_problem.objective.name = np.array([['maximum_power']], dtype=object)
+        optimization_problem.objective.value = rp.array([[1, 1*Units.less]], dtype=rp.float32)
     else:
         raise Exception('undefined objective function')
     
@@ -327,9 +339,76 @@ def add_mission_variables(segment):
     nexus.postprocess = Data()
     
     # Step 10: Append optimization problem 
-    nexus.optimization_problem   = optimization_problem
+    nexus.optimization_problem   = convert_problem_style(optimization_problem)
+
+
     
     return nexus
+
+def convert_problem_style(problem):
+    # 1. INPUTS
+    if hasattr(problem, 'inputs') and not isinstance(problem.inputs, Data):
+        arr = rp.array(problem.inputs or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1) # Force 2D if passed a flat list
+            
+        D = Data()
+        if len(arr) == 0:
+            D.name = rp.array([], dtype=object).reshape(0, 1)
+            D.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            D.name = arr[:, 0:1] # 0:1 keeps it 2D
+            D.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.inputs = D
+
+    # 2. OBJECTIVE
+    if hasattr(problem, 'objective') and not isinstance(problem.objective, Data):
+        arr = rp.array(problem.objective or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        D = Data()
+        if len(arr) == 0:
+            D.name = rp.array([], dtype=object).reshape(0, 1)
+            D.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            D.name = arr[:, 0:1]
+            D.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.objective = D
+
+    # 3. CONSTRAINTS
+    if hasattr(problem, 'constraints') and not isinstance(problem.constraints, Data):
+        arr = rp.array(problem.constraints or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        C = Data()
+        if len(arr) == 0:
+            C.name_signs = rp.array([], dtype=object).reshape(0, 2)
+            C.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            C.name_signs = arr[:, 0:2]
+            C.value = rp.array(arr[:, 2:], dtype=rp.float)
+        problem.constraints = C
+
+    # 4. OUTPUTS (Adding this since your debugger referenced it)
+    if hasattr(problem, 'outputs') and not isinstance(problem.outputs, Data):
+        arr = rp.array(problem.outputs or [], dtype=object)
+        if len(arr) > 0 and arr.ndim == 1:
+            arr = arr.reshape(1, -1)
+            
+        O = Data()
+        if len(arr) == 0:
+            O.name = rp.array([], dtype=object).reshape(0, 1)
+            O.value = rp.array([], dtype=rp.float).reshape(0, 0)
+        else:
+            O.name = arr[:, 0:1]
+            O.value = rp.array(arr[:, 1:], dtype=rp.float)
+        problem.outputs = O
+
+    return problem
+
+    return problem
 
 def iterate_segment(): 
     procedure                           = Process()  
@@ -343,7 +422,7 @@ def iterate_optimizer(nexus):
     segment = nexus.segment
      
     unknowns = segment.state.unknowns.pack_array()
-    if isinstance(unknowns,np.ndarray):
+    if isinstance(unknowns,rp.ndarray):
         segment.state.unknowns.unpack_array(unknowns)
     else:
         segment.state.unknowns = unknowns
@@ -362,7 +441,7 @@ def segment_post_process(nexus):
     I          = nexus.segment.state.numerics.time.integrate
     
     # compute max power of segment 
-    max_power  = np.max(nexus.segment.state.conditions.energy.power)
+    max_power  = rp.max(nexus.segment.state.conditions.energy.power)
     
     # compute total energy consumed 
     if (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Altitude) or\
@@ -371,11 +450,11 @@ def segment_post_process(nexus):
                     (type(nexus.segment) == RCAIDE.Framework.Mission.Segments.Single_Point.Set_Speed_Set_Throttle): 
         energy_consumed =  0
     else:
-        energy_consumed = np.dot(I,power)[-1][0]
+        energy_consumed = rp.dot(I,power)[-1][0]
     
     postprocess                 = nexus.postprocess
     postprocess.maximum_power   = max_power
     postprocess.energy_consumed = energy_consumed 
-    postprocess.nothing         = 0
-    
+    postprocess.nothing         = rp.sum(nexus.segment.state.unknowns.pack_array())*0.0
+
     return nexus  

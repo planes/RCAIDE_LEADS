@@ -21,7 +21,7 @@ from RCAIDE.Framework.External_Interfaces.OpenVSP.vsp_wing             import re
 from RCAIDE.Framework.External_Interfaces.OpenVSP.vsp_nacelle          import read_vsp_nacelle
 from RCAIDE.Framework.External_Interfaces.OpenVSP.get_vsp_measurements import get_vsp_measurements
 
-import numpy as np
+import RNUMPY as rp
 from copy import deepcopy
 import sys
 import os
@@ -38,7 +38,15 @@ except ImportError:
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  vsp read 
 # ---------------------------------------------------------------------------------------------------------------------- 
-def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_type = None, units_type='SI',use_scaling=True,calculate_wetted_area=True): 
+def import_vsp_vehicle(tag,
+                       main_wing_tag     = None,
+                       network_type      = None,
+                       propulsor_type    = None, 
+                       blended_wing_body = False ,
+                       last_blended_wing_body_center_body_section_index = None, 
+                       units_type           = 'SI',
+                       use_scaling          = True,
+                       calculate_wetted_area= True,): 
     """This reads an OpenVSP vehicle geometry and writes it into a RCAIDE vehicle format.
     Includes wings, fuselages, and rotors.
 
@@ -127,10 +135,10 @@ def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_ty
     """  	
 
     if isinstance(network_type,RCAIDE.Framework.Networks.Network) != True:
-        raise Exception('Vehicle energy network type must be defined. \n Choose from list in RCAIDE.Framework.Networks') 
+        raise Exception('Vehicle energy network type must be defined. \n Choose from list in RCAIDE.Framework.Networks, i.e. \n  RCAIDE.Framework.Networks.Fuel()  \n  RCAIDE.Framework.Networks.Electric()  \n  RCAIDE.Framework.Networks.Hybrid()') 
 
     if isinstance(propulsor_type,RCAIDE.Library.Components.Powertrain.Propulsors.Propulsor ) != True:
-        raise Exception('Vehicle propulsor type must be defined. \n Choose from list in RCAIDE.Library.Compoments.Propulsors')     
+        raise Exception('Vehicle propulsor type must be defined. \n Choose from list in RCAIDE.Library.Components.Propulsors, i.e. \n RCAIDE.Library.Components.Powertrain.Propulsors.Turbofan() \n RCAIDE.Library.Components.Powertrain.Propulsors.Turbojet() \n RCAIDE.Library.Components.Powertrain.Propulsors.Turboprop() \n RCAIDE.Library.Components.Powertrain.Propulsors.ElectricRotor(), etc.' )     
 
     # Get the last path from sys.path
     system_path = sys.path[0]
@@ -175,8 +183,7 @@ def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_ty
     for geom in vsp_geoms: 
         geom_name = vsp.GetGeomName(geom)
         geom_names.append(geom_name)
-        print(str(geom_name) + ': ' + geom)
-        
+        print(str(geom_name) + ': ' + geom) 
     
     # ------------------------------------------------------------------        
     # Use OpenVSP to calculate wetted area
@@ -232,7 +239,7 @@ def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_ty
     # Read Wings 
     # ------------------------------------------------------------------			
     for wing_id in vsp_wings:
-        wing = read_vsp_wing(wing_id, main_wing_tag, units_type,use_scaling)
+        wing = read_vsp_wing(wing_id, main_wing_tag,blended_wing_body,last_blended_wing_body_center_body_section_index, units_type,use_scaling)            
         if calculate_wetted_area:
             wing.areas.wetted = measurements[vsp.GetGeomName(wing_id)] * (units_factor**2)  
         vehicle.append_component(wing)		 
@@ -337,6 +344,12 @@ def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_ty
             rotor           = read_vsp_rotor(rotor_id,units_type)
             rotor.tag       = vsp.GetGeomName(rotor_id) 
             propulsor.rotor = rotor
+
+            # Nacelle 
+            nacelle = read_vsp_nacelle(nacelle_id,vsp_nacelle_type[idx], units_type)
+            if calculate_wetted_area:
+                nacelle.areas.wetted = measurements[vsp.GetGeomName(nacelle_id)] * (units_factor**2)           
+            propulsor.nacelle = nacelle                      
             
             # Append to Network 
             network.propulsors.append(propulsor)
@@ -370,9 +383,9 @@ def import_vsp_vehicle(tag,main_wing_tag = None, network_type=None, propulsor_ty
     # get origin of fuselage
     vsp_origin = 0
     for fuselage in vehicle.fuselages:
-        vsp_origin = np.minimum(vsp_origin, fuselage.origin[0][0])
+        vsp_origin = rp.minimum(vsp_origin, fuselage.origin[0][0])
         
-    # shift all compoments to new origin
+    # shift all Components to new origin
     origin_shift =  -vsp_origin
     
 

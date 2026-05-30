@@ -1,4 +1,4 @@
-# RCAIDE/Library/Compoments/Powertrain/Sources/Batteries/Lithium_Ion_LiNiMnCoO2_18650.py
+# RCAIDE/Library/Components/Powertrain/Sources/Batteries/Lithium_Ion_LiNiMnCoO2_18650.py
 # 
 # 
 # Created:  Mar 2024, M. Clarke
@@ -12,7 +12,7 @@ from RCAIDE.Framework.Core                                            import Uni
 from .Generic_Battery_Module                                          import Generic_Battery_Module   
 from RCAIDE.Library.Methods.Powertrain.Sources.Batteries.Lithium_Ion_NMC  import *
 # package imports 
-import numpy as np
+import RNUMPY as rp
 import os 
 from scipy.interpolate  import RegularGridInterpolator 
 
@@ -134,10 +134,10 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
         #  Module Level Properties
         # ----------------------------------------------------------------------------------------------------------------------
         
-        self.tag                                         = 'lithium_ion_nmc'
-        self.maximum_energy                              = 0.0
-        self.maximum_power                               = 0.0
-        self.maximum_voltage                             = 0.0  
+        self.tag                              = 'lithium_ion_nmc'
+        self.maximum_energy                   = 0.0
+        self.maximum_power                    = 0.0
+        self.maximum_voltage                  = 0.0  
          
         # ----------------------------------------------------------------------------------------------------------------------
         #  Cell Level Properties
@@ -146,8 +146,8 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
         self.cell.diameter                    = 0.0185                                                                            # [m]
         self.cell.height                      = 0.0653                                                                            # [m]
         self.cell.mass                        = 0.048 * Units.kg                                                                  # [kg]
-        self.cell.surface_area                = (np.pi*self.cell.height*self.cell.diameter) + (0.5*np.pi*self.cell.diameter**2)  # [m^2]
-        self.cell.volume                      = np.pi*(0.5*self.cell.diameter)**2*self.cell.height 
+        self.cell.surface_area                = (rp.pi*self.cell.height*self.cell.diameter) + (0.5*rp.pi*self.cell.diameter**2)  # [m^2]
+        self.cell.volume                      = rp.pi*(0.5*self.cell.diameter)**2*self.cell.height 
         self.cell.density                     = self.cell.mass/self.cell.volume                                                  # [kg/m^3]  
         self.cell.electrode_area              = 0.0342                                                                           # [m^2] 
                                                                                                                            
@@ -158,7 +158,7 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
         
         self.cell.watt_hour_rating            = self.cell.nominal_capacity  * self.cell.nominal_voltage                          # [Watt-hours]      
         self.cell.specific_energy             = self.cell.watt_hour_rating*Units.Wh/self.cell.mass                               # [J/kg]
-        self.cell.specific_power              = self.cell.specific_energy/self.cell.nominal_capacity                             # [W/kg]   
+        self.cell.specific_power              = self.maximum_power /self.cell.mass                                               # [W/kg] 
         self.cell.resistance                  = 0.025                                                                            # [Ohms] 
                                                             
         self.cell.specific_heat_capacity      = 1108                                                                             # [J/kgK]    
@@ -171,7 +171,7 @@ class Lithium_Ion_NMC(Generic_Battery_Module):
 
         return  
     
-    def energy_calc(self,state,bus,coolant_lines, t_idx, delta_t): 
+    def compute_performance(self,state,bus,coolant_lines, t_idx, delta_t): 
         """
         Computes the state of the NMC battery cell
         
@@ -297,8 +297,8 @@ def create_discharge_performance_map(raw_data):
     """   
     # Process raw data   
     processed_data = Data() 
-    processed_data.Voltage        = np.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs voltage      
-    processed_data.Temperature    = np.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs temperature 
+    processed_data.Voltage        = rp.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs voltage      
+    processed_data.Temperature    = rp.zeros((5,6,15,2)) # current , operating temperature , state_of_charge vs temperature 
 
     # Reshape  Data          
     raw_data.Voltage 
@@ -306,29 +306,29 @@ def create_discharge_performance_map(raw_data):
         for j , Deg in enumerate(Amps):
             min_x    = 0 
             max_x    = max(Deg[:,0])
-            x        = np.linspace(min_x,max_x,15)
-            y        = np.interp(x,Deg[:,0],Deg[:,1])
-            vec      = np.zeros((15,2))
-            vec[:,0] = x/max_x
-            vec[:,1] = y
-            processed_data.Voltage[i,j,:,:]= vec   
+            x        = rp.linspace(min_x,max_x,15)
+            y        = rp.interp(x,Deg[:,0],Deg[:,1])
+            vec      = rp.zeros((15,2))
+            vec = vec.at[:,0].set(x/max_x)
+            vec = vec.at[:,1].set(y)
+            processed_data.Voltage = processed_data.Voltage.at[i,j,:,:].set(vec)
 
     for i, Amps in enumerate(raw_data.Temperature):
         for j , Deg in enumerate(Amps):
             min_x    = 0   
             max_x    = max(Deg[:,0])
-            x        = np.linspace(min_x,max_x,15)
-            y        = np.interp(x,Deg[:,0],Deg[:,1])
-            vec      = np.zeros((15,2))
-            vec[:,0] = x/max_x
-            vec[:,1] = y
-            processed_data.Temperature[i,j,:,:]= vec  
+            x        = rp.linspace(min_x,max_x,15)
+            y        = rp.interp(x,Deg[:,0],Deg[:,1])
+            vec      = rp.zeros((15,2))
+            vec = vec.at[:,0].set(x/max_x)
+            vec = vec.at[:,1].set(y)
+            processed_data.Temperature = processed_data.Temperature.at[i,j,:,:].set(vec)
     
     # Create performance maps  
     battery_data             = Data() 
-    amps                    = np.linspace(0, 8, 5)
-    temp                    = np.linspace(0, 50, 6) +  272.65  # Convert to Kelvin
-    SOC                     = np.linspace(0, 1, 15)
+    amps                    = rp.linspace(0, 8, 5)
+    temp                    = rp.linspace(0, 50, 6) +  272.65  # Convert to Kelvin
+    SOC                     = rp.linspace(0, 1, 15)
     battery_data.Voltage     = RegularGridInterpolator((amps, temp, SOC), processed_data.Voltage,bounds_error=False,fill_value=None)
     battery_data.Temperature = RegularGridInterpolator((amps, temp, SOC), processed_data.Temperature,bounds_error=False,fill_value=None) 
      

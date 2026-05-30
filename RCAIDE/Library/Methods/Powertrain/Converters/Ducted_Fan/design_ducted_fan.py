@@ -22,7 +22,7 @@ from RCAIDE.Library.Methods.Powertrain.Converters.Ducted_Fan.Performance.Blade_E
 from shutil import rmtree
 from scipy import interpolate 
 import os
-import numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  design_ducted_fan
@@ -212,23 +212,23 @@ def design_ducted_fan(ducted_fan, new_regression_results = False, keep_files = T
     return
 
 def clean_data(raw_data,mach,tip_mach,altitude,convergence_matrix):  
-    cleaned_data =  np.zeros((len(mach),len(tip_mach),len(altitude))) 
+    cleaned_data =  rp.zeros((len(mach),len(tip_mach),len(altitude))) 
     for i in range(len(mach)): 
         x = tip_mach
         y = altitude
         
         # mask invalid values
-        array = np.ma.masked_invalid(raw_data[i])
-        if np.all(array.mask ==False):
-            cleaned_data[i, :, :] =  array.data
+        array = rp.ma.masked_invalid(raw_data[i])
+        if rp.all(array.mask ==False):
+            cleaned_data = cleaned_data.at[i, :, :].set(array.data)
         else: 
-            yy,xx   = np.meshgrid(y, x)
+            yy,xx   = rp.meshgrid(y, x)
             x1      = xx[~array.mask]
             y1      = yy[~array.mask]
             newarr  = array[~array.mask] 
-            points  = np.vstack((x1, y1)).T
+            points  = rp.vstack((x1, y1)).T
             values1 = newarr.data
-            cleaned_data[i, :, :]  = interpolate.griddata(points, values1, (xx, yy), method='cubic',  fill_value = -1E5)
+            cleaned_data = cleaned_data.at[i, :, :].set(interpolate.griddata(points, values1, (xx, yy), method='cubic',  fill_value = -1E5))
              
     return cleaned_data
 

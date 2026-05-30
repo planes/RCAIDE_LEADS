@@ -10,7 +10,7 @@ import RCAIDE
 from   RCAIDE.Library.Methods.Powertrain            import setup_operating_conditions 
 from   RCAIDE.Library.Methods.Powertrain.Converters import Motor
 import matplotlib.pyplot as plt
-import numpy as np
+import RNUMPY as rp
 
 #----------------------------------------------------------------------
 #   Reference Values
@@ -23,7 +23,7 @@ import numpy as np
 # ----------------------------------------------------------------------
 def main(): 
 
-    motor_voltage       = np.linspace(0, 610, 20) # [V]
+    motor_voltage       = rp.linspace(0, 610, 20) # [V]
     motor_rpm_vector    = []                      # [rpm]
     motor_torque_vector = []                      # [Nm]
     motor_power_vector  = []                      # [W]
@@ -58,7 +58,7 @@ def main():
         Motor.compute_motor_performance(motor,operating_state.conditions)       
     
         # Extract results
-        motor_rpm_vector.append(motor_conditions.outputs.omega[0][0]*(60/(2*np.pi))) # [rpm]
+        motor_rpm_vector.append(motor_conditions.outputs.omega[0][0]*(60/(2*rp.pi))) # [rpm]
         motor_torque_vector.append(motor_conditions.outputs.torque[0][0])            # [Nm]
         motor_power_vector.append(motor_conditions.outputs.power[0][0]/1000)         # [W]
 
@@ -70,7 +70,7 @@ def main():
 
     plot_power_and_torque(x_cont_pow, y_cont_pow, motor_rpm_vector, motor_power_vector, x_cont_tq, y_cont_tq, motor_torque_vector)
 
-    error = np.abs((motor_power_vector[-1] - y_cont_pow[-1]) / y_cont_pow[-1]) * 100
+    error = rp.abs((motor_power_vector[-1] - y_cont_pow[-1]) / y_cont_pow[-1]) * 100
     print("\nError in Power [%]:", error)
     assert error < 10
 

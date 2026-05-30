@@ -9,7 +9,7 @@
 # ----------------------------------------------------------------------
 
 # RCAIDE imports
-import numpy as np
+import RNUMPY as rp
 from RCAIDE.Framework.Optimization.Common import helper_functions as help_fun
 
 
@@ -88,7 +88,7 @@ def Pyopt_Solve(problem,solver='SNOPT',FD='single', sense_step=1.0E-6,  nonderiv
         if con[ii][1]=='<':
             opt_prob.addCon(name, type='i', upper=edge)
         elif con[ii][1]=='>':
-            opt_prob.addCon(name, type='i', lower=edge,upper=np.inf)
+            opt_prob.addCon(name, type='i', lower=edge,upper=rp.inf)
         elif con[ii][1]=='=':
             opt_prob.addCon(name, type='e', equal=edge)
 
@@ -179,7 +179,7 @@ def PyOpt_Problem(problem,x):
    
     obj   = problem.objective(x)
     const = problem.all_constraints(x).tolist()
-    fail  = np.array(np.isnan(obj.tolist()) or np.isnan(np.array(const).any())).astype(int)
+    fail  = rp.array(rp.isnan(obj.tolist()) or rp.isnan(rp.array(const).any())).astype(int)
 
        
     print('Inputs')

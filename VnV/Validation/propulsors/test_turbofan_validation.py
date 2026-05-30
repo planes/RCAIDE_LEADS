@@ -18,7 +18,7 @@ from   RCAIDE.Library.Methods.Powertrain.Propulsors.Turbofan.design_turbofan imp
 from   RCAIDE.Framework.Mission.Common import Conditions
 
 # Python imports 
-import numpy  as np                   
+import RNUMPY as rp                  
 import pandas as pd
 
 # ----------------------------------------------------------------------
@@ -56,27 +56,27 @@ def main():
     mu                                                = atmo_data.dynamic_viscosity     
 
     conditions                                        = RCAIDE.Framework.Mission.Common.Results() 
-    conditions.freestream.altitude                    = np.atleast_1d(altitude)
-    conditions.freestream.mach_number                 = np.atleast_1d(mach_number)
-    conditions.freestream.pressure                    = np.atleast_1d(p)
-    conditions.freestream.temperature                 = np.atleast_1d(T)
-    conditions.freestream.density                     = np.atleast_1d(rho)
-    conditions.freestream.dynamic_viscosity           = np.atleast_1d(mu)
-    conditions.freestream.gravity                     = np.atleast_2d(planet.sea_level_gravity)
-    conditions.freestream.isentropic_expansion_factor = np.atleast_1d(turbofan.working_fluid.compute_gamma(T,p))
-    conditions.freestream.Cp                          = np.atleast_1d(turbofan.working_fluid.compute_cp(T,p))
-    conditions.freestream.R                           = np.atleast_1d(turbofan.working_fluid.gas_specific_constant)
-    conditions.freestream.speed_of_sound              = np.atleast_1d(a)
-    conditions.freestream.velocity                    = np.atleast_1d(a*mach_number)  
+    conditions.freestream.altitude                    = rp.atleast_1d(altitude)
+    conditions.freestream.mach_number                 = rp.atleast_1d(mach_number)
+    conditions.freestream.pressure                    = rp.atleast_1d(p)
+    conditions.freestream.temperature                 = rp.atleast_1d(T)
+    conditions.freestream.density                     = rp.atleast_1d(rho)
+    conditions.freestream.dynamic_viscosity           = rp.atleast_1d(mu)
+    conditions.freestream.gravity                     = rp.atleast_2d(planet.sea_level_gravity)
+    conditions.freestream.isentropic_expansion_factor = rp.atleast_1d(turbofan.working_fluid.compute_gamma(T,p))
+    conditions.freestream.Cp                          = rp.atleast_1d(turbofan.working_fluid.compute_cp(T,p))
+    conditions.freestream.R                           = rp.atleast_1d(turbofan.working_fluid.gas_specific_constant)
+    conditions.freestream.speed_of_sound              = rp.atleast_1d(a)
+    conditions.freestream.velocity                    = rp.atleast_1d(a*mach_number)  
 
     # setup conditions  
     fuel_line                                         = RCAIDE.Library.Components.Powertrain.Distributors.Fuel_Line()
     segment                                           = RCAIDE.Framework.Mission.Segments.Segment()  
     segment.state.conditions                          = conditions     
     segment.state.conditions.energy[fuel_line.tag]    = Conditions()
-    segment.state.conditions.noise[fuel_line.tag]     = Conditions()
+    segment.state.conditions.aeroacoustics[fuel_line.tag]     = Conditions()
 
-    turbofan.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.noise)
+    turbofan.append_operating_conditions(segment,segment.state.conditions.energy,segment.state.conditions.aeroacoustics)
 
     for tag, item in turbofan.items(): 
         if issubclass(type(item), RCAIDE.Library.Components.Component):
@@ -100,7 +100,7 @@ def main():
     Pt_3                                              = hpc_conditions.outputs.stagnation_pressure
     Tt_4                                              = hpt_conditions.inputs.stagnation_temperature 
     Pt_4                                              = hpt_conditions.inputs.stagnation_pressure 
-    fuel_flow_rate                                    = turbofan_conditions.propulsors[turbofan.tag].fuel_flow_rate
+    fuel_flow_rate                                    = turbofan_conditions.propulsors[turbofan.tag].fuel_mass_flow_rate
     TSFC                                              = turbofan.TSFC # [N/N-s]
 
     rcaide_values = {
@@ -131,7 +131,7 @@ def main():
 
 
 
-    error = np.abs((rcaide_values["Fuel Mass Flow Rate [kg/s]"] - literature_values[turbofan.tag]["Fuel Mass Flow Rate [kg/s]"]) / literature_values[turbofan.tag]["Fuel Mass Flow Rate [kg/s]"]) * 100
+    error = rp.abs((rcaide_values["Fuel Mass Flow Rate [kg/s]"] - literature_values[turbofan.tag]["Fuel Mass Flow Rate [kg/s]"]) / literature_values[turbofan.tag]["Fuel Mass Flow Rate [kg/s]"]) * 100
     print("\nError in Fuel Mass Flow Rate [%]:", error)
     assert error < 8e-1
     

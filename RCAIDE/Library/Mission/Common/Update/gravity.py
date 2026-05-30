@@ -32,6 +32,6 @@ def gravity(segment):
     g      = planet.compute_gravity(H)
 
     # pack
-    segment.state.conditions.freestream.gravity[:,0] = g[:,0]
+    segment.state.conditions.freestream.gravity = segment.state.conditions.freestream.gravity.at[:,0].set(g[:,0])
 
     return 

@@ -12,15 +12,23 @@ import RCAIDE
 from RCAIDE.Framework.Core                                              import Data, Units
 from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method          import VLM
 from RCAIDE.Library.Plots                                               import * 
+from RCAIDE.Library.Methods.Geometry.Planform                           import  wing_planform 
 from RCAIDE.load import load 
 from RCAIDE.save import save  
 
 import sys
-import numpy as np
+import RNUMPY as rp
 import os
 
 # import vehicle file
-sys.path.append(os.path.join( os.path.split(os.path.split(sys.path[0])[0])[0], 'Vehicles'))
+base_dir = os.path.dirname(os.path.abspath(__file__))
+
+vehicles_path = os.path.abspath(
+    os.path.join(base_dir, "..", "..", "Vehicles")
+)
+
+if vehicles_path not in sys.path:
+    sys.path.insert(0, vehicles_path)
 from Boeing_737  import vehicle_setup   as b737_setup
 import matplotlib.pyplot                as plt
 
@@ -31,29 +39,31 @@ def main():
     update_regression_values = False  # should be false unless code functionally changes
     
     # control surface cases
-    deflections = np.array([-10, 10, 20]) *Units.degrees
+    deflections = rp.array([-10, 10, 20]) *Units.degrees
 
     # get settings and conditions
     conditions = get_conditions()      
-    settings = get_settings()
+    settings   = get_settings()
     
     # create results object
     results     = Data()
-    results.CL  = np.array([])
-    results.CDi = np.array([])
-    results.CM  = np.array([])
+    results.CL  = rp.array([])
+    results.CDi = rp.array([])
+    results.CM  = rp.array([])
     
     # run VLM
     for deflection in deflections:
         geometry    = get_deflected_b737(deflection)
-        data        = VLM(conditions, settings, geometry)
-        
-        plot_title  = "{}, deflection = {} degrees".format(geometry.tag, round(deflection/Units.degrees))
-        plot_3d_vehicle_vlm_panelization(geometry, show_wing_control_points=False, save_filename=plot_title, show_figure=False)        
-        
-        results.CL  = np.append(results.CL , data.CLift.flatten() )
-        results.CDi = np.append(results.CDi, data.CDrag_induced.flatten())
-        results.CM  = np.append(results.CM , data.CM.flatten() )
+         
+        for wing in geometry.wings:   
+            wing_planform(wing)                    
+            geometry.reference_chord  = rp.maximum(geometry.reference_chord , wing.chords.mean_aerodynamic)  
+            geometry.reference_span   = rp.maximum(geometry.reference_span  , wing.spans.projected)
+            
+        data        = VLM(conditions, settings, geometry) 
+        results.CL  = rp.append(results.CL , data.CLift.flatten() )
+        results.CDi = rp.append(results.CDi, data.CDrag_induced.flatten())
+        results.CM  = rp.append(results.CM , data.CM.flatten() ) 
         
     # save/load results
     if update_regression_values:
@@ -74,7 +84,7 @@ def main():
         print(errors)
         print('           ')
         
-        max_err = np.max(np.abs(errors))
+        max_err = rp.max(rp.abs(errors))
         assert max_err < 1e-6 , 'Failed at {} test'.format(key)
     
     return
@@ -98,24 +108,25 @@ def get_deflected_b737(deflection):
     return vehicle
 
 def get_conditions():
-    machs      = np.array([0.4  ,0.4  ,0.4  ,])
-    altitudes  = np.array([5000 ,5000 ,5000 ,])  *Units.ft
-    aoas       = np.array([-6.  ,0.   ,6.   ,])  *Units.degrees   
+    machs      = rp.array([0.4  ,0.4  ,0.4  ,])
+    altitudes  = rp.array([5000 ,5000 ,5000 ,])  *Units.ft
+    aoas       = rp.array([-6.  ,0.   ,6.   ,])  *Units.degrees   
     
     conditions = RCAIDE.Framework.Mission.Common.Results()
+    conditions.expand_rows(3)
     atmosphere                              =  RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
     speeds_of_sound                         = atmosphere.compute_values(altitudes).speed_of_sound
     v_infs                                  = machs * speeds_of_sound.flatten()
-    conditions.freestream.velocity          = np.atleast_2d(v_infs).T
-    conditions.freestream.mach_number       = np.atleast_2d(machs).T   
-    conditions.aerodynamics.angles.alpha    = np.atleast_2d(aoas).T
+    conditions.freestream.velocity          = rp.atleast_2d(v_infs).T
+    conditions.freestream.mach_number       = rp.atleast_2d(machs).T   
+    conditions.aerodynamics.angles.alpha    = rp.atleast_2d(aoas).T
     
     return conditions
 
 def get_settings():
     settings = RCAIDE.Framework.Analyses.Aerodynamics.Vortex_Lattice_Method().settings
-    settings.number_of_spanwise_vortices        = None
-    settings.number_of_chordwise_vortices       = None  
+    settings.number_of_spanwise_vortices     = None
+    settings.number_of_chordwise_vortices    = None  
     settings.wing_spanwise_vortices          = 7
     settings.wing_chordwise_vortices         = 4
     settings.fuselage_spanwise_vortices      = 7
@@ -137,11 +148,17 @@ def get_settings():
 #   Save/Load Utility Functions
 # ----------------------------------------------------------------------
 def load_results():
-    return load('control_surfaces_vlm_results.res')
+    ospath         = os.path.abspath(__file__) 
+    separator      = os.path.sep
+    local_path       = os.path.dirname(ospath) + separator   
+    return load(os.path.join(local_path, 'control_surfaces_vlm_results.res'))
 
 def save_results(results):
+    ospath         = os.path.abspath(__file__) 
+    separator      = os.path.sep
+    local_path       = os.path.dirname(ospath) + separator   
     print('!####! SAVING NEW REGRESSION RESULTS !####!')
-    save(results,'control_surfaces_vlm_results.res')
+    save(results,os.path.join(local_path, 'control_surfaces_vlm_results.res'))
     return
 
 # ----------------------------------------------------------------------        

@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Weights/Correlation_Buildups/General_Aviation/compute_horizontal_tail_weight.py
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/General_Aviation/Raymer/compute_horizontal_tail_weight.py
 # 
 # 
 # Created:  Sep 2024, M. Clarke 
@@ -9,7 +9,7 @@
 
 # RCAIDE 
 from RCAIDE.Framework.Core import  Units
-import  numpy as  np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Horizontal Tail Weight 
@@ -53,7 +53,7 @@ def compute_horizontal_tail_weight(wing, vehicle):
     q     = q_c /(Units.force_pound / Units.ft**2.)
 
     #Calculate weight of wing for traditional aircraft horizontal tail
-    weight_English = .016*((Nult*W_0)**.414)*(q**.168)*(S_ht**.896)*((100.*t_c_h/np.cos(sweep_h))**(-.12))*((AR_h/(np.cos(sweep_h)**2))**.043)*(taper_h**(-.02))
+    weight_English = .016*((Nult*W_0)**.414)*(q**.168)*(S_ht**.896)*((100.*t_c_h/rp.cos(sweep_h))**(-.12))*((AR_h/(rp.cos(sweep_h)**2))**.043)*(taper_h**(-.02))
     weight         = weight_English * Units.lbs # Convert from lbs to kg
 
     return weight

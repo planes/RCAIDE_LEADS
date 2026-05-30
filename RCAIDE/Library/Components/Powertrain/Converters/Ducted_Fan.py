@@ -1,4 +1,4 @@
-# RCAIDE/Compoments/Propulsors/Converters/Ducted_Fan.py
+# RCAIDE/Components/Propulsors/Converters/Ducted_Fan.py
 # 
 # 
 # Created:  Mar 2024, M. Clarke 
@@ -11,8 +11,8 @@ import RCAIDE
 from RCAIDE.Framework.Core              import Data
 from .Converter                         import Converter
 from RCAIDE.Library.Methods.Powertrain.Converters.Ducted_Fan.append_ducted_fan_conditions import  append_ducted_fan_conditions
-import numpy as np
-import scipy as sp
+import RNUMPY as rp
+import RNUMPY.scipy as sp
  
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  Nacalle
@@ -242,7 +242,7 @@ class Ducted_Fan(Converter):
         * Right-handed coordinate system is used
         """
 
-        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        rot_mat = sp.spatial.transform.Rotation.from_rotvec([0,rp.pi,0]).as_matrix()
 
         return rot_mat
     
@@ -295,13 +295,13 @@ class Ducted_Fan(Converter):
         """
 
         # Go from velocity to vehicle frame
-        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0,np.pi,0]).as_matrix()
+        body_2_vehicle = sp.spatial.transform.Rotation.from_rotvec([0,rp.pi,0]).as_matrix()
 
         # Go from vehicle frame to ducted fan vehicle frame: rot 1 including the extra body rotation
-        cpts       = len(np.atleast_1d(commanded_thrust_vector))
-        rots       = np.array(self.orientation_euler_angles) * 1.
-        rots       = np.repeat(rots[None,:], cpts, axis=0) 
-        rots[:,1] += commanded_thrust_vector[:,0] 
+        cpts       = len(rp.atleast_1d(commanded_thrust_vector))
+        rots       = rp.array(self.orientation_euler_angles) * 1.
+        rots       = rp.repeat(rots[None,:], cpts, axis=0) 
+        rots = rots.at[:,1].add(commanded_thrust_vector[:,0])
         
         vehicle_2_duct_vec = sp.spatial.transform.Rotation.from_rotvec(rots).as_matrix()
 
@@ -309,8 +309,8 @@ class Ducted_Fan(Converter):
         duct_vec_2_duct_vel = self.vec_to_vel()
 
         # Do all the matrix multiplies
-        rot1    = np.matmul(body_2_vehicle,vehicle_2_duct_vec)
-        rot_mat = np.matmul(rot1,duct_vec_2_duct_vel)
+        rot1    = rp.matmul(body_2_vehicle,vehicle_2_duct_vec)
+        rot_mat = rp.matmul(rot1,duct_vec_2_duct_vel)
  
         return rot_mat , rots
 

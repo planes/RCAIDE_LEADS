@@ -9,7 +9,7 @@
 import RCAIDE
 
 # package imports
-import numpy as np 
+import RNUMPY as rp 
 
 # ---------------------------------------------------------------------------------------------------------------------- 
 # compute_power_from_throttle
@@ -89,7 +89,7 @@ def compute_power_from_throttle(engine,conditions):
 
     # shift in power lapse due to flat rate
     altitude_virtual = altitude - h_flat       
-    altitude_virtual[altitude_virtual<0.] = 0. 
+    altitude_virtual = rp.where(altitude_virtual < 0., 0., altitude_virtual)
 
     # Compute the sea-level ISA atmosphere conditions
     atmo             = RCAIDE.Framework.Analyses.Atmospheric.US_Standard_1976()
@@ -103,7 +103,7 @@ def compute_power_from_throttle(engine,conditions):
     
     # Compute available power 
     Pavailable                    = PSLS * (sigma - 0.117) / 0.883        
-    Pavailable[h_flat > altitude] = PSLS
+    Pavailable = rp.where(h_flat > altitude, PSLS, Pavailable)
 
     # Regulate using throttle 
     P       = Pavailable * engine_conditions.throttle  
@@ -114,12 +114,12 @@ def compute_power_from_throttle(engine,conditions):
     torque = P/omega
     
     # Determine fuel flow rate and cap at 0
-    fuel_flow_rate  = np.fmax(m_dot,np.zeros_like(altitude)) 
+    m_dot_fuel  = rp.fmax(m_dot,rp.zeros_like(altitude)) 
     
     # Store results 
     engine_conditions.power                           = P
     engine_conditions.power_specific_fuel_consumption = PSFC
-    engine_conditions.fuel_flow_rate                  = fuel_flow_rate
+    engine_conditions.fuel_mass_flow_rate             = m_dot_fuel
     engine_conditions.torque                          = torque
 
     return

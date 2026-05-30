@@ -10,7 +10,7 @@
 from RCAIDE.Framework.Core import Data 
 
 # package imports  
-import numpy as np 
+import RNUMPY as rp 
 
 # ----------------------------------------------------------------------------------------------------------------------
 # heads_method
@@ -57,14 +57,14 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
     N/A
     """    
     # Initialize vectors 
-    X_H          = np.zeros((npanel,ncases,ncpts))
-    THETA_H      = np.zeros_like(X_H)
-    DELTA_STAR_H = np.zeros_like(X_H)
-    H_H          = np.zeros_like(X_H)
-    CF_H         = np.zeros_like(X_H) 
-    RE_THETA_H   = np.zeros_like(X_H)
-    RE_X_H       = np.zeros_like(X_H)
-    DELTA_H      = np.zeros_like(X_H)      
+    X_H          = rp.zeros((npanel,ncases,ncpts))
+    THETA_H      = rp.zeros_like(X_H)
+    DELTA_STAR_H = rp.zeros_like(X_H)
+    H_H          = rp.zeros_like(X_H)
+    CF_H         = rp.zeros_like(X_H) 
+    RE_THETA_H   = rp.zeros_like(X_H)
+    RE_X_H       = rp.zeros_like(X_H)
+    DELTA_H      = rp.zeros_like(X_H)      
     
     for case in range(ncases):
         for cpt in range(ncpts):  
@@ -98,33 +98,42 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
                 if case in wrong_columns:
                     continue 
                 
-                x_i          = TURBULENT_COORD.data[:,case,cpt][TURBULENT_COORD.mask[:,case,cpt] ==False] 
-                Ve_i         = VE_I.data[:,case,cpt][TURBULENT_COORD.mask[:,case,cpt] ==False]
-                dVe_i        = DVE_I.data[:,case,cpt][TURBULENT_COORD.mask[:,case,cpt] ==False]
+                # Extract full column
+                x_full   = TURBULENT_COORD[:, case, cpt]
+                ve_full  = VE_I[:, case, cpt]
+                dve_full = DVE_I[:, case, cpt]
+
+                # Mask = NaNs
+                mask = rp.isnan(x_full)
+
+                # Extract valid entries
+                x_i   = x_full[~mask]
+                Ve_i  = ve_full[~mask]
+                dVe_i = dve_full[~mask]
+
                 Re_L         = RE_L[case,cpt]
                 n            = len(x_i)
-                dx           = np.diff(x_i)
+                dx           = rp.diff(x_i)
                 nu           = NU[case,cpt]
                 
-                H            = np.zeros(n) 
-                H[0]         = ShapeFactor_0[case,cpt]
-                Theta        = np.zeros(n)
-                Theta[0]     = THETA_0[case,cpt]
-                H1           = np.zeros(n) 
-                H1[0]        = (DEL_0[case,cpt] - DELTA_STAR_0[case,cpt])/THETA_0[case,cpt]
-                if H1[0]<3.3:
-                    H1[0] = 3.417285
+                H            = rp.zeros(n) 
+                H = H.at[0].set(ShapeFactor_0[case, cpt])
+                Theta        = rp.zeros(n)
+                Theta = Theta.at[0].set(THETA_0[case, cpt])
+                H1           = rp.zeros(n) 
+                H1 = H1.at[0].set((DEL_0[case, cpt] - DELTA_STAR_0[case, cpt]) / THETA_0[case, cpt])
+                H1 = rp.where(H1[0] < 3.3, H1.at[0].set(3.417285), H1)
                 
-                cf           = np.zeros(n)
-                cf[0]        = CF_0[case,cpt] 
-                VeThetaH1    = np.zeros(n)
-                VeThetaH1[0] = Ve_i[0]*Theta[0]*H1[0]
+                cf           = rp.zeros(n)
+                cf = cf.at[0].set(CF_0[case, cpt])
+                VeThetaH1    = rp.zeros(n)
+                VeThetaH1 = VeThetaH1.at[0].set(Ve_i[0] * Theta[0] * H1[0])
                 
                 for i in range(1,n):
                     # initialise the variable values at the current grid point using previous grid points (to define the error functions)
                     H_er = H[i-1];  cf_er = cf[i-1];  H1_er = H1[i-1];  Theta_er = Theta[i-1]
                     # assign previous grid point values of H and Cf to start RK4
-                    H[i] = H[i-1]; cf[i] = cf[i-1]
+                    H = H.at[i].set(H[i - 1])
                     
                     #assume some error values
                     erH = 0.2; erH1 = 0.2; erTheta = 0.2; ercf = 0.2;
@@ -133,18 +142,19 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
                     while abs(erH)>0.00001 or abs(erH1)>0.00001 or abs(erTheta)>0.00001 or abs(ercf)>0.00001:
                         
                         # get Theta and VeThetaH1
-                        Theta[i], VeThetaH1[i] = RK4(i-1, dx, x_i, Theta, VeThetaH1, dTheta_by_dx, dVeThetaH1_by_dx)
-                        if np.isnan(VeThetaH1[i]):
-                            VeThetaH1[i] = VeThetaH1[i-1]
+                        Theta_i, VeThetaH1_i = RK4(i-1, dx, x_i, Theta, VeThetaH1, dTheta_by_dx, dVeThetaH1_by_dx)
+                        Theta = Theta.at[i].set(Theta_i)
+                        VeThetaH1 = VeThetaH1.at[i].set(VeThetaH1_i)
+                        VeThetaH1 = rp.where(rp.isnan(VeThetaH1), rp.roll(VeThetaH1, 1), VeThetaH1)
                        
                         # get H1
-                        H1[i] = VeThetaH1[i]/(Ve_i[i]*Theta[i])
+                        H1 = H1.at[i].set(VeThetaH1[i] / (Ve_i[i] * Theta[i]))
                         
                         # get H
-                        H[i] = getH(H1[i])
+                        H = H.at[i].set(getH(H1[i]))
                         
                         # get skin friction
-                        cf[i] = getcf(i, nu, H[i], Theta[i])
+                        cf = cf.at[i].set(getcf(i, nu, H[i], Theta[i]))
                         
                         # define errors
                         erH = (H[i]-H_er)/H[i];
@@ -164,15 +174,20 @@ def heads_method(npanel,ncases,ncpts,NU,DEL_0,THETA_0,DELTA_STAR_0,CF_0,ShapeFac
                 Re_x         = (Ve_i*x_i)/nu
                 delta        = (Theta*H1) + delta_star
                 
-                indices = np.where(TURBULENT_COORD.mask[:,case,cpt] == False)
-                np.put(X_H[:,case,cpt],indices,x_i )
-                np.put(THETA_H[:,case,cpt],indices,Theta)
-                np.put(DELTA_STAR_H[:,case,cpt],indices,delta_star)
-                np.put(H_H[:,case,cpt],indices,H)
-                np.put(CF_H[:,case,cpt],indices,cf)
-                np.put(RE_THETA_H[:,case,cpt],indices,Re_theta)
-                np.put(RE_X_H[:,case,cpt],indices,Re_x)
-                np.put(DELTA_H[:,case,cpt],indices,delta)
+                # Extract valid indices (non‑NaN)
+                mask = rp.isnan(TURBULENT_COORD[:, case, cpt])
+                indices = rp.nonzero(~mask)[0]
+
+                # Scatter updates back into full arrays
+                X_H          = X_H.at[indices, case, cpt].set(x_i)
+                THETA_H      = THETA_H.at[indices, case, cpt].set(Theta)
+                DELTA_STAR_H = DELTA_STAR_H.at[indices, case, cpt].set(delta_star)
+                H_H          = H_H.at[indices, case, cpt].set(H)
+                CF_H         = CF_H.at[indices, case, cpt].set(cf)
+                RE_THETA_H   = RE_THETA_H.at[indices, case, cpt].set(Re_theta)
+                RE_X_H       = RE_X_H.at[indices, case, cpt].set(Re_x)
+                DELTA_H      = DELTA_H.at[indices, case, cpt].set(delta)
+
 
     RESULTS = Data(
             X_H          = X_H,      

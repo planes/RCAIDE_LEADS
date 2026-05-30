@@ -24,4 +24,4 @@ def altitude(segment):
                     
     """    
     altitude = -segment.state.conditions.frames.inertial.position_vector[:,2]
-    segment.state.conditions.freestream.altitude[:,0] = altitude 
+    segment.state.conditions.freestream.altitude = segment.state.conditions.freestream.altitude.at[:,0].set(altitude)

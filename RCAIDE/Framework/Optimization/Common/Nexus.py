@@ -10,7 +10,7 @@ from RCAIDE.Framework.Analyses import Process
 from copy import deepcopy
 
 from . import helper_functions as help_fun
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------- 
 #  Nexus Class
@@ -53,10 +53,12 @@ class Nexus(Data):
         self.summary                = Data()
         self.optimization_problem   = None
         self.fidelity_level         = 1
-        self.last_inputs            = None
+        self.last_inputs            = Data()
+        self.last_inputs.name       = None
+        self.last_inputs.value      = None
         self.last_fidelity          = None
         self.evaluation_count       = 0
-        self.force_evaluate         = False
+        self.force_evaluate         = True
         self.hard_bounded_inputs    = False
 
         opt_prob = self.optimization_problem
@@ -88,7 +90,7 @@ class Nexus(Data):
         self.unpack_inputs(x)
         
         # Check if last call was the same
-        if np.all(self.optimization_problem.inputs==self.last_inputs) \
+        if rp.all(self.optimization_problem.inputs.value==self.last_inputs.value) \
            and self.last_fidelity == self.fidelity_level \
            and self.force_evaluate == False:
             pass
@@ -159,7 +161,7 @@ class Nexus(Data):
         objective_value  = help_fun.get_values(self,objective,aliases)  
         scaled_objective = help_fun.scale_obj_values(objective,objective_value)
         
-        return scaled_objective.astype(np.double) 
+        return scaled_objective
     
     def inequality_constraint(self,x = None):
         """Retrieve the inequality constraint values for your function
@@ -186,13 +188,12 @@ class Nexus(Data):
         constraints = self.optimization_problem.constraints 
         
         # Setup constraints  
-        indices = []
-        for ii in range(0,len(constraints)):
-            if constraints[ii][1]==('='):
-                indices.append(ii)        
-        iqconstraints = np.delete(constraints,indices,axis=0)
+        mask = constraints.name_signs[:, 1] != '='
+        iqconstraints = Data()
+        iqconstraints.name_signs = constraints.name_signs[mask]
+        iqconstraints.value      = constraints.value[mask]
     
-        if len(iqconstraints) == 0:
+        if len(iqconstraints.value) == 0:
             constraint_evaluations = []
         else:
 
@@ -209,7 +210,7 @@ class Nexus(Data):
             constraint_evaluations = scaled_constraints  - scaled_bnd_constraints
             
             # coorect constaints based on sign 
-            constraint_evaluations[iqconstraints[:,1]=='<'] = -constraint_evaluations[iqconstraints[:,1]=='<']
+            constraint_evaluations = constraint_evaluations.at[iqconstraints.name_signs[:,1]=='<'].set(-constraint_evaluations[iqconstraints.name_signs[:,1]=='<'])
             
         return constraint_evaluations       
     
@@ -238,15 +239,12 @@ class Nexus(Data):
         constraints = self.optimization_problem.constraints
         
         # Setup constraints  
-        indices = []
-        for ii in range(0,len(constraints)):
-            if constraints[ii][1]=='>':
-                indices.append(ii)
-            elif constraints[ii][1]=='<':
-                indices.append(ii)
-        eqconstraints = np.delete(constraints,indices,axis=0)
+        mask = (constraints.name_signs[:,1] != '>') & (constraints.name_signs[:,1] != '<')
+        eqconstraints = Data()
+        eqconstraints.name  = constraints.name_signs[mask]
+        eqconstraints.value = constraints.value[mask]
     
-        if len(eqconstraints) == 0:
+        if len(eqconstraints.name) == 0:
             scaled_constraints = []
         else:
             constraint_values  = help_fun.get_values(self,eqconstraints,aliases)
@@ -371,17 +369,17 @@ class Nexus(Data):
         inplen = len(inpu)
         conlen = len(const)
         
-        grad_obj = np.zeros(inplen)
-        jac_con  = np.zeros((inplen,conlen))
+        grad_obj = rp.zeros(inplen)
+        jac_con  = rp.zeros((inplen,conlen))
         
-        con2 = (con*np.ones_like(jac_con))
+        con2 = (con*rp.ones_like(jac_con))
         
         for ii in range(0,inplen):
-            newx     = np.asarray(x)*1.0
+            newx     = rp.asarray(x)*1.0
             newx[ii] = newx[ii] + diff_interval
             
-            grad_obj[ii]  = self.objective(newx)
-            jac_con[ii,:] = self.all_constraints(newx)
+            grad_obj[ii]  = self.objective(newx)[0]
+            jac_con = jac_con.at[ii,:].set(self.all_constraints(newx))
         
         grad_obj = (grad_obj - obj)/diff_interval
         
@@ -425,8 +423,8 @@ class Nexus(Data):
         obj         = self.optimization_problem.objective
         obj_val     = self.objective(x)
         obj_scale   = help_fun.unscale_const_values(obj,obj_val)
-        obj_table   = np.array(obj)
-        obj_table   = np.insert(obj_table,1,obj_scale)
+        obj_table   = rp.array(obj)
+        obj_table   = rp.insert(obj_table,1,obj_scale)
         
         print('\nObjective Table:\n')
         print(obj_table)
@@ -437,8 +435,8 @@ class Nexus(Data):
         const_scale = help_fun.unscale_const_values(const,const_vals)
         
         # Make a new table
-        const_table = np.array(const)
-        const_table = np.insert(const_table,1,const_scale,axis=1)
+        const_table = rp.array(const)
+        const_table = rp.insert(const_table,1,const_scale,axis=1)
 
         print('\nConstraint Table:\n')
         print(const_table)

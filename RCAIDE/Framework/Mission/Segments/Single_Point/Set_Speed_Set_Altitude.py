@@ -14,7 +14,7 @@ from RCAIDE.Library.Mission                          import Common,Segments
 from RCAIDE.Library.Methods.skip                     import skip 
 
 # package imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 #  Set_Speed_Set_Altitude
@@ -77,7 +77,6 @@ class Set_Speed_Set_Altitude(Evaluate):
         iterate.conditions.planet_position       = skip    
         iterate.conditions.acceleration          = skip
         iterate.conditions.angular_acceleration  = skip 
-        iterate.conditions.weights               = skip
         iterate.residuals.flight_dynamics        = Common.Residuals.flight_dynamics
         post_process                             = self.process.post_process 
         post_process.inertial_position           = skip    

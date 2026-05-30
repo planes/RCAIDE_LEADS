@@ -1,4 +1,4 @@
-# RCAIDE/Library/Methods/Weights/Correlation_Buildups/Raymer/compute_horizontal_tail_weight.py
+# RCAIDE/Library/Methods/Mass_Properties/Weight_Buildups/Conventional/Transport/Raymer/compute_horizontal_tail_weight.py
 # 
 # Created:  Sep 2024, M. Clarke
 
@@ -11,7 +11,7 @@ import RCAIDE
 from RCAIDE.Framework.Core    import Units
 
 # python imports 
-import  numpy as  np
+import RNUMPY as rp
  
 # ----------------------------------------------------------------------------------------------------------------------
 #  Horizontal Tail Weight 
@@ -114,7 +114,7 @@ def compute_horizontal_tail_weight(vehicle, wing, settings,elevator_fraction=0.4
     horiz_tail_location = vehicle.wings.horizontal_stabilizer.origin[0][0]
     for segment in ref_fuselage.segments:
         segment_loc = segment.percent_x_location * ref_fuselage.lengths.total
-        diff.append(np.abs(segment_loc - horiz_tail_location))
+        diff.append(rp.abs(segment_loc - horiz_tail_location))
         names.append(segment.tag)
     min_value = min(diff)
     min_index = diff.index(min_value)
@@ -133,7 +133,7 @@ def compute_horizontal_tail_weight(vehicle, wing, settings,elevator_fraction=0.4
 
     tail_weight = 0.0379 * Kuht * (1 + Fw / Bh) ** (-0.25) * DG ** 0.639 *\
                   vehicle.flight_envelope.ultimate_load ** 0.1 * Sht ** 0.75 * Lt ** -1 *\
-                  Ky ** 0.704 * np.cos(sweep) ** (-1) * Ah ** 0.166 * (1 + Se / Sht) ** 0.1
+                  Ky ** 0.704 * rp.cos(sweep) ** (-1) * Ah ** 0.166 * (1 + Se / Sht) ** 0.1
     
     if settings.advanced_composites:
         tail_weight *= 0.85

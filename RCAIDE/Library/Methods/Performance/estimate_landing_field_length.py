@@ -13,7 +13,7 @@ import  RCAIDE
 from   RCAIDE.Framework.Core import Data, Units
 from   RCAIDE.Library.Methods.Aerodynamics.Common.Lift.compute_max_lift_coeff import compute_max_lift_coeff
 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #  Compute field length required for landing
@@ -131,7 +131,7 @@ def estimate_landing_field_length(vehicle,analyses, altitude=0, delta_isa=0):
     # ========================================================================================
 
     # Defining landing distance equation coefficients 
-    landing_constants    = np.zeros(3)
+    landing_constants    = rp.zeros(3)
     landing_constants[0] = 250.
     landing_constants[1] =   0.
     landing_constants[2] =  2.485  / sea_level_gravity  # Two-wheels truck : [ (1.56 / 0.40 + 1.07) / (2*sea_level_gravity) ]
@@ -142,4 +142,4 @@ def estimate_landing_field_length(vehicle,analyses, altitude=0, delta_isa=0):
         landing_field_length += constant * Vref**idx
     
     # return
-    return landing_field_length
+    return landing_field_length[0][0]

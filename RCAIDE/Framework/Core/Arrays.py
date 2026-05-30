@@ -3,14 +3,13 @@
 # ----------------------------------------------------------------------
 #   Imports
 # ----------------------------------------------------------------------
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------
 #   Array
 # ----------------------------------------------------------------------       
 
-array_type  = np.ndarray
-matrix_type = np.matrixlib.defmatrix.matrix
+array_type  = rp.ndarray
  
 def atleast_2d_col(A):
     """Makes a 2D array in column format
@@ -74,19 +73,23 @@ def atleast_2d(A,oned_as='row'):
     """       
     
     # not an array yet
-    if not isinstance(A,(array_type,matrix_type)):
+    if not isinstance(A,(array_type)):
         if not isinstance(A,(list,tuple)):
             A = [A]
-        A = np.array(A)
+        A = rp.array(A)
         
     # check rank
     if A.ndim < 2:
-        # expand row or col
-        if oned_as == 'row':
-            A = A[None,:]
-        elif oned_as == 'col':
-            A = A[:,None]
-        else:
-            raise Exception("oned_as must be 'row' or 'col' ")
+        A = rp.atleast_2d(A)
+        if A.ndim == 2 and A.shape[0] == 1 and oned_as == 'col':
+            A = A.T
+
+        # # expand row or col
+        # if oned_as == 'row':
+        #     A = A[None,:]
+        # elif oned_as == 'col':
+        #     A = A[:,None]
+        # else:
+        #     raise Exception("oned_as must be 'row' or 'col' ")
             
     return A

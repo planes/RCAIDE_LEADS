@@ -6,13 +6,14 @@
 #  IMPORT
 # ----------------------------------------------------------------------------------------------------------------------
 # RCAIDE imports  
+from RCAIDE.Framework.Core.Data import Data
 from RCAIDE.Library.Components import Wings 
 from RCAIDE.Library.Methods.Aerodynamics.Vortex_Lattice_Method.extract_wing_collocation_points import extract_wing_collocation_points
 from RCAIDE.Library.Methods.Powertrain.Converters.Rotor.Performance.Blade_Element_Momentum_Theory_Helmholtz_Wake  import compute_wake_induced_velocity
 from RCAIDE.Library.Methods.Aerodynamics.Common.Lift.BET_calculations import compute_airfoil_aerodynamics,compute_inflow_and_tip_loss
 # Python imports
-import numpy as np 
-import scipy as sp
+import RNUMPY as rp 
+import RNUMPY.scipy as sp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # wake model
@@ -123,7 +124,7 @@ def evaluate_wake(rotor,wake_inputs,conditions):
         
     return va, vt
 
-def evaluate_slipstream(rotor,rotor_conditions,geometry,ctrl_pts,wing_instance=None):
+def evaluate_slipstream(rotor,VD,conditions,settings,geometry,ctrl_pts,wing_instance=None):
     """
     Evaluates the velocities induced by the rotor on a specified wing of the vehicle.
     If no wing instance is specified, uses main wing or last available wing in geometry.
@@ -145,12 +146,15 @@ def evaluate_slipstream(rotor,rotor_conditions,geometry,ctrl_pts,wing_instance=N
     Properties Used:
     None
     """
+
+    rotor_conditions =  conditions.energy.converters[rotor.tag]
+    
     # Check for wing if wing instance is unspecified
     if wing_instance == None:
         nmw = 0
         # check for main wing
         for i,wing in enumerate(geometry.wings):
-            if not isinstance(wing,Wings.Main_Wing): continue
+            if not (isinstance(wing,Wings.Main_Wing) or isinstance(wing,Wings.Blended_Wing_Body)): continue
             nmw +=1                
             wing_instance = wing
             wing_instance_idx = i
@@ -164,15 +168,14 @@ def evaluate_slipstream(rotor,rotor_conditions,geometry,ctrl_pts,wing_instance=N
             wing_instance_idx = i
     
     # Isolate the VD components corresponding to this wing instance
-    wing_CPs, slipstream_vd_ids = extract_wing_collocation_points(geometry, wing_instance_idx)
+    wing_CPs, slipstream_vd_ids = extract_wing_collocation_points(VD,conditions,settings,geometry, wing_instance_idx)
     
     # Evaluate rotor slipstream effect on specified wing instance
     rot_V_wake_ind = evaluate_wake_velocities(rotor,rotor_conditions,wing_CPs,ctrl_pts)
     
     # Expand
-    wake_V_ind = np.zeros((ctrl_pts,geometry.vortex_distribution.n_cp,3))
-    wake_V_ind[:,slipstream_vd_ids,:] = rot_V_wake_ind
-    
+    wake_V_ind = rp.zeros((ctrl_pts,VD.n_cp[0][0],3))
+    wake_V_ind = wake_V_ind.at[:,slipstream_vd_ids,:].set(rot_V_wake_ind)
         
     return wake_V_ind
 
@@ -243,11 +246,11 @@ def wake_convergence(rotor,wake_inputs):
     Na              = wake_inputs.Na    
 
     if wake_inputs.use_2d_analysis:
-        PSI    = np.ones((ctrl_pts,Nr,Na))
+        PSI    = rp.ones((ctrl_pts,Nr,Na))
     else:
-        PSI    = np.ones((ctrl_pts,Nr))
+        PSI    = rp.ones((ctrl_pts,Nr))
 
-    PSI_final,infodict,ier,msg = sp.optimize.fsolve(iteration,PSI,args=(wake_inputs,rotor),xtol=rotor.sol_tolerance,full_output = 1,band=(1,0))
+    PSI_final,infodict,ier,msg = sp.fsolve(iteration,PSI,args=(wake_inputs,rotor),xtol=rotor.sol_tolerance,full_output = 1,band=(1,0))
     
     # Calculate the velocities given PSI
     va, vt = va_vt(PSI_final, wake_inputs, rotor)
@@ -285,6 +288,7 @@ def iteration(PSI, wake_inputs, rotor):
     """    
     
     # Unpack inputs to rotor wake fidelity zero
+    wake_inputs     = Data(wake_inputs)
     U               = wake_inputs.velocity_total
     Ua              = wake_inputs.velocity_axial
     Ut              = wake_inputs.velocity_tangential
@@ -298,7 +302,8 @@ def iteration(PSI, wake_inputs, rotor):
     Nr              = wake_inputs.Nr
     Na              = wake_inputs.Na
 
-    # Unpack rotor data        
+    # Unpack rotor data   
+    rotor        = Data(rotor)     
     R            = rotor.tip_radius
     B            = rotor.number_of_blades
     tc           = rotor.thickness_to_chord
@@ -307,13 +312,13 @@ def iteration(PSI, wake_inputs, rotor):
     
     # Reshape PSI because the solver gives it flat
     if wake_inputs.use_2d_analysis:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr,Na))
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr,Na))
     else:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr))
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr))
     
     # compute velocities
-    sin_psi      = np.sin(PSI)
-    cos_psi      = np.cos(PSI)
+    sin_psi      = rp.sin(PSI)
+    cos_psi      = rp.cos(PSI)
     Wa           = 0.5*Ua + 0.5*U*sin_psi
     Wt           = 0.5*Ut + 0.5*U*cos_psi
     vt           = Ut - Wt
@@ -325,7 +330,7 @@ def iteration(PSI, wake_inputs, rotor):
     lamdaw, F, piece = compute_inflow_and_tip_loss(r,R,Wa,Wt,B)
 
     # compute Newton residual on circulation
-    Gamma       = vt*(4.*np.pi*r/B)*F*(1.+(4.*lamdaw*R/(np.pi*B*r))*(4.*lamdaw*R/(np.pi*B*r)))**0.5
+    Gamma       = vt*(4.*rp.pi*r/B)*F*(1.+(4.*lamdaw*R/(rp.pi*B*r))*(4.*lamdaw*R/(rp.pi*B*r)))**0.5
     Rsquiggly   = Gamma - 0.5*W*c*Cl
     
     return Rsquiggly.flatten()
@@ -369,13 +374,13 @@ def va_vt(PSI, wake_inputs, rotor):
     
     # Reshape PSI because the solver gives it flat
     if wake_inputs.use_2d_analysis:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr,Na))
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr,Na))
     else:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr))
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr))
     
     # compute velocities
-    sin_psi      = np.sin(PSI)
-    cos_psi      = np.cos(PSI)
+    sin_psi      = rp.sin(PSI)
+    cos_psi      = rp.cos(PSI)
     Wa           = 0.5*Ua + 0.5*U*sin_psi
     Wt           = 0.5*Ut + 0.5*U*cos_psi
     va           = Wa - Ua
@@ -427,28 +432,28 @@ def compute_dR_dpsi(PSI,wake_inputs,rotor):
     
     # Reshape PSI because the solver gives it flat
     if wake_inputs.use_2d_analysis:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr,Na))
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr,Na))
     else:
-        PSI    = np.reshape(PSI,(ctrl_pts,Nr))    
+        PSI    = rp.reshape(PSI,(ctrl_pts,Nr))    
     
     
     # An analytical derivative for dR_dpsi used in the Newton iteration for the BEVW
     # This was solved symbolically in Matlab and exported
     # compute velocities
-    sin_psi      = np.sin(PSI)
-    cos_psi      = np.cos(PSI)
+    sin_psi      = rp.sin(PSI)
+    cos_psi      = rp.cos(PSI)
     Wa           = 0.5*Ua + 0.5*U*sin_psi
     Wt           = 0.5*Ut + 0.5*U*cos_psi
     
     lamdaw, F, piece = compute_inflow_and_tip_loss(r,R,Wa,Wt,B)
     
-    pi          = np.pi
-    pi2         = np.pi**2
+    pi          = rp.pi
+    pi2         = rp.pi**2
     BB          = B*B
     BBB         = BB*B
     f_wt_2      = 4*Wt*Wt
     f_wa_2      = 4*Wa*Wa
-    arccos_piece = np.arccos(piece)
+    arccos_piece = rp.arccos(piece)
     Ucospsi     = U*cos_psi
     Usinpsi     = U*sin_psi
     Utcospsi    = Ut*cos_psi
@@ -458,18 +463,18 @@ def compute_dR_dpsi(PSI,wake_inputs,rotor):
     utpUcospsi2 = utpUcospsi*utpUcospsi
     UapUsinpsi2 = UapUsinpsi*UapUsinpsi
     dR_dpsi     = ((4.*U*r*arccos_piece*sin_psi*((16.*UapUsinpsi2)/(BB*pi2*f_wt_2) + 1.)**(0.5))/B -
-                   (pi*U*(Ua*cos_psi - Ut*sin_psi)*(beta - np.arctan((Wa+Wa)/(Wt+Wt))))/(2.*(f_wt_2 + f_wa_2)**(0.5))
+                   (pi*U*(Ua*cos_psi - Ut*sin_psi)*(beta - rp.arctan((Wa+Wa)/(Wt+Wt))))/(2.*(f_wt_2 + f_wa_2)**(0.5))
                    + (pi*U*(f_wt_2 +f_wa_2)**(0.5)*(U + Utcospsi  +  Uasinpsi))/(2.*(f_wa_2/(f_wt_2) + 1.)*utpUcospsi2)
                    - (4.*U*piece*((16.*UapUsinpsi2)/(BB*pi2*f_wt_2) + 1.)**(0.5)*(R - r)*(Ut/2. -
-                    (Ucospsi)/2.)*(U + Utcospsi + Uasinpsi ))/(f_wa_2*(1. - np.exp(-(B*(Wt+Wt)*(R -
+                    (Ucospsi)/2.)*(U + Utcospsi + Uasinpsi ))/(f_wa_2*(1. - rp.exp(-(B*(Wt+Wt)*(R -
                     r))/(r*(Wa+Wa))))**(0.5)) + (128.*U*r*arccos_piece*(Wa+Wa)*(Ut/2. - (Ucospsi)/2.)*(U +
                     Utcospsi  + Uasinpsi ))/(BBB*pi2*utpUcospsi*utpUcospsi2*((16.*f_wa_2)/(BB*pi2*f_wt_2) + 1.)**(0.5)))
 
-    dR_dpsi[np.isnan(dR_dpsi)] = 0.1
+    dR_dpsi[rp.isnan(dR_dpsi)] = 0.1
     
     # This needs to be made into a jacobian
     dR_dpsi = dR_dpsi.flatten()
-    L       = np.size(PSI)
-    jac     = np.eye(L)*dR_dpsi
+    L       = rp.size(PSI)
+    jac     = rp.eye(L)*dR_dpsi
     
     return jac

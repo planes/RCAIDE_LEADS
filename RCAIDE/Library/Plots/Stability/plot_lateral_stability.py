@@ -1,4 +1,4 @@
-# RCAIDE/Library/Plots/Performance/Stability/plot_lateral_stability.py
+# RCAIDE/Library/Plots/Stability/plot_lateral_stability.py
 # 
 # 
 # Created:  Jul 2023, M. Clarke 
@@ -113,7 +113,7 @@ def plot_lateral_stability(results,
     
     for i in range(len(results.segments)): 
         time     = results.segments[i].conditions.frames.inertial.time[:,0] / Units.min  
-        phi      = results.segments[i].conditions.aerodynamics.angles.phi[:,0] / Units.deg          
+        phi      = -results.segments[i].conditions.aerodynamics.angles.phi[:,0] / Units.deg          
         delta_a  = results.segments[i].conditions.control_surfaces.aileron.deflection[:,0] / Units.deg  
         delta_r  = results.segments[i].conditions.control_surfaces.rudder.deflection[:,0] / Units.deg   
           
@@ -121,7 +121,7 @@ def plot_lateral_stability(results,
         segment_name = segment_tag.replace('_', ' ')
         
         axis_1.plot(time, phi, color = line_colors[i], marker = ps.markers[0], linewidth = ps.line_width, label = segment_name)
-        axis_1.set_ylabel(r'$Bank Angle \phi$') 
+        axis_1.set_ylabel(r'$Bank Angle (deg)$') 
         set_axes(axis_1)     
 
         axis_2.plot(time,delta_a , color = line_colors[i], marker = ps.markers[0], linewidth = ps.line_width)
@@ -133,7 +133,11 @@ def plot_lateral_stability(results,
         axis_3.set_xlabel('Time (mins)')
         axis_3.set_ylabel(r'Rudder Defl. (deg)')
         set_axes(axis_3)         
-         
+    
+    axis_1.set_ylim([-40, 40])  
+    axis_2.set_ylim([-40, 40])    
+    axis_3.set_ylim([-40, 40])
+    
     if show_legend:
         leg =  fig.legend(bbox_to_anchor=(0.5, 0.95), loc='upper center', ncol = 4) 
         leg.set_title('Flight Segment', prop={'size': ps.legend_font_size, 'weight': 'heavy'})    

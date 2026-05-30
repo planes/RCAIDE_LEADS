@@ -7,7 +7,7 @@
 
 import RCAIDE
 from RCAIDE.Framework.Core import Data, Units
-import numpy as np 
+import RNUMPY as rp 
 from RCAIDE.Library.Methods.Geometry.Airfoil.import_airfoil_geometry import import_airfoil_geometry
 from RCAIDE.Library.Methods.Geometry.Airfoil.compute_airfoil_properties import compute_airfoil_properties 
 import os
@@ -26,10 +26,10 @@ def propeller_geometry():
     prop.tip_radius       = 5 * Units.inches
     prop.number_of_blades = 2
     prop.hub_radius       = prop.tip_radius * 0.1
-    prop.inputs.omega     = np.array([[4500 * Units.rpm]])    
+    prop.inputs.omega     = rp.array([[4500 * Units.rpm]])    
     
 
-    r_R = np.array(
+    r_R = rp.array(
         [
             0.15,
             0.20,
@@ -50,7 +50,7 @@ def propeller_geometry():
             0.95,
         ]
     )
-    c_R = np.array(
+    c_R = rp.array(
         [
             0.138,
             0.154,
@@ -71,7 +71,7 @@ def propeller_geometry():
             0.061,
         ]
     )
-    beta = np.array(
+    beta = rp.array(
         [
             37.86,
             45.82,
@@ -113,5 +113,5 @@ def propeller_geometry():
     airfoil.geometry                 = import_airfoil_geometry(airfoil.coordinate_file,airfoil.number_of_points)
     airfoil.polars                   = compute_airfoil_properties(airfoil.geometry,airfoil.polar_files)
     prop.append_airfoil(airfoil) 
-    prop.airfoil_polar_stations      = list(np.zeros(len(r_R)).astype(int))
+    prop.airfoil_polar_stations      = list(rp.zeros(len(r_R)).astype(int))
     return prop

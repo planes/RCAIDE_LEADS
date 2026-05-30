@@ -11,7 +11,7 @@ from RCAIDE.Framework.Core                              import Data , Units, ori
 from RCAIDE.Library.Methods.Aerodynamics.Common.Lift    import compute_airfoil_aerodynamics,compute_inflow_and_tip_loss 
 
 # package imports
-import  numpy as  np 
+import RNUMPY as rp 
 # ---------------------------------------------------------------------------------------------------------------------- 
 #  BEMT_Helmholtz_performance
 # ----------------------------------------------------------------------------------------------------------------------  
@@ -175,7 +175,7 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     a       = conditions.freestream.speed_of_sound[:,0,None]
     T       = conditions.freestream.temperature[:,0,None]
     Vv      = conditions.frames.inertial.velocity_vector
-    nu      = mu/rho
+    nu      = mu/rp.where(rho==0, 1e-12, rho)
     rho_0   = rho 
 
     # Number of radial stations and segment control points
@@ -183,53 +183,55 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     ctrl_pts = len(Vv)
     
     # Helpful shorthands
-    pi      = np.pi 
+    pi      = rp.pi 
 
     # Velocity in the rotor frame
     T_body2inertial         = conditions.frames.body.transform_to_inertial
     T_inertial2body         = orientation_transpose(T_body2inertial)
     V_body                  = orientation_product(T_inertial2body,Vv)
     body2thrust,orientation = rotor.body_to_prop_vel(commanded_TV) 
-    T_body2thrust           = orientation_transpose(np.ones_like(T_body2inertial[:])*body2thrust)
+    T_body2thrust           = orientation_transpose(rp.ones_like(T_body2inertial[:])*body2thrust)
     V_thrust                = orientation_product(T_body2thrust,V_body)
 
     # Check and correct for hover
     V         = V_thrust[:,0,None]
-    V[V==0.0] = 1E-6 
+    V         = rp.where(V==0.0, 1E-6, V)
 
     # Non-dimensional radial distribution and differential radius
     chi           = r_1d/R
-    diff_r        = np.diff(r_1d)
-    deltar        = np.zeros(len(r_1d))
-    deltar[1:-1]  = diff_r[0:-1]/2 + diff_r[1:]/2
-    deltar[0]     = diff_r[0]/2
-    deltar[-1]    = diff_r[-1]/2
+    diff_r        = rp.diff(r_1d)
+    deltar        = rp.zeros(len(r_1d))
+    deltar = deltar.at[1:-1].set(diff_r[0:-1]/2 + diff_r[1:]/2)
+    deltar = deltar.at[0].set(diff_r[0] / 2)
+    deltar = deltar.at[-1].set(diff_r[-1] / 2)
 
     # Calculating rotational parameters
-    omegar   = np.outer(omega,r_1d)
+    omega    = rp.reshape(omega, (-1,))
+    r_1d     = rp.reshape(r_1d, (-1,))
+    omegar   = rp.outer(omega, r_1d)
     n        = omega/(2.*pi)   # Rotations per second
 
     # 2 dimensional radial distribution non dimensionalized
-    chi_2d         = np.tile(chi[:, None],(1,Na))
-    chi_2d         = np.repeat(chi_2d[None,:,:], ctrl_pts, axis=0)
-    r_dim_2d       = np.tile(r_1d[:, None] ,(1,Na))
-    r_dim_2d       = np.repeat(r_dim_2d[None,:,:], ctrl_pts, axis=0)
-    c_2d           = np.tile(c[:, None] ,(1,Na))
-    c_2d           = np.repeat(c_2d[None,:,:], ctrl_pts, axis=0)
+    chi_2d         = rp.tile(chi[:, None],(1,Na))
+    chi_2d         = rp.repeat(chi_2d[None,:,:], ctrl_pts, axis=0)
+    r_dim_2d       = rp.tile(r_1d[:, None] ,(1,Na))
+    r_dim_2d       = rp.repeat(r_dim_2d[None,:,:], ctrl_pts, axis=0)
+    c_2d           = rp.tile(c[:, None] ,(1,Na))
+    c_2d           = rp.repeat(c_2d[None,:,:], ctrl_pts, axis=0)
 
     # Azimuthal distribution of stations (in direction of rotation)
-    psi            = np.linspace(0,2*pi,Na+1)[:-1]
-    psi_2d         = np.tile(np.atleast_2d(psi),(Nr,1))
-    psi_2d         = np.repeat(psi_2d[None, :, :], ctrl_pts, axis=0)
+    psi            = rp.linspace(0,2*pi,Na+1)[:-1]
+    psi_2d         = rp.tile(rp.atleast_2d(psi),(Nr,1))
+    psi_2d         = rp.repeat(psi_2d[None, :, :], ctrl_pts, axis=0)
  
     total_blade_pitch = beta_0  +  pitch_c
     
     # apply blade sweep to azimuthal position
-    if np.any(np.array([sweep])!=0):
+    if rp.any(rp.array([sweep])!=0):
         use_2d_analysis     = True
-        sweep_2d            = np.repeat(sweep[:, None], (1,Na))
-        sweep_offset_angles = np.tan(sweep_2d/r_dim_2d)
-        psi_2d             += sweep_offset_angles
+        sweep_2d            = rp.repeat(sweep[:, None], (1,Na))
+        sweep_offset_angles = rp.tan(sweep_2d/rp.where(r_dim_2d==0, 1e-12, r_dim_2d))
+        psi_2d              = psi_2d + sweep_offset_angles
 
     # Starting with uniform freestream
     ua       = 0
@@ -237,27 +239,27 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     ur       = 0
 
     # Include velocities introduced by rotor incidence angles
-    if (np.any(abs(V_thrust[:,1]) >1e-3) or np.any(abs(V_thrust[:,2]) >1e-3)) and use_2d_analysis:
+    if (rp.any(abs(V_thrust[:,1]) >1e-3) or rp.any(abs(V_thrust[:,2]) >1e-3)) and use_2d_analysis:
 
         # y-component of freestream in the propeller cartesian plane
         Vy  = V_thrust[:,1,None,None]
-        Vy  = np.repeat(Vy, Nr,axis=1)
-        Vy  = np.repeat(Vy, Na,axis=2)
+        Vy  = rp.repeat(Vy, Nr,axis=1)
+        Vy  = rp.repeat(Vy, Na,axis=2)
 
         # z-component of freestream in the propeller cartesian plane
         Vz  = V_thrust[:,2,None,None]
-        Vz  = np.repeat(Vz, Nr,axis=1)
-        Vz  = np.repeat(Vz, Na,axis=2)
+        Vz  = rp.repeat(Vz, Nr,axis=1)
+        Vz  = rp.repeat(Vz, Na,axis=2)
 
         # compute resulting radial and tangential velocities in polar frame
-        utz =  -Vz*np.sin(psi_2d)
-        urz =   Vz*np.cos(psi_2d)
-        uty =  -Vy*np.cos(psi_2d)
-        ury =   Vy*np.sin(psi_2d)
+        utz =  -Vz*rp.sin(psi_2d)
+        urz =   Vz*rp.cos(psi_2d)
+        uty =  -Vy*rp.cos(psi_2d)
+        ury =   Vy*rp.sin(psi_2d)
 
         ut +=  (utz + uty)  # tangential velocity in direction of rotor rotation
         ur +=  (urz + ury)  # radial velocity (positive toward tip)
-        ua +=  np.zeros_like(ut) 
+        ua +=  rp.zeros_like(ut) 
     
     # Include external velocities introduced by user
     if nonuniform_freestream:
@@ -273,43 +275,46 @@ def BEMT_Helmholtz_performance(rotor, conditions):
 
         # 2-D freestream velocity and omega*r
         V_2d   = V_thrust[:,0,None,None]
-        V_2d   = np.repeat(V_2d, Na,axis=2)
-        V_2d   = np.repeat(V_2d, Nr,axis=1)
-        omegar = (np.repeat(np.outer(omega,r_1d)[:,:,None], Na, axis=2))
+        V_2d   = rp.repeat(V_2d, Na,axis=2)
+        V_2d   = rp.repeat(V_2d, Nr,axis=1)
+        omegar = (rp.repeat(rp.outer(omega,r_1d)[:,:,None], Na, axis=2))
 
         # total velocities
         Ua     = V_2d + ua
 
         # 2-D blade pitch and radial distributions
-        if np.size(pitch_c)>1:
+        if rp.size(pitch_c)>1:
             # control variable is the blade pitch, repeat around azimuth
-            beta = np.repeat(total_blade_pitch[:,:,None], Na, axis=2)
+            beta = rp.repeat(total_blade_pitch[:,:,None], Na, axis=2)
         else:
-            beta = np.tile(total_blade_pitch[:,:,None],(ctrl_pts,1,Na ))
+            beta = rp.tile(total_blade_pitch[:,:,None],(ctrl_pts,1,Na ))
 
-        r    = np.tile(r_1d[None,:,None], (ctrl_pts, 1, Na))
-        c    = np.tile(c[None,:,None], (ctrl_pts, 1, Na))
-        deltar = np.tile(deltar[None,:,None], (ctrl_pts, 1, Na))
+        r    = rp.tile(r_1d[None,:,None], (ctrl_pts, 1, Na))
+        c    = rp.tile(c[None,:,None], (ctrl_pts, 1, Na))
+        deltar = rp.tile(deltar[None,:,None], (ctrl_pts, 1, Na))
 
         # 2-D atmospheric properties
-        a   = np.tile(np.atleast_2d(a),(1,Nr))
-        a   = np.repeat(a[:, :, None], Na, axis=2)
-        nu  = np.tile(np.atleast_2d(nu),(1,Nr))
-        nu  = np.repeat(nu[:,  :, None], Na, axis=2)
-        rho = np.tile(np.atleast_2d(rho),(1,Nr))
-        rho = np.repeat(rho[:,  :, None], Na, axis=2)
-        T   = np.tile(np.atleast_2d(T),(1,Nr))
-        T   = np.repeat(T[:, :, None], Na, axis=2)
+        a   = rp.tile(rp.atleast_2d(a),(1,Nr))
+        a   = rp.repeat(a[:, :, None], Na, axis=2)
+        nu  = rp.tile(rp.atleast_2d(nu),(1,Nr))
+        nu  = rp.repeat(nu[:,  :, None], Na, axis=2)
+        rho = rp.tile(rp.atleast_2d(rho),(1,Nr))
+        rho = rp.repeat(rho[:,  :, None], Na, axis=2)
+        T   = rp.tile(rp.atleast_2d(T),(1,Nr))
+        T   = rp.repeat(T[:, :, None], Na, axis=2)
 
     else:
         # total velocities
         r      = r_1d
-        Ua     = np.outer((V + ua),np.ones_like(r))
+        V = rp.reshape(V, (-1,))
+        ua = rp.reshape(rp.array(ua), (-1,))
+        r = rp.reshape(r, (-1,))
+        Ua = rp.outer(V + ua, rp.ones_like(r))
         beta   = total_blade_pitch
 
     # Total velocities
     Ut     = omegar - ut
-    U      = np.sqrt(Ua*Ua + Ut*Ut + ur*ur)
+    U      = rp.sqrt(Ua*Ua + Ut*Ut + ur*ur)
 
     #---------------------------------------------------------------------------
     # COMPUTE WAKE-INDUCED INFLOW VELOCITIES AND RESULTING ROTOR PERFORMANCE
@@ -347,7 +352,7 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     # tip loss correction for velocities, since tip loss correction is only applied to loads in prior BET iteration
     va     = F*va
     vt     = F*vt
-    lamdaw = r*(va+Ua)/(R*(Ut-vt))
+    lamdaw = r*(va+Ua)/(R*rp.where((Ut-vt)==0, 1e-12, (Ut-vt)))
 
     # More Cd scaling from Mach from AA241ab notes for turbulent skin friction
     Tw_Tinf     = 1. + 1.78*(Ma*Ma)
@@ -356,8 +361,8 @@ def BEMT_Helmholtz_performance(rotor, conditions):
     Rp_Rinf     = (Tp_Tinf**2.5)*(Tp+110.4)/(T+110.4)
     Cd          = ((1/Tp_Tinf)*(1/Rp_Rinf)**0.2)*Cdval
 
-    epsilon                  = Cd/Cl
-    epsilon[epsilon==np.inf] = 10.
+    epsilon                  = Cd/rp.where(Cl==0, 1e-12, Cl)
+    epsilon                  = rp.where(Cl==0, 10.0, epsilon)
 
     # thrust and torque and their derivatives on the blade.
     blade_T_distribution     = rho*(Gamma*(Wt-epsilon*Wa))*deltar
@@ -376,97 +381,100 @@ def BEMT_Helmholtz_performance(rotor, conditions):
 
         Va_2d = Wa
         Vt_2d = Wt
-        V_disc  = np.sqrt(Va_2d**2 + Vt_2d**2)
+        V_disc  = rp.sqrt(Va_2d**2 + Vt_2d**2)
         M_disc  = Ma
         
-        Va_avg = np.average(Wa, axis=2)      # averaged around the azimuth
-        Vt_avg = np.average(Wt, axis=2)      # averaged around the azimuth
+        Va_avg = rp.average(Wa, axis=2)      # averaged around the azimuth
+        Vt_avg = rp.average(Wt, axis=2)      # averaged around the azimuth
 
         Va_ind_2d  = va
         Vt_ind_2d  = vt
-        Vt_ind_avg = np.average(vt, axis=2)
-        Va_ind_avg = np.average(va, axis=2)
+        Vt_ind_avg = rp.average(vt, axis=2)
+        Va_ind_avg = rp.average(va, axis=2)
 
         # set 1d blade loadings to be the average:
-        blade_T_distribution    = np.mean((blade_T_distribution_2d), axis = 2)
-        blade_Q_distribution    = np.mean((blade_Q_distribution_2d), axis = 2)
-        blade_dT_dr             = np.mean((blade_dT_dr_2d), axis = 2)
-        blade_dQ_dr             = np.mean((blade_dQ_dr_2d), axis = 2)
+        blade_T_distribution    = rp.mean((blade_T_distribution_2d), axis = 2)
+        blade_Q_distribution    = rp.mean((blade_Q_distribution_2d), axis = 2)
+        blade_dT_dr             = rp.mean((blade_dT_dr_2d), axis = 2)
+        blade_dQ_dr             = rp.mean((blade_dQ_dr_2d), axis = 2)
 
         # compute the hub force / rotor drag distribution along the blade
         dL_2d    = 0.5*rho*c_2d*Cd*omegar**2*deltar
         dD_2d    = 0.5*rho*c_2d*Cl*omegar**2*deltar
 
-        rotor_drag_distribution = np.mean(dL_2d*np.sin(psi_2d) + dD_2d*np.cos(psi_2d),axis=2)
+        rotor_drag_distribution = rp.mean(dL_2d*rp.sin(psi_2d) + dD_2d*rp.cos(psi_2d),axis=2)
 
     else:
-        Va_2d   = np.repeat(Wa[ :, :, None], Na, axis=2)
-        Vt_2d   = np.repeat(Wt[ :, :, None], Na, axis=2)
+        Va_2d   = rp.repeat(Wa[ :, :, None], Na, axis=2)
+        Vt_2d   = rp.repeat(Wt[ :, :, None], Na, axis=2)
 
-        blade_T_distribution_2d  = np.repeat(blade_T_distribution[:, :, None], Na, axis=2)
-        blade_Q_distribution_2d  = np.repeat(blade_Q_distribution[:, :, None], Na, axis=2)
-        blade_dT_dr_2d           = np.repeat(blade_dT_dr[:, :, None], Na, axis=2)
-        blade_dQ_dr_2d           = np.repeat(blade_dQ_dr[:, :, None], Na, axis=2)
-        blade_Gamma_2d           = np.repeat(Gamma[ :, :, None], Na, axis=2)
-        alpha_2d                 = np.repeat(alpha[ :, :, None], Na, axis=2)
-        V_disc                   = np.sqrt(Va_2d**2 + Vt_2d**2)
-        M_disc                   = np.repeat(Ma[ :, :, None], Na, axis=2)
+        blade_T_distribution_2d  = rp.repeat(blade_T_distribution[:, :, None], Na, axis=2)
+        blade_Q_distribution_2d  = rp.repeat(blade_Q_distribution[:, :, None], Na, axis=2)
+        blade_dT_dr_2d           = rp.repeat(blade_dT_dr[:, :, None], Na, axis=2)
+        blade_dQ_dr_2d           = rp.repeat(blade_dQ_dr[:, :, None], Na, axis=2)
+        blade_Gamma_2d           = rp.repeat(Gamma[ :, :, None], Na, axis=2)
+        alpha_2d                 = rp.repeat(alpha[ :, :, None], Na, axis=2)
+        V_disc                   = rp.sqrt(Va_2d**2 + Vt_2d**2)
+        M_disc                   = rp.repeat(Ma[ :, :, None], Na, axis=2)
         
         Vt_avg                  = Wt
         Va_avg                  = Wa
         Vt_ind_avg              = vt
         Va_ind_avg              = va
-        Va_ind_2d               = np.repeat(va[ :, :, None], Na, axis=2)
-        Vt_ind_2d               = np.repeat(vt[ :, :, None], Na, axis=2)
+        Va_ind_2d               = rp.repeat(va[ :, :, None], Na, axis=2)
+        Vt_ind_2d               = rp.repeat(vt[ :, :, None], Na, axis=2)
 
         # compute the hub force / rotor drag distribution along the blade
         dL    = 0.5*rho*c*Cd*omegar**2*deltar
-        dL_2d = np.repeat(dL[:, :, None], Na, axis=2)
+        dL_2d = rp.repeat(dL[:, :, None], Na, axis=2)
         dD    = 0.5*rho*c*Cl*omegar**2*deltar
-        dD_2d = np.repeat(dD[:, :, None], Na, axis=2)
+        dD_2d = rp.repeat(dD[:, :, None], Na, axis=2)
 
-        rotor_drag_distribution = np.mean(dL_2d*np.sin(psi_2d) + dD_2d*np.cos(psi_2d),axis=2)
+        rotor_drag_distribution = rp.mean(dL_2d*rp.sin(psi_2d) + dD_2d*rp.cos(psi_2d),axis=2)
 
     # forces
-    thrust                  = np.atleast_2d((B * np.sum(blade_T_distribution, axis = 1))).T
-    torque                  = np.atleast_2d((B * np.sum(blade_Q_distribution, axis = 1))).T
-    rotor_drag              = np.atleast_2d((B * np.sum(rotor_drag_distribution, axis=1))).T
+    thrust                  = rp.atleast_2d((B * rp.sum(blade_T_distribution, axis = 1))).T
+    torque                  = rp.atleast_2d((B * rp.sum(blade_Q_distribution, axis = 1))).T
+    rotor_drag              = rp.atleast_2d((B * rp.sum(rotor_drag_distribution, axis=1))).T
+    omega                   = rp.atleast_2d(omega).T
+    n                       = rp.atleast_2d(n).T
+    V                       = rp.atleast_2d(V).T
     power                   = omega*torque
 
     # calculate coefficients
     D        = 2*R
-    Cq       = torque/(rho_0*(n*n)*(D*D*D*D*D))
-    Ct       = thrust/(rho_0*(n*n)*(D*D*D*D))
-    Cp       = power/(rho_0*(n*n*n)*(D*D*D*D*D))
-    Crd      = rotor_drag/(rho_0*(n*n)*(D*D*D*D))
-    etap     = V*thrust/power
-    A        = np.pi*(R**2 - rotor.hub_radius**2)
-    FoM      = thrust*np.sqrt(thrust/(2*rho_0*A))/power  
+    Cq       = torque/(rho_0*rp.where(n==0, 1e-12, (n*n))*rp.where(D==0, 1e-12, (D*D*D*D*D)))
+    Ct       = thrust/(rho_0*rp.where(n==0, 1e-12, (n*n))*rp.where(D==0, 1e-12, (D*D*D*D)))
+    Cp       = power/(rho_0*rp.where(n==0, 1e-12, (n*n*n))*rp.where(D==0, 1e-12, (D*D*D*D*D)))
+    Crd      = rotor_drag/(rho_0*rp.where(n==0, 1e-12, (n*n))*rp.where(D==0, 1e-12, (D*D*D*D)))
+    etap     = V*thrust/rp.where(power==0, 1e-12, power)
+    A        = rp.pi*(R**2 - rotor.hub_radius**2)
+    safe_thrust = rp.where(thrust<=0, 1e-12, thrust)
+    FoM      = thrust*rp.sqrt(safe_thrust/rp.where((2*rho_0*A)==0, 1e-12, (2*rho_0*A)))/rp.where(power==0, 1e-12, power)  
 
-    # prevent things from breaking
-    Cq[Cq<0]                   = 0.
-    Ct[Ct<0]                   = 0.
-    Cp[Cp<0]                   = 0.
-    thrust[omega<0.0]          = -thrust[omega<0.0]
-    thrust[omega==0.0]         = 0.0
-    power[omega==0.0]          = 0.0
-    torque[omega==0.0]         = 0.0
-    rotor_drag[omega==0.0]     = 0.0
-    Ct[omega==0.0]             = 0.0
-    Cp[omega==0.0]             = 0.0
-    etap[omega==0.0]           = 0.
-    thrust[eta[:,0]  <=0.0]    = 0.0
-    power[eta[:,0]  <=0.0]     = 0.0
-    torque[eta[:,0]  <=0.0]    = 0.0  
-    power[eta>1.0]             = power[eta>1.0]*eta[eta>1.0]
-    thrust[eta[:,0]>1.0,:]     = thrust[eta[:,0]>1.0,:]*eta[eta[:,0]>1.0,:] 
+    # prevent things from breaking 
+    Cq                   = rp.where(Cq<0, 0., Cq)
+    Ct                   = rp.where(Ct<0, 0., Ct)
+    Cp                   = rp.where(Cp<0, 0., Cp)
+    thrust               = rp.where(omega<0.0, -thrust, thrust)
+    thrust               = rp.where(omega==0.0, 0.0, thrust)
+    power                = rp.where(omega==0.0, 0.0, power)
+    torque               = rp.where(omega==0.0, 0.0, torque)
+    rotor_drag           = rp.where(omega==0.0, 0.0, rotor_drag)
+    Ct                   = rp.where(omega==0.0, 0.0, Ct)
+    Cp                   = rp.where(omega==0.0, 0.0, Cp)
+    etap                 = rp.where(omega==0.0, 0.0, etap)
+    thrust               = rp.where(eta[:,0,None]  <=0.0, 0.0, thrust)
+    power                = rp.where(eta[:,0,None]  <=0.0, 0.0, power)
+    torque               = rp.where(eta[:,0,None]  <=0.0, 0.0, torque)
+    power                = rp.where(eta>1.0, power*eta, power)
+    thrust               = rp.where(eta[:,0,None]>1.0, thrust*eta[:,0,None], thrust) 
 
-    disc_loading           = thrust/(np.pi*(R**2))
-    power_loading          = thrust/(power)
+    disc_loading           = thrust/(rp.pi*rp.where(R==0, 1e-12, (R**2)))
+    power_loading          = thrust/rp.where(power==0, 1e-12, power)
 
     # Make the thrust a 3D vector
-    thrust_prop_frame      = np.zeros((ctrl_pts,3))
-    thrust_prop_frame[:,0] = thrust[:,0]
+    thrust_prop_frame      = rp.hstack([thrust, rp.zeros((ctrl_pts, 2))])
     thrust_vector          = orientation_product(orientation_transpose(T_body2thrust),thrust_prop_frame)
      
     conditions.energy.converters[rotor.tag]  = Data( 
@@ -481,7 +489,7 @@ def BEMT_Helmholtz_performance(rotor, conditions):
                 number_radial_stations            = Nr,
                 orientation                       = orientation,  
                 number_azimuthal_stations         = Na,
-                advance_ratio                     = V/(n*D), 
+                advance_ratio                     = V/rp.where((n*D)==0, 1e-12, (n*D)), 
                 disc_radial_distribution          = r_dim_2d,
                 speed_of_sound                    = conditions.freestream.speed_of_sound,
                 density                           = conditions.freestream.density,

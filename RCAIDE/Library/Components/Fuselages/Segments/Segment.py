@@ -1,4 +1,4 @@
-# RCAIDE/Library/Compoments/Fuselage/Segment.py
+# RCAIDE/Library/Components/Fuselage/Segment.py
 # 
 # Created:  Mar 2024, M. Clarke 
 
@@ -87,8 +87,8 @@ class Segment(Component):
         self.height                  = 0 
         self.width                   = 0 
         self.curvature               = 2
-        self.radius                  = 0
-
+        self.radius                  = 0  
+        self.fuel_tank               = Data() 
         self.vsp_data                = Data()
         self.vsp_data.xsec_id        = ''       
         self.vsp_data.shape          = ''        

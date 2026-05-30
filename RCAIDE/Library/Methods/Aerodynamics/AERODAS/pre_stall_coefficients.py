@@ -9,7 +9,7 @@
 from RCAIDE.Framework.Core import Data
 
 # python imports 
-import numpy as np
+import RNUMPY as rp
 
 # ----------------------------------------------------------------------------------------------------------------------
 # Pre Stall Coefficients
@@ -58,31 +58,35 @@ def pre_stall_coefficients(state,settings,geometry):
     ACDmin = wing.section.minimum_drag_coefficient_angle_of_attack 
     
     if wing.vertical == True:
-        alpha = 0. * np.ones_like(alpha)
+        alpha = 0. * rp.ones_like(alpha)
         
     # Equation 6c
     RCL1          = S1*(ACL1-A0)-CL1max
-    RCL1[RCL1<=0] = 1.e-16
+    RCL1 = rp.where(RCL1 <= 0, 1e-16, RCL1)
     
     # Equation 6d
     N1            = 1 + CL1max/RCL1
     
     # Equation 6a or 6b depending on the alpha
-    CL1            = 0.0 * np.ones_like(alpha)
-    CL1[alpha>A0]  = S1*(alpha[alpha>A0]-A0)-RCL1[alpha>A0]*((alpha[alpha>A0]-A0)/(ACL1[alpha>A0]-A0))**N1[alpha>A0]
-    CL1[alpha==A0] = 0.0
-    CL1[alpha<A0]  = S1*(alpha[alpha<A0]-A0)+RCL1[alpha<A0]*((A0-alpha[alpha<A0])/(ACL1[alpha<A0]-A0))**N1[alpha<A0]
+    CL1            = 0.0 * rp.ones_like(alpha)
+    CL1 = rp.where(alpha > A0, S1 * (alpha - A0) - RCL1 * ((alpha - A0) / (ACL1 - A0)) ** N1, CL1)
+    CL1 = rp.where(alpha == A0, 0.0, CL1)
+    CL1 = rp.where(alpha < A0, S1 * (alpha - A0) + RCL1 * ((A0 - alpha) / (ACL1 - A0)) ** N1, CL1)
     
     # M what is m?
     M              = 2. # Does this need changing
 
     # Equation 7a
-    con      = np.logical_and((2*A0-ACD1)<=alpha,alpha<=ACD1)
-    CD1      = np.ones_like(alpha)
-    CD1[con] = CDmin[con] + (CD1max[con]-CDmin[con])*((alpha[con] - ACDmin)/(ACD1[con]-ACDmin))**M    
-    
-    # Equation 7b
-    CD1[np.logical_not(con)] = 0.
+    con = rp.logical_and((2*A0 - ACD1) <= alpha, alpha <= ACD1)
+
+    CD1 = rp.zeros_like(alpha)
+
+    # Compute the numerator and denominator only once
+    num = CDmin + (CD1max - CDmin) * ((alpha - ACDmin) / (ACD1 - ACDmin))**M
+
+    # Scatter update for the "con" region
+    CD1 = CD1.at[con].set(num[con])
+
     
     # Pack outputs
     wing_result = Data(
